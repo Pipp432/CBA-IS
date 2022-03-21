@@ -1,0 +1,18 @@
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+body{
+	font-family: "Kanit";
+}
+#top_so,
+#top_margin,
+#fa_sales_total,
+#fa_margin_total,
+#fa_sales_weeks,
+#fa_margin_weeks,
+#fa_sales_cat,
+#fa_margin_cat{
+	width: 100%; 
+}
+
+

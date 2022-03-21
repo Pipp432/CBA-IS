@@ -1,0 +1,107 @@
+body {
+    font-family: 'Sarabun', sans-serif;
+}
+
+h1,h2,h3,h4,h5,h6,p {
+    font-family: 'Sarabun', sans-serif;
+}
+
+a {
+    color: #022d40;
+}
+
+a:hover {
+    color: #011a25;
+}
+
+.whiteText{
+    color: #ffffff;
+}
+
+.btn-default{
+    background-color: #022d40;
+    color: #ffffff;
+    border-color: #022d40;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+    background-color: #011a25;
+    color: #ffffff;
+    border-color: #011a25;
+}
+
+.btn-outline-default{
+    background-color: transparent;
+    color: #022d40;
+    border-color: #022d40 !important;
+}
+
+.btn-outline-default:hover, .btn-outline-default:focus, .btn-outline-default:active, .btn-outline-default.active, .open .dropdown-toggle.btn-outline-default {
+    background-color: transparent;
+    color: #011a25;
+    border-color: #011a25 !important;
+}
+
+.btn-outline-default2{
+    background-color: transparent;
+    color: #888888;
+    border-color: #888888 !important;
+}
+
+.btn-outline-default2:hover, .btn-outline-default2:focus, .btn-outline-default2:active, .btn-outline-default2.active, .open .dropdown-toggle.btn-outline-default2 {
+    background-color: transparent;
+    color: #022d40;
+    border-color: #022d40 !important;
+}
+
+.table td, .table th {
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 5px;
+    vertical-align: middle;
+}
+
+.status_td {
+    vertical-align: middle !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.table th {
+    background-color: #eee;
+}
+
+.part {
+    border-top: 4px solid #022d40;
+    background-color: #fafafa;
+}
+
+.badge {
+    font-weight: normal !important;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.dropdown {
+    cursor: pointer;
+    color: #888888;
+}
+
+.dropdown:hover {
+    cursor: pointer;
+    color: #022d40;
+}
+
+.dropdown-menu {
+    padding: 0 !important;
+    min-width: 0 !important;
+}
+
+.dropdown-item {
+    cursor: pointer;
+    padding: .5rem !important;
+}
+
+.dropdown-menu a:active {
+    color: #212529 !important;
+    background-color: #eeeeee !important;
+}

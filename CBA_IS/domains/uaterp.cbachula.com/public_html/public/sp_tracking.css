@@ -1,0 +1,81 @@
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+table.dataTable td, table.dataTable th {
+    font-family: "Kanit"; 
+}
+.firstTable table {
+	font-family: "Kanit";
+	white-space: nowrap;
+	margin: 0;
+	border: none;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+.firstTable table td,
+.firstTable table th {
+	padding: 0.5rem 1rem;
+	margin: 0.5rem 0.5rem;
+	
+}
+.firstTable table thead th {
+/* padding: 3px; */
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	width: 12vw;
+	background: white;
+}
+.firstTable table td {
+	background: #fff;
+	/* padding: 4px 5px; */
+	text-align: center;
+}
+
+.firstTable table tbody th {
+	font-weight: 100;
+	text-align: left;
+	position: relative;
+}
+.firstTable table thead th:nth-child(2) {
+	position: sticky;
+	left: 0;
+	z-index: 2;
+	text-align: center;
+
+}
+.firstTable table tbody th {
+	position: sticky;
+	left: 0;
+	background: white;
+	z-index: 1;
+	font-weight: 200;
+}
+.firstTable .table-container {
+	width: 100%;
+	max-height: 80vh;
+	overflow: auto;
+}
+[role="region"][aria-labelledby][tabindex]:focus {
+	box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
+	outline: 0;
+}
+#top10_table{
+	display: flex;
+	justify-content: center;
+	width:100%;
+}
+.header{
+	font-size: 1rem;
+	color: #444444;
+	background-color: white;
+	font-family: "Kanit";
+}
+.font-adjust{
+	font-size: 1rem;
+	font-family: "Kanit";
+}
+.selected-background {
+	background-color:#F8E2CF;
+}

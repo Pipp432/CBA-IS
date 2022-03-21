@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <div class="container mt-3" ng-controller="moduleAppController">
+
+        <h2 class="mt-3">รายการจัดส่งสินค้าจากคลัง / Inventory Report Delivery (IRD)</h2>
+        
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- SELECTING CI/RR -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
+            <div class="card-body">
+                <div class="row mx-0">
+                    <div class="col-md-4">
+                        <label for="dropdownCompany">โครงการ</label>
+                        <select class="form-control" ng-model="selectedCompany" id="dropdownCompany" style="width: 150px">
+                            <option value="">เลือกโครงการ</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div class="row mx-0 mt-2">
+                    <table class="table table-hover my-1" ng-show="srs.length == 0" style="text-align: center;">
+                        <tr>
+                            <th>ไม่มี SOX ที่ต้องจัดส่ง</th>
+                        </tr>
+                    </table>
+                    <table class="table table-hover my-1" ng-show="srs.length != 0" style="text-align: center;">
+                        <tr>
+							<th>วันที่ SOX</th>
+                            <th>เลข SOX</th>
+							<th>ประเภท SOX</th>
+							<th>special</th>
+                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							
+                            <th>เลข IV</th>
+                            <th>ขนาดกล่อง</th>
+							<th>ขนส่ง</th>
+							<th>ราคารวม</th>
+							<th>รายละเอียด</th>
+                        </tr>
+                        <tr ng-repeat="sr in srs | unique:'u'  | filter:{company:selectedCompany}" ng-click="addIrdItem(sr)">
+                            <td >{{sr.sox_date}}</td>
+                            <td>{{sr.sox_no}}</td>
+							<td>{{sr.sox_type}}</td>
+							<td>
+								<i class="fa fa-exclamation-circle" aria-hidden="true" ng-show="sr.special != null" style="color: red"></i>
+							</td>
+                            <td><i class="fa fa-check" aria-hidden="true" ng-show="sr.fin_form==1"></i></td>							
+							<td>{{sr.invoice_no}}</td>
+							<td >{{sr.box_size}}</td>
+							<td >{{sr.note}}</td>
+							<td style="text-align: center;">{{sr.total_sales_price | number:2}}</td>
+							<td><button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#soxDetailCollapse" aria-expanded="true" aria-controls="soxDetailCollapse">details</button></td>
+							<td><div class="collapse" id="soxDetailCollapse">
+							  <div class="card card-body">
+								  <table>
+									  <tr ng-repeat="sr_item in srs" ng-show="sr_item.sox_no===sr.sox_no" onclick="window.location.href= 'https://catalog.cbachula.com/search?query=".{{product_name}}."&search_by=name'">
+										  <td>{{sr_item.so_no}}</td>
+										  <td>{{sr_item.product_no}}</td>
+										  <td>{{sr_item.product_name}}</td> 
+										  <td>(x{{sr_item.quantity}})</td>
+									  </tr>
+								  </table>
+							  </div>
+							</div></td>
+						</tr>				
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- SHOWING IVRC ITEMS -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;">
+            <div class="card-body">
+                <div class="row mx-0">
+                    <h4 class="my-1">รายละเอียดยืนยันการบันทึก IRD </h4>
+                    <table class="table table-hover my-1" ng-show="irdItems.length == 0">
+                        <tr>
+                            <th>ยังไม่ได้เพิ่มเลข SOX</th>
+                        </tr>
+                    </table>
+                    <table class="table table-hover my-1" ng-show="irdItems.length != 0">
+                        <tr>
+                            <th colspan="2">วันที่ SOX</th>
+                            <th>เลข SOX</th>
+							<th>ประเภท SOX</th>
+							<th>special</th>
+                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							
+                            <th>เลข IV</th>
+                            <th>ขนาดกล่อง</th>
+							<th>ราคารวม</th>
+							
+                        </tr>
+                        <tr ng-repeat="irdItem in irdItems | unique:'u'">
+                            <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropIrdItem(irdItem)"></i></td>
+							<td>{{irdItem.sox_date}}</td>
+                            <td style="text-align: center;">{{irdItem.sox_no}}</td>
+                            <td style="text-align: center;">{{irdItem.sox_type}}</td>
+							<td style="text-align: center;">
+								<i class="fa fa-exclamation-circle" aria-hidden="true" ng-show="irdItem.special != null" style="color: red"></i>
+							</td>
+							<td style="text-align: center"><i ng-show="irdItem.fin_form==1" class="bi bi-check2-circle"></i></td>
+							<td style="text-align: center;">{{irdItem.invoice_no}}</td>
+							<td style="text-align: center;">{{irdItem.box_size}}</td>
+							<td style="text-align: center;">{{irdItem.total_sales_price | number:2}}</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right;" colspan="8">รวม</th>
+                            <th style="text-align: left;">{{count}} &nbsp; &nbsp;&nbsp; &nbsp; กล่อง</th>
+                    </table>
+                </div>
+                <hr>
+                <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postIrdItems()">บันทึก IRD</button>
+                </div>
+            </div>
+        </div>
+        <div  style="position: fixed; right: 0; bottom: 0; margin-bottom: 1%; margin-right: 7%">
+        <button class="btn btn-light" ng-click="scrollToTop()">เลื่อนขึ้น</button> &nbsp; &nbsp; 
+		<button class="btn btn-light" ng-click="scrollToBottom()">เลื่อนลง</button>
+		</div>
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- FORM VALIDATION -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <script>
+            addModal('formValidate1', 'ใบนำสินค้าออกจากคลัง / Inventory Report Delivery (IRD)', 'ยังไม่ได้เพิ่ม SOX');
+        </script>
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+    </div>
+
+</body>
+
+</html>
+
+<style>
+    td { border-bottom: 1px solid lightgray; }
+    th { border-bottom: 1px solid lightgray; text-align: center; }
+</style>
+
+<script>
+
+    app.controller('moduleAppController', function($scope, $http, $compile) {
+        
+        $scope.selectedCompany = '';
+        $scope.irdItems = [];
+        $scope.srs = <?php echo $this->srs; ?>;
+        $scope.scrollToTop = function() {
+            
+            window.scrollTo({ top: 0});
+            
+        }
+		$scope.scrollToBottom = function() {
+            
+            window.scrollTo({ left: 0, top: document.body.scrollHeight});
+            
+        }
+		$scope.addIrdItem = function(sr) {
+            var newSox = true;
+            angular.forEach($scope.irdItems, function (value, key) {
+                if(value.sox_no == sr.sox_no) {
+					newSox = false;
+                }
+            });
+            if(newSox) {
+                angular.forEach($scope.srs, function (value, key) {
+                    if(value.sox_no == sr.sox_no) {
+                        $scope.irdItems.push(value);
+                    }
+                });
+            }
+			$scope.calculateTotalBox();
+        }
+		
+		
+        
+        $scope.dropIrdItem = function(sr) {
+            var tempIrdItem = [];
+            angular.forEach($scope.irdItems, function (value, key) {
+                if(value.sox_no != sr.sox_no) {
+                    tempIrdItem.push(value);
+                }
+            });
+            $scope.irdItems = tempIrdItem;
+            $scope.calculateTotalBox();
+        }
+        
+        $scope.calculateTotalBox = function() {
+            $scope.count = 0
+			$scope.sox = []
+            angular.forEach($scope.irdItems, function (value, key) {
+                if(!($scope.sox.includes(value.sox_no))){
+					$scope.sox.push(value.sox_no)					
+				}
+				
+			$scope.count = $scope.sox.length
+            });
+        }
+        
+		$scope.postIrdItems = function() {
+			if($scope.irdItems.length === 0) {
+                $('#formValidate1').modal('toggle');
+            } else{
+				$('#confirmModal').modal('hide');
+            $.post("/scm/ird/post_ird_items", {
+				company : $scope.selectedCompany,
+				box_count : $scope.count,
+                post : true,
+                irdItems : JSON.stringify(angular.toJson($scope.irdItems))
+            }, function(data) {
+				console.log(data);
+                addModal('successModal', 'ใบนำสินค้าออกจากคลัง / Inventory Report Delivery (IRD)', 'บันทึก ' + data + ' สำเร็จ');
+                $('#successModal').modal('toggle');
+                $('#successModal').on('hide.bs.modal', function (e) {
+					window.open('/file/ird/' + data.substring(0, 9));
+                    window.location.replace('/scm/ird');
+                });
+            });
+        }
+				
+			}
+		
+		
+		
+        
+
+  	});
+
+</script>

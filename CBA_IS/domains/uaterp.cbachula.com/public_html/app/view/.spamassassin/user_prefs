@@ -1,0 +1,20 @@
+
+
+
+
+
+
+required_score 5.0
+
+
+
+report_safe     1
+
+
+whitelist_from @hotmail.com
+whitelist_from @outlook.com
+
+
+#SAFE AREA start
+
+#SAFE AREA end
