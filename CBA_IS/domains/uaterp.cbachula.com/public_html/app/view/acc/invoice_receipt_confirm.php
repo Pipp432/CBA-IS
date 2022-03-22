@@ -210,7 +210,8 @@
         }
         
         $scope.postivrcItems = function() {
-            
+            console.log("Hello");
+            $scope.addPVB();
             if($scope.ivrcItems.length === 0) {
                 $('#formValidate1').modal('toggle');
             } else if ($scope.iv === '') {
@@ -245,6 +246,7 @@
                 });
                 
             }
+          
             
             
         }
