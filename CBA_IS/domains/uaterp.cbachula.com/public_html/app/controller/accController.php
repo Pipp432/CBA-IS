@@ -42,7 +42,8 @@ class accController extends controller {
             $this->view->render("acc/invoice_receipt_confirm", "navbar");
         } else if (uri::get(2)==='post_ivrc') {
             $this->positionEcho('acc', $this->model->addIvrc());
-        }    
+        }
+         
     }
     
     public function payment_voucher() {
