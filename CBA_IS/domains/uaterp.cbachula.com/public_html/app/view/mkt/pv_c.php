@@ -133,8 +133,7 @@
         }
         $scope.addBankName = function(){
             console.log($scope.bankName)
-            window.open('/file/pvc/');
-
+           
         }
         
 
