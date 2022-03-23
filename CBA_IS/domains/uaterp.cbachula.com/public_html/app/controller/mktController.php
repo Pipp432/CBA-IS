@@ -423,14 +423,25 @@ class mktController extends controller {
 		$this->view->sp_data = $this->model->get_sp_data_all();
 		$this->view->render("mkt/sp_response","navbar");
 	}
-    public function pv_c() {
-        if(empty(uri::get(2))) {
-            $this->view->setTitle("Calculate Transportation Price");
-            $this->view->suppliers = $this->model->getSuppliers();
-            $this->view->products = $this->model->getProductsForT();
-            $this->view->render("mkt/pv_c", "navbar");
-        } 
+    public function pvc(){
+        if (empty(uri::get(2))) {
+            $this->view->setTitle("Payment Voucher C (PV-C)"); 
+           $this->view->render("mkt/pvc","navbar");
+        }else if (uri::get(2)==='post_PVC'){
+             $this->positionEcho('mkt', $this->model->addPVC());
+        }
+        
     }
+    
+    public function request_minor_money_form() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("Payment Voucher A (PV-A)"); 
+            $this->view->render("mkt/request_minor_money_form", "navbar");
+        } else if (uri::get(2)==='post_Request') {
+            $this->positionEcho('mkt', $this->model->addRequestPettyMoney());
+        }
+    } 
+    
 
 }
 

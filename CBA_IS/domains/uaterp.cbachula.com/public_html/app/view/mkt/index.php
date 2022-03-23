@@ -19,11 +19,12 @@ $dt=$dt -> format('Hi');
 	echo "<script>addModuleLink('mktRow', '/mkt/commart', 'desktop', 'CBA x COMMART');</script>";
 	echo "<script>addModuleLink('mktRow', '/mkt/dashboard', 'folder-open-o', 'Dashboard');</script>";
 	echo "<script>addModuleLink('mktRow', '/mkt/t_price', 'truck', 'คำนวณค่าส่ง');</script>";
-	echo "<script>addModuleLink('mktRow', '/mkt/pv_c', 'desktop', 'Payment Voucher (PV)');</script>";
+
+	echo "<script>addModuleLink('mktRow', '/mkt/pvc', 'desktop', 'Payment Voucher (PV)');</script>";
 	
 	echo "<script>addModuleLink('mktRow', 'https://docs.google.com/spreadsheets/d/1-lnIdt3ccJ7f6eBWI56mnuVq-yX1xU95VDu-eIJkSJI/edit?usp=sharing', 'truck', 'Supplier Delivery Time Slot');</script>";
 		
-	echo "<script>addModuleLink('mktRow', '/mkt/sales_and_margin', 'bar-chart', 'Actual vs Forecast Sales/Margin');</scrip`t>";
+	echo "<script>addModuleLink('mktRow', '/mkt/sales_and_margin', 'bar-chart', 'Actual vs Forecast Sales/Margin');</script>";
 	echo "<script>addModuleLink('mktRow', '/mkt/sp_tracking', 'table', 'SP Tracking');</script>";
 	echo "<script>addModuleLink('mktRow', '/is/thelastday', 'heart', 'The Last Day');</script>";
 		

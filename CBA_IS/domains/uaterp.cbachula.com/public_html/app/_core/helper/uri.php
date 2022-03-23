@@ -8,8 +8,10 @@ class uri {
 
     public static function setUri() {
         self::$uri = filter_input(INPUT_SERVER, 'REQUEST_URI');
+        // Trim right & left
         self::$uri = ltrim(self::$uri, '/');
         self::$uri = rtrim(self::$uri, '/');
+        // Creates array out of the string using the first parameter as delimiter
         self::$uri = explode('/', self::$uri);
         foreach (self::$uri as $i) {
             $i = htmlspecialchars($i);

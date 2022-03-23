@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-<body>
+    <body>
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
@@ -77,12 +77,14 @@
                     <label>ใบเสนอราคา(pdf)</label>
                     <input class="form-control-file" type="file" id="ivFile">
                     <br>
-                    <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" onclick="goToAcc()">ยืนยัน</button>
+                    <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" ng-click="submit()">ยืนยัน</button>
             </div>
            
             
         </div>
 </body>
+</html>
+
 <script>
     
     function checkBank(bank){
@@ -94,9 +96,7 @@
             element.style.display='none';    
         }
     }
-    function goToAcc(){
-        window.location.href = "https://uaterp.cbachula.com/acc/confirm_payment_voucher";
-    }
+    
     let num = 1;
     function addRows(){
         const element = document.getElementById(`row${num}`);
@@ -114,7 +114,18 @@
     }
 </script>
 <script>
+         addModal('formValidate0', 'ใบชำระ supplier/PV-C', 'please enter date');
+         addModal('formValidate1', 'ใบชำระ supplier/PV-C', 'please enter withdrawal name');
+         addModal('formValidate2', 'ใบชำระ supplier/PV-C', 'please enter employee ID');
+         addModal('formValidate3', 'ใบชำระ supplier/PV-C', 'please enter Line ID')
+         addModal('formValidate4', 'ใบชำระ supplier/PV-C', 'please enter bank name');
+         addModal('formValidate5', 'ใบชำระ supplier/PV-C', 'please enter tax number');
+         addModal('formValidate6', 'ใบชำระ supplier/PV-C', 'please enter bank book name');
+         addModal('formValidate7', 'ใบชำระ supplier/PV-C', 'please enter authorizer name')
+</script>
+<script>
     app.controller('moduleAppController', function($scope, $http, $compile) {
+    
         $scope.withdrawDate='';
         $scope.withdrawName='';
         $scope.employeeId ='';
@@ -122,7 +133,10 @@
         $scope.bankName ='';
         $scope.taxNumber='';
         $scope.bankBookName='';
-        $scope.authorizerName='';
+        $scope.authorizerName=''; 
+        $scope.table=[];
+       
+
         $scope.addDate = function(){
             console.log($scope.withdrawDate);
 
@@ -132,10 +146,56 @@
 
         }
         $scope.addBankName = function(){
-            console.log($scope.bankName)
            
+            console.log($scope.bankName);
+           
+        }
+       
+
+    
+        $scope.submit = function(){
+            if($scope.withdrawDate ==='') $('#formValidate0').modal('toggle');
+            // else if($scope.withdrawName==='') $('#formValidate1').modal('toggle');
+            // else if($scope.employeeId ==='') $('#formValidate2').modal('toggle');
+            // else if($scope.employeeLine==='') $('#formValidate3').modal('toggle');
+            // else if($scope.bankName ==='')$('#formValidate4').modal('toggle');
+            // else if($scope.taxNumber ==='')$('#formValidate5').modal('toggle');
+            // else if( $scope.bankBookName==='')$('#formValidate6').modal('toggle');
+            // else if($scope.authorizerName ==='')$('#formValidate7').modal('toggle');
+            else{ 
+                var confirmModal = addConfirmModal('confirmModal', 'Confirm',"help",'postPVC()'); 
+                $('body').append($compile(confirmModal)($scope));
+
+                $('#confirmModal').modal('toggle');
+                // window.open("https://uaterp.cbachula.com/acc/confirm_payment_voucher");
+            }
+            
+          
+        }
+
+        $scope.postPVC = function(){
+            
+
+            $('#confirmModal').modal('hide');
+
+            $.post("pvc/post_PVC",{
+                withdrawDate :$scope.withdrawDate,
+                withdrawName:'1',
+                employeeId : '1',
+                employeeLine: '1',
+                bankName : '1',
+                taxNumber: '1',
+                bankBookName: '1',
+                authorizerName: '1' ,
+                table : [{}]
+            },function(data){
+                console.log("Posted");
+                $('#successModal').modal('toggle');
+                
+            })
+
         }
         
 
     })
-</script>
+    </script>

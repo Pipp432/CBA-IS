@@ -155,6 +155,19 @@ class fileController extends controller {
             }
         }
     }
+    public function pvc() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "mkt" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
+                $this->view->pvc = $this->model->getPvc(uri::get(2));
+                $this->view->render("file/pvc");
+            } else {
+                $this->err404();
+            }
+        }
+    }
     
     public function cs() { 
         if(empty(uri::get(2))) {

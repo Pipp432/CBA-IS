@@ -4533,4 +4533,77 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 		$sql->execute([]);
 		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
 	}
+
+
+
+  public function assign_rq_no() {
+
+    $rqPrefix = 'RQ-';
+    $sql = $this->prepare( "select ifnull(max(rq_no),0) as max from request_cash_demo where rq_no like ?" );
+    $sql->execute( [ $this->getCompany( $productLine ) . 'RQ-%' ] );
+    $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
+    $runningNo = '';
+    if ( $maxRqNo == '0' ) {
+      $runningNo = '00001';
+    } else {
+      $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+      if ( strlen( $latestRunningNo ) == 5 ) {
+        $runningNo = $latestRunningNo;
+      } else {
+        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+          $runningNo .= '0';
+        }
+        $runningNo .= $latestRunningNo;
+      }
+    }
+    return $rqPrefix . $runningNo;
+  }
+
+  public function addRequestPettyMoney() { 
+    
+    $rq_no = $this->assign_rq_no();
+
+    $sql = $this->prepare("insert into request_cash_demo (rq_no ,date, time, employee_id, LineId, product_name, cost, iv_image_link ,slip_image_link, cancelled, done)
+                             values ( ?,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 0, 0)" );
+    $success = $sql->execute([
+      $rq_no,
+      input::post( 'employee_id' ),
+      input::post( 'lineId' ),
+      input::post( 'product_name' ),
+      ( double )input::post( 'cost' ),
+      input::post( 'iv_image_link' ),
+      input::post( 'slip_image_link' )
+    ]);
+    
+    if ($success) echo $rq_no  . ' สำเร็จ';
+    else {
+      echo $rq_no  . ' error'.'<br>';
+      echo input::post( 'lineId' ).'<br>';
+      print_r($sql->errorInfo());
+    }
+  }
+  
+  public function addPVC(){
+    $rq_no = $this->assign_rq_no();
+    $sql = $this->prepare("insert into  PVC_Demo (rq_no, Withdraw Date, Withdraw Name, Employee ID, EmployeeLine, Bank Name, Tax Number, Bank Book Name, Authorize Name, TableOfDetails) values (? ,? ,? ,? ,? ,? ,? ,? ,? ,? )" );
+    $success = $sql->execute([
+      $rq_no,
+      input::post( 'withdrawDate' ),
+      input::post( 'withdrawName' ),
+      input::post( 'employeeId' ),
+      input::post( 'employeeLine' ),
+      input::post( 'taxNumber' ),
+      input::post( 'bankBookName' ),
+      input::post( 'authorizerName' ),
+      input::post( 'table' ),
+    ]);
+    if ($success) echo $rq_no  . ' Success';
+    else {
+      echo $rq_no  . ' error'.'<br>';
+      echo input::post( 'lineId' ).'<br>';
+      print_r($sql->errorInfo());
+    }
+  }
+
+
 }
