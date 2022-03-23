@@ -423,6 +423,14 @@ class mktController extends controller {
 		$this->view->sp_data = $this->model->get_sp_data_all();
 		$this->view->render("mkt/sp_response","navbar");
 	}
+    public function pv_c() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("Calculate Transportation Price");
+            $this->view->suppliers = $this->model->getSuppliers();
+            $this->view->products = $this->model->getProductsForT();
+            $this->view->render("mkt/pv_c", "navbar");
+        } 
+    }
 
 }
 

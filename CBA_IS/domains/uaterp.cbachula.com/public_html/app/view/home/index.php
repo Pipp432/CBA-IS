@@ -88,12 +88,14 @@
 					echo "<script>addModuleLink('gmRow', '/mkt/sp_response', 'child', 'SP Engagements');</script>";
 					echo "<script>addModuleLink('gmRow', '/mkt/sp_tracking', 'table', 'SP Tracking');</script>";
 					echo "<script>addModuleLink('gmRow', '/is/thelastday', 'heart', 'The Last Day');</script>";
+                    
                     echo '</div>';
                 } if ($this->getPosition=='hr' || $this->getPosition=='ibc'){ 
 					echo '<div class="row row-cols-2 row-cols-md-5 mt-2" style="padding: 0;" id="gmRow">';
                     echo "<script>addModuleLink('gmRow', '/mkt/point_report', 'cloud-download', 'Point Report');</script>";
 					echo "<script>addModuleLink('gmRow', '/mkt/sp_response', 'child', 'SP Engagements');</script>";
 					echo "<script>addModuleLink('gmRow', '/is/thelastday', 'heart', 'The Last Day');</script>";
+                    
                     echo '</div>';
 				}if($this->getPosition=='is') {
                     if($this->getPosition=='is') echo '<h4 class="my-2">Information System</h4>';

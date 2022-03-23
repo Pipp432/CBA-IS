@@ -158,7 +158,7 @@
 <script>
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
-        
+        // ivrcItems is basically the รายละเอียดยืนยันการวางบิล
         $scope.selectedProductType = '';
         $scope.selectedSupplier = '';
         $scope.filterRRCI = '';
@@ -210,24 +210,30 @@
         }
         
         $scope.postivrcItems = function() {
-            console.log("Hello");
-            $scope.addPVB();
+            
             if($scope.ivrcItems.length === 0) {
+                // blank ยังไม่ได้กรอกเลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี
                 $('#formValidate1').modal('toggle');
             } else if ($scope.iv === '') {
+                // blank day NOTE: breaks the page
                 $('#formValidate2').modal('toggle');
             } else {
                 
+                // Creating PVB here
+                // Create date for ivrc
                 var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
                                     (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
                                     ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
-                
+                // Creation of data
+                // FormData is a web page interface where (key: value)
                 var data = new FormData();
                 data.append('ivFile', $('#ivFile')[0].files[0]);
                 data.append('iv', $scope.iv);
                 data.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
                 data.append('ivrcDate', ivrcDateStr);
-                
+               
+                console.log("Hi");
+                // Async jQuery method
                 $.ajax({
                     url: '/acc/invoice_receipt_confirm/post_ivrc',
                     data: data,
@@ -236,8 +242,9 @@
                     processData: false,
                     method: 'POST',
                     type: 'POST',
+                    // Success so modal pop up
                     success: function () {
-                        addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว');
+                        addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว(DONE)');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
                             window.location.assign('/');

@@ -33,7 +33,7 @@ class accController extends controller {
             $this->positionEcho('fin', $this->view->iv_no = $this->model->addIV_noCR());
         } 
     }
-	
+	// -> Object operator
     public function invoice_receipt_confirm() {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
