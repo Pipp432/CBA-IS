@@ -133,7 +133,7 @@
         }
         $scope.addBankName = function(){
             console.log($scope.bankName)
-            window.open('/domains/uaterp.cbachula.com/public_html/app/view/file/pvc');
+            window.open('/file/pvc/');
 
         }
         
