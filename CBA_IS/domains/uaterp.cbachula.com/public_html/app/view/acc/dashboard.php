@@ -51,6 +51,13 @@
                     </div>
                 </div>
             </div>
+            <div class="col">
+                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">ใบสำคัญสั่งจ่าย C (PVC)</h5>
+                    </div>
+                </div>
+            </div>
             
         </div>
 

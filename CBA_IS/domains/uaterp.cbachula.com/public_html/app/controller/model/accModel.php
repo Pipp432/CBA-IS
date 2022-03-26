@@ -928,20 +928,11 @@ class accModel extends model {
         }
         
     }
-    public function getPVCs($PVC_No) {
-       $sql = $this->prepare("SELECT PVC_Demo.PVC_No,PVC_Demo.Withdraw_Date,PVC_Demo.Withdraw_Name,PVC_Demo.quotation_name, PVC_Demo.quotation_image FROM `PVC_Demo` WHERE 1");
-       $data =$sql->execute([$PVC_No]);        
-       
-       if($sql->rowCount() > 0){
-            header('Content-type: '.$data['quotation_type']);
-          
-           return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
-       }else{
-           echo $sql;
-           echo "Hello";
-       }
-       
-       
+    public function getPVCs() {
+       $sql = $this->prepare("select * from PVC_Demo");
+       $sql->execute();
+       $data = $sql->fetchAll()[0];
+       echo "<script>console.log('Debug Objects: " . $data[0] . "' );</script>";
        
         // if ($sql->rowCount() > 0) {
 		// 	$data = $sql->fetchAll()[0];
@@ -952,23 +943,7 @@ class accModel extends model {
         //     echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
         // }
         
-    }public function getQuotation($PVC_No) {
-        $sql = $this->prepare("SELECT  PVC_Demo.quotation_name,PVC_Demo.quotation_type,PVC_Demo.quotation_image FROM `PVC_Demo` WHERE PVC_Demo.PVC_No = ?");
-        $sql->execute([$PVC_No]);
-        if ($sql->rowCount() > 0) {
-            $data = $sql->fetchAll()[0];
-    		header('Content-type: '.$data['quotation_type']);
-            echo base64_decode($data['quotation_image']);
-        } else {
-            echo 'ไม่มีใบเบิกค่าใช้จ่ายของเลข WS นี้';
-        }
-       
-    
-        
-        
-        
     }
-
 	
 	// PV-C Module
     public function addPVC() {

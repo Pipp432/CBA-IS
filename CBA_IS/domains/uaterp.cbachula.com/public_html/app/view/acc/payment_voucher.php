@@ -187,7 +187,7 @@
                 <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
                  
                 <div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PC'">
-                    <table class="table table-hover my-1" ng-show="wss.length == 0">
+                    <table class="table table-hover my-1" ng-show="PVCs.length == 0">
                         <tr ng-show="!isLoad">
                             <th>ไม่มีใบเบิกค่าใช้จ่าย ที่ยังไม่ได้ออก PV</th>
                         </tr>
@@ -197,26 +197,30 @@
                             </th>
                         </tr>
                     </table>
-                    <table class="table table-hover my-1" ng-show="wss.length != 0">
+                    <table class="table table-hover my-1" ng-show="PVCs.length != 0">
                         <tr>
-                            <th>เลข WS</th>
+                            <th>เลข PVC</th>
                             <th>วันที่</th>
                             <th>ใบเบิกค่าใช้จ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
-                            <th>สลิป</th>
                             <th>ผู้ขอเบิก</th>
+                           
                         </tr>
-                        <tr ng-repeat="ws in wss | filter:{form_no:pvItemRR} |filter:{ws_type:'3'}" ng-click="getWsDetail(ws)">
-                            <td>{{ws.ws_no}}</td>
-                            <td>{{ws.date}}</td>
-                            <td><a href="/acc/payment_voucher/get_ws_form/{{ws.ws_no}}" target="_blank">{{ws.form_name}}</a></td>
-                            <td style="text-align: center;">
-                                <a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/iv1" target="_blank">{{ws.iv_name}}</a><br>
-                                <a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/iv2" target="_blank">{{ws.iv2_name}}</a><br>
-                                <a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/iv3" target="_blank">{{ws.iv3_name}}</a>
+                        <!-- <tr ng-repeat="pvc in PVCs | filter:{form_no:pvItemRR} |filter:{ws_type:'3'}" ng-click="getWsDetail(ws)"> -->
+                        <tr ng-repeat="pvc in PVCs track by $index" ng-click="getPVCDetail(pvc)">
+                            <td>{{pvc.PVC_No}}</td>
+                            <td>{{pvc.Withdraw_Date}}</td>
+                            <!-- <td><a href="/acc/payment_voucher/get_PVCs_form/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a></td> -->
+                            <td>
+                            <a href="/file/pvc/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a>
                             </td>
-                            <td><a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/slip" target="_blank">{{ws.slip_name}}</a></td>
-                            <td>{{ws.employee_id}} {{ws.employee_nickname_thai}}</td>
+                            <td style="text-align: center;">
+                                <a href="/acc/payment_voucher/get_quotation/{{pvc.PVC_No}}" target="_blank">{{pvc.quotation_name}}</a><br>  
+                            </td>
+                            <td>{{pvc.Withdraw_Name}}</td>
+                            
+                            <!-- <td><a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/slip" target="_blank">{{ws.slip_name}}</a></td>
+                            <td>{{ws.employee_id}} {{ws.employee_nickname_thai}}</td> -->
                         </tr>
                     </table>
                 </div>
@@ -286,6 +290,9 @@
                 
                 <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postPvItems()">บันทึก PV</button>
+                </div>
+                <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="getPVC()">TEST</button>
                 </div>
                 
             </div>
@@ -359,6 +366,7 @@
             $scope.vat = false;
             $scope.rrcinopvs = [];
             $scope.wss = [];
+            $scope.PVCs = [];
             $scope.isLoad = true;
             
             if($scope.selectedPaymentType === '') {
@@ -370,7 +378,10 @@
                 $('#pvNameLabel').html('จ่าย Supplier');
                 $("#pvAddressTextbox").prop("disabled", true);
             } else if($scope.selectedPaymentType==='PC') {
-                $http.get('/acc/payment_voucher/get_ws').then(function(response){$scope.wss = response.data; $scope.isLoad = false;});
+                // $http.get('/acc/payment_voucher/get_ws').then(function(response){$scope.wss = response.data; $scope.isLoad = false;});
+                $http.get('/acc/payment_voucher/get_PVCs_form').then(function(response){$scope.PVCs = response.data; $scope.isLoad = false;console.log($scope.PVCs)});
+                
+                
             } else if($scope.selectedPaymentType==='PD') {
                 
             }  
@@ -582,6 +593,20 @@
                 
             } 
             
+        }
+        $scope.getPVC=function(){
+            $.post("acc/payment_voucher/get_PVCs_form",function(data,status){
+                console.log(data);
+              
+              
+               
+
+            })
+        }
+        $scope.getPVCDetail = function(pvc) {
+            $("#pvItemRR").prop("disabled", true);
+            $scope.pvItemRR = pvc.PVC_No;
+            console.log( $scope.pvItemRR);
         }
 
   	});

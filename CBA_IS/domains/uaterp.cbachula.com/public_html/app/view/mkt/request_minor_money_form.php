@@ -12,7 +12,7 @@
 
 
 
-        <h2 class="mt-3">เบิกเงินรองจ่าย</h2> 
+        <h2 class="mt-3">เบิกเงินรองจ่าย</h2>
 
 
 
@@ -22,90 +22,43 @@
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-        
+
 
         <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
 
             <div class="card-body">
 
-                <div class="row mx-0"> 
+
+                <div class="row mx-0">
 
                     <div class="col-md-4">
 
                         <label for="employeeTextbox">รหัสผู้ออกใบเบิกเงินรองจ่าย</label>
 
-                        <input type="text" class="form-control" id="employeeTextbox" ng-change="addEmployee()" ng-model="employee_id" style="text-transform:uppercase">
+                        <input type="text" class="form-control" id="employeeTextbox" ng-change="addEmployee()"
+                            ng-model="employee_id" style="text-transform:uppercase">
 
                     </div>
 
                     <div class="col-md-8">
 
-                        <label for="employeeDetailTextbox">ชื่อผู้ออกใบเบิกเงินรองจ่าย</label> 
+                        <label for="employeeDetailTextbox">ชื่อผู้ออกใบเบิกเงินรองจ่าย</label>
 
-                        <input type="text" class="form-control" id="employeeDetailTextbox" ng-model="employee_name" disabled>
+                        <input type="text" class="form-control" id="employeeDetailTextbox" ng-model="employee_name"
+                            disabled>
 
                     </div>
 
                 </div>
 
-                <div class="row mx-0"> 
+                <div class="row mx-0">
 
                     <div class="col-md-4">
 
                         <label for="lineId">Line Id</label>
 
-                        <input type="text" class="form-control" id="LineId"  ng-model="line_id">
+                        <input type="text" class="form-control" id="LineId" ng-model="line_id">
 
-                    </div>
-
-                </div>
-
-                <hr>
-
-                <div class="row mx-0"> 
-
-                    <div class="col-md-4">
-
-                        <label for="productName">ชื่อสินค้า</label>
-
-                        <input type="text" class="form-control" id="productName"  ng-model="product_name">
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <label for="price">ราคา</label>
-
-                        <input type="text" class="form-control" id="price"  ng-model="price">
-
-                    </div>
-
-                </div>
-                
-                <div class="row mx-0"> 
-
-                    <div class="col-md-4">
-
-                        <form method="POST" action="uploadInvoice" enctype="multipart/form-data">
-
-                        <label for="invoice/receipt">Invoice/Receipt</label>
-
-                        <input type="file" class="form-control-file" id = "invoice/receipt" name="Invoice_Receipt" value="">
-
-                        </form>
-                        
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <form method="POST" action="" enctype="multipart/form-data">
-
-                        <label for="bankSlip">Bank Slip</label>
-
-                        <input type="file" class="form-control-file" id ="bankSlip" name="bank_slip" value="">
-
-                        </form>
-                        
                     </div>
 
                 </div>
@@ -114,11 +67,57 @@
 
                 <div class="row mx-0">
 
+                    <div class="col-md-4">
+
+                        <label for="productName">ชื่อสินค้า</label>
+
+                        <input type="text" class="form-control" id="productName" ng-model="product_name">
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label for="price">ราคา</label>
+
+                        <input type="text" class="form-control" id="price" ng-model="price">
+
+                    </div>
+
+                </div>
+                <form id='form'>
+                    <div class="row mx-0">
+
+                        <div class="col-md-4">
+
+                            <label for="invoice/receipt">Invoice/Receipt</label>
+
+                            <input type="file" class="form-control-file" id="invoice/receipt" name="Invoice_Receipt_pic">
+
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label for="bankSlip">Bank Slip</label>
+
+                            <input type="file" class="form-control-file" id="bankSlip" name="bank_slip">
+
+                        </div>
+
+                    </div>
+                </form>
+                <hr>
+
+
+
+                <div class="row mx-0">
+
                     <div class="col-md-2">
 
                         <label for="buttonConfirmDetail" style="color:white;">.</label>
 
-                        <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" ng-click="confirmDetail()">ยืนยัน</button>
+                        <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail"
+                            ng-click="confirmDetail()">ยืนยัน</button>
 
                     </div>
 
@@ -134,10 +133,9 @@
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-        
+
 
         <script>
-
             addModal('formValidate0', 'เบิกเงินรองจ่าย', 'ไม่เจอรหัสพนักงานนี้');
 
             addModal('formValidate1', 'เบิกเงินรองจ่าย', 'เพิ่มรหัสพนักงานก่อนนะครับ');
@@ -145,7 +143,6 @@
             addModal('formValidate2', 'เบิกเงินรองจ่าย', 'เพิ่ม line ID ก่อนนะครับ');
 
             addModal('formValidate5', 'ใบสั่งขาย / Sales Order (SO)', 'ยังไม่ได้เพิ่มสินค้าเข้าใบสั่งขาย');
-
         </script>
 
 
@@ -168,39 +165,28 @@
 
 
 
-<style>
-/* 
-    td { border-bottom: 1px solid lightgray; }
-
-    th { border-bottom: 1px solid lightgray; text-align: center; } */
-
-</style>
-
-
 
 <script>
 
+    app.controller('moduleAppController', function ($scope, $http, $compile) {
 
-
-    app.controller('moduleAppController', function($scope, $http, $compile) {
-
-        
-        $scope.employee_name='';
+        $scope.employee_id = '';
+        $scope.employee_name = '';
         $scope.line_id = '';
-        $scope.bank_slip_dir = '/public/img';
-        $scope.invoice_receipt_dir = '/public/img';
+        $scope.product_name = '';
+        $scope.price = '';
 
-        $scope.addEmployee = function() {
+        $scope.addEmployee = function () {
 
-            if($scope.employee_id.length === 5) {
+            if ($scope.employee_id.length === 5) {
 
-                $http.get("/public/json/employee.json?t=<?= time() ?>").then(function(response) {
+                $http.get("/public/json/employee.json?t=<?= time() ?>").then(function (response) {
 
                     var found = false;
 
                     angular.forEach(response.data, function (value, key) {
 
-                        if(value.employee_id == $scope.employee_id.toUpperCase()){
+                        if (value.employee_id == $scope.employee_id.toUpperCase()) {
 
                             $scope.employee_name = value.employee_name_thai;
 
@@ -210,7 +196,7 @@
 
                     });
 
-                    if(!found) {
+                    if (!found) {
 
                         $scope.employee_name = 'Employee not found!';
 
@@ -227,84 +213,100 @@
         }
 
 
-        $scope.confirmDetail = function() {
+        $scope.confirmDetail = function () {
 
-            if($scope.employee_name === '') {
+            if ($scope.employee_name === '') {
 
                 $('#formValidate1').modal('toggle');
 
-            } else if($scope.employee_name === 'Employee not found!'){
+            } else if ($scope.employee_name === 'Employee not found!') {
 
                 $('#formValidate0').modal('toggle');
 
-            }  else if($scope.line_id === ''){
+            } else if ($scope.line_id === '') {
 
                 $('#formValidate2').modal('toggle');
 
-            }  else {
+            } else if ($scope.product_name === '') {
+
+                $('#formValidate3').modal('toggle');
+
+            } else if ($scope.price === '') {
+
+                $('#formValidate4').modal('toggle');
+
+            } else {
 
                 $scope.showAfterSubmit = true;
 
                 $scope.formValidate();
             }
-        } 
+        }
 
-        $scope.formValidate = function() {
+        $scope.formValidate = function () {
 
-            var confirmModal = addConfirmModal('confirmModal', 'เบิกเงินรองจ่าย','ยืนยันการออกใบเบิกเงินรองจ่าย','postRequest()');
+            var confirmModal = addConfirmModal('confirmModal', 'เบิกเงินรองจ่าย',
+                'ยืนยันการออกใบเบิกเงินรองจ่าย', 'postRequest()');
 
             $('body').append($compile(confirmModal)($scope));
 
             $('#confirmModal').modal('toggle');
         }
 
-
-
-        $scope.postRequest = function() {
+        $scope.postRequest = function () {
 
             $('#confirmModal').modal('hide');
 
-            console.log("post shit");
+            var formData = new FormData(form);
 
-            console.log($scope.employee_id.toUpperCase());
-            console.log($scope.line_id);
-            console.log($scope.price);
-            console.log($scope.product_name);
 
+            $.ajax({
+                url: 'request_minor_money_form/post_img_Request',
+                type: "POST",
+                dataType: 'json',
+                method: 'POST',
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+            }).done(function (data) {
+                console.log(data);
+                console.log(data['success']);
+                if(data['success']) {
+                    $scope.rq_no = data['rq_no'];
+                    $scope.postRequest2();
+                } else {
+                    addModal('uploadFailModal', 'upload imgae', 'fail');
+                    $('#uploadFailModal').modal('toggle');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log('ajax.fail');
+                addModal('uploadFailModal', 'upload imgae', 'fail');
+                $('#uploadFailModal').modal('toggle');
+            });         
+        }
+        $scope.postRequest2 = function () {
 
             $.post("request_minor_money_form/post_Request", {
 
-                post : true,
+                post: true,
 
-                employee_id : $scope.employee_id.toUpperCase(),
+                rq_no: $scope.rq_no,
 
-                lineId : $scope.line_id,
+                employee_id: $scope.employee_id.toUpperCase(),
 
-                product_name : $scope.product_name,
-				
-				cost : $scope.price,
+                lineId: $scope.line_id,
 
-                iv_image_link : 'todo',       //todo get uploaded immage name
+                product_name: $scope.product_name,
 
-                slip_image_link : 'todo'
+                cost: $scope.price,
 
-            }, function(data) {
+            }, function (data) {
 
                 addModal('successModal', 'เบิกเงินรองจ่าย', data);
 
                 $('#successModal').modal('toggle');
-
-                $('#successModal').on('hide.bs.modal', function (e) {
-
-                    //window.location.assign('/');
-
-                });
-
             });
-
         }
     });
-
-
-
 </script>

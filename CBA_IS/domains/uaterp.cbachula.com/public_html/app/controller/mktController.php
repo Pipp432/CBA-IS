@@ -426,12 +426,22 @@ class mktController extends controller {
     public function pvc(){
         if (empty(uri::get(2))) {
             $this->view->setTitle("Payment Voucher C (PV-C)"); 
-           $this->view->render("mkt/pvc","navbar");
+            $this->view->render("mkt/pvc","navbar");
         }else if (uri::get(2)==='post_PVC'){
              $this->positionEcho('mkt', $this->model->addPVC());
+        }else if(uri::get(2)==='post_quotation'){
+            $this->positionEcho('mkt', $this->model->uploadImgForPVC());
         }
         
     }
+    // public function post_quotation(){
+    //     if(empty(uri::get(2))) {
+    //         $this->view->setTitle("Upload quotation");
+    //         $this->view->render("mkt/pvc", "navbar");
+    //     } else if (uri::get(2)==='post_quotation_file') {
+    //         $this->positionEcho('mkt', $this->model->uploadQuotation());
+    //     }
+    // }
     
     public function request_minor_money_form() {
         if(empty(uri::get(2))) {
@@ -439,9 +449,10 @@ class mktController extends controller {
             $this->view->render("mkt/request_minor_money_form", "navbar");
         } else if (uri::get(2)==='post_Request') {
             $this->positionEcho('mkt', $this->model->addRequestPettyMoney());
+        } else if (uri::get(2)==='post_img_Request') {
+            $this->positionEcho('mkt', $this->model->uploadImgForRequestPettyMoney());
         }
     } 
-    
 
 }
 

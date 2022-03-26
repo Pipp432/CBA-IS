@@ -271,4 +271,10 @@ foreach ($list as $value) {
             }
         }
     }//ws
+    public function request_minor_money_form() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("Payment Voucher A (PV-A)"); 
+            $this->view->render('/fin/validate_minor_money_form', "navbar");
+        }
+    } 
 }

@@ -211,12 +211,28 @@ class fileModel extends model {
         }
         return null;
 	}
-    public function getPVC($PVC_No) {
-		$sql = $this->prepare("SELECT PVC_Demo.Withdraw_Date, PVC_Demo.Withdraw_Name, 
-                                PVC_Demo.Employee_ID, PVC_Demo.Employee_Line, PVC_Demo.Bank_Name,
-                                PVC_Demo.Tax_Number, PVC_Demo.Bank_Book_Name, PVC_Demo.Authorize_Name,
-                                PVC_Demo.Table_Of_Details FROM `PVC_Demo` WHERE PVC_Demo.PVC_No=?");
-        $sql->execute([$PVC_No]);
+    public function getPvc($pvc_no) {
+		$sql = $this->prepare("select
+                                    PVC.pvc_no,
+                                    PVC.pvc_date,
+                                    PVC.pvc_name,
+                                    PVC.pvc_type,
+                                    PVC.pvc_address,
+                                    PVC.supplier_no,
+                                    PVCPrinting.file_date,
+                                    PVCPrinting.iv_no,
+                                    PVCPrinting.detail,
+                                    PVCPrinting.rr_no,
+                                    PVCPrinting.paid_total,
+                                    PVCPrinting.note,
+                                    PVC.thai_text,
+                                    PVC.total_paid,
+                                    PVC.due_date,
+                                    PVC.bank
+    							from PVCPrinting
+    							inner join PVC on PVC.pvc_no = PVCPrinting.pvc_no
+    							where PVC.pvc_no = ?");
+        $sql->execute([$pvc_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }

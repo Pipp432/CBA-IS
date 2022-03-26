@@ -84,7 +84,12 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addPVC());
         } else if (uri::get(2)==='post_pvd') {
             
-        }     
+        }else if (uri::get(2)==='get_PVCs_form') {
+            $this->positionEcho('acc', $this->model->getPVCs(Uri::get(3)));
+        }else if (uri::get(2)==='get_quotation') {
+            $this->positionEcho('acc', $this->model->getQuotation(Uri::get(3)));
+        }
+
     }
     
     public function confirm_payment_voucher() {
@@ -244,4 +249,17 @@ class accController extends controller {
             }
         }
 	}
+
+    ////////////////////////// mamemook na
+    public function confirm_iv() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("acc");
+            $this->view->setTitle("Confirm iv");
+            $this->view->iv = $this->model->getConfirmIV();
+            $this->view->render("acc/confirm_iv", "navbar");
+        } else if (uri::get(2)==='get_confirm_iv') {
+            $this->positionEcho('acc', $this->model->getConfirmIV());
+        }
+    }
+
 }

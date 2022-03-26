@@ -12,6 +12,7 @@
         <script>addModuleLink('accRow', '/acc/invoice_receipt_confirm', 'file-text-o', 'Invoice Receipt Confirm (IVRC)');</script>
         <script>addModuleLink('accRow', '/acc/payment_voucher', 'money', 'Payment Voucher (PV)');</script>
         <script>addModuleLink('accRow', '/acc/confirm_payment_voucher', 'inbox', 'Confirm Payment Voucher');</script>
+        <script>addModuleLink('accRow', '/acc/confirm_iv', 'check-circle-o', 'Confirm IV');</script>
         <script>addModuleLink('accRow', '/acc/confirm_ird', 'check-circle-o', 'Confirm IRD');</script>
         <script>addModuleLink('accRow', '/acc/return_inventory', 'undo', 'Return Inventory (RE)');</script>
         <script>addModuleLink('accRow', '/acc/re_dashboard', 'folder-open-o', 'RE-Dashboard');</script>

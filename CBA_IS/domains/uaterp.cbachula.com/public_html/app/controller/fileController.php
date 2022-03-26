@@ -145,7 +145,11 @@ class fileController extends controller {
     public function pv() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        } else {
+        }else if(uri::get(2)=="pvc"){
+            $this->positionEcho('acc', $this->model->getPVC(Uri::get(3)));
+            $this->view->render("file/pvc");
+
+        }else {
             if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
                 $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
                 $this->view->pv = $this->model->getPv(uri::get(2));
@@ -158,10 +162,14 @@ class fileController extends controller {
     public function pvc() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        } else {
-            if ($this->getPosition() == "mkt" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+        } else if(uri::get(2)==="get_pvc"){
+            $this->view->pvc = $this->model->getPvc(uri::get(3));
+           
+        }
+        else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
                 $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
-                $this->view->pvc = $this->model->getPvc(uri::get(2));
+                $this->view->pvc = $this->model->getPvc(uri::get(3));
                 $this->view->render("file/pvc");
             } else {
                 $this->err404();
