@@ -4655,7 +4655,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
   public function addPVC(){
     
     $sql = $this->prepare("update  PVC_Demo SET Withdraw_Date=?, Withdraw_Name=?, Employee_ID=?, 
-    Employee_Line=?, Bank_Name=?, Tax_Number=?, Bank_Book_Name=?, Authorize_Name=?, 
+    Employee_Line=?, Bank_Name=?, Tax_Number=?, Bank_Book_Name=?, Bank_Book_Number=? ,Authorize_Name=?, 
     Table_Of_Details=? WHERE PVC_No = ?");
     $success = $sql->execute([
       
@@ -4664,6 +4664,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       input::post( 'employeeId' ),
       input::post( 'employeeLine' ),
       input::post( 'bankName' ),
+      input::post( 'bankNumber' ),
       input::post( 'taxNumber' ),
       input::post( 'bankBookName' ),
       input::post( 'authorizerName' ),

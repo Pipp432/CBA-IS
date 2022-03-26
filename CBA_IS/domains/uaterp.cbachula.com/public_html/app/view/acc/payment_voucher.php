@@ -291,9 +291,7 @@
                 <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postPvItems()">บันทึก PV</button>
                 </div>
-                <div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="getPVC()">TEST</button>
-                </div>
+               
                 
             </div>
         </div>

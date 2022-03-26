@@ -46,11 +46,15 @@
                     </div>
                 <br>
                 <label>ชื่อบัญชีธนาคารที่รับโอน</label>
-                <input type="text" class="form-control" id="bookBankNameTextbox" ng-change="addSeller()" ng-model="bankBookName" >
+                <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookNumber" >
+
+                <br>
+                <label>เลขที่บัญชีธนาคารที่รับโอน</label>
+                <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookName" >
                 
                 <br> 
                 <label>ผู้ร้บรอง</label>
-                <input type="text" class="form-control" id="authorizerNameTextbox" ng-change="addSeller()" ng-model="authorizerName" >
+                <input type="text" class="form-control" id="authorizerNameTextbox" ng-model="authorizerName" >
                 
                 <br> 
 
@@ -156,6 +160,7 @@
         $scope.employeeLine=''
         $scope.bankName ='';
         $scope.taxNumber='';
+        $scope.bankBookNumber='';
         $scope.bankBookName='';
         $scope.authorizerName=''; 
        
@@ -234,6 +239,9 @@
         };
         $scope.getAuthorizerName=function(){
             return $scope.authorizerName
+        }; 
+        $scope.getBankBookNumber=function(){
+            return $scope.bankBookNumber;
         }; 
         $scope.getTableData=function(){
             return processTable();
@@ -333,6 +341,7 @@
                 bankName : $scope.getBankName(),
                 taxNumber: $scope.getTaxNumber(),
                 bankBookName: $scope.getBankBookName(),
+                bankBookNumber: $scope.getBankBookNumber(),
                 authorizerName: $scope.getAuthorizerName() ,
                 table : $scope.getTableData(),
                 

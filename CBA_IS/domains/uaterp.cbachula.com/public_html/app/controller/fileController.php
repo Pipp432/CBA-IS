@@ -162,8 +162,8 @@ class fileController extends controller {
     public function pvc() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        } else if(uri::get(2)==="get_pvc"){
-            $this->view->pvc = $this->model->getPvc(uri::get(3));
+        } else if(uri::get(2)==="get_PVC"){
+            $this->positionEcho('file', $this->model->getPVC(Uri::get(3)));
            
         }
         else {

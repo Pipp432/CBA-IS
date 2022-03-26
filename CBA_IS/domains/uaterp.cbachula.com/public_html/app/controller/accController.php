@@ -86,6 +86,7 @@ class accController extends controller {
             
         }else if (uri::get(2)==='get_PVCs_form') {
             $this->positionEcho('acc', $this->model->getPVCs(Uri::get(3)));
+    
         }else if (uri::get(2)==='get_quotation') {
             $this->positionEcho('acc', $this->model->getQuotation(Uri::get(3)));
         }

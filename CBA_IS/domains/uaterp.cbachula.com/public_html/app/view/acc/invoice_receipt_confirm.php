@@ -110,7 +110,7 @@
                     </table>
                 </div>
                 <hr>
-                <div class="row mx-0 mt-2">
+                <div>
                     <div class="col-md-4">
                         <label for="textboxIv">เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี</label>
                         <input type="text" class="form-control" id="textboxIv" ng-model="iv" placeholder="เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี">
@@ -119,10 +119,30 @@
                         <label for="datetime-input">วันที่</label>
                         <input class="form-control" type="date" id="datetime-input" ng-model="ivrcDate">
                     </div>
-                    <div class="col-md-4">
-                        <label for="ivFile">อัปโหลดเอกสาร</label><br>
-                        <input class="form-control-file" type="file" id="ivFile">
-                    </div>
+                    <form id="billForm">
+                        <div class="col-md-4">
+                            <label for="billFormUpload">อัปโหลดใบวางบิล</label><br>
+                            <input class="form-control-file" type="file" id="billFormUplaod">
+                        </div>  
+                    </form><br>
+                    <form id="taxForm">   
+                        <div class="col-md-4">
+                            <label for="taxFormUplaod">อัปโหลดใบกำกับภาษี</label><br>
+                            <input class="form-control-file" type="file" id="taxFormUplaod">
+                        </div>
+                    </form><br>
+                    <form id="taxInvoice">
+                        <div class="col-md-4">
+                            <label for="taxInvoiceUpload">อัปโหลดใบแจ้งหนี้</label><br>
+                            <input class="form-control-file" type="file" id="taxInvoiceUplad">
+                        </div>
+                    </form><br>
+                    <form id="taxReduce">
+                        <div class="col-md-4">
+                            <label for="taxReduceUpload">อัปโหลดใบลดหนี้</label><br>
+                            <input class="form-control-file" type="file" id="taxReduceUpload">
+                        </div>
+                    </form>
                 </div>
                 <hr>
                 <div class="row mx-0 mt-2">
@@ -226,13 +246,20 @@
                                     ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
                 // Creation of data
                 // FormData is a web page interface where (key: value)
-                var data = new FormData();
-                data.append('ivFile', $('#ivFile')[0].files[0]);
+                const billForm = document.getElementById("billForm")
+                var billData = new FormData(billForm);
+                const taxForm = document.getElementById("taxForm")
+                var taxData = new FormData(taxForm);
+                const taxInvoiceForm = document.getElementById("taxInvoice")
+                var taxInvoiceData = new FormData(taxInvoiceForm);
+                const taxRudeuceForm = document.getElementById("taxReduce")
+                var taxRudeuceData = new FormData(taxRudeuceForm);
+               
                 data.append('iv', $scope.iv);
                 data.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
                 data.append('ivrcDate', ivrcDateStr);
                
-                console.log("Hi");
+                
                 // Async jQuery method
                 $.ajax({
                     url: '/acc/invoice_receipt_confirm/post_ivrc',
