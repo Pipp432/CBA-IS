@@ -34,12 +34,12 @@ class isController extends controller {
             $this->view->render("is/demo", "navbar");
         }
     }
-    public function thelastday() { 
-        $this->requireSignIn();
-        $this->view->setTitle("The Last Day");
-        $this->view->getPosition = $this->getPosition();
-        $this->view->render("is/thelastday");
-    }
+    // public function thelastday() { 
+    //     $this->requireSignIn();
+    //     $this->view->setTitle("The Last Day");
+    //     $this->view->getPosition = $this->getPosition();
+    //     $this->view->render("is/thelastday");
+    // }
 	
 	public function postEndProject() { 
         $this->requirePost();

@@ -86,11 +86,12 @@ class fileModel extends model {
 	}
     
     public function getIv($iv_no) {
-		$sql = $this->prepare("select
+		$sql = $this->prepare("SELECT
                                 	Invoice.invoice_no,
                                     Invoice.invoice_date,
                                     Invoice.file_no,
                                     Invoice.customer_name,
+                                    Invoice.customer_title,
                                     Invoice.employee_id,
                                     Invoice.customer_address,
                                     Invoice.id_no,
@@ -108,12 +109,15 @@ class fileModel extends model {
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no
-    							where Invoice.invoice_no = ?");
+    							where Invoice.invoice_no = ? ");
         $sql->execute([$iv_no]);
-        if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return null;
+       
+    
+
+
+        
+        return  json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+       
 	}
     
     public function getCn($iv_no) {
@@ -214,7 +218,7 @@ class fileModel extends model {
     public function getPVC($PVC_No) {
 		$sql = $this->prepare("SELECT PVC_Demo.PVC_No,PVC_Demo.Withdraw_Date, PVC_Demo.Withdraw_Name, 
                                 PVC_Demo.Employee_ID, PVC_Demo.Employee_Line, PVC_Demo.Bank_Name,
-                                PVC_Demo.Tax_Number, PVC_Demo.Bank_Book_Name,PVC_Demo.Bank_Book_Number ,PVC_Demo.Authorize_Name,
+                                PVC_Demo.Tax_Number,PVC_Demo.EX_No,PVC_Demo.Bank_Book_Name,PVC_Demo.Bank_Book_Number ,PVC_Demo.Authorize_Name,
                                 PVC_Demo.Table_Of_Details FROM `PVC_Demo` WHERE PVC_Demo.PVC_No=? ");
         $sql->execute([$PVC_No]);
         if ($sql->rowCount() > 0) {

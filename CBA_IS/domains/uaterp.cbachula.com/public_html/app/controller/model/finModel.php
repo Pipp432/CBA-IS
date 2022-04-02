@@ -16,6 +16,7 @@ class finModel extends model {
                                     SOX.employee_id,
                                     Employee.employee_nickname_thai,
                                     Customer.customer_name,
+                                    Customer.customerTitle,
                                     Customer.customer_surname,
                                     Customer.address,
                                     Customer.national_id,
@@ -42,7 +43,6 @@ class finModel extends model {
                                     SO.commission as so_commission,
                                     SOX.slip_uploaded,
                                     SOX.slip_datetime,
-                                    SOX.slip_name,
                                     SOX.payment_date,
                                     SOX.payment_time,
 									SOX.payment_amount,
@@ -166,7 +166,7 @@ class finModel extends model {
                 
                 if($value['so_total_sales_vat2'] != 0) {
                     $total_sales_no_vat = ((double) $value['so_total_sales_price2']) / 1.07;
-                    $total_sales_vat = ((double) $value['so_total_sales_price2']) / 107 * 7;
+                    $total_sales_vat = (((double) $value['so_total_sales_price2']) / 107) * 7;
                     $total_sales_price = (double) $value['so_total_sales_price2'];
                 } else {
                     $total_sales_no_vat = (double) $value['so_total_sales_price2'];
@@ -324,7 +324,7 @@ class finModel extends model {
         
         $crItemsArray = json_decode(input::post('crItems'), true); 
         $crItemsArray = json_decode($crItemsArray, true); 
-        
+       
         $soList = array();
         $iv_no = "";
         $cr_no = "";
@@ -354,13 +354,14 @@ class finModel extends model {
                 }
                 
                 // insert IV
-                $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_address, id_no, file_no,
+                $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
                                         file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note)
                                         values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");  
                 $sql->execute([
                     $iv_no,
                     $value['employee_id'],
                     input::post('cusName'),
+                    input::post('customer_title'),
                     input::post('cusAddress'),
                     input::post('cusId'),
                     $value['so_no'],
@@ -399,119 +400,119 @@ class finModel extends model {
 					
 				//echo 'before';
 
-                if(is_numeric($value['employee_id'])) {
+                // if(is_numeric($value['employee_id'])) {
 					
-					//echo 'after isnumeric';
+				// 	//echo 'after isnumeric';
                     
-                    // Archery (week5)
-                    // $this->updateSalesPro5($value['so_no'], $total_sales_price, $value['employee_id']);
+                //     // Archery (week5)
+                //     // $this->updateSalesPro5($value['so_no'], $total_sales_price, $value['employee_id']);
                     
-                    $sql = $this->prepare("select so_date as SO_date from SO where so_no = ?");
-                    $sql->execute([$value['so_no']]);
-                    $CheckSoDate = $sql->fetchAll()[0]['SO_date'];
+                //     $sql = $this->prepare("select so_date as SO_date from SO where so_no = ?");
+                //     $sql->execute([$value['so_no']]);
+                //     $CheckSoDate = $sql->fetchAll()[0]['SO_date'];
 					
-					//echo 'check date';
+				// 	//echo 'check date';
 					
-					$sql = $this->prepare("select so_time as SO_time from SO where so_no = ?");
-                    $sql->execute([$value['so_no']]);
-                    $CheckSoTime = $sql->fetchAll()[0]['SO_time'];
+				// 	$sql = $this->prepare("select so_time as SO_time from SO where so_no = ?");
+                //     $sql->execute([$value['so_no']]);
+                //     $CheckSoTime = $sql->fetchAll()[0]['SO_time'];
 					
-					//echo 'check time';
+				// 	//echo 'check time';
                     
-                    //$sql = $this->prepare("select point as goody_point from goody_point_log where datetime = ? and employee_id = ?");
-                    //$sql->execute([$CheckSoDate, $value['employee_id']]);
-                    //$CheckGoody = $sql->fetchAll()[0]['goody_point'];
-                    //
-                    //// Goody Point
-                    //if($CheckGoody == 0) {
-                    //    $this->updatePointGoody($value['so_no'], $value['employee_id']);
-                    //}
+                //     //$sql = $this->prepare("select point as goody_point from goody_point_log where datetime = ? and employee_id = ?");
+                //     //$sql->execute([$CheckSoDate, $value['employee_id']]);
+                //     //$CheckGoody = $sql->fetchAll()[0]['goody_point'];
+                //     //
+                //     //// Goody Point
+                //     //if($CheckGoody == 0) {
+                //     //    $this->updatePointGoody($value['so_no'], $value['employee_id']);
+                //     //}
                     
-                    //Pro Week 7-8
-                     if (($CheckSoDate == '2021-07-12' && $CheckSoTime >= '14:00:00') || $CheckSoDate == '2021-07-13' || $CheckSoDate == '2021-07-14' || 
-                         $CheckSoDate == '2021-07-15' || $CheckSoDate == '2021-07-16' || $CheckSoDate == '2021-07-17' || 
-						 $CheckSoDate == '2021-07-19' || $CheckSoDate == '2021-07-20' || $CheckSoDate == '2021-07-21' || 
-                         $CheckSoDate == '2021-07-22' || $CheckSoDate == '2021-07-23' || $CheckSoDate == '2021-07-24') {
+                //     //Pro Week 7-8
+                //      if (($CheckSoDate == '2021-07-12' && $CheckSoTime >= '14:00:00') || $CheckSoDate == '2021-07-13' || $CheckSoDate == '2021-07-14' || 
+                //          $CheckSoDate == '2021-07-15' || $CheckSoDate == '2021-07-16' || $CheckSoDate == '2021-07-17' || 
+				// 		 $CheckSoDate == '2021-07-19' || $CheckSoDate == '2021-07-20' || $CheckSoDate == '2021-07-21' || 
+                //          $CheckSoDate == '2021-07-22' || $CheckSoDate == '2021-07-23' || $CheckSoDate == '2021-07-24') {
 						 
-						 // check range
-						 $sql = $this->prepare("select lp_range from CboinRange where employee_id = ?");
-                         $sql->execute([$value['employee_id']]);
-						 $range = $sql->fetchAll()[0]['lp_range'];
-						 //echo ' range ='.$range;
+				// 		 // check range
+				// 		 $sql = $this->prepare("select lp_range from CboinRange where employee_id = ?");
+                //          $sql->execute([$value['employee_id']]);
+				// 		 $range = $sql->fetchAll()[0]['lp_range'];
+				// 		 //echo ' range ='.$range;
 						 
-						 // check จำนวครั้งที่เคยได้ c-boin จากการขาย
-						 $sql = $this->prepare("select sum(cboin) as count from CboinLog where remark = ? and cancelled = 0 and employee_id = ?");
-						 $sql->execute(['Sales - Range '.$range, $value['employee_id']]);
-						 $count = $sql->fetchAll()[0]['count'];
-						 //echo ' count ='.$count;
+				// 		 // check จำนวครั้งที่เคยได้ c-boin จากการขาย
+				// 		 $sql = $this->prepare("select sum(cboin) as count from CboinLog where remark = ? and cancelled = 0 and employee_id = ?");
+				// 		 $sql->execute(['Sales - Range '.$range, $value['employee_id']]);
+				// 		 $count = $sql->fetchAll()[0]['count'];
+				// 		 //echo ' count ='.$count;
 						 
-						 if ($count < 90) {
+				// 		 if ($count < 90) {
 							 
-							 // check ยอดจาด iv ทั้งหมดที่เคยขา รวมปัจจุบันด้วย
-							 $sql = $this->prepare("select ifnull(sum(Invoice.total_sales_price),0) as TotalSold from Invoice 
-													INNER JOIN SO on SO.so_no = Invoice.file_no
-													where Invoice.employee_id = ? and Invoice.cancelled = 0 and file_type = 'SO' and SO.cancelled = 0 
-													AND ((so_date = '2021-07-12' and so_time >= '14:00:00') 
-															OR (so_date between '2021-07-13' AND '2021-07-17') 
-															OR (so_date between '2021-07-19' AND '2021-07-24'))");
-							 $sql->execute([$value['employee_id']]);
-							 $totalSold = $sql->fetchAll()[0]['TotalSold'];
-							 //echo ' total sold ='.$totalSold;
+				// 			 // check ยอดจาด iv ทั้งหมดที่เคยขา รวมปัจจุบันด้วย
+				// 			 $sql = $this->prepare("select ifnull(sum(Invoice.total_sales_price),0) as TotalSold from Invoice 
+				// 									INNER JOIN SO on SO.so_no = Invoice.file_no
+				// 									where Invoice.employee_id = ? and Invoice.cancelled = 0 and file_type = 'SO' and SO.cancelled = 0 
+				// 									AND ((so_date = '2021-07-12' and so_time >= '14:00:00') 
+				// 											OR (so_date between '2021-07-13' AND '2021-07-17') 
+				// 											OR (so_date between '2021-07-19' AND '2021-07-24'))");
+				// 			 $sql->execute([$value['employee_id']]);
+				// 			 $totalSold = $sql->fetchAll()[0]['TotalSold'];
+				// 			 //echo ' total sold ='.$totalSold;
 							 
-							 // ดูยอดที่ต้องทำได้ต่อ 30 c-boin ของแต่ละ range
-							 $targetSales = 0;
-							 if ($range == '1') {
-								 $targetSales = 1000;
-							 }
-							 else if ($range == '2') {
-								 $targetSales = 1500;
-							 }
-							 else {
-								 $targetSales = 3000;
-							 }
+				// 			 // ดูยอดที่ต้องทำได้ต่อ 30 c-boin ของแต่ละ range
+				// 			 $targetSales = 0;
+				// 			 if ($range == '1') {
+				// 				 $targetSales = 1000;
+				// 			 }
+				// 			 else if ($range == '2') {
+				// 				 $targetSales = 1500;
+				// 			 }
+				// 			 else {
+				// 				 $targetSales = 3000;
+				// 			 }
 							 
-							 //echo ' target sales ='.$targetSales;
+				// 			 //echo ' target sales ='.$targetSales;
 							 
-							 //จำนวนครั้งที่ได้แต้มไปแล้ว
-							 $times=$count;
+				// 			 //จำนวนครั้งที่ได้แต้มไปแล้ว
+				// 			 $times=$count;
 							 
-							 //ยอดที่เคยขายและได้แต้มไปแล้ว
-							 $sold=$times*$targetSales;
+				// 			 //ยอดที่เคยขายและได้แต้มไปแล้ว
+				// 			 $sold=$times*$targetSales;
 							 
-							 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม
-							 $new_total=$totalSold-$sold;
+				// 			 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม
+				// 			 $new_total=$totalSold-$sold;
 							 
-							 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม  หารด้วย ยอดต่อการได้แต้ม 1 ครั้ง
-							 $p_times=intdiv($new_total,$targetSales);
+				// 			 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม  หารด้วย ยอดต่อการได้แต้ม 1 ครั้ง
+				// 			 $p_times=intdiv($new_total,$targetSales);
 							 
-							 // set จำนวนครั้งที่คูณแต้ม ตามจำนวน max
-							 $new_p_times = 3 - $count;
-							 if ($p_times > $new_p_times){
-								 $p_times = $new_p_times;
-							 }
-							 
-							 
-							 $extraPoint = ($p_times >= 1) ? $p_times*30: 0;
-							 
-							 if ($extraPoint > 0) {
-								 $sql = $this->prepare("insert into CboinLog (date, time, employee_id, cboin, remark, note, cancelled)
-							 						values(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 0)");
-								 $sql->execute([$value['employee_id'], $extraPoint, 'Sales - Range '.$range, $iv_no]);
-							 }
-							 
-							 //echo ' inserted ja!';
+				// 			 // set จำนวนครั้งที่คูณแต้ม ตามจำนวน max
+				// 			 $new_p_times = 3 - $count;
+				// 			 if ($p_times > $new_p_times){
+				// 				 $p_times = $new_p_times;
+				// 			 }
 							 
 							 
+				// 			 $extraPoint = ($p_times >= 1) ? $p_times*30: 0;
 							 
-						 }
+				// 			 if ($extraPoint > 0) {
+				// 				 $sql = $this->prepare("insert into CboinLog (date, time, employee_id, cboin, remark, note, cancelled)
+				// 			 						values(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 0)");
+				// 				 $sql->execute([$value['employee_id'], $extraPoint, 'Sales - Range '.$range, $iv_no]);
+				// 			 }
+							 
+				// 			 //echo ' inserted ja!';
+							 
+							 
+							 
+				// 		 }
 						 
 						 
 						 
-                     }
+                //      }
                     
                      
                     
-                }
+                // }
                 
                 // ============================================================================================================================================================
                 // NEW CBA2020 ACC
@@ -538,8 +539,10 @@ class finModel extends model {
                 // END CBA2020 ACC
                 } else {
             
-            	echo 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่';
-				return 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่';
+            	echo 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่ กรุณาแคปหน้าเจอให้กับทางทีม IS ขออภัยในความไม่สะดวก';
+                $check = $sql->errorInfo()[2];
+               
+				return $check;
 				}
             }
             
@@ -980,7 +983,7 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
         }
         
     }
-    public function getWsIv($iv_no) {
+    public function getWsIv($iv_no) { 
         
         $sql = $this->prepare("select * from WS_IV where iv_no = ?");
         $sql->execute([$iv_no]);
@@ -1554,5 +1557,41 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return [];
     }
+
+    public function getMinorRequestForFin() {
+        $sql = $this->prepare("select rq_no,date,time,employee_id,employee_name,LineId,product_name,cost from petty_cash_received where done = 0");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
+    
+    public function getRe($rq_no) {
+        $sql = $this->prepare("select rq_no,iv_rec_image,iv_rec_type from petty_cash_received where rq_no = ?");
+        $sql->execute([$rq_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['iv_rec_type']);
+            echo base64_decode($data['iv_rec_image']);
+        } else {
+            echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+        }
+    }
+
+    public function getIv($rq_no) {
+        $sql = $this->prepare("select rq_no,slip_image,slip_type from petty_cash_received where rq_no = ?");
+        $sql->execute([$rq_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['slip_type']);
+            echo base64_decode($data['slip_image']);
+        } else {
+            echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+        }
+    }
+
     
 }

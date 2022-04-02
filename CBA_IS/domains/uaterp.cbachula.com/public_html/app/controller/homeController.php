@@ -29,7 +29,7 @@ class homeController extends controller {
     public function add_customer() {
         if(empty(uri::get(2))) {
             $this->view->setTitle("Add Customer");
-            $this->view->render("home/add_customer");
+            $this->view->render("home/add_customer", "navbar");
         } else if (uri::get(2)==='post_customer') {
             echo $this->model->addCustomer();
         }

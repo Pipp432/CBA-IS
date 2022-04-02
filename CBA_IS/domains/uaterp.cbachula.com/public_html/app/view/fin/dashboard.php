@@ -75,7 +75,7 @@
                     <td ng-click="viewFile(dashboard)">{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
                     <td>
                         {{dashboard.total_sales_price}}
-                        <a href="/fin/cash_receipt/sox_slip/{{dashboard.sox_no}}" target="_blank">สลิปครับ</a>
+                        <a href="https://uatline.cbachula.com/public/sox_slips/{{dashboard.sox_no}}.jpeg" target="_blank" onClick()="check404()">สลิปครับ</a>
                     </td>
                 </tr>
             </table>
@@ -105,9 +105,19 @@
         
         $scope.viewFile = function(cr) {
             // var iv = cr.cr_no.substring(0,1) + 'IV-' + cr.cr_no.substring(4,9);
-            window.open('/file/iv/' + cr.invoice_no);
+            window.open('/file/iv_cr/' + cr.invoice_no);
         }
-        
-    });
+        var url = window.location.href;
+       
+                    
+    
+    })
+   
+  
+    
+    
+         
+    
 
 </script>
+

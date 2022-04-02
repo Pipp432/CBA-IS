@@ -77,10 +77,10 @@
                     <br>
                     <button type="button" class="btn btn-default btn-block" id="addRows" onclick="addRows()">เพิ่มช่อง</button>
                 </div>
-                <form id="form">
-                <br>
-                   <label>ใบเสนอราคา(pdf)</label>
-                   <input type="file" class="form-control-file" id="quotation" name="Quotation_pic">
+                <form id="form" >
+                    <br>
+                    <label>ใบเสนอราคา(pdf)</label>
+                    <input type="file" class="form-control-file" id="quotation" name="Quotation_pic">
                     
                     <br>
                 </form>
@@ -264,9 +264,10 @@
             else if( $scope.bankBookName==='')$('#formValidate6').modal('toggle');
             else if($scope.authorizerName ==='')$('#formValidate7').modal('toggle');
             else{ 
-                var confirmModal = addConfirmModal('confirmModal', 'Confirm',"ยืนยันข้อมูล",'postQuote()'); 
+                var confirmModal = addConfirmModal('confirmModal', 'Confirm',"ยืนยันข้อมูล","postQuote()"); 
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
+                
                 // window.open("https://uaterp.cbachula.com/acc/confirm_payment_voucher");
                 
                 
@@ -294,13 +295,13 @@
         // }
         $scope.postQuote = function(){
             $('#confirmModal').modal('hide');
-            
+           
             var formData = new FormData(form);
-            console.log(form)
-            formData.forEach(data=>console.log(data))
-
+           
+                    
+    
             $.ajax({
-                url: 'pvc/post_quotation',
+                url: "pvc/post_quotation",
                 type: "POST",
                 dataType: 'json',
                 method: 'POST',
@@ -326,10 +327,8 @@
                 addModal('uploadFailModal', 'upload imgae', '2 fail');
                 $('#uploadFailModal').modal('toggle');
             });    
-
         }
     
-
         $scope.postPVC = function(){
             $('#confirmModal').modal('hide');
             $.post("pvc/post_PVC",{
@@ -350,10 +349,12 @@
                 $('#successModal').modal('toggle');
                 
             })
-
         }
+       
+        
         $scope.toMainMenu = function(){
-            window.location.assign('https://uaterp.cbachula.com/home');
+            const url = "https://uaterp.cbachula.com/home"
+            window.location.assign(url);
         }
         // $scope.postQuotationItems = function() {
             

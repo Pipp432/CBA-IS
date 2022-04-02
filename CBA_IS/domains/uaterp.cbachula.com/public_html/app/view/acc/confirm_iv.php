@@ -5,18 +5,8 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">Confirm IV</h2>
-        
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        <!-- PO -->
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        
-        
-
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        <!-- DOCUMENT -->
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        
+        <h2 class="mt-3">Confirm Invoice</h2>
+ 
         <div class="mt-2 p-0">
             <table class="table table-hover my-1">
 					<tr>
@@ -24,30 +14,27 @@
 						<th style="text-align: center;">วันที่ที่ออก iv</th>
                         <th style="text-align: center;">ชื่อผู้ออก iv</th>
                         <th style="text-align: center;">ประเภท</th>
-						<th style="text-align: center;">Vat type</th>
-						<th style="text-align: center;">เอกสาร IV CBA</th>
+						<th style="text-align: center;">Vat type</th> 
+                        <!-- <th style="text-align: center;">ที่อยู่ลูกค้า</th>
+                        <th style="text-align: center;">e-mail</th> -->
+						<th style="text-align: center;">เอกสาร IVCR</th>
                         <th style="text-align: center;">สถานะ</th>
 					</tr>
-					<tr ng-repeat="inv in invoice | unique:'invoice_no'" >
-						<td ng-click="viewFile(invoice)" style="text-align: center;">{{invoice.invoice_no}}</td>
-						<td style="text-align: center;">{{invoice.invoice_date}}</td>
-                        <td style="text-align: center;">{{invoice.employee_id}}</td>
-						<td style="text-align: center;">{{invoice.vat_type}}</td>
-						<td style="text-align: center;">{{invoice.product_type}}</td>
-                        <td style="text-align: center;"><button type="button" class="btn btn-info" ng-click = "getAddress(dashboard)">Print IV</button>
-                        </td>
-                        <input type="checkbox" id="confirmIV" name="confirmIV" value="confirm"><label for="Confirm_iv"> Confirm</label><br>
-						<!--<td style="text-align: center;"><button type="button" class="btn btn-info" ng-click = "getSOXinIRD(dashboard)">Confirm</button>
-                        </td>-->
-						
+					<tr ng-repeat="inv in invoices | unique:'invoice_no'">
+						<td style="text-align: center;">{{inv.invoice_no}}</td>
+						<td style="text-align: center;">{{inv.invoice_date}} {{inv.invoice_time}}</td>
+                        <td style="text-align: center;">{{inv.approved_employee}}</td>
+                        <td style="text-align: center;">{{inv.product_type}}</td>
+						<td style="text-align: center;">{{inv.vat_type}}</td>
+                        <!-- <td style="text-align: center;">{{inv.customer_address}}</td> 
+                        <td style="text-align: center;">{{inv.email}}</td>  -->
+                        <td style="text-align: center;"><button type="button" class="btn btn-info" ng-click = "seeIV(inv)">IVCR</button></td>
+                        <td style="text-align: center;"><button type="button" class="btn btn-info" id="ConfirmIVbox" ng-click = "conivItems(inv.invoice_no)">Confirm </button></td>
 					</tr>				
 			</table>
             
             
         </div>
-
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
     </div>
 
@@ -63,18 +50,30 @@
 
 <script>
 
+    
+
     app.controller('moduleAppController', function($scope, $http, $compile) {
         
-		$scope.confirm_iv = <?php echo $this->confirm_iv; ?>
-        
-        $scope.getAddress = function(file) {
-			window.open('/acc/iv_download/' + file.iv_no);
+        $scope.civItems = [];
+
+		$scope.invoices = <?php echo $this->invoices; ?>
+        // console.log($scope.invoices);
+
+        $scope.conivItems = function(invoice_no) {
+
+            $.post("/acc/confirm_iv/conivItems", {
+                invoice_no: invoice_no
+            }, function(data) {
+                addModal('successModal', 'Confirm IV', 'Confirm Successful');
+                $('#successModal').modal('toggle');
+                $('#successModal').on('hide.bs.modal', function (e) { location.assign('/acc/print_iv') });  //{ location.assign('/acc/dashboard') }
+            });
+        }
+     
+        $scope.seeIV = function(file) {
+			window.open('/file/iv_cr/' + file.invoice_no);
 		}
 
-        $scope.viewFile = function(file) {
-			window.open('/file/iv/' + file.iv_no);
-		}
-		
     });
 
 </script>

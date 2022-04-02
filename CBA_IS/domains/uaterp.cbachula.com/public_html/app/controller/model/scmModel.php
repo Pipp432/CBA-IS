@@ -44,7 +44,7 @@ class scmModel extends model {
                                 inner join Product on Product.product_no = SOPrinting.product_no
                                 inner join Invoice on Invoice.file_no = SOXPrinting.so_no
                                 inner join Employee on Employee.employee_id = SOX.employee_id
-                                where SOX.done = 9 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null
+                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null
 								ORDER BY SOX.ird_no, SOX.sox_no ASC");
         $sql->execute();
         if ($sql->rowCount() > 0) {
@@ -793,6 +793,36 @@ class scmModel extends model {
 		
 	}
 	
+    public function updateIRD($sox_no){
+        $sql=$this->prepare("UPDATE `SOX` SET `done`=? WHERE sox_no=?");
+        $sql->execute([9,$sox_no]);
+    }
+
+    public function download_sox(){
+        //$sql=$this->prepare("SELECT * FROM SOX WHERE SOX.done=0");
+        $sql=$this->prepare("SELECT * FROM SOX INNER JOIN SOXPrinting USING(sox_no) INNER JOIN SO USING(so_no) WHERE SO.product_type='Stock' AND SO.product_type='Order'");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+
+    public function change_status($sox_no){
+        $sql=$this->prepare("UPDATE `SOX` SET `done`=? WHERE sox_no=?");
+        $sql->execute([1,$sox_no]);
+    }
+    
+
+    public function get_status(){
+        $sql=$this->prepare("SELECT * FROM SOX WHERE SOX.done=9");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+
 	// IRD Module
 	public function assignIRD($company){
 		$IRDPrefix = $company.'IR-';
@@ -1003,6 +1033,19 @@ class scmModel extends model {
 		}
 		return [];
 		}
-	
+
+        public function getIRDs($ird_no){
+            $sql=$this->prepare("SELECT * FROM `IRD` WHERE ird_no =? ");
+            $data=$sql->execute([$ird_no]);
+
+            if($sql->rowCount() > 0){
+                header('Content-type: '.$data['quotation_type']);
+              
+               return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
+           }else{
+               echo $sql;
+               echo "Hello";
+           }
+        }
 	
 }

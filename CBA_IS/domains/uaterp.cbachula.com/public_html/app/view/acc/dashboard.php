@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col">
                 <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()">
                     <div class="card-body">
@@ -51,14 +51,14 @@
                     </div>
                 </div>
             </div>
+
             <div class="col">
-                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVB()">
                     <div class="card-body">
-                        <h5 class="card-title my-0">ใบสำคัญสั่งจ่าย C (PVC)</h5>
+                        <h5 class="card-title my-0">ใบSupplier (PVB)</h5>
                     </div>
                 </div>
             </div>
-            
         </div>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -94,10 +94,18 @@
                         <span ng-show="dashboard.slip_name == null && dashboard.receipt_name == null">รอโอนเงิน</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name == null">โอนเงินแล้ว</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name != null">ได้ใบเสร็จแล้ว</span>
-                        <span ng-show="dashboard.slip_name != null"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank">สลิป</a></span>
+                        <span ng-show="dashboard.slip_name != null"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank">สลิป invoice</a></span>
+                        <span ng-show="dashboard.cr_name == null">ไม่มีใบ CR </span>
+                        <a ng-show="dashboard.cr_name != null" href="/acc/dashboard/get_PVB_CR/{{dashboard.file_no}}" target="_blank">ดูใบ CR</a> </span>
+
+                        <!-- <span ng-show="pvType == 'Supplier'"> <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
+                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบกำกับภาษี </a>
+                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> </span> -->
+                        
                     </td>
                 </tr>
             </table>
+            <!-- <button type="button" class="btn btn-default btn-block my-0" ng-click="test()">test</button> -->
             
         </div>
 
@@ -126,7 +134,13 @@
         $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
 		$scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
+        $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
         $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
+        $scope.pvType = '';
+
+        $scope.test = function() {
+             console.log($scope.dashboards);
+        }
         
 		$scope.getDashboardIVCR = function() {
             $scope.dashboards = $scope.dashboardsIv;
@@ -145,9 +159,18 @@
         }
         
         $scope.getDashboardPV = function() {
-            $scope.dashboards = $scope.dashboardsPv;
+            $scope.dashboards = $scope.dashboardsPv; 
             $scope.doc = 'PV';
+            $scope.pvType = '';
             $scope.temp = 'ประเภทการสั่งจ่าย';
+        }
+
+        $scope.getDashboardPVB = function() {
+
+            $scope.dashboards = $scope.dashboardsPvb; 
+            $scope.doc = 'PV';
+            $scope.pvType = 'Supplier';
+            $scope.temp = 'PV-B';
         }
         
         $scope.getDashboardPO = function() {

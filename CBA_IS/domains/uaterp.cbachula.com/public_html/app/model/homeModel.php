@@ -21,13 +21,14 @@ class homeModel extends model {
 	}
         
         public function addCustomer() {
-                $sql = $this->prepare("insert into Customer (date, customer_name, customer_surname, customer_nickname, gender, customer_tel, email, province, address, national_id)
-                                        values (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?)");  
+                $sql = $this->prepare("insert into Customer (date,customerTitle, customer_name, customer_surname, customer_nickname, gender, customer_tel, email, province, address, national_id)
+                                        values (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");  
                 $sql->execute([
+                        input::post('customerTitle'),
                         input::post('customerFirstName'),
                         input::post('customerLastName'),
                         input::post('customerNickName'),
-                        input::post('customerTitle') == 'นาย' ? 'M' : 'F',
+                        input::post('customerTitle') == 'นาย'|| input::post('customerTitle') == 'เด็กชาย' ? 'M' : 'F',
                         input::post('customerTel'),
                         input::post('customerEmail'),
                         input::post('customerProvince'),

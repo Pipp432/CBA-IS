@@ -6,6 +6,7 @@ use _core\controller;
 use _core\helper\input;
 use _core\helper\session;
 use _core\helper\uri;
+use PhpMyAdmin\Url;
 
 class accController extends controller {
 
@@ -82,14 +83,23 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addPVB());
         } else if (uri::get(2)==='post_pvc') {
             $this->positionEcho('acc', $this->model->addPVC());
-        } else if (uri::get(2)==='post_pvd') {
-            
         }else if (uri::get(2)==='get_PVCs_form') {
             $this->positionEcho('acc', $this->model->getPVCs(Uri::get(3)));
-    
-        }else if (uri::get(2)==='get_quotation') {
-            $this->positionEcho('acc', $this->model->getQuotation(Uri::get(3)));
-        }
+        }else if (uri::get(2)==='get_PVC') {
+            $this->positionEcho('acc', $this->model->getPVC());
+        }else if (uri::get(2)==='due_date') {
+            $this->positionEcho('acc', $this->model->postDueDate(Uri::get(3)));
+        }else if(uri::get(2)==='confirm'){
+            $this->positionEcho('acc', $this->model->postConfirm(Uri::get(3)));
+        }else if(uri::get(2)==='get_IVPC_Files'){
+            $this->positionEcho('acc', $this->model->getIVPCFiles(Uri::get(3),Uri::get(3)));
+        } else if(uri::get(2)==='get_PVD'){
+            $this->positionEcho('acc', $this->model->getPVDForPV()); 
+        } else if(uri::get(2)==='update_PVD'){
+            $this->positionEcho('acc', $this->model->updatePVDForPV()); 
+        } else if(uri::get(2)==='post_PVD'){
+            $this->positionEcho('acc', $this->model->postPVDForPV()); 
+        } 
 
     }
     
@@ -116,12 +126,15 @@ class accController extends controller {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
             $this->view->setTitle("Credit Note");
+            $this->view->PVDs = $this->model->getPVD();
             $this->view->render("acc/credit_note", "navbar");
         } else if (uri::get(2)==='post_iv') {
             $this->positionEcho('acc', $this->model->getIvForCn());
         } else if (uri::get(2)==='post_cn') {
             $this->positionEcho('acc', $this->model->addCn());
-        } 
+        } else if (uri::get(2)==='update_PVD') {
+            $this->positionEcho('acc', $this->model->updatePVDCreditNote());
+        }
     }
     
     public function general_journal() {
@@ -161,12 +174,25 @@ class accController extends controller {
             $this->view->setTitle("Dashboard");
             $this->view->dashboardIv = $this->model->getDashboardIv();
             $this->view->dashboardPv = $this->model->getDashboardPv();
+            $this->view->dashboardPvb = $this->model->getDashboardPvb(); 
             $this->view->dashboardPo = $this->model->getDashboardPo();
 			$this->view->dashboardCr = $this->model->getDashboardCr();
             $this->view->render("acc/dashboard", "navbar");
         } else if (uri::get(2)==='pv_slip') {
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('acc', $this->model->getSlipData(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        } else if (uri::get(2)==='get_IVPC_Files_dashboard') {
+            if (!empty(Uri::get(4))) {
+                $this->positionEcho('acc', $this->model->getIVPCFilesDashboard(Uri::get(3),Uri::get(4)));
+            } else {
+                $this->err404();
+            }
+        } else if (uri::get(2)==='get_PVB_CR') {
+            if (!empty(Uri::get(4))) {
+                $this->positionEcho('acc', $this->model->getPVBCR(Uri::get(3)));
             } else {
                 $this->err404();
             }
@@ -251,16 +277,30 @@ class accController extends controller {
         }
 	}
 
-    ////////////////////////// mamemook na
+
     public function confirm_iv() {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
-            $this->view->setTitle("Confirm iv");
-            $this->view->iv = $this->model->getConfirmIV();
+            $this->view->setTitle("Confirm IV");
+            $this->view->invoices = $this->model->getConfirmIV();
             $this->view->render("acc/confirm_iv", "navbar");
-        } else if (uri::get(2)==='get_confirm_iv') {
-            $this->positionEcho('acc', $this->model->getConfirmIV());
+        } 
+        else if (uri::get(2)==='conivItems') {
+            $this->positionEcho('acc', $this->model->confirmIV());
         }
     }
+
+    public function print_iv() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("acc");
+            $this->view->setTitle("Print IV");
+            $this->view->invoicess = $this->model->getPrintIV();
+            $this->view->render("acc/print_iv", "navbar");
+        } 
+        else if (uri::get(2)==='printivItems') {
+            $this->positionEcho('acc', $this->model->confirmPrintIV());
+        } 
+    }
+
 
 }

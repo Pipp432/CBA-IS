@@ -41,7 +41,7 @@
                 <h3 style="text-align: center;"><b>ใบกำกับภาษี<br>Tax Invoice</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">สำเนา</h5>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].invoice_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].invoice_date}}</h6>
                 <h6 style="text-align: right; font-size: 16px;">เอกสารออกเป็นชุด</h6>
@@ -51,9 +51,9 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2564 (โครงการ {{company}})</b><br>
-                    อาคารไชยยศสมบัติ 1 เลขที่ 254 ชั้นใต้ดิน ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
-                    โทร. 0-2218-5746-9 โทรสาร. 0-2218-5762<br>
+                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                    อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
+                    โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
 					เลขประจำตัวผู้เสียภาษี {{company_id}} (สำนักงานใหญ่)
                 </p>
             </div>
@@ -105,8 +105,7 @@
                     <th colspan="2" style="text-align: left;">
                         {{detail[0].sales_price_thai}}
                     </th>
-                    <th colspan="2" style="text-align: right;">ส่วนลด</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].discount | number:2}}</th>
+                    
                 </tr>
                 <tr>
                     <th colspan="4" rowspan="3">
@@ -117,12 +116,12 @@
                             <div class="col-4">
                                 <div class="row">
 									<div class="col">
-										<img ng-src="/public/img/acc_sign.jpg" style="width: 30%; " />
+										<img ng-src="/public/img/accsign.jpg" style="width: 50%; " />
 									</div>
 								</div>
 								<div class="row" style="margin-top: -5%">
 									<div class="col">
-										__________________________<br>บัญชีผู้ออกเอกสาร<br>วันที่ {{day}}/{{month}}/{{year}}
+										__________________________<br>ผู้ออกเอกสาร<br>วันที่ {{day}}/{{month}}/{{year}}
 									</div>
 								</div>
                             </div>
@@ -242,9 +241,9 @@
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
 			$scope.day = $scope.detail[0].invoice_date.substring(8,10);
             switch($scope.company) {
-                case '1': $scope.company_id = '0-9920-04145-63-5'; break;
-                case '2': $scope.company_id = '0-9920-04145-64-3'; break;
-                case '3': $scope.company_id = '0-9920-04145-65-1'; break;
+                case '1': $scope.company_id = '0-9920-04240-25-5'; break;
+                case '2': $scope.company_id = '0-9920-04240-26-3'; break;
+                case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
         }

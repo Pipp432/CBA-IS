@@ -266,7 +266,44 @@ class accModel extends model {
 
     } 
     
-    // CN Module
+    // CN(PV-D) Module
+    
+    public function getpvd() {
+        $sql = "SELECT * from PVD where PVD_status = 0";
+        $statement = $this->prepare($sql);
+        $statement->execute([]);
+
+        if ($statement->rowCount() > 0) {
+            return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        } else return []; 
+    }
+
+    public function updatePVDCreditNote() {
+        $sql = "UPDATE PVD SET 
+        employee_id = ?,
+        employee_line = ?,
+        total_amount = ?,
+        vat_id = ?,
+        sox_no = ?,
+        invoice_no = ?,
+        note = ? 
+        where PVD_status = 0 AND pvd_no = ?"; 
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("employee_id"),
+            input::post("employee_line"),
+            input::post("total_amount"),
+            input::post("vat_id"),
+            input::post("sox_no"),
+            input::post("invoice_no"),
+            input::post("note"),
+            input::post("pvd_no"),
+        ]);
+        if($success) echo 'success';
+        else echo print_r($statement->errorInfo());
+
+    }
+
     public function getIvForCn() {
         $sql = $this->prepare("select
                                 	Invoice.invoice_no,
@@ -292,80 +329,147 @@ class accModel extends model {
         return '';   
     }
     
-    // CN Module
+    // CN(PV-D) Module
     public function addCn() {
         
-        $iv_no = $this->assignIv(input::post('file_no')); 
+        //$iv_no = $this->assignIv(input::post('file_no')); 
         
-        $cnItemsArray = json_decode(input::post('cnItems'), true); 
-        $cnItemsArray = json_decode($cnItemsArray, true); 
+        // $cnItemsArray = json_decode(input::post('cnItems'), true); 
+        // $cnItemsArray = json_decode($cnItemsArray, true); 
         
-        // insert IV(CN)
-        $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_address, id_no, file_no,
-                                file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note, invoice_type)
-                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '-', '-', '-', '-', ?, 'IV', ?, ?, ?, ?, ?, 0, 0, ?, null, 0, ?, 'CN')");  
-        $sql->execute([
-            $iv_no,
-            input::post('file_no'),
-            (double) input::post('diff_total_sales_no_vat'),
-            (double) input::post('diff_total_sales_vat'),
-            (double) input::post('diff_total_sales_price'),
-            0,
-            input::post('diff_total_sales_price_thai'),
-            json_decode(session::get('employee_detail'), true)['employee_id'],
-            input::post('cn_detail')
-        ]); 
+        //update PVD status 
+        $sql = "UPDATE PVD SET 
+            PVD_status = 1
+        where PVD_status = 0 AND pvd_no = ?"; 
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("pvd_no"),
+        ]);
+
+        if($success) {
+            echo ' success(';
+            echo input::post("pvd_no");
+            echo')';
+        } else {
+            echo ' failed(';
+            echo input::post("pvd_no");
+            echo')';
+        }
+
+        //moved to end of pvd process also in acc ??????
+
+        // // insert IV(CN)
+        // $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_address, id_no, file_no,
+        //                         file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note, invoice_type)
+        //                         values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '-', '-', '-', '-', ?, 'IV', ?, ?, ?, ?, ?, 0, 0, ?, null, 0, ?, 'CN')");  
+        // $sql->execute([
+        //     $iv_no,
+        //     input::post('file_no'),
+        //     (double) input::post('diff_total_sales_no_vat'),
+        //     (double) input::post('diff_total_sales_vat'),
+        //     (double) input::post('diff_total_sales_price'),
+        //     0,
+        //     input::post('diff_total_sales_price_thai'),
+        //     json_decode(session::get('employee_detail'), true)['employee_id'],
+        //     input::post('cn_detail')
+        // ]); 
         
-        // update canclled in ex-IV
-        $sql = $this->prepare("update Invoice set cancelled = 1 where invoice_no = ?");  
-        $sql->execute([input::post('file_no')]); 
+        // // update canclled in ex-IV
+        // $sql = $this->prepare("update Invoice set cancelled = 1 where invoice_no = ?");  
+        // $sql->execute([input::post('file_no')]); 
         
         // ============================================================================================================================================================
         // NEW CBA2020 ACC
         
-        // insert AccountDetail sequence 2
-        // Dr รายได้รับล่วงหน้า - โครงการ X
-        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        $sql->execute([$iv_no, '1', '24-1'.$iv_no[0].'00', (double) input::post('diff_total_sales_no_vat'), 0, 'CN']);
+        // // insert AccountDetail sequence 2
+        // // Dr รายได้รับล่วงหน้า - โครงการ X
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([$iv_no, '1', '24-1'.$iv_no[0].'00', (double) input::post('diff_total_sales_no_vat'), 0, 'CN']);
         
-        // insert AccountDetail sequence 3
-        // Dr ภาษีขาย - โครงการ X
-        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        $sql->execute([$iv_no, '2', '62-1'.$iv_no[0].'00', (double) input::post('diff_total_sales_vat'), 0, 'CN']);
+        // // insert AccountDetail sequence 3
+        // // Dr ภาษีขาย - โครงการ X
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([$iv_no, '2', '62-1'.$iv_no[0].'00', (double) input::post('diff_total_sales_vat'), 0, 'CN']);
         
-        // insert AccountDetail sequence 1
-        // Cr เงินฝากออมทรัพย์ - โครงการ X
-        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        $sql->execute([$iv_no, '3', '12-1'.$iv_no[0].'00', 0, (double) input::post('diff_total_sales_price'), 'CN']);
+        // // insert AccountDetail sequence 1
+        // // Cr เงินฝากออมทรัพย์ - โครงการ X
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([$iv_no, '3', '12-1'.$iv_no[0].'00', 0, (double) input::post('diff_total_sales_price'), 'CN']);
         
-        // ============================================================================================================================================================
-        // END CBA2020 ACC
+        // // ============================================================================================================================================================
+        // // END CBA2020 ACC
             
-        foreach($cnItemsArray as $value) {
+        // foreach($cnItemsArray as $value) {
             
-            // insert InvoicePrinting
-            $sql = $this->prepare("insert into InvoicePrinting (invoice_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, rr_no)
-                                    values (?, ?, ?, ?, ?, ?, ?, 0, 'CN')");  
-            $sql->execute([
-                $iv_no,
-                $value['product_no'],
-                (double) $value['sales_no_vat'],
-                (double) $value['sales_vat'],
-                (double) $value['sales_price'],
-                (double) $value['quantity'],
-                (double) $value['total_sales_price']
-            ]);
+        //     // insert InvoicePrinting
+        //     $sql = $this->prepare("insert into InvoicePrinting (invoice_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, rr_no)
+        //                             values (?, ?, ?, ?, ?, ?, ?, 0, 'CN')");  
+        //     $sql->execute([
+        //         $iv_no,
+        //         $value['product_no'],
+        //         (double) $value['sales_no_vat'],
+        //         (double) $value['sales_vat'],
+        //         (double) $value['sales_price'],
+        //         (double) $value['quantity'],
+        //         (double) $value['total_sales_price']
+        //     ]);
             
-        }
+        // }
         
-        echo $iv_no;
+        
         
     }
 
-    // CN Module
+
+
+    //pvd module
+    public function getPVDForPV() {
+        $sql = "SELECT * from PVD where PVD_status = 1";
+        $statement = $this->prepare($sql);
+        $statement->execute([]);
+
+        if ($statement->rowCount() > 0) {
+            return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        } else return json_encode([]); 
+    }
+
+    public function updatePVDForPV() {
+
+        $sql = "UPDATE PVD SET  
+            company_code = ?, recipent = ?, bank = ?, bank_no = ?, recipent_address = ?
+            WHERE PVD_status = 1 AND pvd_no = ?";
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("company_code"),
+            input::post("recipent"),
+            input::post("bank"),
+            input::post("bank_no"),
+            input::post("address"),
+            input::post("pvd_no"),
+        ]);
+        if($success) echo ' สำเร็จ';
+        else print_r($statement->errorInfo());
+    }
+
+    
+    public function postPVDForPV() {
+        $sql = "UPDATE PVD SET 
+            PVD_status = 2, company_code = ?
+        where PVD_status = 1 AND pvd_no = ?"; 
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("company_code"),
+            input::post("pvd_no"),
+        ]);
+        if($success) echo ' สำเร็จ';
+        else print_r($statement->errorInfo());
+    }
+
+
+    // CN(PV-D) Module
     private function assignIv($iv_no) {
         $ivPrefix = $iv_no[0].'IV-';
         $sql=$this->prepare("select ifnull(max(invoice_no),0) as max from Invoice where invoice_no like ?");
@@ -538,34 +642,85 @@ class accModel extends model {
     // IVRC Module
     public function addIvrc() {
         
-        $ivrcItemsArray = json_decode(input::post('ivrcItems'), true); 
+
+        $ivrcItemsArray = json_decode($_POST['ivrcItems'], true);  
+        //$ivrcItemsArray = json_decode(input::post('ivrcItems'), true);  
         $ivrcItemsArray = json_decode($ivrcItemsArray, true); 
-        
+
+
         $rrciList = array();
         
         foreach($ivrcItemsArray as $value) {
-            
             if (!in_array($value['ci_no'], $rrciList)) {
-                
                 array_push($rrciList, $value['ci_no']);
                 
                 // update invoice in RR/CI
                 if($value['type'] == 'RR') {
                     $sql=$this->prepare("update RR set invoice_no = ? where rr_no = ?");
-                    $sql->execute([input::post('iv'), $value['ci_no']]);
+                    $sql->execute([$_POST['iv'], $value['ci_no']]);
                 } else if ($value['type'] == 'CI') {
                     $sql=$this->prepare("update CI set invoice_no = ? where ci_no = ?");
-                    $sql->execute([input::post('iv'), $value['ci_no']]);
+                    $sql->execute([$_POST['iv'], $value['ci_no']]);
                 }
                 
-                $fileName = $_FILES['ivFile']['name'];
-                $fileData = file_get_contents($_FILES['ivFile']['tmp_name']);
+                $fileName = $_FILES['taxIV']['name'];
+                $fileData = file_get_contents($_FILES['taxIV']['tmp_name']);
                 $fileData = base64_encode($fileData);
-                $fileType = $_FILES['ivFile']['type'];
+                $fileType = $_FILES['taxIV']['type'];
                 
                 // insert invoice file in RRCI_Invoice
                 $sql = $this->prepare("insert into RRCI_Invoice (rrci_no, rrci_invoice_name, rrci_invoice_type, rrci_invoice_data) values (?, ?, ?, ?)");
                 $sql->execute([$value['ci_no'], $fileName, $fileType, $fileData]);
+                //echo print_r($sql->errorInfo());
+
+
+
+                $bill_file_name = $_FILES['bill']['name'];
+                $bill_no = $_POST['bill_no'];
+                $bill_file_data = base64_encode(file_get_contents($_FILES['bill']['tmp_name']));
+                $bill_file_type = $fileType = $_FILES['bill']['type'];
+
+                $tax_file_name = $_FILES['tax']['name'];
+                $tax_form_no = $_POST['tax_form_no'];
+                $tax_file_data = base64_encode(file_get_contents($_FILES['tax']['tmp_name']));
+                $tax_file_type = $_FILES['tax']['name'];
+
+                $debt_reduce_file_name = $_FILES['tax_reduce_upload']['name'];
+                $tax_reduce_no = $_POST['tax_reduce_no'];
+                $debt_reduce_file_data = base64_encode(file_get_contents($_FILES['tax_reduce_upload']['tmp_name']));
+                $debt_reduce_file_type = $_FILES['tax_reduce_upload']['name'];
+
+
+
+                // insert invoice file in IVPC_Files
+                //echo $bill_file_name;
+                //echo $bill_file_type;
+                $sql = $this->prepare("insert into IVPC_Files (rrci_no,
+                                        bill_file_name,bill_no,bill_file_type,bill_file_data,
+                                        tax_file_name,tax_no,tax_file_type,tax_file_data,
+                                        debt_reduce_file_name,debt_reduce_no,debt_reduce_file_type,debt_reduce_file_data) 
+                                        values (?,?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $sql->execute([
+                    $value['ci_no'], 
+                    $bill_file_name,
+                    $bill_no,
+                    $bill_file_type,
+                    $bill_file_data,
+
+                    $tax_file_name ,
+                    $tax_form_no,
+                    $tax_file_type ,
+                    $tax_file_data ,
+
+                    $debt_reduce_file_name,
+                    $tax_reduce_no,
+                    $debt_reduce_file_type,
+                    $debt_reduce_file_data,
+                ]);
+
+
+
+                //echo print_r($sql->errorInfo());
                 
                 // ============================================================================================================================================================
                 // NEW CBA2020 ACC
@@ -576,19 +731,19 @@ class accModel extends model {
                     // Dr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '8', input::post('ivrcDate'), '21-2'.$value['supplier_no'], (double) $value['confirm_subtotal'], 0, 'CIV']);
+                    $sql->execute([$value['ci_no'], '8', $_POST['ivrcDate'], '21-2'.$value['supplier_no'], (double) $value['confirm_subtotal'], 0, 'CIV']);
                     
                     // insert AccountDetail sequence 9
                     // Dr ภาษีซื้อ
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '9', input::post('ivrcDate'), '61-1'.$value['ci_no'][0].'00', (double) $value['confirm_vat'], 0, 'CIV']);
+                    $sql->execute([$value['ci_no'], '9', $_POST['ivrcDate'], '61-1'.$value['ci_no'][0].'00', (double) $value['confirm_vat'], 0, 'CIV']);
                     
                     // insert AccountDetail sequence 10
                     // Cr เจ้าหนี้การค้า - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '10', input::post('ivrcDate'), '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
+                    $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
                 
                 } else if ($value['type'] == 'RE') {
                     
@@ -596,19 +751,19 @@ class accModel extends model {
                     // Dr เจ้าหนี้การค้า - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '8', input::post('ivrcDate'), '21-1'.$value['supplier_no'], (double) $value['confirm_total'] * -1, 0, 'CIV']);
+                    $sql->execute([$value['ci_no'], '8', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'] * -1, 0, 'CIV']);
                     
                     // insert AccountDetail sequence 9
                     // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '9', input::post('ivrcDate'), '21-2'.$value['supplier_no'], 0, (double) $value['confirm_subtotal'] * -1, 'CIV']);
+                    $sql->execute([$value['ci_no'], '9', $_POST['ivrcDate'], '21-2'.$value['supplier_no'], 0, (double) $value['confirm_subtotal'] * -1, 'CIV']);
                     
                     // insert AccountDetail sequence 10
                     // Cr ภาษีซื้อ
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '10', input::post('ivrcDate'), '61-1'.$value['ci_no'][0].'00', 0, (double) $value['confirm_vat'] * -1, 'CIV']);
+                    $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '61-1'.$value['ci_no'][0].'00', 0, (double) $value['confirm_vat'] * -1, 'CIV']);
                     
                 }
                 
@@ -620,6 +775,78 @@ class accModel extends model {
         }
         
     }
+
+    public function getIVPCFiles($type,$ci_no) { 
+        switch($type) {
+            case 'bill':
+                $statement = "SELECT bill_file_type AS fileType,bill_file_data AS fileData from IVPC_Files where rrci_no = ?";
+                break;
+            case 'tax':
+                $statement = "SELECT tax_file_type AS fileType,tax_file_data AS fileData from IVPC_Files where rrci_no = ?";
+                break;
+            case 'debt':
+                $statement = "SELECT debt_reduce_file_type AS fileType,debt_reduce_file_data AS fileData from IVPC_Files where rrci_no = ?";
+                break;
+            default:
+                $statement = "SELECT debt_reduce_file_type from IVPC_Files where rrci_no = ? AND 0";
+          }
+
+
+        $sql = $this->prepare($statement);
+        $sql->execute([$rq_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['fileType']);
+            echo base64_decode($data['fileData']);
+        } else {
+            echo 'ไม่มีใบ'.$type.'ของเลข WS นี้';
+        }
+    }
+
+    public function getIVPCFilesDashboard($type,$pv_no) {
+        switch($type) {
+            case 'bill':
+                $sql = "SELECT bill_file_type AS fileType,bill_file_data AS fileData from IVPC_Files where pv_no = ?";
+                break;
+            case 'tax':
+                $sql = "SELECT tax_file_type AS fileType,tax_file_data AS fileData from IVPC_Files where pv_no = ?";
+                break;
+            case 'debt':
+                $sql = "SELECT debt_reduce_file_type AS fileType,debt_reduce_file_data AS fileData from IVPC_Files where pv_no = ?";
+                break;
+            default:
+                $sql = "SELECT debt_reduce_file_type from IVPC_Files where pv_no = ? AND 0";
+          }
+
+
+        $sql = $this->prepare($sql); 
+        $sql->execute([$pv_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['fileType']);
+            echo base64_decode($data['fileData']);
+        } else {
+            echo 'ไม่มีใบ'.$type.'ของเลข pv นี้';
+        }
+    }
+
+    public function getPVBCR($pv_no){
+        $sql = "SELECT cr_name , cr_type , cr_data  from PV where pv_no = ?";
+        $sql = $this->prepare($sql); 
+        $sql->execute([$pv_no]);
+
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['fileType']);
+            echo base64_decode($data['fileData']);
+        } else {
+            echo 'ไม่มีใบ CR ของเลข pv นี้';
+        }
+    }
+
+
     
     // PV-A Module
     public function addPVA() {
@@ -790,7 +1017,7 @@ class accModel extends model {
     		header('Content-type: '.$data['rrci_invoice_type']);
             echo base64_decode($data['rrci_invoice_data']);
         } else {
-            echo 'ไม่มีใบวางบิล/ใบกำกับภาษีของ RR/CI นี้';
+            echo 'ไม่มีใบวางบิล/ใบกำกับภาษีของ RR/CI นี้'; 
         }
 }
     
@@ -812,6 +1039,14 @@ class accModel extends model {
             (double) input::post('totalVat'),
             input::post('dueDate'),
             input::post('bank')
+        ]);
+
+        //add pv_no to 	IVPC_Files
+
+        $sql = $this->prepare("update IVPC_Files set pv_no = ? where rrci_no = ?");     
+        $sql->execute([
+            $pvno,
+            input::post('ci_no')
         ]);
         
         $pvItemsArray = json_decode(input::post('pvItems'), true); 
@@ -928,47 +1163,6 @@ class accModel extends model {
         }
         
     }
-    public function getPVCs($PVC_No) {
-       $sql = $this->prepare("SELECT PVC_Demo.PVC_No,PVC_Demo.Withdraw_Date,PVC_Demo.Withdraw_Name,PVC_Demo.quotation_name, PVC_Demo.quotation_image FROM `PVC_Demo` WHERE 1");
-       $data =$sql->execute([$PVC_No]);        
-       
-       if($sql->rowCount() > 0){
-            header('Content-type: '.$data['quotation_type']);
-          
-           return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
-       }else{
-           echo $sql;
-           echo "Hello";
-       }
-       
-       
-       
-        // if ($sql->rowCount() > 0) {
-		// 	$data = $sql->fetchAll()[0];
-		// 	header('Content-type: '.$data['file_type']);
-		// 	echo $data['file_data'];
-            
-        // } else {
-        //     echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
-        // }
-        
-    }public function getQuotation($PVC_No) {
-        $sql = $this->prepare("SELECT  PVC_Demo.quotation_name,PVC_Demo.quotation_type,PVC_Demo.quotation_image FROM `PVC_Demo` WHERE PVC_Demo.PVC_No = ?");
-        $sql->execute([$PVC_No]);
-        if ($sql->rowCount() > 0) {
-            $data = $sql->fetchAll()[0];
-    		header('Content-type: '.$data['quotation_type']);
-            echo base64_decode($data['quotation_image']);
-        } else {
-            echo 'ไม่มีใบเบิกค่าใช้จ่ายของเลข WS นี้';
-        }
-       
-    
-        
-        
-        
-    }
-
 	
 	// PV-C Module
     public function addPVC() {
@@ -1314,6 +1508,7 @@ class accModel extends model {
                                     file_no as temp
                                 from Invoice 
                                 inner join Employee on Employee.employee_id = Invoice.approved_employee
+                                where confirmPrint = 1 and acc_confirm = 1
                                 order by invoice_date desc, invoice_time desc");
         $sql->execute();
         if ($sql->rowCount() > 0) {
@@ -1360,7 +1555,28 @@ class accModel extends model {
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+        return [];
+    }
+
+    public function getDashboardPvb() {
+        $sql = $this->prepare("SELECT
+                                	pv_no as file_no,
+                                    pv_date as file_date,
+                                    pv_type as temp,
+                                    approved_employee as file_emp_id,
+                                    employee_nickname_thai as file_emp_name,
+                                    PV.slip_name,
+                                    PV.receipt_name,
+                                    PV.cr_name
+                                from PV
+                                inner join Employee on Employee.employee_id = PV.approved_employee
+								where cancelled = 0 AND pv_type = 'Supplier'
+                                order by pv_date desc");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return [];
     }
     
     // Dashboard Module
@@ -1929,29 +2145,165 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 	}
 
 
-    /// should work
+    
+
+
+
     public function getConfirmIV() {
-		$sql = $this->prepare("select
-                                    distinct Invoice.invoice_no,
-                                    invoice_date,
-                                    Invoice.employee_id,
-                                    SO.product_type,
-                                    vat.vat_type,
-
-
-
+        $sql = $this->prepare("select
+                                Invoice.invoice_no,
+                                Invoice.invoice_date,
+                                Invoice.invoice_time,
+                                Invoice.approved_employee,
+                                Invoice.file_no,
+                                Invoice.id_no,
+                                Invoice.acc_confirm,
+                                SO.product_type,
+                                SO.vat_type
+    
                                 from Invoice
-                                left join SO on SO.so_no = Invoice.file_no
-                                left join (select so_no, vat_type from SO) vat on vat.so_no = Invoice.file_no
+                                left join SO on  Invoice.file_no = SO.so_no 
+                                where Invoice.acc_confirm = 0
                                 order by Invoice.invoice_date, Invoice.invoice_time");
-        $sql->execute();
-        if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+            $sql->execute();
+            if ($sql->rowCount() > 0) {
+                return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+            }
+            return null;
         }
-        return json_encode([]);            
+    
+    
+        public function confirmIV() {
+            
+            // $civArray = json_decode(input::post('civValue'), true); 
+            // $civArray = json_decode($civArray, true);
+    
+            $invoice_no = input::post('invoice_no');
+            
+            // foreach($civArray as $value) {
+                $sql = $this->prepare("update Invoice 
+                                        set acc_confirm = '1'
+                                        where invoice_no  = ? ");
+                $sql->execute([$invoice_no]);
+                
+            // }
+        }
+    
+
+
+
+    public function getPrintIV() {
+        $sql = $this->prepare("SELECT
+                                Invoice.invoice_no,
+                                Invoice.invoice_date,
+                                Invoice.invoice_time,
+                                Invoice.approved_employee,
+                                Invoice.acc_confirm,
+                                Invoice.file_no,
+                                Invoice.id_no,
+                                Invoice.customer_name,
+                                SO.product_type,
+                                Customer.email,
+                                SOX.customer_tel,
+                                Invoice.customer_address,
+                                SOX.fin_form
+
+                                FROM Invoice
+                                left join SO on  Invoice.file_no = SO.so_no 
+                                left join SOXPrinting on Invoice.file_no = SOXPrinting.so_no
+                                left join SOX on SOXPrinting.sox_no=SOX.sox_no
+                                left join Customer on SOX.customer_tel = Customer.customer_tel
+                                where Invoice.confirmPrint = 0 and Invoice.acc_confirm = 1
+                                order by Invoice.invoice_date, Invoice.invoice_time");
+            $sql->execute();
+            if ($sql->rowCount() > 0) {
+                return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+            }
+        return null;
     }
 
-	
+    public function confirmPrintIV() {
+        //// change var 
+		// $pivArray = json_decode(input::post('pivValue'), true); 
+        // $pivArray = json_decode($pivArray, true);
+
+        $invoice_no = input::post('invoice_no');
+
+        // foreach($pivArray as $value) {
+			$sql = $this->prepare("UPDATE Invoice 
+									set confirmPrint = '1'
+									where invoice_no = ? ");
+            // $sql = $this->prepare("insert into Invoice (acc_confirm) 
+            //                         value (?) ");
+			$sql->execute([$invoice_no]);
+
+		//}
+	}
+
+
+
+    public function getPVCs($PVC_No) {
+        $sql = $this->prepare("SELECT * FROM `PVC_Demo` WHERE 1");
+        $data =$sql->execute([$PVC_No]);        
+        
+        if($sql->rowCount() > 0){
+             header('Content-type: '.$data['quotation_type']);
+           
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
+        }else{
+            echo $sql;
+            echo "Hello";
+        }
+        
+        
+        
+         // if ($sql->rowCount() > 0) {
+         // 	$data = $sql->fetchAll()[0];
+         // 	header('Content-type: '.$data['file_type']);
+         // 	echo $data['file_data'];
+             
+         // } else {
+         //     echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+         // }
+         
+     }
+    public function getQuotation($PVC_No) {
+         $sql = $this->prepare("SELECT  PVC_Demo.quotation_name,PVC_Demo.quotation_type,PVC_Demo.quotation_image FROM `PVC_Demo` WHERE PVC_Demo.PVC_No = ?");
+         $sql->execute([$PVC_No]);
+         if ($sql->rowCount() > 0) {
+             $data = $sql->fetchAll()[0];
+             header('Content-type: '.$data['quotation_type']);
+             echo base64_decode($data['quotation_image']);
+         } else {
+             echo 'ไม่มีใบเบิกค่าใช้จ่ายของเลข WS นี้';
+         }
+     } 
+    public function postDueDate($PVC_No){
+             $sql=$this->prepare("UPDATE PVC_Demo SET due_date=? WHERE PVC_No =?");
+             $sql->execute([
+                 input::post('due_date'),
+             $PVC_No]);
+    }
+    public function postConfirm($PVC_No){
+        $sql=$this->prepare("UPDATE PVC_Demo SET sign_date=?,debit=?,iv_no=?,detail=?,rr_no=?,total_paid=?,vat=?,pv_name=?,pv_address=?,selected_company=?,confirmed=? WHERE PVC_No=?");
+        $sql->execute([
+            input::post('date'),
+            input::post('debit'),
+            input::post('iv_no'),
+            input::post('detail'),
+            input::post('rr_no'),
+            input::post('total_paid'),
+            input::post('vat'),
+            input::post('pv_name'),
+            input::post('pv_address'),
+            input::post('selected_company'),
+            input::post('confirm'),
+            $PVC_No
+        ]);
+    }
+
+
+
 }
     
     

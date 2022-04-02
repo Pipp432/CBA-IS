@@ -928,22 +928,6 @@ class accModel extends model {
         }
         
     }
-    public function getPVCs() {
-       $sql = $this->prepare("select * from PVC_Demo");
-       $sql->execute();
-       $data = $sql->fetchAll()[0];
-       echo "<script>console.log('Debug Objects: " . $data[0] . "' );</script>";
-       
-        // if ($sql->rowCount() > 0) {
-		// 	$data = $sql->fetchAll()[0];
-		// 	header('Content-type: '.$data['file_type']);
-		// 	echo $data['file_data'];
-            
-        // } else {
-        //     echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
-        // }
-        
-    }
 	
 	// PV-C Module
     public function addPVC() {
@@ -1904,29 +1888,124 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 	}
 
 
-    /// should work
+    /// mookki
+    // public function getConfirmIV() {
+	// 	$sql = $this->prepare("select
+    //                             	Invoice.invoice_no,
+    //                                 Invoice.invoice_date,
+    //                                 Invoice.approved_employee,
+                                    
+    //                             from Invoice
+    //                             order by Invoice.invoice_date");
+    //     $sql->execute();
+    //     if ($sql->rowCount() > 0) {
+    //         return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+    //     }
+    //     return json_encode([]);            
+    // }
+
+    //ver getDashboardIv
     public function getConfirmIV() {
-		$sql = $this->prepare("select
-                                    distinct Invoice.invoice_no,
-                                    invoice_date,
-                                    Invoice.employee_id,
-                                    SO.product_type,
-                                    vat.vat_type,
+    $sql = $this->prepare("select
+                            Invoice.invoice_no,
+                            Invoice.invoice_date,
+                            Invoice.invoice_time,
+                            Invoice.approved_employee,
+                            Invoice.file_no,
+                            Invoice.id_no,
+                            Invoice.confirm,
+                            SO.product_type,
+                            SO.vat_type
 
-
-
-                                from Invoice
-                                left join SO on SO.so_no = Invoice.file_no
-                                left join (select so_no, vat_type from SO) vat on vat.so_no = Invoice.file_no
-                                order by Invoice.invoice_date, Invoice.invoice_time");
+                            from Invoice
+                            left join SO on  Invoice.file_no = SO.so_no 
+                            order by Invoice.invoice_date, Invoice.invoice_time");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return json_encode([]);            
+        return null;
+    }
+    //left join Supplier on Supplier.id_no = Invoice.id_no
+    
+    //left join (select so_no, vat_type from SO) vat on vat.so_no = Invoice.file_no
+
+
+    ///ver0
+    public function confirmIV() {
+		
+		$civArray = json_decode(input::post('civValue'), true); 
+        $civArray = json_decode($civArray, true);
+        
+        foreach($civArray as $value) {
+			$sql = $this->prepare("update Invoice 
+									set confirm = '1',
+									where iv_no = ? ");
+			$sql->execute([$value['iv_no']]);
+			
+		}
+	}
+    public function getPVCs($PVC_No) {
+        $sql = $this->prepare("SELECT * FROM `PVC_Demo` WHERE 1");
+        $data =$sql->execute([$PVC_No]);        
+        
+        if($sql->rowCount() > 0){
+             header('Content-type: '.$data['quotation_type']);
+           
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
+        }else{
+            echo $sql;
+            echo "Hello";
+        }
+        
+        
+        
+         // if ($sql->rowCount() > 0) {
+         // 	$data = $sql->fetchAll()[0];
+         // 	header('Content-type: '.$data['file_type']);
+         // 	echo $data['file_data'];
+             
+         // } else {
+         //     echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+         // }
+         
+     }
+    public function getQuotation($PVC_No) {
+         $sql = $this->prepare("SELECT  PVC_Demo.quotation_name,PVC_Demo.quotation_type,PVC_Demo.quotation_image FROM `PVC_Demo` WHERE PVC_Demo.PVC_No = ?");
+         $sql->execute([$PVC_No]);
+         if ($sql->rowCount() > 0) {
+             $data = $sql->fetchAll()[0];
+             header('Content-type: '.$data['quotation_type']);
+             echo base64_decode($data['quotation_image']);
+         } else {
+             echo 'ไม่มีใบเบิกค่าใช้จ่ายของเลข WS นี้';
+         }
+     } 
+    public function postDueDate($PVC_No){
+             $sql=$this->prepare("UPDATE PVC_Demo SET due_date=? WHERE PVC_No =?");
+             $sql->execute([
+                 input::post('due_date'),$PVC_No]);
+    }
+    public function postConfirm($PVC_No){
+        $sql=$this->prepare("UPDATE PVC_Demo SET sign_date=?,debit=?,iv_no=?,detail=?,rr_no=?,total_paid=?,vat=?,pv_name=?,pv_address=?,selected_company=?,confirmed=? WHERE PVC_No=?");
+        $sql->execute([
+            input::post('date'),
+            input::post('debit'),
+            input::post('iv_no'),
+            input::post('detail'),
+            input::post('rr_no'),
+            input::post('total_paid'),
+            input::post('vat'),
+            input::post('pv_name'),
+            input::post('pv_address'),
+            input::post('selected_company'),
+            input::post('confirm'),
+            $PVC_No
+        ]);
     }
 
-	
+
+
 }
     
     

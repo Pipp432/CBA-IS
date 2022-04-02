@@ -21,10 +21,10 @@
                             <option value="PA">เงินรองจ่าย(PV-A)</option>
                             <option value="PB">จ่าย Supplier</option>
                             <option value="PC">ค่าใช้จ่าย(PV-C)</option>
-                            <option value="PD">เงินมัดจำ</option>
+                            <option value="PD">PV-D คืนเงินลูกค้า</option>
                         </select>
                     </div>
-                    <div class="col-md-3" ng-show="selectedPaymentType!=''">
+                    <div class="col-md-3" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
                         <label for="pvNameTextbox" id="pvNameLabel"></label>
                         <input type="text" class="form-control" id="pvNameTextbox" ng-model="pvName" ng-show="selectedPaymentType!='PB' || otherExpense">
                         <select class="form-control" ng-model="selectedSupplier" ng-change="selectSupplier()" id="dropdownSupplier" ng-show="selectedPaymentType=='PB'">
@@ -46,7 +46,7 @@
                             <label class="custom-control-label" for="customCheck1">ค่าใช้จ่ายอื่น ๆ</label>
                         </div>-->
                     </div>
-                    <div class="col-md-6" ng-show="selectedPaymentType!=''">
+                    <div class="col-md-6" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
                         <label for="pvAddressTextbox">ที่อยู่</label>
                         <input type="text" class="form-control" id="pvAddressTextbox" ng-model="pvAddress">
                     </div>
@@ -58,7 +58,7 @@
         <!-- ADDING PV ITEMS -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
-        <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType != ''">
+        <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType != ''">
             <div class="card-body">
                 <div class="row mx-0">
                     <h4 class="my-1">
@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-md-3">
                         <label for="pvItemIV">เลขที่ใบกำกับภาษี</label>
-                        <input type="text" class="form-control" id="pvItemIV" ng-model="pvItemIV">
+                        <input type="text" class="form-control" id="pvItemIV" ng-model="pvItems.Tax_Number">
                     </div>
                     <div class="col-md-3">
                         <label for="pvItemPaidTotal">จำนวนเงิน</label>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="addPvItemButton" style="color:white;">.</label>
-                        <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem()">ยืนยันรายการ</button>
+                        <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem(pvItemRR)">ยืนยันรายการ</button>
                     </div>
                 </div>
 				<div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PA'">
@@ -170,12 +170,15 @@
                             <td>
                                 {{rrcinopv.ci_no}}<br>
                                 <a href="/acc/payment_voucher/get_invoice/{{rrcinopv.ci_no}}" target="_blank">ดูใบวางบิล</a>
+                                <a href="/acc/payment_voucher/get_IVPC_Files/bill/{{rrcinopv.ci_no}}" target="_blank">ดูใบแจ้งหนี้</a>
+                                <a href="/acc/payment_voucher/get_IVPC_Files/tax/{{rrcinopv.ci_no}}" target="_blank">ดูใบกำกับภาษี</a>
+                                <a href="/acc/payment_voucher/get_IVPC_Files/debt/{{rrcinopv.ci_no}}" target="_blank">ดูใบลดหนี้</a>
                             </td>
                             <td>{{rrcinopv.po_no}}</td>
                             <td>{{rrcinopv.ci_date}}</td>
-                            <!--<td><ul class="my-0">
+                            <td><ul class="my-0">
                                 <li ng-repeat="rrcinopv_item in rrcinopvs" ng-show="rrcinopv_item.ci_no===rrcinopv.ci_no">{{rrcinopv_item.product_name}} (x{{rrcinopv_item.quantity}})</li>
-                            </ul></td>-->
+                            </ul></td>
                             <td></td>
                             <td style="text-align: right;">{{rrcinopv.confirm_total | number:2}}</td>
                         </tr>
@@ -201,23 +204,23 @@
                         <tr>
                             <th>เลข PVC</th>
                             <th>วันที่</th>
-                            <th>ใบเบิกค่าใช้จ่าย</th>
+                            <th>ใบสำคัญสั่งจ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
                             <th>ผู้ขอเบิก</th>
                            
                         </tr>
                         <!-- <tr ng-repeat="pvc in PVCs | filter:{form_no:pvItemRR} |filter:{ws_type:'3'}" ng-click="getWsDetail(ws)"> -->
-                        <tr ng-repeat="pvc in PVCs track by $index" ng-click="getPVCDetail(pvc)">
-                            <td>{{pvc.PVC_No}}</td>
-                            <td>{{pvc.Withdraw_Date}}</td>
+                        <tr ng-repeat="pvc in PVCs track by $index" ng-click="getPVCDetail(pvc,$index)">
+                            <td style="text-align: center;">{{pvc.PVC_No}}</td>
+                            <td style="text-align: center;">{{pvc.Withdraw_Date}}</td>
                             <!-- <td><a href="/acc/payment_voucher/get_PVCs_form/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a></td> -->
-                            <td>
-                            <a href="/file/pvc/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a>
+                            <td style="text-align: center;">
+                            <a href="/file/re_req/{{pvc.PVC_No}}" target="_blank">{{pvc.EX_No}}</a>
                             </td>
                             <td style="text-align: center;">
                                 <a href="/acc/payment_voucher/get_quotation/{{pvc.PVC_No}}" target="_blank">{{pvc.quotation_name}}</a><br>  
                             </td>
-                            <td>{{pvc.Withdraw_Name}}</td>
+                            <td style="text-align: center;">{{pvc.Withdraw_Name}}</td>
                             
                             <!-- <td><a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/slip" target="_blank">{{ws.slip_name}}</a></td>
                             <td>{{ws.employee_id}} {{ws.employee_nickname_thai}}</td> -->
@@ -233,17 +236,18 @@
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <?php print_r($pvItems) ?>
 		<?php echo $pvItems ?>
-        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!=''">
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
             <div class="card-body">
                 
                 <div class="row mx-0">
-                    <h4 class="my-1">รายละเอียดใบสำคัญสั่งจ่าย</h4>
-                    <table class="table table-hover my-1" ng-show="pvItems.length == 0">
+                    <h4 class="my-1">รายละเอียดใบสำคัญสั่งจ่าย&nbsp;</h4>
+                   <br><h4 class="my-1">{{pvItemRR}}</h4>
+                    <table class="table table-hover my-1" ng-show="pvDetails.length == 0">
                         <tr>
                             <th>ยังไม่ได้เพิ่มรายการสั่งจ่าย</th>
                         </tr>
                     </table>
-                    <table class="table table-hover my-1" ng-show="pvItems.length != 0">
+                    <table class="table table-hover my-1" ng-show="pvDetails.length != 0">
                         <tr>
                             <th colspan="2">วันที่</th>
                             <th>เดบิต</th>
@@ -254,7 +258,7 @@
                             <th>ภาษี</th>
                             <th>จำนวนเงิน</th>
                         </tr>
-                        <tr ng-repeat="pvItem in pvItems">
+                        <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
                             <td>{{pvItem.date}}</td>
                             <td>{{pvItem.debit}}</td>
@@ -295,7 +299,116 @@
                 
             </div>
         </div>
-        
+
+
+        <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+        <!-- ADDING PV-D  -->
+        <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show = "selectedPaymentType == 'PD' ">
+        <div class="card-body">
+                <div class="row mx-0">
+                    <div class="col-md-12">
+                        <label for="filter_anything">PVD no</label>
+                        <input type="text" class="form-control" id="filter_anything" ng-model="filter_anything" style="text-transform:uppercase">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                <h4 class="my-1" ng-show="PVDs.length != 0">รายละเอียดใบ PV-D</h4>
+                </div>
+                <table class="table table-hover my-1" ng-show="PVDs.length == 0">
+                    <tr>
+                        <th>ยังไม่มีการขอใบ PVD</th>
+                    </tr>
+                </table>
+                <table class="table table-hover my-1" ng-show="PVDs.length != 0">
+                    <tr>
+                        <th class = "center_cell">PVD no</th>
+                        <th class = "center_cell">employee id</th>
+                        <th class = "center_cell">employee line</th>
+                        <th class = "center_cell">total_amount</th>
+                        <th class = "center_cell">vat id</th>
+                        <th class = "center_cell">sox no</th>
+                        <th class = "center_cell">invoice id</th>
+                        <th class = "center_cell">note</th>
+                    </tr>
+                    <tr ng-repeat = "PVD in PVDs | unique:'pvd_no'  | filter:{pvd_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
+                        <td class = "center_cell">{{PVD.pvd_no}}</td>
+                        <td class = "center_cell">{{PVD.employee_id}}</td>
+                        <td class = "center_cell">{{PVD.employee_line}}</td>
+                        <td class = "center_cell">{{PVD.total_amount}}</td>
+                        <td class = "center_cell">{{PVD.vat_id}}</td>
+                        <td class = "center_cell">{{PVD.sox_no}}</td>
+                        <td class = "center_cell">{{PVD.invoice_no}}</td>
+                        <td class = "center_cell">{{PVD.note}}</td>
+                    </tr>
+                    <tr ng-show = "selected_PVD.length != 0">
+                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.pvd_no}}</td>
+                        <td class = "center_cell">{{selected_PVD.employee_id}}</td>
+                        <td class = "center_cell">{{selected_PVD.employee_line}}</td>
+                        <td class = "center_cell">{{selected_PVD.total_amount}}</td>
+                        <td class = "center_cell">{{selected_PVD.vat_id}}</td>
+                        <td class = "center_cell">{{selected_PVD.sox_no}}</td>
+                        <td class = "center_cell">{{selected_PVD.invoice_no}}</td>
+                        <td class = "center_cell">{{selected_PVD.note}}</td>
+                    </tr>
+                </table>
+                <div ng-show = "selected_PVD.length != 0">
+                    <hr>
+                    <div class="col-md-12">
+                        <h4 class="my-1">เพิ่มรายละเอียดใบสำคัญสั่งจ่าย&nbsp;</h4>
+                    </div>
+                    <br>
+                    <div class="col-md-3">
+                            <label for="checkboxPVD">แก้ไขข้อมูล</label>
+                            <input type="checkbox" id = "checkboxPVD" ng-change = 'updatePVD()' ng-model = 'selected_PVD.editing'/> 
+                    </div>    
+                    <div class="row mx-0">
+                        <div class="col-md-3">
+                            
+                            <label for="pvNameTextboxPVD">สั่งจ่าย</label>
+                            <input type="text" class="form-control" id="pvNameTextboxPVD" ng-model="selected_PVD.recipent" ng-disabled="!selected_PVD.editing">
+                            <select class="form-control" ng-model="selected_PVD.company_code" ng-change="selectCompanypvd()">
+                                <option value="">สั่งจ่ายในนาม</option>
+                                <option value='1'>โครงการ 1</option>
+                                <option value='2'>โครงการ 2</option>
+                                <option value='3'>โครงการ 3</option>
+                                <option value='9'>โครงการพิเศษ 1</option>
+                                <option value='8'>โครงการพิเศษ 2</option>
+                            </select>
+                        </div>    
+                        <div class="col-md-6">
+                            <label for="locationPVD">ที่อยู่</label>
+                            <input type="text" class="form-control" id="locationPVD" ng-model="selected_PVD.location" ng-disabled="!selected_PVD.editing">
+                        </div>   
+                    </div>  
+
+                    <div class="row mx-0">
+                        <div class="col-md-3">
+                            <label for="bankPVD">ธนาคาร</label>
+                            <input type="text" class="form-control" id="bankPVD" ng-model="selected_PVD.bank" ng-disabled="!selected_PVD.editing">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="bankNoPVD">เลขธนาคาร</label>
+                            <input type="text" class="form-control" id="bankNoPVD" ng-model="selected_PVD.bank_no" ng-disabled="!selected_PVD.editing">
+                        </div>   
+                    </div>  
+
+                    <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVD()" ng-disabled="selected_PVD.editing">บันทึก PV</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- FORM VALIDATION -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -324,6 +437,9 @@
 <style>
     td { border-bottom: 1px solid lightgray; }
     th { border-bottom: 1px solid lightgray; text-align: center; }
+    .center_cell {
+        text-align: center;
+    }
 </style>
 
 <script>
@@ -336,7 +452,9 @@
 					document.getElementById('vatCheck').value = '0';
 			}
         }
+        $scope.totalPaid
         $scope.pvItems = [];
+        $scope.pvDetails = [];
         $scope.selectedPaymentType = '';
         $scope.selectedSupplier = '';
         $scope.showAfterSubmit = false;
@@ -350,6 +468,56 @@
         $scope.pvItemPaidTotal = '';
         $scope.vat = false;
         $scope.isLoad = true;
+        $scope.dueDate='';
+        $scope.ci_no = '';
+        $scope.selected_PVD = [];
+
+
+        $scope.selectPVD = function($PVD) {
+            $scope.selected_PVD = $PVD;
+            // console.log($scope.selected_PVD);
+            //todo get customer and iv data
+        }
+
+        $scope.dropPVD = function() {
+            $scope.selected_PVD = [];
+        }
+        // $scope.selectCompanypvd = function() {
+        //     console.log($scope.selected_PVD.company_code);
+        // }
+
+        $scope.updatePVD = function() {
+        //     console.log($scope.selected_PVD);
+        //     console.log($scope.selected_PVD.company_code);
+            if(!$scope.selected_PVD.editing) {
+                $.post("/acc/payment_voucher/update_PVD", {
+                    post : true,
+                    pvd_no : $scope.selected_PVD.pvd_no,
+                    company_code : $scope.selected_PVD.company_code,
+                    recipent : $scope.selected_PVD.recipent,
+                    bank : $scope.selected_PVD.bank,
+                    bank_no : $scope.selected_PVD.bank_no,
+                    address : $scope.selected_PVD.location,     
+                }, function(data) {
+                    addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    $('#pvdeditsuccessModalupdate').modal('toggle');
+                });
+            }
+        }
+
+        $scope.postPVD = function() {
+            if(!$scope.selected_PVD.editing) {
+                $.post("/acc/payment_voucher/post_PVD", {
+                    post : true,
+                    pvd_no : $scope.selected_PVD.pvd_no,
+                    company_code : $scope.selected_PVD.company_code,
+                }, function(data) {
+                    addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    $('#pvdUpdateSuccessModalupdate').modal('toggle');
+                    window.location.assign('/');
+                });
+            }
+        }
         
         $scope.selectPaymentType = function() {
             
@@ -366,6 +534,7 @@
             $scope.wss = [];
             $scope.PVCs = [];
             $scope.isLoad = true;
+            $scope.PVDs = [];
             
             if($scope.selectedPaymentType === '') {
             
@@ -381,7 +550,11 @@
                 
                 
             } else if($scope.selectedPaymentType==='PD') {
-                
+                $http.get('/acc/payment_voucher/get_PVD').then(function(response){
+                    $scope.PVDs = response.data; 
+                    $scope.isLoad = false;
+                    console.log(JSON.stringify($scope.PVDs));
+                });
             }  
             
         }
@@ -427,6 +600,7 @@
             $scope.pvItemRR = rrcinopv.ci_no;
             $scope.pvItemIV = rrcinopv.invoice_no;
             $scope.pvItemPaidTotal = rrcinopv.confirm_total;
+            $scope.ci_no = rrcinopv.ci_no;
         }
         
         $scope.getWsDetail = function(ws) {
@@ -438,8 +612,8 @@
             
             if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && ($scope.pvName==='' || $scope.pvAddress==='')) {
                 $('#formValidate6').modal('toggle');
-            } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemIV==='') {
-                $('#formValidate7').modal('toggle');
+            // } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemIV==='') {
+            //     $('#formValidate7').modal('toggle');
             } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemPaidTotal==='') {
                 $('#formValidate8').modal('toggle');
             } else if ($scope.pvItemDate==='') {
@@ -447,11 +621,33 @@
             } else {
                 
                 if($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') $scope.pvItems=[];
-                
+                const company = document.getElementById("dropdownCompany").value;
                 var pvItemDateStr = $scope.pvItemDate.getFullYear() + '-' + 
                                     (($scope.pvItemDate.getMonth()+1) < 10 ? '0' : '') + ($scope.pvItemDate.getMonth()+1) + '-' + 
                                     ($scope.pvItemDate.getDate() < 10 ? '0' : '') + $scope.pvItemDate.getDate();
+                
                                     
+                if($scope.selectedPaymentType==='PC')
+                {
+                    $.post(`/acc/payment_voucher/confirm/${$scope.pvItemRR}`,{
+                        "debit" : $scope.pvItemDebit,
+                        "date" : pvItemDateStr,
+                        "iv_no" : $scope.pvItemIV,
+                        "detail" : $scope.pvItemDetail,
+                        "rr_no" : $scope.pvItemRR,
+                        "total_paid" : parseFloat($scope.pvItemPaidTotal),
+                        "vat" : parseFloat(($scope.vat) ? $scope.pvItemPaidTotal * 7 / 107 : 0),
+                        "pv_name" : $scope.pvName,
+                        "pv_address" : $scope.pvAddress,
+                        "selected_company":company,
+                        "confirm":"1"
+                    }).done(function(data,status){
+                        console.log(data)
+                        console.log(status)
+                    });
+                }
+
+
                 $scope.pvItems.push({
                     "debit" : $scope.pvItemDebit,
                     "date" : pvItemDateStr,
@@ -461,9 +657,11 @@
                     "total_paid" : parseFloat($scope.pvItemPaidTotal),
                     "vat" : parseFloat(($scope.vat) ? $scope.pvItemPaidTotal * 7 / 107 : 0)
                 });
+
                 
                 $scope.clearPvItem();
                 $scope.calculateTotalPrice();
+
                                
             }
         }
@@ -539,7 +737,7 @@
                 if($scope.selectedSupplier==='') {
                     $('#formValidate3').modal('toggle');
                 } else {
-                    $.post("/acc/payment_voucher/post_pvb", {
+                    $.post("/acc/payment_voucher/post_pvb", { 
                         post : true,
                         supplier_no : $scope.supplierNoForFilter,
                         pv_name : $scope.pvName,
@@ -550,7 +748,8 @@
                         totalPaidThai : NumToThai($scope.totalPaid),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
-                        bank : $scope.bank
+                        bank : $scope.bank,
+                        ci_no : $scope.ci_no,
                     }, function(data) {
                         addModal('successModal', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'บันทึก ' + data + ' สำเร็จ');
                         $('#successModal').modal('toggle');
@@ -592,19 +791,19 @@
             } 
             
         }
-        $scope.getPVC=function(){
-            $.post("acc/payment_voucher/get_PVCs_form",function(data,status){
-                console.log(data);
-              
-              
-               
 
-            })
-        }
-        $scope.getPVCDetail = function(pvc) {
+        $scope.getPVCDetail = function(pvc,index) {
+            let sum= 0;
             $("#pvItemRR").prop("disabled", true);
             $scope.pvItemRR = pvc.PVC_No;
-            console.log( $scope.pvItemRR);
+            console.log($scope.pvItemRR);
+            $scope.pvDetails = JSON.parse($scope.PVCs[index]["Table_Of_Details"])
+            console.log( $scope.pvDetails )
+            $scope.pvItems = $scope.PVCs[index]
+            console.log($scope.pvItems);
+
+            ($scope.pvDetails).forEach(entry=>sum+=entry['money'])
+            $scope.totalPaid = sum
         }
 
   	});

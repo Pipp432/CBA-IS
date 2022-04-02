@@ -60,7 +60,7 @@
 							<td><div class="collapse" id="soxDetailCollapse">
 							  <div class="card card-body">
 								  <table>
-									  <tr ng-repeat="sr_item in srs" ng-show="sr_item.sox_no===sr.sox_no" onclick="window.location.href= 'https://catalog.cbachula.com/search?query=".{{product_name}}."&search_by=name'">
+									  <tr ng-repeat="sr_item in srs" ng-show="sr_item.sox_no===sr.sox_no" ng-click="windowChange()">
 										  <td>{{sr_item.so_no}}</td>
 										  <td>{{sr_item.product_no}}</td>
 										  <td>{{sr_item.product_name}}</td> 
@@ -182,6 +182,9 @@
                 });
             }
 			$scope.calculateTotalBox();
+        }
+        $scope.windowChange = function(){
+            window.location.href= 'https://catalog.cbachula.com/search?query=".{{product_name}}."&search_by=name'
         }
 		
 		

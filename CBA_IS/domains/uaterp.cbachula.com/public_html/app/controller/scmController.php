@@ -308,8 +308,28 @@ class scmController extends controller {
         } else if (uri::get(2)==='post_ird_items') {
             $this->positionEcho('scm', $this->model->addIRD());
         }
+        else if (uri::get(2)==='get_status') {
+            $this->positionEcho('scm', $this->model->get_status());
+        }
+        else if (uri::get(2)==='change_status') {
+            $this->positionEcho('scm', $this->model->change_status());
+        }
     }
-	
+
+	public function confirm_prepare() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("scm");
+            $this->view->setTitle("ยืนยันการจัดเตรียม");
+            $this->view->render("scm/confirm_prepare", "navbar");
+        } else if (uri::get(2)==='update_ird_items') {
+            $this->positionEcho('scm', $this->model->updateIRD());
+        }
+        else if (uri::get(2)==='get_sox') {
+            $this->positionEcho('scm', $this->model->download_sox());
+        }
+    }
+
+
 	public function upload_ird() {
         if(empty(uri::get(2))) {
             $this->requirePostition("scm");
@@ -329,5 +349,7 @@ class scmController extends controller {
             $this->view->render("scm/re_dashboard", "navbar");
         }
     }
+
+
 
 }

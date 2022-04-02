@@ -10,37 +10,24 @@
                 <img src="/public/img/cba-logo.png" alt="cba-logo" style="width: 60%;">
             </div>
             <div class="col-4 px-0">
-                <h3 style="text-align: center;"><b>ใบสำคัญสั่งจ่าย<br>Payment Voucher-C</b></h3>
+                <h3 style="text-align: center;"><b>ใบสำคัญสั่งจ่าย<br>Payment Voucher</b></h3>
             </div>
             <div class="col-4 px-0">
                 <h5 style="text-align: right;">สำเนา</h5>
-                <h5 style="text-align: right;"><b>เลขที่ {{details[0].PVC_No}}</b></h5>
-                <h6 style="text-align: right;">วันที่ {{details[0].Withdraw_Date}}</h6>
+                <h5 style="text-align: right;"><b>เลขที่ {{detail[0].pv_no}}</b></h5>
+                <h6 style="text-align: right;">วันที่ {{detail[0].pv_date}}</h6>
             </div>
         </div>
         
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2564 (โครงการ CBA 2022)</b><br>
+                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2564 (โครงการ {{company}})</b><br>
                     อาคารไชยยศสมบัติ 1 เลขที่ 254 ชั้นใต้ดิน ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
                     โทร. 0-2218-5746-9 โทรสาร. 0-2218-5762
                 </p>
             </div>
-        </div>
-        <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].Withdraw_Name}}&nbsp;</span>
-                <span  style="text-align: left;">
-                   รหัสพนักงาน {{details[0].Employee_ID}}&nbsp;
-                </span>
-               
-            
-        </div>
-        <div class="text">
-                <br><p>ธนาคารผู้รับโอน {{details[0].Bank_Name}}</p><br>
-                <p>เลขที่บัญชี {{details[0].Bank_Book_Number}}</p><br>
-                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].Bank_Book_Name}}</p>
-        </div>        
+        </div>  
         
         <hr>
 
@@ -48,35 +35,51 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <th>วัน/เดือน/ปี ที่เกิดค่าใช้จ่าย</th>
-                        <th>วัตถุประสงค์/รายละเอียดค่าใช้จ่าย</th>
-                        <th>จำนวนเงิน(บาท)</th>
+                        <td><b>สั่งจ่าย</b> {{detail[0].pv_name}}</td>
+                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_type}}</td>
+                        <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].due_date}}</td>
                     </tr>
-                    <tr ng-repeat = "item in tableDetails" >
-                        <td><b> {{item.date}}</b> </td>
-						<td><b> {{item.details}}</b> </td>
-                        <td><b> {{item.money}}</b></td>
+                    <tr ng-show="detail[0].supplier_no != ''">
+                        <td colspan="2"><b>ที่อยู่</b> {{detail[0].pv_address}}</td>
+						<td><b>เลขที่ Supplier</b> {{detail[0].supplier_no}}</td>
                     </tr>
-                    <td colspan="3">
-                       รวมทั้งสิ้น {{sum}} บาท
-                    </td>
-                   
+                    <tr ng-show="detail[0].supplier_no == ''">
+                        <td colspan="3"><b>ที่อยู่</b> {{detail[0].pv_address}}</td>
+                    </tr>
                 </table>
             </div>
-        </div> 
-        <br>
-        <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].Withdraw_Name}}&nbsp;</span>
-                <span  style="text-align: left;">
-                   ผู้รับรอง {{details[0].Authorize_Name}}&nbsp;
-                </span>
-               
-            
-        </div>
+        </div>  
 
-       
+        <div class="row px-2 mt-2">
+            <table style="border-collapse: collapse; width: 100%;">
+                <tr>
+                    <th>ใบสำคัญลงวันที่</th>
+                    <th>เลขที่ใบสำคัญ/ใบรับวางบิล/<br>ใบกำกับภาษี/ใบเบิกค่าใช้จ่าย</th>
+                    <th>รายละเอียด</th>
+                    <th>เลขที่ RR/CI</th>
+                    <th>จำนวน</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+                <tr ng-repeat="item in detail">
+                    <td style="text-align: left;">{{item.file_date}}</td>
+                    <td style="text-align: left;">{{item.iv_no}}</td>
+                    <td style="text-align: left;">{{item.detail}}</td>
+                    <td style="text-align: left;">{{item.rr_no}}</td>
+                    <td style="text-align: right;">{{item.paid_total | number:2}}</td>
+                    <td style="text-align: left;">{{item.note}}</td>
+                </tr>
+                <tr>
+                    <th colspan="1" style="text-align: center;">จำนวนเงิน</th>
+                    <th colspan="2" style="text-align: left;">{{detail[0].thai_text}}</th>
+                    <th colspan="1" style="text-align: center;">รวม</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].total_paid | number:2}}</th>
+                </tr>
+            </table>
+        </div>  
         
-       
+        <div class="row px-2 mt-3">
+            <p><i>หมายเหตุ : จ่าย {{detail[0].bank}}</i></p>
+        </div>  
     
     </div>
 
@@ -85,13 +88,6 @@
 </html>
 
 <style>
-    .text{
-        line-height: 75%;
-    }
-#HASH {
-  display: flex;
-  justify-content: space-between;
-}
     body, h1, h2, h3, h4, h5, h6, p { font-family: 'Sarabun', sans-serif; }
     table, th, td { border: 1px solid black; padding: 5px; }
     th { text-align: center; }
@@ -99,18 +95,9 @@
 
 <script>
     
-    app.controller('moduleAppController', function($scope,$http) {
-        $scope.details=[]
-        $scope.tableDetails={}
-        $scope.sum='';
+    app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
-            var url = window.location.href; 
-            const PVC_No = (url.split('/'))[5];
-            $http.get(`/file/pvc/get_PVC/${PVC_No}`).then(function(response){$scope.details= response.data; $scope.isLoad = false;$scope.tableDetails = JSON.parse($scope.details[0].Table_Of_Details);console.log($scope.tableDetails);($scope.tableDetails).forEach(entry => {
-                $scope.sum+=parseInt(entry.money);
-            });});
-            
-           
+        
         }
     });
     

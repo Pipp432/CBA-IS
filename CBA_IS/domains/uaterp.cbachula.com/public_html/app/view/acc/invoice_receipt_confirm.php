@@ -111,37 +111,63 @@
                 </div>
                 <hr>
                 <div>
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <label for="textboxIv">เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี</label>
                         <input type="text" class="form-control" id="textboxIv" ng-model="iv" placeholder="เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี">
-                    </div>
+                    </div> -->
                     <div class="col-md-4">
                         <label for="datetime-input">วันที่</label>
                         <input class="form-control" type="date" id="datetime-input" ng-model="ivrcDate">
                     </div>
-                    <form id="billForm">
-                        <div class="col-md-4">
-                            <label for="billFormUpload">อัปโหลดใบวางบิล</label><br>
-                            <input class="form-control-file" type="file" id="billFormUplaod">
+                    <form id="form">
+                        <div class = "row mx-0 mt-2">
+                            <div class="col-md-4">
+                                <label for="bill_no">เลขที่ใบวางบิล</label>
+                                <input type="text" class="form-control" id="bill_no" ng-model="bill_no" placeholder="ใบวางบิล">
+                            </div> 
+                            <div class="col-md-4">
+                                <label for="billFormUpload">อัปโหลดใบวางบิล</label><br>
+                                <input class="form-control-file" type="file" id="billFormUpload" name='billFormUpload'>
+                            </div>  
                         </div>  
-                    </form><br>
-                    <form id="taxForm">   
-                        <div class="col-md-4">
+                        <br>
+                        <div class = "row mx-0 mt-2">
+                            <div class="col-md-4">
+                                <label for="tax_form_no">เลขที่ใบกำกับภาษี</label>
+                                <input type="text" class="form-control" id="tax_form_no" ng-model="tax_form_no" placeholder="ใบกำกับภาษี">
+                            </div> 
+                            <div class="col-md-4">
                             <label for="taxFormUplaod">อัปโหลดใบกำกับภาษี</label><br>
-                            <input class="form-control-file" type="file" id="taxFormUplaod">
-                        </div>
-                    </form><br>
-                    <form id="taxInvoice">
-                        <div class="col-md-4">
-                            <label for="taxInvoiceUpload">อัปโหลดใบแจ้งหนี้</label><br>
-                            <input class="form-control-file" type="file" id="taxInvoiceUplad">
-                        </div>
-                    </form><br>
-                    <form id="taxReduce">
-                        <div class="col-md-4">
-                            <label for="taxReduceUpload">อัปโหลดใบลดหนี้</label><br>
-                            <input class="form-control-file" type="file" id="taxReduceUpload">
-                        </div>
+                            <input class="form-control-file" type="file" id="taxFormUpload" name='taxFormUpload'>
+                            </div>  
+                        </div>  
+
+
+                        <br>
+                        <div class = "row mx-0 mt-2">
+                            <div class="col-md-4">
+                                <label for="textboxIv">เลขที่ใบแจ้งหนี้ (invoice)</label>
+                                <input type="text" class="form-control" id="textboxIv" ng-model="iv" placeholder="ใบแจ้งหนี้">
+                            </div> 
+                            <div class="col-md-4">
+                                <label for="taxInvoiceUpload">อัปโหลดใบแจ้งหนี้</label><br>
+                                <input class="form-control-file" type="file" id="taxInvoiceUpload" name='taxInvoiceUpload'>
+                            </div>
+                        </div> 
+
+                        <br>
+                        <div class = "row mx-0 mt-2">
+                            <div class="col-md-4">
+                                <label for="tax_reduce_no">เลขที่ใบลดหนี้</label>
+                                <input type="text" class="form-control" id="tax_reduce_no" ng-model="tax_reduce_no" placeholder="ใบแจ้งหนี้">
+                            </div> 
+                            <div class="col-md-4">
+                                <label for="taxReduceUpload">อัปโหลดใบลดหนี้</label><br>
+                                <input class="form-control-file" type="file" id="taxReduceUpload" name='taxReduceUpload'>
+                            </div>
+                        </div> 
+
+
                     </form>
                 </div>
                 <hr>
@@ -149,6 +175,7 @@
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postivrcItems()">บันทึกการยืนยันการวางบิล</button>
                 </div>
             </div>
+            <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="test()">test</button> -->
         </div>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -173,9 +200,15 @@
 <style>
     td { border-bottom: 1px solid lightgray; }
     th { border-bottom: 1px solid lightgray; text-align: center; }
+    .input_same_line{
+        float:left;
+    }
 </style>
 
 <script>
+
+
+
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
         // ivrcItems is basically the รายละเอียดยืนยันการวางบิล
@@ -185,6 +218,10 @@
         $scope.iv = '';
         $scope.ivrcItems = [];
         $scope.rrcis = <?php echo $this->rrcis; ?>;
+
+        // $scope.test = function() {
+        //     console.log($('#billFormUpload')[0].files[0]);
+        // }
         
         $scope.addIvrcItem = function(rrci) {
             if ($scope.ivrcItems.length != 0 && $scope.ivrcItems[0].supplier_no != rrci.supplier_no) {
@@ -246,42 +283,49 @@
                                     ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
                 // Creation of data
                 // FormData is a web page interface where (key: value)
-                const billForm = document.getElementById("billForm")
-                var billData = new FormData(billForm);
-                const taxForm = document.getElementById("taxForm")
-                var taxData = new FormData(taxForm);
-                const taxInvoiceForm = document.getElementById("taxInvoice")
-                var taxInvoiceData = new FormData(taxInvoiceForm);
-                const taxRudeuceForm = document.getElementById("taxReduce")
-                var taxRudeuceData = new FormData(taxRudeuceForm);
                
-                data.append('iv', $scope.iv);
-                data.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
-                data.append('ivrcDate', ivrcDateStr);
+                var formData = new FormData();
+                formData.append('bill', $('#billFormUpload')[0].files[0]);
+                formData.append('tax', $('#taxFormUpload')[0].files[0]);
+                formData.append('taxIV', $('#taxInvoiceUpload')[0].files[0]);
+                formData.append('tax_reduce_upload', $('#taxReduceUpload')[0].files[0]);
+                
+               
+                formData.append('iv', $scope.iv);
+                formData.append('bill_no', $scope.bill_no);
+                formData.append('tax_form_no', $scope.tax_form_no);
+                formData.append('tax_reduce_no', $scope.tax_reduce_no);
+                formData.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
+                formData.append('ivrcDate', ivrcDateStr);
                
                 
-                // Async jQuery method
-                $.ajax({
-                    url: '/acc/invoice_receipt_confirm/post_ivrc',
-                    data: data,
+                // !! Async jQuery method
+                $.ajax({ 
+                    url: '/acc/invoice_receipt_confirm/post_ivrc', 
+                    data: formData,
                     cache: false,
                     contentType: false,
                     processData: false,
                     method: 'POST',
                     type: 'POST',
                     // Success so modal pop up
-                    success: function () {
-                        addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว(DONE)');
+                }).done(function (data) {
+                    // addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว(DONE)');
+                    //console.log(data);
+                    addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', data);
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
                             window.location.assign('/');
                         });
-                    }
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log('ajax.fail');
+                    addModal('uploadFailModal', 'upload fail', 'fail');
+                    $('#uploadFailModal').modal('toggle');
                 });
                 
             }
           
-            
+            //db name = ivpc_file
             
         }
 

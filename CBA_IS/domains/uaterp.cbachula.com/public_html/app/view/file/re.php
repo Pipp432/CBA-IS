@@ -22,9 +22,9 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2564 (โครงการ {{company}}) (สำนักงานใหญ่)</b><br>
-                    อาคารไชยยศสมบัติ 1 เลขที่ 254 ชั้นใต้ดิน ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
-                    โทร. 0-2218-5746-9 โทรสาร. 0-2218-5762
+                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                    อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
+                    โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
                 </p>
             </div>
         </div>  
@@ -69,10 +69,18 @@
                         <div class="col-4" style="text-align:left;">
                                     หมายเหตุ:
                         </div>
-                    
                         <div class="col-4">
-                        <br> __________________________<br>ฝ่าย SCM<br>วันที่ _____/_____/_____ 
-                        </div>
+                                <div class="row">
+									<div class="col">
+										<img ng-src="/public/img/scm_sign.jpg" style="width: 40%; " />
+									</div>
+								</div>
+								<div class="row" style="margin-top: -7%">
+                                    <div class="col">
+                                     __________________________<br>ฝ่าย SCM<br>วันที่ {{day}}/{{month}}/{{year}} 
+                                    </div>
+                                </div>
+                            </div>
                         <div class="col-4">
                         <br> __________________________<br>ผู้รับสินค้า<br>วันที่ _____/_____/_____ 
                         </div>
@@ -115,6 +123,15 @@
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->re; ?>;
             $scope.company = $scope.detail[0].re_no.substring(0,1);
+            $scope.year = $scope.detail[0].re_date.substring(0,4);
+			$scope.month = $scope.detail[0].re_date.substring(5,7);
+			$scope.day = $scope.detail[0].re_date.substring(8,10);
+            switch($scope.company) {
+                case '1': $scope.company_id = '0-9920-04240-25-5'; break;
+                case '2': $scope.company_id = '0-9920-04240-26-3'; break;
+                case '3': $scope.company_id = '0-9920-04240-24-7'; break;
+                default: $scope.company_id = 'XXX'; break;
+            }
         }
     });
     

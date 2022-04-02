@@ -135,6 +135,19 @@ foreach ($list as $value) {
             }
         }
     }
+    public function pvc(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("Payment Voucher (PV)");
+            $this->view->render("fin/pvc", "navbar");
+        }else if(uri::get(2)==="get_PVCs"){
+            $this->positionEcho('fin', $this->model->getPVCs());
+        }else if(uri::get(2)==="get_PVC_Detail"){
+            $this->positionEcho('fin', $this->model->getPVCDetail(uri::get(3)));
+        }else if(uri::get(2)==="post_additional_data"){
+            $this->positionEcho('fin', $this->model->postAdditionDetail(uri::get(3)));
+        }
+    }
     public function upload()
     {
         if(empty(uri::get(2))) {
@@ -224,7 +237,7 @@ foreach ($list as $value) {
         }
         else if (uri::get(2)==='createslipForSup') {
             
-                if($this->model->insertslipForSup(input::post('filename'),input::post('filetype'),input::post('filedata'),input::post('pvno')))
+                if($this->model->insertslipForSup(input::post('filename'),input::post('filetype'),input::post('filedata'),input::post('filename2'),input::post('filetype2'),input::post('filedata2'),input::post('pvno')))
                 {
                     echo"valid";
                 }
@@ -271,10 +284,39 @@ foreach ($list as $value) {
             }
         }
     }//ws
-    public function request_minor_money_form() {
+    public function validate_petty_cash_request() {
         if(empty(uri::get(2))) {
-            $this->view->setTitle("Payment Voucher A (PV-A)"); 
-            $this->view->render('/fin/validate_minor_money_form', "navbar");
+            $this->view->setTitle("confirm เบิกเงินรองจ่าย"); 
+            $this->view->minor_requests = $this->model->getMinorRequestForFin();
+            $this->view->render("fin/validate_petty_cash_request", "navbar"); 
+        } else if(uri::get(2)==='get_re') {
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getRe(Uri::get(3))); 
+            } else {
+                $this->err404();
+            }
+        } else if(uri::get(2)==='get_iv') {
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getIv(Uri::get(3))); 
+            } else {
+                $this->err404();
+            }
         }
-    } 
+    }
+
+    
+    
+    public function upslip_pvd() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("Confirm PV-D");
+            $this->view->pvds = $this->model->getPVD(); ///
+            $this->view->render("fin/upslip_pvd", "navbar"); 
+        } 
+        else if (uri::get(2)==='conpvdItems') {
+            $this->positionEcho('fin', $this->model->confirmPVD()); ///
+        }
+    }
+
+
 }

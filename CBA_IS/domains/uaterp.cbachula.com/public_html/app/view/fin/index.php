@@ -11,6 +11,7 @@
         <script>addModuleLink('finRow', '/fin/ws', 'file-text-o', 'ธุรกรรมเบิกจ่าย');</script>
         <script>addModuleLink('finRow', '/fin/dashboard', 'folder-open-o', 'Dashboard');</script>
         <script>addModuleLink('finRow', '/fin/tr', 'folder-open-o', 'TR');</script>
+        <script>addModuleLink('finRow', '/fin/pvc', 'money', 'ใบขอเบิกค่าใช้จ่าย');</script>
 		<script>addModuleLink('finRow', '/is/thelastday', 'heart', 'The Last Day');</script>
     </div>
     

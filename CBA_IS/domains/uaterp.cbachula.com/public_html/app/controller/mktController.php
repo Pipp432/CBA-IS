@@ -443,16 +443,40 @@ class mktController extends controller {
     //     }
     // }
     
-    public function request_minor_money_form() {
+    public function petty_cash_request() {
         if(empty(uri::get(2))) {
             $this->view->setTitle("Payment Voucher A (PV-A)"); 
-            $this->view->render("mkt/request_minor_money_form", "navbar");
+            $this->view->render("mkt/petty_cash_request", "navbar");
         } else if (uri::get(2)==='post_Request') {
             $this->positionEcho('mkt', $this->model->addRequestPettyMoney());
         } else if (uri::get(2)==='post_img_Request') {
             $this->positionEcho('mkt', $this->model->uploadImgForRequestPettyMoney());
         }
-    } 
+    }
+    
+    
+    public function Confirm_Po() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("mkt");
+            $this->view->setTitle("Confirm_Po");
+            $this->view->pos = $this->model->getStockPo();
+            $this->view->render("mkt/Confirm_Po", "navbar");
+        } else if (uri::get(2)==='get_po_install_ci') {
+            $this->positionEcho('mkt', $this->model->getStockPo());
+        } else if (uri::get(2)==='post_ci_items') {
+            $this->positionEcho('mkt', $this->model->confirmPO());
+        }  
+    }
+
+    public function pre_pvd() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("mkt");
+            $this->view->setTitle("Payment Voucher D (PV-D)");
+            $this->view->render("mkt/pre_pvd","navbar");
+        } else if (uri::get(2)==='post_requestpvd') {
+            $this->positionEcho('mkt', $this->model->requestPVD());
+        }
+    }
 
 }
 

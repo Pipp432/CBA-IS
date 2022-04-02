@@ -9,7 +9,7 @@
 <body>
 
     <div class="container mt-3" ng-controller="moduleAppController">
-
+    <!-- <button class="btn btn-light" ng-click="test()">test</button> -->
         <h2 class="mt-3">ใบกำกับภาษี / Tax Invoice (IV)</h2> 
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -33,6 +33,7 @@
                             <th>ลูกค้า</th>
 							<th>Payment Date</th>
 							<th>Payment Time</th>
+                            <th>VAT</th>
 							<th>Payment Amount</th>
                             <th>ราคารวม</th>
 							<th>ขอใบกำกับภาษี</th>
@@ -45,12 +46,14 @@
                             <td>{{sox.sox_no}}</td>
                             <td>{{sox.employee_id}} {{sox.employee_nickname_thai}}</td>
                             <td>{{sox.customer_name}} {{sox.customer_surname}}</td>
-							<td style="text-align: center">{{sox.payment_date}}</td>
-							<td style="text-align: center">{{sox.payment_time}}</td>
-							<td style="text-align: center">{{sox.payment_amount}}</td>
+							<td style="text-align: center">{{sox.payment_date==null ? getDate(sox):sox.payment_date}}</td>
+							<td style="text-align: center">{{sox.payment_time==null ? getTime(sox):sox.payment_time}}</td>
+                            <td style="text-align: center">{{sox.so_total_sales_vat}}</td>
+							<td style="text-align: center">{{sox.so_total_sales_price}}</td>
+                            
                             <td style="text-align: right;">
                                 {{sox.sox_sales_price | number:2}}<br>
-                                <a href="/fin/cash_receipt/sox_slip/{{sox.sox_no}}" target="_blank" ng-show="{{sox.slip_uploaded==1}}">
+                                <a href="https://uatline.cbachula.com/public/sox_slips/{{sox.sox_no}}.jpeg" target="_blank" ng-show="{{sox.slip_uploaded==1}}">
                                     <i class="fa fa-picture-o" aria-hidden="true"></i> ไฟล์สลิป
                                 </a>
                                 <br>{{sox.slip_datetime}}
@@ -163,6 +166,7 @@
                 <hr>
                 <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">บันทึกใบกำกับภาษีและใบเสร็จรับเงิน</button>
+                    
                 </div>
             </div>
         </div>
@@ -205,34 +209,66 @@
 
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
+        $scope.sox='';
 
         $scope.crItems = [];
         // $scope.selectedBank = '';
         // $scope.TransferTime = '';
         $scope.soxs = <?php echo $this->soxs; ?>;
         var first = true;
+
+
+        // $scope.test = function() {
+        //     console.log( $('#textboxCusId').val());
+        //     console.log( $('#textboxCusId').val().length);
+        //     console.log($('#textBoxCusName').val());
+        //     console.log($('#textBoxCusName').val().length);
+        //     console.log( $('#textboxCusAddress').val());
+        //     console.log( $('#textboxCusAddress').val().length);
+        //     console.log($scope.selectedBank);
+        //     console.log($scope.Noted);
+        //     console.log($scope.sox.sox_no);
+        //     console.log($scope.crItems);
+        // }
+
+
 		$scope.scrollToTop = function() {
             
             window.scrollTo({ top: 0});
             
         }
+
 		$scope.scrollToBottom = function() {
             
             window.scrollTo({ left: 0, top: document.body.scrollHeight});
             
         }
+
         $scope.addCrItem = function(sox) {
             
             $scope.crItems = [];
             $scope.sox = sox;
+            console.log($scope.calculateVat(sox));
+            $scope.customer_title = '';
             
             angular.forEach($scope.soxs, function (value, key) {
                 if(value.sox_no == sox.sox_no) {
                     $scope.crItems.push(value);
                 }
             });
+           
             $scope.calculateCrItem();
             
+        }
+
+        $scope.calculateVat = function(sox){
+            return ((parseFloat(sox.payment_amount) * 7)/107).toFixed(2);
+        }
+        $scope.getDate = function(sox){
+            return (sox.sox_datetime).split(' ')[0];
+        }
+        $scope.getTime = function(sox){
+            return (sox.sox_datetime).split(' ')[1];
         }
         
         $scope.calculateCrItem = function() {
@@ -251,10 +287,12 @@
                 Object.assign(value, {so_total_sales_price2: so_total_sales_price2});
                 
                 console.log(value);
+                $scope.customer_title=value['customerTitle'];
+                console.log($scope.customer_title);
                 
                 if(key == $scope.crItems.length - 1 && value.transportation_price != 0) {
                     var transportation = {
-                        product_type : 'Transport',
+                        product_type : "Transport",
                         quantity : 1,
                         sales_no_vat : parseFloat(value.transportation_no_vat),
                         sales_vat : parseFloat(value.transportation_vat),
@@ -268,8 +306,8 @@
                         transportation_price : parseFloat(value.transportation_price),
                         so_no : value.so_no,
                         sox_no : value.sox_no,
-                        product_no : 'X',
-                        product_name : 'ค่าขนส่ง'
+                        product_no : "X",
+                        product_name : "ค่าขนส่ง"
                     }
                     tempSoNo = value.so_no;
                     $scope.crItems.push(transportation);
@@ -317,6 +355,7 @@
             });
             
         }
+
         
         var click = false;
         
@@ -358,6 +397,7 @@
             $.post("/fin/cash_receipt/post_ivcr", {
                 post : true,
                 cusName : $('#textBoxCusName').val(),
+                customer_title: $scope.customer_title,
                 cusAddress : $('#textboxCusAddress').val(),
                 cusId : $('#textboxCusId').val(),
                 // cusName : '-',
@@ -370,11 +410,12 @@
                 sox_number : $scope.sox.sox_no,
                 crItems : JSON.stringify(angular.toJson($scope.crItems))
             }, function(data) {
+                console.log(`Return statement: ${data}`);
+                addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);
                 console.log(data);
-                addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data  +' สำเร็จ');
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
-                    window.open('/file/iv/' + data.substring(0, 9));
+                    window.open('/file/iv_cr/' + data.substring(0, 9));
                     location.reload();
                     // window.location.assign('/');
                 });           

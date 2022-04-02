@@ -13,6 +13,7 @@
         <script>addModuleLink('accRow', '/acc/payment_voucher', 'money', 'Payment Voucher (PV)');</script>
         <script>addModuleLink('accRow', '/acc/confirm_payment_voucher', 'inbox', 'Confirm Payment Voucher');</script>
         <script>addModuleLink('accRow', '/acc/confirm_iv', 'check-circle-o', 'Confirm IV');</script>
+        <script>addModuleLink('accRow', '/acc/print_iv', 'arrow-circle-o-down', 'Print IV');</script>
         <script>addModuleLink('accRow', '/acc/confirm_ird', 'check-circle-o', 'Confirm IRD');</script>
         <script>addModuleLink('accRow', '/acc/return_inventory', 'undo', 'Return Inventory (RE)');</script>
         <script>addModuleLink('accRow', '/acc/re_dashboard', 'folder-open-o', 'RE-Dashboard');</script>
@@ -20,7 +21,7 @@
         <script>addModuleLink('accRow', '/acc/po_calculator', 'calculator', 'PO Calculator');</script>
         <script>addModuleLink('accRow', '/acc/search_porrci', 'search', 'Search PO/RR/CI');</script>
         <script>addModuleLink('accRow', '/acc/dashboard', 'folder-open-o', 'Dashboard');</script>
-		<script>addModuleLink('accRow', '/is/thelastday', 'heart', 'The Last Day');</script>
+		<!-- <script>addModuleLink('accRow', '/is/thelastday', 'heart', 'The Last Day');</script> -->
     </div>
     
 </body>
