@@ -775,8 +775,9 @@
                     var output = d.getFullYear() + '/' +
                         (month<10 ? '0' : '') + month + '/' +
                         (day<10 ? '0' : '') + day;
-
                         
+
+
                     $.post("/acc/payment_voucher/post_pvc", {
                         post : true,
                         pv_name : $scope.pvName,
