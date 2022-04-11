@@ -776,11 +776,13 @@
                         (month<10 ? '0' : '') + month + '/' +
                         (day<10 ? '0' : '') + day;
 
+                        
                     $.post("/acc/payment_voucher/post_pvc", {
                         post : true,
                         pv_name : $scope.pvName,
                         pv_address : $scope.pvAddress,
                         pv_date: output,
+                        pv_detail:$scope.pvItemDetail,
                         ex_no:$scope.pvItemRR,
                         re_req_no:$scope.pvDetails[0].re_req_no,
                         company_code : $scope.company_code,
