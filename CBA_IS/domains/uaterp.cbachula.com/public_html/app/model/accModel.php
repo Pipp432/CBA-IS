@@ -9,9 +9,9 @@ use _core\helper\uri;
 use _core\helper\thaiNum;
 use PDO;
 
-class accModel extends model {    
+class accModel extends model {
 	public function getDashboardIv2() {
-        
+           //wig
         // $sql = $this->prepare("select
         //                         	distinct Invoice.invoice_no,
         //                             invoice_date,
