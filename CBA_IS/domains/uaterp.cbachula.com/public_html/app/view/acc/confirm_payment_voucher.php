@@ -26,6 +26,8 @@
                             <option value="Supplier">จ่าย Supplier</option>
                             <option value="Expense">ค่าใช้จ่าย</option>
                             <option value="เงินมัดจำ">เงินมัดจำ</option>
+                            <option value="pva">PV-A</option>
+                            <option value="pvd">PV-D</option>
                         </select>
                     </div>
                 </div>
@@ -49,11 +51,16 @@
                             <td>{{pv.pv_date}}</td>
                             <td>{{pv.pv_type}}</td>
                             <td><ul class="my-0">
-                                <li ng-repeat="pv_item in pvs" ng-show="pv_item.pv_no===pv.pv_no">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
+                                <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" ng-repeat="pv_item in pvs" ng-show="pv_item.pv_no===pv.pv_no">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
+                                <li ng-show = "pv.pv_type == 'pvd'">-</li>
+                                <li ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</li>
                             </ul></td>
                             <td style="text-align: right;">
                                 {{pv.total_paid | number:2}}<br>
-                                <a href="/acc/confirm_payment_voucher/get_receipt/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
+                                <a ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" href="/acc/confirm_payment_voucher/get_receipt/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
+                                <a ng-show = "pv.pv_type == 'pvd'" href="/acc/confirm_payment_voucher/get_pvdslip/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
+                                <a ng-show = "pv.pv_type == 'pva'" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank">slip</a> 
+                                <!-- todo get pva slip -->
                             </td>
                         </tr>
                     </table>
@@ -129,21 +136,25 @@
         $scope.cpvItems = [];
         $scope.filterPVNo = '';
         $scope.filterPVType = '';
+        $scope.pvs = [];
         
         $http.get('/acc/confirm_payment_voucher/get_rr_ci_pv').then(function(response){
-            $scope.pvs = response.data;
+            $scope.pvs.concat(response.data);
         });
-        
-        $scope.addCpvItem = function(rrcipv) {
-            angular.forEach($scope.pvs, function (value, key) {
-                if(value.ci_no == rrci.ci_no) {
-                    $scope.cpvItems.push(value);
-                    $scope.total_purchase_no_vat = value.confirm_subtotal;
-                    $scope.total_purchase_vat = value.confirm_vat;
-                    $scope.total_purchase_price = value.confirm_total;
-                }
+
+        $http.get('/acc/confirm_payment_voucher/get_pvd').then(function(response){ 
+            angular.forEach(response['data'], function (value) {
+                value.pv_type = "pvd";
+                $scope.pvs.push(value);
             });
-        }
+        });
+
+        $http.get('/acc/confirm_payment_voucher/get_pva').then(function(response){ 
+            angular.forEach(response['data'], function (value) {
+                value.pv_type = "pva";
+                $scope.pvs.push(value);
+            });
+        });
         
         $scope.addCpvItem = function(pv) {
             var newPv = true;
@@ -152,6 +163,7 @@
                     newPv = false;
                 }
             });
+
             if(newPv) {
                 angular.forEach($scope.pvs, function (value, key) {
                     if(value.pv_no == pv.pv_no) {
@@ -159,6 +171,7 @@
                     }
                 });
             }
+
         }
         
         $scope.dropCpvItem = function(cpvItem) {
@@ -183,51 +196,82 @@
         
         $scope.postCpvItems = function() {
             $('#confirmModal').modal('hide');
-            $.post("/acc/confirm_payment_voucher/post_cpv_items", {
-                post : true,
-                cpvItems : JSON.stringify(angular.toJson($scope.cpvItems))
-            }, function(data) {
-                addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + data + 'สำเร็จ');
-                $('#successModal').modal('toggle');
-                $('#successModal').on('hide.bs.modal', function (e) {
-                    window.location.assign('/');
-                });
+            
+            var cpvds = []; //pvd
+            var cpvas = []; //pva
+            var cpvs = []; //other pv
+            var respond = '';
+            var respond_count = 0;
+            angular.forEach($scope.cpvItems, function (value, key) {
+                if(value.pv_type == "pvd") {
+                    cpvds.push(value.pv_no);
+                } else if(value.pv_type == "pva") {
+                    cpvas.push(value.pv_no);
+                } else cpvs.push(value);
             });
+
+
+            if(cpvs.length != 0) {
+                $.post("/acc/confirm_payment_voucher/post_cpv_items", {
+                    post : true,
+                    cpvItems : JSON.stringify(angular.toJson(cpvs))
+                }, function(data) {
+                    respond.concat(data);
+                    respond_count++;
+
+                    if(respond_count == 3) {
+                        addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                            location.reload();
+                        });
+                    }
+
+
+                });
+            } else respond_count++;
+
+            if(cpvds.length != 0) {
+                $.post("/acc/confirm_payment_voucher/post_cpvd_items", { //todo impliment this in controller and model
+                    post : true,
+                    cpvItems : JSON.stringify(angular.toJson(cpvds))
+                }, function(data) {
+                    respond.concat(data);
+                    respond_count++;
+
+                    if(respond_count == 3) {
+                        addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                            location.reload();
+                        });
+                    }
+                });
+            } else respond_count++;
+
+            if(cpvas.length != 0) {
+                $.post("/acc/confirm_payment_voucher/post_cpva_items", {
+                    post : true,
+                    cpvItems : JSON.stringify(angular.toJson(cpvas))
+                }, function(data) {
+                    respond.concat(data);
+                    respond_count++;
+
+                    if(respond_count == 3) {
+                        addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                            location.reload();
+                        });
+                    }
+                });
+            } else respond_count++;
+
+
         }
+
+
         
-        // $scope.postcpvItems = function() {
-            
-        //     if($scope.cpvItems.length === 0) {
-        //         $('#formValidate1').modal('toggle');
-        //     } else if ($scope.iv === '') {
-        //         $('#formValidate2').modal('toggle');
-        //     } else {
-                
-        //         var data = new FormData();
-        //         data.append('ivFile', $('#ivFile')[0].files[0]);
-        //         data.append('iv', $scope.iv);
-        //         data.append('cpvItems', JSON.stringify(angular.toJson($scope.cpvItems)));
-                
-        //         $.ajax({
-        //             url: '/acc/invoice_receipt_confirm/post_ivrc',
-        //             data: data,
-        //             cache: false,
-        //             contentType: false,
-        //             processData: false,
-        //             method: 'POST',
-        //             type: 'POST',
-        //             success: function () {
-        //                 addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว');
-        //                 $('#successModal').modal('toggle');
-        //                 $('#successModal').on('hide.bs.modal', function (e) {
-        //                     window.location.assign('/');
-        //                 });
-        //             }
-        //         });
-                
-        //     }
-            
-        // }
 
   	});
 

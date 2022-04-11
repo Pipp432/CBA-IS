@@ -15,9 +15,9 @@
             <div class="col-4 px-0">
                 <h5 style="text-align: right;">สำเนา</h5>
                 
-                    <h5 style="text-align: right;"><b>เลขที่ {{details[0].EX_No}}</b></h5>
+                    <h5 style="text-align: right;"><b>เลขที่ {{details[0].ex_no==null ? "ยังไม่ confirm" : details[0].ex_no}}</b></h5>
               
-                <h6 style="text-align: right;">วันที่ {{details[0].Withdraw_Date}}</h6>
+                <h6 style="text-align: right;">วันที่ {{details[0].withdraw_date}}</h6>
             </div>
         </div>
         
@@ -31,17 +31,17 @@
             </div>
         </div>
         <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].Withdraw_Name}}&nbsp;</span>
+                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].withdraw_name}}&nbsp;</span>
                 <span  style="text-align: left;">
-                   รหัสพนักงาน {{details[0].Employee_ID}}&nbsp;
+                   รหัสพนักงาน {{details[0].employee_id}}&nbsp;
                 </span>
                
             
         </div>
         <div class="text">
-                <br><p>ธนาคารผู้รับโอน {{details[0].Bank_Name}}</p><br>
-                <p>เลขที่บัญชี {{details[0].Bank_Book_Number}}</p><br>
-                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].Bank_Book_Name}}</p>
+                <br><p>ธนาคารผู้รับโอน {{details[0].bank_name}}</p><br>
+                <p>เลขที่บัญชี {{details[0].bank_book_number}}</p><br>
+                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_name}}</p>
         </div>        
         
         <hr>
@@ -54,7 +54,7 @@
                         <th>วัตถุประสงค์/รายละเอียดค่าใช้จ่าย</th>
                         <th>จำนวนเงิน(บาท)</th>
                     </tr>
-                    <tr ng-repeat = "item in tableDetails" >
+                    <tr ng-repeat = "item in tableDetails track by $index" >
                         <td><b> {{item.date}}</b> </td>
 						<td><b> {{item.details}}</b> </td>
                         <td><b> {{item.money}}</b></td>
@@ -68,7 +68,7 @@
         </div> 
         <br>
         <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].Withdraw_Name}}&nbsp;</span>
+                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].withdraw_name}}&nbsp;</span>
                 <span  style="text-align: left;">
                    ผู้รับรอง {{details[0].Authorize_Name}}&nbsp;
                 </span>
@@ -79,13 +79,13 @@
         <div>
             <p><b>(สำหรับฝ่ายการเงิน)<br></b></p>
             <p><u>จ่ายออกจากโครงการ</u></p>
-            <p>(&nbsp;&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;โครงการ&nbsp;3&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;SPJ&nbsp;1&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;SPJ&nbsp;2</p>
+            <p>(&nbsp;{{details[0].company =="project1" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp; {{details[0].company =="project2" ? "X" : "" }} &nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;{{details[0].company =="project3" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;3&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ1" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;1&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ2" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;2</p>
         </div>
 
         <div>
             
             <p><u>หลักฐานในการขอเบิกเงิน</u></p>
-            <p>(&nbsp;&nbsp;)&nbsp;ใบกำกับภาษี&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;บิลเงินสด + นามบัตรหริอสำเนาบัตรประชาชนเจ้าของร้าน&emsp;&emsp;(&nbsp;&nbsp;)&nbsp;ใบเสนอราคา</p>
+            <p>(&nbsp;{{details[0].evidence =="quotation" ? "X" : "" }}&nbsp;)&nbsp;ใบกำกับภาษี&emsp;&emsp;(&nbsp;{{details[0].evidence =="billAndID" ? "X" : "" }}&nbsp;)&nbsp;บิลเงินสด + นามบัตรหริอสำเนาบัตรประชาชนเจ้าของร้าน&emsp;&emsp;(&nbsp;{{details[0].evidence =="invoice" ? "X" : "" }}&nbsp;)&nbsp;ใบเสนอราคา</p>
         </div>
        
         <div class="row px-2 mt-2">
@@ -128,14 +128,20 @@
         $scope.sum='';
         $scope.getDetail = function() {
             var url = window.location.href; 
-            const PVC_No = (url.split('/'))[5];
-            $http.get(`/file/re_req/get_PVC/${PVC_No}`).then(function(response){$scope.details= response.data; $scope.isLoad = false;$scope.tableDetails = JSON.parse($scope.details[0].Table_Of_Details);console.log($scope.tableDetails);($scope.tableDetails).forEach(entry => {
-                $scope.sum+=parseInt(entry.money);
-               
-            });});
+            $scope.details = <?php echo $this->re_req; ?>;
+            $scope.company = $scope.details[0].re_req_no.substring(0,1);
+            $scope.tableDetails = JSON.parse($scope.details[0].details)
+            console.log($scope.details[0])
+            
+            $scope.tableDetails.forEach(data => {
+                $scope.sum += data.money;
+                
+            });
             
            
         }
+       
+
     });
     
 </script>

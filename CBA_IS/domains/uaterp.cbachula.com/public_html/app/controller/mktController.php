@@ -434,6 +434,17 @@ class mktController extends controller {
         }
         
     }
+    public function reimbursement_request(){
+        if (empty(uri::get(2))) {
+            $this->view->setTitle("Reimbursement Request"); 
+            $this->view->render("mkt/reimbursement_request","navbar");
+        }else if (uri::get(2)==='post_reimbursement_Request'){
+            $this->positionEcho('mkt', $this->model->addReReqDetails());
+        }else if(uri::get(2)==='post_quotation'){
+            $this->positionEcho('mkt', $this->model->uploadImgForReReq());
+        }
+        
+    }
     // public function post_quotation(){
     //     if(empty(uri::get(2))) {
     //         $this->view->setTitle("Upload quotation");
@@ -447,10 +458,8 @@ class mktController extends controller {
         if(empty(uri::get(2))) {
             $this->view->setTitle("Payment Voucher A (PV-A)"); 
             $this->view->render("mkt/petty_cash_request", "navbar");
-        } else if (uri::get(2)==='post_Request') {
+        } else if (uri::get(2)==='post_pva') {
             $this->positionEcho('mkt', $this->model->addRequestPettyMoney());
-        } else if (uri::get(2)==='post_img_Request') {
-            $this->positionEcho('mkt', $this->model->uploadImgForRequestPettyMoney());
         }
     }
     

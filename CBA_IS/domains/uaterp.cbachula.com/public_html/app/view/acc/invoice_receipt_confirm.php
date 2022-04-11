@@ -290,8 +290,11 @@
                 formData.append('taxIV', $('#taxInvoiceUpload')[0].files[0]);
                 formData.append('tax_reduce_upload', $('#taxReduceUpload')[0].files[0]);
                 
-               
-                formData.append('iv', $scope.iv);
+                
+                if($scope.iv == '-') {
+                    formData.append('iv', 'no IV submitted');
+                } else formData.append('iv', $scope.iv);
+                
                 formData.append('bill_no', $scope.bill_no);
                 formData.append('tax_form_no', $scope.tax_form_no);
                 formData.append('tax_reduce_no', $scope.tax_reduce_no);
@@ -301,7 +304,7 @@
                 
                 // !! Async jQuery method
                 $.ajax({ 
-                    url: '/acc/invoice_receipt_confirm/post_ivrc', 
+                    url: '/acc/invoice_receipt_confirm/post_ivrc',  
                     data: formData,
                     cache: false,
                     contentType: false,

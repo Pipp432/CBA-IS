@@ -83,8 +83,8 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addPVB());
         } else if (uri::get(2)==='post_pvc') {
             $this->positionEcho('acc', $this->model->addPVC());
-        }else if (uri::get(2)==='get_PVCs_form') {
-            $this->positionEcho('acc', $this->model->getPVCs(Uri::get(3)));
+        }else if (uri::get(2)==='get_ReReqs') {
+            $this->positionEcho('acc', $this->model->getReReqDetail(Uri::get(3)));
         }else if (uri::get(2)==='get_PVC') {
             $this->positionEcho('acc', $this->model->getPVC());
         }else if (uri::get(2)==='due_date') {
@@ -92,7 +92,7 @@ class accController extends controller {
         }else if(uri::get(2)==='confirm'){
             $this->positionEcho('acc', $this->model->postConfirm(Uri::get(3)));
         }else if(uri::get(2)==='get_IVPC_Files'){
-            $this->positionEcho('acc', $this->model->getIVPCFiles(Uri::get(3),Uri::get(3)));
+            $this->positionEcho('acc', $this->model->getIVPCFiles(Uri::get(3),Uri::get(4)));
         } else if(uri::get(2)==='get_PVD'){
             $this->positionEcho('acc', $this->model->getPVDForPV()); 
         } else if(uri::get(2)==='update_PVD'){
@@ -110,6 +110,10 @@ class accController extends controller {
             $this->view->render("acc/confirm_payment_voucher", "navbar");
         } else if (uri::get(2)==='get_rr_ci_pv') {
             $this->positionEcho('acc', $this->model->getRRCIPV());
+        } else if (uri::get(2)==='get_pvd') {
+            $this->positionEcho('acc', $this->model->getPVDConfirmPV()); 
+        } else if (uri::get(2)==='get_pva') {
+            $this->positionEcho('acc', $this->model->getPVAConfirmPV()); 
         } else if (uri::get(2)==='get_receipt') {
             $this->requirePostition("acc");
             if (!empty(Uri::get(3))) {
@@ -119,7 +123,11 @@ class accController extends controller {
             }
         } else if (uri::get(2)==='post_cpv_items') {
             $this->positionEcho('acc', $this->model->confirmPV());
-        }   
+        } else if (uri::get(2)==='post_cpvd_items') {
+            $this->positionEcho('acc', $this->model->confirmPVD());
+        } else if (uri::get(2)==='post_cpva_items') {
+            $this->positionEcho('acc', $this->model->confirmPVA());
+        }
     }
     
     public function credit_note() {
@@ -174,9 +182,12 @@ class accController extends controller {
             $this->view->setTitle("Dashboard");
             $this->view->dashboardIv = $this->model->getDashboardIv();
             $this->view->dashboardPv = $this->model->getDashboardPv();
-            $this->view->dashboardPvb = $this->model->getDashboardPvb(); 
+            $this->view->dashboardPva = $this->model->getDashboardPva();
+            $this->view->dashboardPvb = $this->model->getDashboardPvb();
+            $this->view->dashboardPvd = $this->model->getDashboardPvd();
             $this->view->dashboardPo = $this->model->getDashboardPo();
 			$this->view->dashboardCr = $this->model->getDashboardCr();
+            $this->view->dashboardPvc = $this->model->getDashboardPvc();
             $this->view->render("acc/dashboard", "navbar");
         } else if (uri::get(2)==='pv_slip') {
             if (!empty(Uri::get(3))) {
@@ -191,7 +202,7 @@ class accController extends controller {
                 $this->err404();
             }
         } else if (uri::get(2)==='get_PVB_CR') {
-            if (!empty(Uri::get(4))) {
+            if (!empty(Uri::get(3))) {
                 $this->positionEcho('acc', $this->model->getPVBCR(Uri::get(3)));
             } else {
                 $this->err404();

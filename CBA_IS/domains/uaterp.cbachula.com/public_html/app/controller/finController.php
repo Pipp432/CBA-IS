@@ -148,6 +148,19 @@ foreach ($list as $value) {
             $this->positionEcho('fin', $this->model->postAdditionDetail(uri::get(3)));
         }
     }
+    public function reimbursement_request(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("Reimbursement Request");
+            $this->view->render("fin/reimbursement_request", "navbar");
+        }else if(uri::get(2)==="get_re_req"){
+            $this->positionEcho('fin', $this->model->getReReq());
+        }else if(uri::get(2)==="get_re_req_Detail"){
+            $this->positionEcho('fin', $this->model->getReReqDetails(uri::get(3)));
+        }else if(uri::get(2)==="post_additional_data"){
+            $this->positionEcho('fin', $this->model->postAdditionReReqDetail());
+        }
+    }
     public function upload()
     {
         if(empty(uri::get(2))) {
@@ -237,12 +250,8 @@ foreach ($list as $value) {
         }
         else if (uri::get(2)==='createslipForSup') {
             
-                if($this->model->insertslipForSup(input::post('filename'),input::post('filetype'),input::post('filedata'),input::post('filename2'),input::post('filetype2'),input::post('filedata2'),input::post('pvno')))
-                {
-                    echo"valid";
-                }
-                else echo"not success";
-            
+                echo $this->model->insertslipForSup(input::post('filename'),input::post('filetype'),input::post('filedata'),input::post('filename2'),input::post('filetype2'),input::post('filedata2'),input::post('pvno'));
+
         
         }
        
@@ -256,6 +265,7 @@ foreach ($list as $value) {
         $this->view->pvforreceipt = $this->model->GetPVforReceipt();
         $this->view->pvfortranfer = $this->model->GetPVforTranfer();
         $this->view->wstype3data = $this->model->GetWSType3();
+        $this->view->pvas = $this->model->GetPVAforWS();
         $this->view->setTitle("Withdrawal Slip");
         $this->view->render("fin/WS","navbar");
         
@@ -282,8 +292,11 @@ foreach ($list as $value) {
             } else {
                 $this->err404();
             }
+        } else if (uri::get(2)==='PVA_slip') {
+            $this->positionEcho('fin', $this->model->postSlipPVA());
         }
     }//ws
+
     public function validate_petty_cash_request() {
         if(empty(uri::get(2))) {
             $this->view->setTitle("confirm เบิกเงินรองจ่าย"); 
@@ -291,20 +304,35 @@ foreach ($list as $value) {
             $this->view->render("fin/validate_petty_cash_request", "navbar"); 
         } else if(uri::get(2)==='get_re') {
             if (!empty(Uri::get(3))) {
-                $this->positionEcho('acc', $this->model->getRe(Uri::get(3))); 
+                $this->positionEcho('fin', $this->model->getRe(Uri::get(3))); 
             } else {
                 $this->err404();
             }
         } else if(uri::get(2)==='get_iv') {
             if (!empty(Uri::get(3))) {
-                $this->positionEcho('acc', $this->model->getIv(Uri::get(3))); 
+                $this->positionEcho('fin', $this->model->getIv(Uri::get(3))); 
             } else {
                 $this->err404();
             }
+        } else if(uri::get(2) === 'confirm_request'){
+            $this->positionEcho('fin', $this->model->confirmPettyCashRequest()); 
+        } else if(uri::get(2) === 'reject_request'){
+            $this->positionEcho('fin', $this->model->rejectPettyCashRequest()); 
         }
     }
 
-    
+    public function create_pva() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("create PV-A"); 
+            $this->view->render("fin/create_pva", "navbar"); 
+        } else if(uri::get(2) === "get_pva") {
+            $this->positionEcho('fin', $this->model->getPVAForCreation()); 
+        } else if(uri::get(2) === "create_pva") {
+            $this->positionEcho('fin', $this->model->bundlePVA()); 
+        } else if(uri::get(2) === "get_fin_slip") {
+            $this->positionEcho('fin', $this->model->getFinSlipPVA(uri::get(3))); 
+        }
+    }
     
     public function upslip_pvd() {
         if(empty(uri::get(2))) {

@@ -20,7 +20,7 @@ $dt=$dt -> format('Hi');
 	echo "<script>addModuleLink('mktRow', '/mkt/dashboard', 'folder-open-o', 'Dashboard');</script>";
 	echo "<script>addModuleLink('mktRow', '/mkt/t_price', 'truck', 'คำนวณค่าส่ง');</script>";
 
-	echo "<script>addModuleLink('mktRow', '/mkt/pvc', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>";
+	echo "<script>addModuleLink('mktRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>";
 	
 	echo "<script>addModuleLink('mktRow', 'https://docs.google.com/spreadsheets/d/1-lnIdt3ccJ7f6eBWI56mnuVq-yX1xU95VDu-eIJkSJI/edit?usp=sharing', 'truck', 'Supplier Delivery Time Slot');</script>";
 		

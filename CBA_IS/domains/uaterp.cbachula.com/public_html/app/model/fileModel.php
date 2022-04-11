@@ -215,18 +215,32 @@ class fileModel extends model {
         }
         return null;
 	}
-    public function getPVC($PVC_No) {
-		$sql = $this->prepare("SELECT PVC_Demo.PVC_No,PVC_Demo.Withdraw_Date, PVC_Demo.Withdraw_Name, 
-                                PVC_Demo.Employee_ID, PVC_Demo.Employee_Line, PVC_Demo.Bank_Name,
-                                PVC_Demo.Tax_Number,PVC_Demo.EX_No,PVC_Demo.Bank_Book_Name,PVC_Demo.Bank_Book_Number ,PVC_Demo.Authorize_Name,
-                                PVC_Demo.Table_Of_Details FROM `PVC_Demo` WHERE PVC_Demo.PVC_No=? ");
-        $sql->execute([$PVC_No]);
+    public function getPVC($pv_no) {
+		$sql = $this->prepare("SELECT * FROM PVC where PVC.pv_no = ?");
+        $sql->execute([$pv_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return "error";
+	}
+    public function getReReq($re_req_no) {
+		$sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE re_req_no = ? ");
+        $sql->execute([$re_req_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return null;
 	}
     
+    public function getPva($pv_no) {
+		$sql = $this->prepare("SELECT * FROM `PVA_Bundle` WHERE pv_no = ? ");
+        $sql->execute([$pv_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+	}
+
     public function getCs($cs_no) {
 		$sql = $this->prepare("select
                                 	CS.cs_no,

@@ -468,6 +468,27 @@ class accModel extends model {
         else print_r($statement->errorInfo());
     }
 
+    public function getPVDConfirmPV() {
+        $sql = "SELECT 
+                    pvd_no as pv_no, 
+                    pvd_date as pv_date,
+                    total_amount as total_paid,
+                    slipName as receipt_name
+                from PVD where PVD_status = 3";
+        $sql = $this->prepare($sql);
+        $sql->execute([]);
+
+        //todo append pv_type "pvd"
+        $ret = $sql->fetchAll(PDO::FETCH_ASSOC);
+        foreach($ret as $item) {
+            $item['pv_type'] = "pvd";
+        }
+
+        if ($sql->rowCount() > 0) {
+            return json_encode($ret, JSON_UNESCAPED_UNICODE);
+        } else return json_encode([]); 
+    }
+
 
     // CN(PV-D) Module
     private function assignIv($iv_no) {
@@ -683,12 +704,12 @@ class accModel extends model {
                 $tax_file_name = $_FILES['tax']['name'];
                 $tax_form_no = $_POST['tax_form_no'];
                 $tax_file_data = base64_encode(file_get_contents($_FILES['tax']['tmp_name']));
-                $tax_file_type = $_FILES['tax']['name'];
+                $tax_file_type = $_FILES['tax']['type'];
 
                 $debt_reduce_file_name = $_FILES['tax_reduce_upload']['name'];
                 $tax_reduce_no = $_POST['tax_reduce_no'];
                 $debt_reduce_file_data = base64_encode(file_get_contents($_FILES['tax_reduce_upload']['tmp_name']));
-                $debt_reduce_file_type = $_FILES['tax_reduce_upload']['name'];
+                $debt_reduce_file_type = $_FILES['tax_reduce_upload']['type'];
 
 
 
@@ -788,12 +809,13 @@ class accModel extends model {
                 $statement = "SELECT debt_reduce_file_type AS fileType,debt_reduce_file_data AS fileData from IVPC_Files where rrci_no = ?";
                 break;
             default:
-                $statement = "SELECT debt_reduce_file_type from IVPC_Files where rrci_no = ? AND 0";
-          }
+                header("Location: https://uaterp.cbachula.com/error404"); /* Redirect browser */
+                die();
+            }
 
 
         $sql = $this->prepare($statement);
-        $sql->execute([$rq_no]);
+        $sql->execute([$ci_no]);
         
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
@@ -821,7 +843,7 @@ class accModel extends model {
 
 
         $sql = $this->prepare($sql); 
-        $sql->execute([$pv_no]);
+        $sql->execute([$pv_no]); 
         
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
@@ -833,14 +855,14 @@ class accModel extends model {
     }
 
     public function getPVBCR($pv_no){
-        $sql = "SELECT cr_name , cr_type , cr_data  from PV where pv_no = ?";
+        $sql = "SELECT * from PV where pv_no = ?";
         $sql = $this->prepare($sql); 
         $sql->execute([$pv_no]);
 
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
-            header('Content-type: '.$data['fileType']);
-            echo base64_decode($data['fileData']);
+            header('Content-type: '.$data['cr_type']);
+            echo $data['cr_data'];
         } else {
             echo 'ไม่มีใบ CR ของเลข pv นี้';
         }
@@ -849,7 +871,7 @@ class accModel extends model {
 
     
     // PV-A Module
-    public function addPVA() {
+    public function addPVA() { //depecated move to db PVA and PVA_bundle
         
         $pvno = $this->assignPv('A', input::post('company_code'));
         
@@ -1165,90 +1187,118 @@ class accModel extends model {
     }
 	
 	// PV-C Module
+    private function assignPVC($type, $companyNo) {
+        $pvPrefix = $companyNo.'P'.$type.'-';
+        $sql = $this->prepare("select ifnull(max(pv_no),0) as max from PVC where pv_no like ?");
+        $sql->execute([$pvPrefix.'%']);
+        $maxPvNo = $sql->fetchAll()[0]['max'];
+        $runningNo = '';
+        if($maxPvNo == '0') {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = (int) substr($maxPvNo, 4) + 1;
+            if(strlen($latestRunningNo) == 5) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ($x = 1; $x <= 5 - strlen($latestRunningNo); $x++) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $pvPrefix.$runningNo;
+    }   
     public function addPVC() {
         
-        $pvno = $this->assignPv('C', input::post('company_code'));
+        $pvno = $this->assignPVC('C', input::post('company_code'));
         
-        $sql = $this->prepare("insert into PV (pv_no, pv_date, pv_type, vat_type, supplier_no, pv_name, pv_address, total_paid, approved_employee, paid, cancelled, note, thai_text, total_vat, due_date, bank)
-                                values (?, CURRENT_TIMESTAMP, 'Expense', 1, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)");  
+        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_due_date,pv_pay,approved_employee,pv_address,total_paid,total_paid_thai) 
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");  
         $sql->execute([
             $pvno,
-            '',
+            input::post('ex_no'),
+            input::post('re_req_no'),
+            "1",
             input::post('pv_name'),
-            input::post('pv_address'),
-            (double) input::post('totalPaid'),
-            json_decode(session::get('employee_detail'), true)['employee_id'],
-            '',
-            input::post('totalPaidThai'),
-            (double) input::post('totalVat'),
+            input::post('pv_date'),
             input::post('dueDate'),
-            input::post('bank')
+           
+            "Expense",
+            json_decode(session::get('employee_detail'), true)['employee_id'],
+            input::post('pv_address'),
+            input::post('totalPaid'),
+            input::post('totalPaidThai')
+
+            
+         
+           
         ]);
         
-        $pvItemsArray = json_decode(input::post('pvItems'), true); 
-        $pvItemsArray = json_decode($pvItemsArray, true); 
+        // $pvItemsArray = json_decode(input::post('pvItems'), true); 
+        // $pvItemsArray = json_decode($pvItemsArray, true); 
         
-        $i = 1;
+        // $i = 1;
         
-        foreach($pvItemsArray as $pvItem) {
+        // foreach($pvItemsArray as $pvItem) {
             
-            $sql = $this->prepare("insert into PVPrinting (pv_no, sequence, file_date, debit, iv_no, rr_no, detail, paid_total, cancelled, note, vat)
-                                    values (?, ?, ?, ?, ?, ?, ?, ?, 0, null, ?)");  
-            $sql->execute([
-                $pvno,
-                $i,
-                $pvItem['date'],
-                $pvItem['debit'],
-                $pvItem['iv_no'],
-                '',
-                $pvItem['detail'],
-                (double) $pvItem['total_paid'],
-                (double) $pvItem['vat']
-            ]);
+        //     $sql = $this->prepare("insert into PVPrinting (pv_no, sequence, file_date, debit, iv_no, rr_no, detail, paid_total, cancelled, note, vat)
+        //                             values (?, ?, ?, ?, ?, ?, ?, ?, 0, null, ?)");  
+        //     $sql->execute([
+        //         $pvno,
+        //         $i,
+        //         $pvItem['date'],
+        //         $pvItem['debit'],
+        //         $pvItem['iv_no'],
+        //         '',
+        //         $pvItem['detail'],
+        //         (double) $pvItem['total_paid'],
+        //         (double) $pvItem['vat']
+        //     ]);
             
-            // update status in WS
-            $sql = $this->prepare("update WS set pv_no = ?, status = 2 where form_no = ?");  
-            $sql->execute([$pvno, $pvItem['rr_no']]);
+        //     // update status in WS
+        //     $sql = $this->prepare("update WS set pv_no = ?, status = 2 where form_no = ?");  
+        //     $sql->execute([$pvno, $pvItem['rr_no']]);
             
-            $i++;
+        //     $i++;
 
-            // insert AccountDetail sequence 1
-            // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$pvno, 1, '12-1'.$pvno[0].'10', (double) $pvItem['total_paid'], 0, 'PV']);
+        //     // insert AccountDetail sequence 1
+        //     // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
+        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        //     $sql->execute([$pvno, 1, '12-1'.$pvno[0].'10', (double) $pvItem['total_paid'], 0, 'PV']);
 
-            // insert AccountDetail sequence 2
-            // Cr เงินฝากออมทรัพย์ - โครงการ x
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PV']);
+        //     // insert AccountDetail sequence 2
+        //     // Cr เงินฝากออมทรัพย์ - โครงการ x
+        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        //     $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PV']);
             
-            // insert AccountDetail sequence 3
-            // Dr ค่าใช้จ่าย 
-			if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
-				$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-									values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-				$sql->execute([$pvno, 3, $pvItem['debit'], (double) $pvItem['total_paid']/1.07, 0, 'PV']);
-			}
+        //     // insert AccountDetail sequence 3
+        //     // Dr ค่าใช้จ่าย 
+		// 	if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
+		// 		$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+		// 							values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+		// 		$sql->execute([$pvno, 3, $pvItem['debit'], (double) $pvItem['total_paid']/1.07, 0, 'PV']);
+		// 	}
             
-            // insert AccountDetail sequence 4
-            // Dr ภาษีซื้อ - โครงการ X
-			if ($pvItem["vat_check"]=='1'){
-				$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-									values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-				$sql->execute([$pvno, 4, '61-1'.$pvno[0].'00', ((double) $pvItem['total_paid'])*7/107, 0, 'PV']);
-			}
+        //     // insert AccountDetail sequence 4
+        //     // Dr ภาษีซื้อ - โครงการ X
+		// 	if ($pvItem["vat_check"]=='1'){
+		// 		$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+		// 							values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+		// 		$sql->execute([$pvno, 4, '61-1'.$pvno[0].'00', ((double) $pvItem['total_paid'])*7/107, 0, 'PV']);
+		// 	}
 
-            // insert AccountDetail sequence 5
-            // Cr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$pvno, 5, '12-1'.$pvno[0].'10', 0, (double) $pvItem['total_paid'], 'PV']);
+        //     // insert AccountDetail sequence 5
+        //     // Cr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
+        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        //     $sql->execute([$pvno, 5, '12-1'.$pvno[0].'10', 0, (double) $pvItem['total_paid'], 'PV']);
             
             
-        }
+        // }
         
+        echo "<script>console.log('Debug Objects: " . $sql->errorInfo()[2] . "' );</script>";
         echo $pvno;
     }   
 	
@@ -1295,9 +1345,27 @@ class accModel extends model {
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+        return json_encode([]);
     }
-    
+
+    public function getPVAConfirmPV() {
+        $sql = $this->prepare("select
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names
+                                from PVA_bundle
+                                where pv_status = 4");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+
+
     // Confirm PV Module
     public function getSlipData($pv_no) {
         
@@ -1425,6 +1493,43 @@ class accModel extends model {
         echo $value['pv_no'];
         
     }  
+
+    public function confirmPVD() {
+        $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
+        $pv_no_array = json_decode($cpvItemsArray, true);
+        foreach($pv_no_array as $value) {
+            $sql = $this->prepare("UPDATE PVD SET PVD_status = 4 WHERE pvd_no = ?");    
+            $sql->execute([$value]);
+            echo $value;
+            echo ' ';
+        }
+    }
+
+    public function confirmPVA() {
+        $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
+        $pv_no_array = json_decode($cpvItemsArray, true);
+        foreach($pv_no_array as $value) {
+            $success = true;
+            $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 5 WHERE pv_no = ?");
+            $success = $success && $sql->execute([$value]);
+            if($success) {
+                $sql = $this->prepare("UPDATE PVA SET pv_status = 5 WHERE pv_no = ?");
+                $success = $success && $sql->execute([$value]);
+            }
+            if($success) {
+                echo $value;
+                echo ' ';
+            } else {
+                $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 4 WHERE pv_no = ?");
+                $sql->execute([$value]);
+                echo "error confirming ".$value." ";
+                echo print_r($sql->errorInfo());
+            }
+            
+        }
+    }
+
+
     
     // General Journal Module
     public function getAccountDetail() {
@@ -1558,6 +1663,22 @@ class accModel extends model {
         return [];
     }
 
+    public function getDashboardPva() {
+        $sql = $this->prepare("select
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA_bundle");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
     public function getDashboardPvb() {
         $sql = $this->prepare("SELECT
                                 	pv_no as file_no,
@@ -1572,6 +1693,33 @@ class accModel extends model {
                                 inner join Employee on Employee.employee_id = PV.approved_employee
 								where cancelled = 0 AND pv_type = 'Supplier'
                                 order by pv_date desc");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getDashboardPvd() {
+        $sql = $this->prepare("SELECT pvd_no,invoice_no,sox_no,pvd_date,pvd_time,PVD_status FROM PVD");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+    
+    public function getDashboardPvc() {
+        $sql = $this->prepare("select * from Reimbursement_Request where ex_no is not null");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return [];
+    }
+
+    public function getDashboardPvc_confirm() {
+        $sql = $this->prepare("select * from Reimbursement_Request where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -2239,6 +2387,17 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 
 		//}
 	}
+    public function getReReqDetail($re_req_no){
+        $sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE ex_no IS NOT NULL AND confirmed != '1' ");
+        $data =$sql->execute([$re_req_no]);   
+        if($sql->rowCount() > 0){
+           return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
+       }else{
+           echo $sql;
+           echo "Hello";
+       } 
+        
+    }
 
 
 
@@ -2284,29 +2443,30 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
                  input::post('due_date'),
              $PVC_No]);
     }
-    public function postConfirm($PVC_No){
-        $sql=$this->prepare("UPDATE PVC_Demo SET sign_date=?,debit=?,iv_no=?,detail=?,rr_no=?,total_paid=?,vat=?,pv_name=?,pv_address=?,selected_company=?,confirmed=? WHERE PVC_No=?");
-        $sql->execute([
-            input::post('date'),
+    public function postConfirm($ex_no){
+        $sql=$this->prepare("UPDATE Reimbursement_Request SET debit=?, pv_date=?, pv_details=?,total_paid=?, pv_name=?, pv_address=?, pv_company=?,  return_tax=? WHERE ex_no =?");
+        $success=$sql->execute([
             input::post('debit'),
-            input::post('iv_no'),
-            input::post('detail'),
-            input::post('rr_no'),
+            input::post('pv_date'),
+            input::post('details'),
             input::post('total_paid'),
-            input::post('vat'),
             input::post('pv_name'),
             input::post('pv_address'),
             input::post('selected_company'),
-            input::post('confirm'),
-            $PVC_No
+            
+            input::post('return_tax'),
+            $ex_no
+           
+
         ]);
+        return $sql->errorInfo()[2];
+
+
+
     }
-
-
-
 }
     
-    
+
 
 
 

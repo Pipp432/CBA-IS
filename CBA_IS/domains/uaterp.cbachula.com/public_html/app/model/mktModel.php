@@ -4542,17 +4542,15 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 
 
 
-  public function assign_rq_no() {
-
-    $rqPrefix = 'RQ-';
-    $sql = $this->prepare( "select ifnull(max(rq_no),0) as max from petty_cash_received where rq_no like ?" );
-    $sql->execute( [ 'RQ-%' ] );
+  public function assignInternalPVDNo() {
+    $sql = $this->prepare( "SELECT ifnull(max(internal_pva_no),0) as max from PVA" );
+    $sql->execute();
     $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
     $runningNo = '';
     if ( $maxRqNo == '0' ) {
       $runningNo = '00001';
     } else {
-      $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+      $latestRunningNo = ( (int) $maxRqNo) + 1;
       if ( strlen( $latestRunningNo ) == 5 ) {
         $runningNo = $latestRunningNo;
       } else {
@@ -4562,79 +4560,46 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
         $runningNo .= $latestRunningNo;
       }
     }
-    return $rqPrefix . $runningNo;
+    return $runningNo;
   }
 
   public function addRequestPettyMoney() { 
 
-    $sql = $this->prepare("update petty_cash_received SET date = CURRENT_TIMESTAMP, time =CURRENT_TIMESTAMP,employee_id=?,employee_name = ?,LineId=?,product_name=?,cost=?,cancelled=0, done=0 WHERE rq_no = ?" );
+    $internal_pva_no = $this->assignInternalPVDNo();
+
+    $ivrc_file_name = $_FILES['invoice/receipt']['name'];
+    $ivrc_file_data = base64_encode(file_get_contents($_FILES['invoice/receipt']['tmp_name']));
+    $ivrc_file_type = $_FILES['invoice/receipt']['type'];
+
+    $slip_file_name = $_FILES['slip']['name'];
+    $slip_file_data = base64_encode(file_get_contents($_FILES['slip']['tmp_name']));
+    $slip_file_type = $_FILES['slip']['type'];
+
+    $sql = $this->prepare("INSERT INTO PVA (internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, total_paid, product_names,ivrc_name, ivrc_type, ivrc_data, slip_name, slip_type, slip_data, pv_status	) 
+                            VALUE (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,0)");
     $success = $sql->execute([
+      $internal_pva_no,
       input::post( 'employee_id' ),
       input::post( 'employee_name' ),
       input::post( 'lineId' ),
-      input::post( 'product_name' ),
       ( double )input::post( 'cost' ),
-      input::post( 'rq_no' ),
+      input::post( 'product_name' ),
+      $ivrc_file_name,
+      $ivrc_file_type,
+      $ivrc_file_data,
+      $slip_file_name,
+      $slip_file_type,
+      $slip_file_data,
     ]);
     
     if ($success) {
-      echo input::post( 'rq_no' )  . ' สำเร็จ<br>';
+      echo 'success';
     } else {
-      echo input::post( 'rq_no' )  . ' error'.'<br>';
+      echo $internal_pva_no  . ' error'.'<br>';
       print_r($sql->errorInfo());
     }
 
   }
-
-  public function uploadImgForRequestPettyMoney() {
-    $Invoice_Receipt_pic = $_FILES['Invoice_Receipt_pic'];
-    $bank_slip = $_FILES['bank_slip'];
-    if(filesize($Invoice_Receipt_pic['tmp_name']) > 50000 || filesize($bank_slip['tmp_name']) > 50000) {
-      $success = false;
-      $re->cause = 'File size too big!! Max file size is 50 kb.';
-    } else if(!@is_array(getimagesize($Invoice_Receipt_pic['tmp_name'])) || !@is_array(getimagesize($bank_slip['tmp_name']))){
-      $success = false;
-      $re->cause = 'File is not an image.';
-    } else {
-     $rq_no = $this->assign_rq_no();
-     
-     if(isset($Invoice_Receipt_pic)) {
-       $file1 = file_get_contents($Invoice_Receipt_pic['tmp_name']);
-       $file1 = base64_encode($file1);
-       $file1Name = $Invoice_Receipt_pic['name'];
-       $file1Type = $Invoice_Receipt_pic['type'];
-     }
-      if(isset($bank_slip)) {
-        $file2 = file_get_contents($bank_slip['tmp_name']);
-        $file2 = base64_encode($file2);
-        $file2Name = $bank_slip['name'];
-        $file2Type = $bank_slip['type'];
-      }
-
-      $sql = $this->prepare("insert into petty_cash_received (rq_no ,iv_rec_image,iv_rec_name,iv_rec_type, slip_image,slip_name,slip_type)
-                               values ( ?, ?, ?, ?, ?, ?, ?)" );
-      $success = $sql->execute([
-         $rq_no,
-        $file1,
-       $file1Name,
-       $file1Type,
-       $file2,
-        $file2Name,
-        $file2Type,
-      ]);
-
-      $re->rq_no = $rq_no;
-    }
-    if ($success) {
-      $re->success = true;
-      echo json_encode($re);
-    } else {
-      $re->success = false;
-      //$re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
-      echo json_encode($re);
-    }
-  }
-
 
   public function assign_pvc_no() {
 
@@ -4659,7 +4624,109 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     return $rqPrefix . $runningNo;
   }
   
+  public function assign_re_req_no() {
+
+    $rqPrefix = 'ReReq-';
+    $sql = $this->prepare(  "select ifnull(max(re_req_no),0) as max from Reimbursement_Request where re_req_no like 'REREQ-%'" );
+    $sql->execute();
+    $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
   
+    $runningNo = '';
+    if ( $maxRqNo == '0' ) {
+      $runningNo = '00001';
+    } else {
+      $latestRunningNo = ( int )substr( $maxRqNo, 6 ) + 1;
+     
+      if ( strlen( $latestRunningNo ) == 5 ) {
+        $runningNo = $latestRunningNo;
+      } else {
+        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+          $runningNo .= '0';
+        }
+        $runningNo .= $latestRunningNo;
+      }
+    }
+    
+    return $rqPrefix . $runningNo;
+  }
+  public function addReReqDetails(){
+    
+    $sql = $this->prepare("update Reimbursement_Request SET withdraw_date=?, withdraw_name=?, employee_id=?, 
+    line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? ,authorizer_name=?, 
+    details=? WHERE re_req_no  = ?");
+    $success = $sql->execute([
+      
+      input::post( 'withdrawDate' ),
+      input::post( 'withdrawName' ),
+      input::post( 'employeeId' ),
+      input::post( 'employeeLine' ),
+      input::post( 'bankName' ),
+      input::post( 'taxNumber' ),
+      input::post( 'bankBookName' ),
+      input::post( 'bankBookNumber' ),
+      input::post( 'authorizerName' ),
+      input::post( 'table' ),
+      input::post( 're_req_no' )
+      
+      
+    ]);
+    if ($success){ echo ' help สำเร็จ';
+    echo input::post( 're_req_no ' ).'<br>';
+      print_r($sql->errorInfo());}
+    else {
+     
+      echo input::post( 're_req_no ' ).'<br>';
+      print_r($sql->errorInfo());
+    }
+    
+    
+  }
+  
+  
+  public function uploadImgForReReq() {
+    $Quotation_pic = $_FILES['quotation_pic']; 
+    
+    
+    if(filesize($Quotation_pic['tmp_name']) > 50000) {
+      $success = false;
+      $re->cause = 'File size too big!! Max file size is 50 kb.';
+    } else if(!@is_array(getimagesize($Quotation_pic['tmp_name']))){
+      $success = false;
+      $re->cause = 'File is not an image.';
+    } else {
+    $rq_no = $this->assign_re_req_no();
+     
+     if(isset($Quotation_pic)) {
+       $file1 = file_get_contents($Quotation_pic['tmp_name']);
+       $file1 = base64_encode($file1);
+       $file1Name = $Quotation_pic['name'];
+       $file1Type = $Quotation_pic['type'];
+     }
+      
+  
+      $sql = $this->prepare("insert into Reimbursement_Request (re_req_no, quotation_name, quotation_type, quotation_data)
+                               values( ?, ?, ?, ?)" );
+      $success = $sql->execute([
+         $rq_no,
+         $file1Name,
+         $file1Type,
+         $file1
+       
+      ]);
+      
+  
+      $re->rq_no = $rq_no;
+    }
+    if ($success) {
+      $re->success = true;
+      echo json_encode($re);
+    } else {
+      $re->success = false;
+      $re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
+      echo json_encode($re);
+    }
+   
+  }
 
 public function getStockPo() {
   $sql = $this->prepare( "SELECT

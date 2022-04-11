@@ -146,7 +146,7 @@ class fileController extends controller {
         if(empty(uri::get(2))) {
             $this->err404();
         }else if(uri::get(2)=="pvc"){
-            $this->positionEcho('acc', $this->model->getPVC(Uri::get(3)));
+            $this->positionEcho('acc', $this->model->getPV(Uri::get(3)));
             $this->view->render("file/pvc");
 
         }else {
@@ -159,17 +159,38 @@ class fileController extends controller {
             }
         }
     }
+    public function pvc() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        }else if(uri::get(2)=="pvc"){
+            $this->positionEcho('acc', $this->model->getPVC(Uri::get(3)));
+            $this->view->render("file/pvc");
+            
+
+        }else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
+                $this->view->pvc = $this->model->getPVC(uri::get(2));
+                $this->view->render("file/pvc");
+                echo "<script>console.log('Debug Objects: " . $this->model->getPVC(uri::get(2)) . "' );</script>";
+            } else {
+                $this->err404();
+            }
+        }
+    }
+    
     public function re_req() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        } else if(uri::get(2)==="get_PVC"){
-            $this->positionEcho('file', $this->model->getPVC(Uri::get(3)));
+        } else if(uri::get(2)==="get_re_req"){
+            $this->positionEcho('file', $this->model->getReReq(Uri::get(3)));
+            $this->view->render("file/re_req");
            
         }
         else {
             if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
                 $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
-                $this->view->pvc = $this->model->getPvc(uri::get(3));
+                $this->view->re_req = $this->model->getReReq(uri::get(2));
                 $this->view->render("file/re_req");
             } else {
                 $this->err404();
@@ -177,6 +198,24 @@ class fileController extends controller {
         }
     }
    
+    public function pva() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        }else if(uri::get(2)=="pva"){
+            $this->positionEcho('acc', $this->model->getPva(Uri::get(3)));
+            $this->view->render("file/pva");
+
+        }else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
+                $this->view->pv = $this->model->getPva(uri::get(2));
+                $this->view->render("file/pva");
+            } else {
+                $this->err404();
+            }
+        }
+    }
+
     
     public function cs() { 
         if(empty(uri::get(2))) {

@@ -53,19 +53,51 @@
             </div>
 
             <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVA()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">ใบ PVA (PVA)</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVB()">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบSupplier (PVB)</h5>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        <!-- DOCUMENT -->
-        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+            <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVD()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">ใบSupplier (PVD)</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVC()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">ใบเบิกค่าใช้จ่าย</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVC_confirm()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">PVC</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <div class="mt-2 p-0">
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- DOCUMENT everything not pv  -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+        <div ng-show = "temp != 'PV-D' && temp != 'PV-A' && temp != 'PV-C' && temp != 'PPV-C'" class="mt-2 p-0">
             
             <table class="table table-hover my-1">
                 <tr>
@@ -94,9 +126,9 @@
                         <span ng-show="dashboard.slip_name == null && dashboard.receipt_name == null">รอโอนเงิน</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name == null">โอนเงินแล้ว</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name != null">ได้ใบเสร็จแล้ว</span>
-                        <span ng-show="dashboard.slip_name != null"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank">สลิป invoice</a></span>
+                        <span ng-show="dashboard.slip_name != null"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
                         <span ng-show="dashboard.cr_name == null">ไม่มีใบ CR </span>
-                        <a ng-show="dashboard.cr_name != null" href="/acc/dashboard/get_PVB_CR/{{dashboard.file_no}}" target="_blank">ดูใบ CR</a> </span>
+                        <a ng-show="dashboard.cr_name != null" href="/acc/dashboard/get_PVB_CR/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">ดูใบ CR</a> </span>
 
                         <!-- <span ng-show="pvType == 'Supplier'"> <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
                         <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบกำกับภาษี </a>
@@ -105,16 +137,150 @@
                     </td>
                 </tr>
             </table>
-            <!-- <button type="button" class="btn btn-default btn-block my-0" ng-click="test()">test</button> -->
+            
+        </div>
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- DOCUMENT PVD -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <div ng-show = "temp == 'PV-D'" class="mt-2 p-0">
+            
+            <table class="table table-hover my-1">
+                <tr>
+                    <th>เลข PV-D</th>
+                    <th>เลข IV</th>
+                    <th>เลข SOX</th>
+                    <th>วันที่</th>
+                    <th>Slip</th>
+                    <th>สถานะ</th>
+                </tr>
+                <tr ng-show="dashboards.length == 0">
+                    <th colspan="5">
+                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> no PV-D to show</h6>
+                    </th>
+                </tr>
+                <!-- todo view file -->
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                    <td>{{dashboard.pvd_no}}</td>
+                    <td>{{dashboard.invoice_no}}</td>
+                    <td>{{dashboard.sox_no}}</td>
+                    <td>{{dashboard.pvd_date}} {{dashboard.pvd_time}}</td>
+                    <td>
+                        <span ng-show="dashboard.PVD_status < 3">fin ยังไม่ upload slip</span>
+                        <!-- todo get pvd slip -->
+                        <a ng-show="dashboard.PVD_status >= 3" href="/acc/dashboard/get_PVD_slip/{{dashboard.pvd_no}}" target="_blank" ng-click="stopEvent($event)">slip</a>
+
+                    </td>
+                    <!-- todo convert status to readable -->
+                    <td>{{dashboard.PVD_status}}</td>
+                </tr>
+            </table>
+            
+        </div>
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- DOCUMENT PVA -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <div ng-show = "temp == 'PV-A'" class="mt-2 p-0">
+            
+            <table class="table table-hover my-1">
+                <tr>
+                    <th>เลข PV-A</th>
+                    <th>วันที่</th>
+                    <th>รายการ</th>
+                    <th>จำนวนเงิน</th>
+                    <th>Slip</th>
+                    <th>สถานะ</th>
+                </tr>
+                <tr ng-show="dashboards.length == 0">
+                    <th colspan="5">
+                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> no PV-D to show</h6>
+                    </th>
+                </tr>
+                <!-- todo view file -->
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                    <td>{{dashboard.pv_no}}</td>
+                    <td>{{dashboard.pv_date}} {{dashboard.pv_time}}</td>
+                    <td>{{dashboard.product_names}}</td>
+                    <td>{{dashboard.total_paid}}</td>
+                    <td>
+                        <span ng-show="dashboard.pv_status < 4">fin ยังไม่ upload slip</span>
+                        <!-- todo get pvd slip -->
+                        <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
+
+                    </td>
+                    <!-- todo convert status to readable -->
+                    <td>{{dashboard.pv_status}}</td>
+                </tr>
+            </table>
             
         </div>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
+        <div ng-show = "temp == 'PPV-C'" class="mt-2 p-0">
+            
+            <table class="table table-hover my-1">
+                <tr>
+                    <th>เลข PV-C</th>
+                    <th>วันที่</th>
+                    <th>จำนวนเงิน</th>
+                    <th>ผู้ออกใบเบิกค่าใช้จ่าย</th>
+                    <th>ผู้กดยืนยัน</th>
+                </tr>
+                <tr ng-show="dashboards.length == 0">
+                    <th colspan="5">
+                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> ไม่มีใบเบิกค่าใช้จ่าย แสดง </h6>
+                    </th>
+                </tr>
+                <!-- todo view file -->
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                    <td>{{dashboard.ex_no}}</td>
+                    <td>{{dashboard.withdraw_date}}</td>
+                    <td>{{dashboard.total_paid}}</td>
+                    <td>{{dashboard.employee_id}}</td>
+                </tr>
+            </table>
+            
+        </div>
+
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+        <div ng-show = "temp == 'PV-C'" class="mt-2 p-0">
+            
+            <table class="table table-hover my-1">
+                <tr>
+                    <th>เลข PV-C</th>
+                    <th>วันที่</th>
+                    <th>จำนวนเงิน</th>
+                    <th>อัพสลิป</th>
+                    <th>ผู้ออกใบเบิกค่าใช้จ่าย</th>
+                    <th>ผู้กดยืนยัน</th>
+                </tr>
+                <tr ng-show="dashboards.length == 0">
+                    <th colspan="5">
+                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> no PV-C to show </h6>
+                    </th>
+                </tr>
+                <!-- todo view file -->
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                    <td>{{dashboard.ex_no}}</td>
+                    <td>{{dashboard.withdraw_date}}</td>
+                    <td>{{dashboard.total_paid}}</td>
+                    <td>{{dashboard.employee_id}}</td>
+                </tr>
+            </table>
+            
+        </div>
+
     </div>
 
-</body>
+</body> 
 
 </html>
 
@@ -134,13 +300,12 @@
         $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
 		$scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
+        $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
+        $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
+        $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
         $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
         $scope.pvType = '';
-
-        $scope.test = function() {
-             console.log($scope.dashboards);
-        }
         
 		$scope.getDashboardIVCR = function() {
             $scope.dashboards = $scope.dashboardsIv;
@@ -165,6 +330,13 @@
             $scope.temp = 'ประเภทการสั่งจ่าย';
         }
 
+        $scope.getDashboardPVA = function() {
+            $scope.dashboards = $scope.dashboardsPva; 
+            $scope.doc = 'PV';
+            $scope.pvType = 'pva';
+            $scope.temp = 'PV-A';
+        }
+
         $scope.getDashboardPVB = function() {
 
             $scope.dashboards = $scope.dashboardsPvb; 
@@ -172,11 +344,38 @@
             $scope.pvType = 'Supplier';
             $scope.temp = 'PV-B';
         }
+
+        $scope.getDashboardPVD = function() {
+
+            $scope.dashboards = $scope.dashboardsPvd; 
+            $scope.doc = 'PV';
+            $scope.pvType = 'pvd';
+            $scope.temp = 'PV-D';
+        }
+
+        $scope.getDashboardPVC = function(){
+            $scope.dashboards = $scope.dashboardsPvc; 
+            $scope.doc = 'PV';
+            $scope.pvType = 'pvc';
+            $scope.temp = 'PPV-C';
+        }
+
+        $scope.getDashboardPVC_confirm = function(){
+            $scope.dashboards = $scope.dashboardsPvc; 
+            $scope.doc = 'PV';
+            $scope.pvType = 'pvc';
+            $scope.temp = 'PV-C';
+        }
+
         
         $scope.getDashboardPO = function() {
             $scope.dashboards = $scope.dashboardsPo;
             $scope.doc = 'PO';
             $scope.temp = 'Supplier';
+        }
+
+        $scope.stopEvent = function(e){
+            e.stopPropagation();
         }
         
         $scope.viewFile = function(file) {

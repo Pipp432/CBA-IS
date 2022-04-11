@@ -36,8 +36,8 @@
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
                         <td><b>สั่งจ่าย</b> {{detail[0].pv_name}}</td>
-                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_type}}</td>
-                        <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].due_date}}</td>
+                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_pay}}</td>
+                        <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].pv_due_date}}</td>
                     </tr>
                     <tr ng-show="detail[0].supplier_no != ''">
                         <td colspan="2"><b>ที่อยู่</b> {{detail[0].pv_address}}</td>
@@ -60,17 +60,17 @@
                     <th>จำนวน</th>
                     <th>หมายเหตุ</th>
                 </tr>
-                <tr ng-repeat="item in detail">
-                    <td style="text-align: left;">{{item.file_date}}</td>
-                    <td style="text-align: left;">{{item.iv_no}}</td>
+              
+                    <td style="text-align: left;">{{detail[0].pv_due_date}}</td>
+                    <td style="text-align: left;">{{detail[0].ex_no}}</td>
                     <td style="text-align: left;">{{item.detail}}</td>
-                    <td style="text-align: left;">{{item.rr_no}}</td>
+                    <td style="text-align: left;">{{detail[0].re_req_no}}</td>
                     <td style="text-align: right;">{{item.paid_total | number:2}}</td>
                     <td style="text-align: left;">{{item.note}}</td>
-                </tr>
+                
                 <tr>
                     <th colspan="1" style="text-align: center;">จำนวนเงิน</th>
-                    <th colspan="2" style="text-align: left;">{{detail[0].thai_text}}</th>
+                    <th colspan="2" style="text-align: left;">{{detail[0].total_paid_thai}}</th>
                     <th colspan="1" style="text-align: center;">รวม</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].total_paid | number:2}}</th>
                 </tr>
@@ -97,7 +97,8 @@
     
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
-        
+            $scope.detail = <?php echo $this->pvc; ?>;
+            $scope.company = $scope.detail[0].pv_no.substring(0,1);
         }
     });
     

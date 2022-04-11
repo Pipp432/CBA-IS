@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-md-3">
                         <label for="pvItemIV">เลขที่ใบกำกับภาษี</label>
-                        <input type="text" class="form-control" id="pvItemIV" ng-model="pvItems.Tax_Number">
+                        <input type="text" class="form-control" id="pvItemIV" ng-model="pvItems.tax_number">
                     </div>
                     <div class="col-md-3">
                         <label for="pvItemPaidTotal">จำนวนเงิน</label>
@@ -190,19 +190,15 @@
                 <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
                  
                 <div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PC'">
-                    <table class="table table-hover my-1" ng-show="PVCs.length == 0">
-                        <tr ng-show="!isLoad">
+                    <table class="table table-hover my-1" ng-show="ReReqs.length == 0">
+                       
                             <th>ไม่มีใบเบิกค่าใช้จ่าย ที่ยังไม่ได้ออก PV</th>
-                        </tr>
-                        <tr ng-show="isLoad">
-                            <th>
-                                <h6 class="my-0"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> กำลังโหลด ...</h6>
-                            </th>
-                        </tr>
+                        
+                        
                     </table>
-                    <table class="table table-hover my-1" ng-show="PVCs.length != 0">
+                    <table class="table table-hover my-1" ng-show="ReReqs.length != 0">
                         <tr>
-                            <th>เลข PVC</th>
+                            <th>เลข EX</th>
                             <th>วันที่</th>
                             <th>ใบสำคัญสั่งจ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
@@ -210,17 +206,17 @@
                            
                         </tr>
                         <!-- <tr ng-repeat="pvc in PVCs | filter:{form_no:pvItemRR} |filter:{ws_type:'3'}" ng-click="getWsDetail(ws)"> -->
-                        <tr ng-repeat="pvc in PVCs track by $index" ng-click="getPVCDetail(pvc,$index)">
-                            <td style="text-align: center;">{{pvc.PVC_No}}</td>
-                            <td style="text-align: center;">{{pvc.Withdraw_Date}}</td>
+                        <tr ng-repeat="re_req in ReReqs track by $index" ng-click="getReReqDetail(re_req,$index)">
+                            <td style="text-align: center;">{{re_req.ex_no}}</td>
+                            <td style="text-align: center;">{{re_req.withdraw_date}}</td>
                             <!-- <td><a href="/acc/payment_voucher/get_PVCs_form/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a></td> -->
                             <td style="text-align: center;">
-                            <a href="/file/re_req/{{pvc.PVC_No}}" target="_blank">{{pvc.EX_No}}</a>
+                            <a href="/file/re_req/{{re_req.re_req_no}}" target="_blank">{{re_req.re_req_no}}</a>
                             </td>
                             <td style="text-align: center;">
-                                <a href="/acc/payment_voucher/get_quotation/{{pvc.PVC_No}}" target="_blank">{{pvc.quotation_name}}</a><br>  
+                                <a href="/acc/payment_voucher/get_quotation/{{re_req.PVC_No}}" target="_blank">{{re_req.quotation_name}}</a><br>  
                             </td>
-                            <td style="text-align: center;">{{pvc.Withdraw_Name}}</td>
+                            <td style="text-align: center;">{{re_req.withdraw_name}}</td>
                             
                             <!-- <td><a href="/acc/payment_voucher/get_ws_iv/{{ws.ws_no}}/slip" target="_blank">{{ws.slip_name}}</a></td>
                             <td>{{ws.employee_id}} {{ws.employee_nickname_thai}}</td> -->
@@ -260,12 +256,12 @@
                         </tr>
                         <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
-                            <td>{{pvItem.date}}</td>
+                            <td>{{pvItem.withdraw_date}}</td>
                             <td>{{pvItem.debit}}</td>
-                            <td>{{pvItem.iv_no}}</td>
-                            <td>{{pvItem.detail}}</td>
-                            <td>{{pvItem.rr_no}}</td>
-                            <td style="text-align: right;">{{pvItem.vat | number:2}}</td>
+                            <td>{{pvItem.tax_number}}</td>
+                            <td>{{pvItem.pv_details}}</td>
+                            <td>{{pvItem.re_req_no}}</td>
+                            <td style="text-align: right;">{{(pvItem.total_paid)*7/107| number:2}}</td>
                             <td style="text-align: right;">{{pvItem.total_paid | number:2}}</td>
                         </tr>
                         <tr>
@@ -532,7 +528,7 @@
             $scope.vat = false;
             $scope.rrcinopvs = [];
             $scope.wss = [];
-            $scope.PVCs = [];
+            $scope.ReReqs = [];
             $scope.isLoad = true;
             $scope.PVDs = [];
             
@@ -546,7 +542,7 @@
                 $("#pvAddressTextbox").prop("disabled", true);
             } else if($scope.selectedPaymentType==='PC') {
                 // $http.get('/acc/payment_voucher/get_ws').then(function(response){$scope.wss = response.data; $scope.isLoad = false;});
-                $http.get('/acc/payment_voucher/get_PVCs_form').then(function(response){$scope.PVCs = response.data; $scope.isLoad = false;console.log($scope.PVCs)});
+                $http.get('/acc/payment_voucher/get_ReReqs').then(function(response){$scope.ReReqs = response.data; $scope.pvItem = $scope.ReReqs ;$scope.pvItems = $scope.ReReqs;$scope.isLoad = false;console.log($scope.ReReqs)});
                 
                 
             } else if($scope.selectedPaymentType==='PD') {
@@ -616,6 +612,7 @@
             //     $('#formValidate7').modal('toggle');
             } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemPaidTotal==='') {
                 $('#formValidate8').modal('toggle');
+                console.log($scope.pvItemPaidTotal)
             } else if ($scope.pvItemDate==='') {
                 $('#formValidate1').modal('toggle');
             } else {
@@ -628,22 +625,26 @@
                 
                                     
                 if($scope.selectedPaymentType==='PC')
-                {
+                { let tax= ($scope.tax ? "Yes" : "No")
+                    console.log(pvItemDateStr,$scope.pvItemDebit,$scope.pvItemPaidTotal,$scope.pvName,$scope.pvAddress,company )
+                    console.log($scope.vat, tax)
                     $.post(`/acc/payment_voucher/confirm/${$scope.pvItemRR}`,{
-                        "debit" : $scope.pvItemDebit,
-                        "date" : pvItemDateStr,
-                        "iv_no" : $scope.pvItemIV,
-                        "detail" : $scope.pvItemDetail,
-                        "rr_no" : $scope.pvItemRR,
-                        "total_paid" : parseFloat($scope.pvItemPaidTotal),
-                        "vat" : parseFloat(($scope.vat) ? $scope.pvItemPaidTotal * 7 / 107 : 0),
-                        "pv_name" : $scope.pvName,
-                        "pv_address" : $scope.pvAddress,
-                        "selected_company":company,
-                        "confirm":"1"
+                        "debit" : String($scope.pvItemDebit),
+                        "cr_name": String($scope.pvItemRR),
+                        "pv_date" : pvItemDateStr,
+                        "total_paid" : String($scope.pvItemPaidTotal),
+                        "pv_name" : String($scope.pvName),
+                        "pv_address" : String($scope.pvAddress),
+                        "details": String($scope.pvItemDetail),
+                        "selected_company":String(company.company_code),
+                        "confirm":"1",
+                        "return_tax": tax
                     }).done(function(data,status){
                         console.log(data)
                         console.log(status)
+                        
+                    }).fail(function(e){
+                        console.log(e)
                     });
                 }
 
@@ -664,6 +665,7 @@
 
                                
             }
+           
         }
         
         $scope.clearPvItem = function() {
@@ -766,10 +768,21 @@
                 if($scope.selectedCompany==='') {
                     $('#formValidate9').modal('toggle');
                 } else {
+                    var d = new Date();
+                    var month = d.getMonth()+1;
+                    var day = d.getDate();
+
+                    var output = d.getFullYear() + '/' +
+                        (month<10 ? '0' : '') + month + '/' +
+                        (day<10 ? '0' : '') + day;
+
                     $.post("/acc/payment_voucher/post_pvc", {
                         post : true,
                         pv_name : $scope.pvName,
                         pv_address : $scope.pvAddress,
+                        pv_date: output,
+                        ex_no:$scope.pvItemRR,
+                        re_req_no:$scope.pvDetails[0].re_req_no,
                         company_code : $scope.company_code,
                         pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
                         totalPaid : $scope.totalPaid,
@@ -778,12 +791,15 @@
                         dueDate : dueDateStr,
                         bank : $scope.bank
                     }, function(data) {
-                        addModal('successModal', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'บันทึก ' + data + ' สำเร็จ');
-                        $('#successModal').modal('toggle');
-                        $('#successModal').on('hide.bs.modal', function (e) {
-                            window.location.assign('/');
-                        });
+                        console.log(JSON.stringify(angular.toJson($scope.pvItems)))
+                        console.log(data)
+                        // addModal('successModal', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'บันทึก ' + data + ' สำเร็จ');
+                        // $('#successModal').modal('toggle');
+                        // $('#successModal').on('hide.bs.modal', function (e) {
+                        //     // window.location.assign('/');
+                        // });
                     });
+                    
                 }
                 
             } else if($scope.selectedPaymentType==='PD') {
@@ -792,18 +808,30 @@
             
         }
 
-        $scope.getPVCDetail = function(pvc,index) {
-            let sum= 0;
+        $scope.getReReqDetail = function(re_req,index) {
+           
             $("#pvItemRR").prop("disabled", true);
-            $scope.pvItemRR = pvc.PVC_No;
+            $scope.pvItemRR = re_req.ex_no;
             console.log($scope.pvItemRR);
-            $scope.pvDetails = JSON.parse($scope.PVCs[index]["Table_Of_Details"])
-            console.log( $scope.pvDetails )
-            $scope.pvItems = $scope.PVCs[index]
-            console.log($scope.pvItems);
-
-            ($scope.pvDetails).forEach(entry=>sum+=entry['money'])
-            $scope.totalPaid = sum
+            $scope.pvDetails = JSON.parse($scope.ReReqs[index]["details"])
+            console.log( $scope.pvDetails[0].money)
+            $scope.pvItems = $scope.ReReqs[index]
+            console.log( $scope.pvItems);
+            $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
+            
+            ($scope.ReReqs).forEach(data=>{
+                if(data.ex_no===$scope.pvItemRR){
+                $scope.pvDetails = [data];
+                
+            }
+            console.log($scope.pvDetails)
+            
+        })
+        $scope.totalPaid = Number($scope.pvDetails[0].total_paid);
+            $scope.totalVat = Number($scope.pvDetails[0].total_paid)*7/107;
+            console.log($scope.totalPaid)
+         
+            
         }
 
   	});

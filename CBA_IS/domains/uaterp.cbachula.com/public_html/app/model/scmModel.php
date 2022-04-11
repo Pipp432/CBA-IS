@@ -799,31 +799,60 @@ class scmModel extends model {
         $sql->execute([1,$sox_no]);
     }
 
+    public function get_detail(){
+        $sql=$this->prepare("SELECT * FROM Product INNER JOIN SOPrinting ON Product.product_no=SOPrinting.product_no");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
     //ปุ่มยืนยัน-ช่องบน
     public function download_sox(){
         //$sql=$this->prepare("SELECT * FROM SOX WHERE SOX.done=0");
-        $sql=$this->prepare("SELECT * FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
-        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no WHERE SO.product_type='Stock' 
-        OR SO.product_type='Order' AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
+        $sql=$this->prepare("SELECT * FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no
+        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
+        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
+        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         //echo "<script>console.log('Debug Objects: " . $sql->errorInfo()[2]. "' );</script>";
-        return json_encode([]);
-        //return null;
+        //return json_encode([]);
+        return null;
         
     }
-
     //ปุ่มird-ช่องล่าง
-    public function change_status($sox_no){
-        $sql=$this->prepare("UPDATE `SOX` SET `sox_status`=? WHERE sox_no=?");
-        $sql->execute([9,$sox_no]);
+    public function change_status(){
+        $irdItemArray = json_decode( input::post( 'irdItems' ), true );
+        $irdItemArray = json_decode( $irdItemArray, true );
+        $irdList = array();
+        foreach ( $irdItemArray as $value ) {
+
+            if ( array_key_exists( $value[ 'sox_no' ], $irdList ) ) {
+        
+            } else {
+                $sql=$this->prepare("UPDATE `SOX` SET `sox_status`=? WHERE sox_no=?");
+                $sql->execute([9,$value[ 'sox_no' ]]);
+            }
+        }
     }
     
     //ปุ่มird-ช่องบน
     public function get_status(){
-        $sql=$this->prepare("SELECT * FROM SOX WHERE sox_status=1");
+        $sql=$this->prepare("SELECT * FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no
+        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
+        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
+        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 9");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

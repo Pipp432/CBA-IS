@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ใบชำระ supplier/PV-C</h2>
+        <h2 class="mt-3">ใบขอเบิกค่าใช้จ่าย / Reimbursement Request</h2>
 
         <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
             <div class="card-body">
@@ -80,7 +80,7 @@
                 <form id="form" >
                     <br>
                     <label>ใบเสนอราคา(pdf)</label>
-                    <input type="file" class="form-control-file" id="quotation" name="Quotation_pic">
+                    <input type="file" class="form-control-file" id="quotation" name="quotation_pic">
                     
                     <br>
                 </form>
@@ -301,7 +301,7 @@
                     
     
             $.ajax({
-                url: "pvc/post_quotation",
+                url: "reimbursement_request/post_quotation",
                 type: "POST",
                 dataType: 'json',
                 method: 'POST',
@@ -315,13 +315,13 @@
                 console.log(data['success']);
                 if(data['success']) {
                     $scope.rq_no = data['rq_no'];
-                    $scope.postPVC();
+                    $scope.postReReq();
                 } else {
                     addModal('uploadFailModal', 'upload imgae', ' 1 fail');
                     $('#uploadFailModal').modal('toggle');
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.log('ajax.fail');
+                console.log(jqXHR.responseText);
                 console.log(textStatus);
                 console.log(errorThrown);
                 addModal('uploadFailModal', 'upload imgae', '2 fail');
@@ -329,10 +329,11 @@
             });    
         }
     
-        $scope.postPVC = function(){
+        $scope.postReReq = function(){
             $('#confirmModal').modal('hide');
-            $.post("pvc/post_PVC",{
-                PVC_No : $scope.rq_no,
+            $.post("reimbursement_request/post_reimbursement_Request",{
+                post:true,
+                re_req_no : $scope.rq_no,
                 withdrawDate :$scope.getWithdrawDate(),
                 withdrawName:$scope.getWithdrawName(),
                 employeeId : $scope.getEmployeeId(),
@@ -345,8 +346,10 @@
                 table : $scope.getTableData(),
                 
             },function(data,status){
-                addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ','toMainMenu()');
+                console.log(data,status);
+                addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
+                $scope.toMainMenu();
                 
             })
         }

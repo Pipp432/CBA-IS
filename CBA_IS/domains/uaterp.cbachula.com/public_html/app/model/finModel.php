@@ -315,6 +315,57 @@ class finModel extends model {
         }
         return json_encode([]);
     }
+    public function getReReq(){
+        $sql = $this->prepare("select * from Reimbursement_Request where ex_no IS Null");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+        
+    }
+    public function getReReqDetails($re_req_no){
+        $sql = $this->prepare("select * from Reimbursement_Request where re_req_no=?");
+        $sql->execute([$re_req_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+        
+    }
+    public function assign_ex_no() {
+
+        $rqPrefix = 'EX-';
+        $sql = $this->prepare( "select ifnull(max(ex_no),0) as max from Reimbursement_Request where ex_no like ?" );
+        $sql->execute( [ 'EX-%' ] );
+        $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
+        $runningNo = '';
+        if ( $maxRqNo == '0' ) {
+          $runningNo = '00001';
+        } else {
+          $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+          if ( strlen( $latestRunningNo ) == 5 ) {
+            $runningNo = $latestRunningNo;
+          } else {
+            for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+              $runningNo .= '0';
+            }
+            $runningNo .= $latestRunningNo;
+          }
+        }
+        return $rqPrefix . $runningNo;
+      }
+    public function postAdditionReReqDetail(){
+        echo "<script>console.log('pain' );</script>";
+        $sql = $this->prepare("update Reimbursement_Request set Reimbursement_Request.evidence=?,Reimbursement_Request.company=?,Reimbursement_Request.ex_no=? where re_req_no=? ");
+        $ex_no = $this->assign_ex_no();
+        $sql-> execute([
+        input::post('proof'),
+        input::post('project'),
+        $ex_no,
+       input::post('re_req_number')
+    ]);
+    }
     
     // CR Module
     public function addCr() {
@@ -813,13 +864,15 @@ class finModel extends model {
         return true;
         
     }
-    public function insertslipForSup($name,$type,$data,$pvno)
+    public function insertslipForSup($name,$type,$data,$name2,$type2,$data2,$pvno)
     {
         $data=base64_decode($data);
+        $data2=base64_decode($data2);
         
-        $sql = $this->prepare("update  PV set slip_name = ?, slip_type= ? , slip_data = ? , tranferred_employee = ? where pv_no = ?");
-        $sql->execute([$name,$type,$data,session::get('employee_id'),$pvno]);
-        return true;
+        $sql = $this->prepare("update  PV set slip_name = ?, slip_type= ? , slip_data = ? , cr_name = ?, cr_type= ? , cr_data = ? , tranferred_employee = ? where pv_no = ?");
+        $success = $sql->execute([$name,$type,$data,$name2,$type2,$data2,session::get('employee_id'),$pvno]);
+        if($success) echo true;
+        else print_r($sql->errorInfo());
         
     }
     public function GetStatus2Data()
@@ -1558,8 +1611,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         return [];
     }
 
+    //confirm petty cash request (pre pva)
     public function getMinorRequestForFin() {
-        $sql = $this->prepare("select rq_no,date,time,employee_id,employee_name,LineId,product_name,cost from petty_cash_received where done = 0");
+        $sql = $this->prepare("SELECT internal_pva_no,pv_date,pv_time,employee_id,employee_name,line_id,product_names,total_paid from PVA where pv_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return $sql->fetchAll();
@@ -1567,33 +1621,188 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         return [];
     }
     
-    public function getRe($rq_no) {
-        $sql = $this->prepare("select rq_no,iv_rec_image,iv_rec_type from petty_cash_received where rq_no = ?");
-        $sql->execute([$rq_no]);
+    public function getRe($internal_pva_no) {
+        $sql = $this->prepare("select ivrc_type,ivrc_data from PVA where internal_pva_no = ?");
+        $sql->execute([$internal_pva_no]);
         
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
-    		header('Content-type: '.$data['iv_rec_type']);
-            echo base64_decode($data['iv_rec_image']);
+    		header('Content-type: '.$data['ivrc_type']);
+            echo base64_decode($data['ivrc_data']);
         } else {
-            echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+            echo 'ไม่มีใบกำกับภาษีของคำขอนี้';
         }
     }
 
-    public function getIv($rq_no) {
-        $sql = $this->prepare("select rq_no,slip_image,slip_type from petty_cash_received where rq_no = ?");
-        $sql->execute([$rq_no]);
+    public function getIv($internal_pva_no) {
+        $sql = $this->prepare("select slip_data,slip_type from PVA where internal_pva_no = ?");
+        $sql->execute([$internal_pva_no]);
         
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
             header('Content-type: '.$data['slip_type']);
-            echo base64_decode($data['slip_image']);
+            echo base64_decode($data['slip_data']);
         } else {
-            echo 'ไม่มีใบกำกับภาษีของเลข WS นี้';
+            echo 'ไม่มีใบกำกับภาษีของคำขอนี้';
         }
     }
 
-    
+    public function confirmPettyCashRequest(){
+
+        $fin_slip_file_name = $_FILES['slip_file']['name'];
+        $fin_slip_file_data = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
+        $fin_slip_file_type = $_FILES['slip_file']['type'];
+
+        $sql = $this->prepare("UPDATE PVA SET 
+                                fin_slip_name = ?,
+                                fin_slip_data = ?,
+                                fin_slip_type = ?,
+                                pv_status = 1 
+                               WHERE internal_pva_no = ?");
+        $success = $sql->execute([$fin_slip_file_name,$fin_slip_file_data,$fin_slip_file_type,$_POST['internal_pva_no']]);
+        if($success) {
+            echo 'success';
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
+        }
+    }
+
+    public function rejectPettyCashRequest(){
+        $sql = $this->prepare("UPDATE PVA SET pv_status = -1 WHERE internal_pva_no = ?");
+        $success = $sql->execute([$_POST['internal_pva_no']]);
+        if($success) {
+            echo 'success';
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
+        }
+    }
+
+    //create real pva
+    public function getPVAForCreation(){
+        $sql = $this->prepare("SELECT internal_pva_no,pv_date,pv_time,employee_id,employee_name,line_id,product_names,total_paid,fin_slip_name,slip_name,ivrc_name from PVA where pv_status = 1");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getFinSlipPVA($internal_pva_no){
+        $sql = $this->prepare("SELECT fin_slip_data,fin_slip_type from PVA where internal_pva_no = ?");
+        $sql->execute([$internal_pva_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['fin_slip_type']);
+            echo base64_decode($data['fin_slip_data']);
+        } else {
+            echo 'หาใบไม่เจอ';
+            print_r($sql->errorInfo());
+        }
+    }
+
+    public function bundlePVA() {
+        $pvas = $_POST['cpvItems'];
+        $success = true;
+        $pva_no = $this->assignPVA($_POST['program']);
+        $product_names = '';
+        $total_paid = 0;
+
+        foreach($pvas as $pva) {
+            $sql = $this->prepare("UPDATE PVA SET 
+                                 pv_no = ?,
+                                 pv_status = 2 
+                                WHERE internal_pva_no = ?");
+            $success = $success && $sql->execute([$pva_no,$pva['internal_pva_no']]);
+
+            $product_names = $product_names . $pva['product_names'] . "\r\n";
+            $total_paid = $total_paid + $pva['total_paid'];
+            if(!$success) break;
+        }
+
+        if($success) {
+            $sql = $this->prepare("INSERT INTO PVA_bundle (pv_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,?,?,2)");
+            $success = $success && $sql->execute([$pva_no,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,$total_paid,$product_names]);
+        }
+        
+        if($success) {
+            echo $pva_no;
+        } else {
+            foreach($pvas as $pva) {
+                $sql = $this->prepare("UPDATE PVA SET 
+                                     pv_no = null,
+                                     pv_status = 1 
+                                    WHERE internal_pva_no = ?");
+                $sql->execute([$pva['internal_pva_no']]); //set pre pva back
+            }
+            echo 'failed';
+            print_r($sql->errorInfo());
+        }
+    }
+
+    private function assignPVA($program) {
+        $rqPrefix = $program.'PA-';
+        $sql = $this->prepare( "select ifnull(max(pv_no),0) as max from PVA where pv_no like ?" );
+        $sql->execute( [ $program.'PA-%' ] );
+        $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
+        $runningNo = '';
+        if ( $maxRqNo == '0' ) {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+            if ( strlen( $latestRunningNo ) == 5 ) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $rqPrefix . $runningNo;
+    }
+
+    //real pva now
+
+    public function GetPVAforWS() {
+        $sql = $this->prepare("SELECT pv_no,product_names,total_paid from PVA_bundle where pv_status = 3 ORDER BY pv_no ASC");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+        public function postSlipPVA() {
+        $slip_name = $_FILES['slip_file']['name'];
+        $slip_data = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
+        $slip_type = $_FILES['slip_file']['type'];
+
+        $sql = $this->prepare("UPDATE PVA_bundle SET 
+                                slip_name = ?,
+                                slip_data = ?,
+                                slip_type = ?,
+                                pv_status = 4 
+                               WHERE pv_no = ?");
+        $success = $sql->execute([$slip_name,$slip_data,$slip_type,$_POST['pv_no']]);
+
+        if($success){
+            $sql = $this->prepare("UPDATE PVA SET 
+                                    pv_status = 4 
+                                   WHERE pv_no = ?");
+            $success = $success && $sql->execute([$_POST['pv_no']]);
+        }
+        if($success) {
+            echo 'success';
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
+        }
+    }
+
+    //PVD
     public function getPVD() {
         $sql = $this->prepare("SELECT
                                 PVD.pvd_no,
@@ -1610,6 +1819,8 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return null;
     }
+
+
 
     public function confirmPVD() {
 
@@ -1630,8 +1841,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         
         if($success) echo 'success';  
         else echo implode(" ",$sql->errorInfo());
-
     }
+
+
 
     
 }
