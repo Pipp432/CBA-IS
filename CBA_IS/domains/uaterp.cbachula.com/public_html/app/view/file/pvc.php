@@ -63,7 +63,7 @@
               
                     <td style="text-align: left;">{{detail[0].pv_due_date}}</td>
                     <td style="text-align: left;">{{detail[0].ex_no}}</td>
-                    <td style="text-align: left;">{{item.detail}}</td>
+                    <td style="text-align: left;">{{detail[0].pv_details}}</td>
                     <td style="text-align: left;">{{detail[0].re_req_no}}</td>
                     <td style="text-align: right;">{{item.paid_total | number:2}}</td>
                     <td style="text-align: left;">{{item.note}}</td>

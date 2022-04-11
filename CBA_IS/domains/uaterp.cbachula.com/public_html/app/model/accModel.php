@@ -1212,8 +1212,8 @@ class accModel extends model {
         
         $pvno = $this->assignPVC('C', input::post('company_code'));
         
-        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_due_date,pv_pay,approved_employee,pv_address,total_paid,total_paid_thai) 
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");  
+        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_details,pv_due_date,pv_pay,approved_employee,pv_address,total_paid,total_paid_thai) 
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");  
         $sql->execute([
             $pvno,
             input::post('ex_no'),
@@ -1221,6 +1221,7 @@ class accModel extends model {
             "1",
             input::post('pv_name'),
             input::post('pv_date'),
+            input::post('pv_detail'),
             input::post('dueDate'),
            
             "Expense",
