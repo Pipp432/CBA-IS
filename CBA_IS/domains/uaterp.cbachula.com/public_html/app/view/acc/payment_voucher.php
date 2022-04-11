@@ -824,7 +824,7 @@
                 $scope.pvDetails = [data];
                 
             }
-            console.log($scope.pvDetails)
+            
             
         })
         $scope.totalPaid = Number($scope.pvDetails[0].total_paid);
