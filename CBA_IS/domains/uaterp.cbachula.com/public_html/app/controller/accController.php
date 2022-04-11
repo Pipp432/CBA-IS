@@ -45,7 +45,9 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addIvrc());
         }
          
+        
     }
+
     
     public function payment_voucher() {
         if(empty(uri::get(2))) {
