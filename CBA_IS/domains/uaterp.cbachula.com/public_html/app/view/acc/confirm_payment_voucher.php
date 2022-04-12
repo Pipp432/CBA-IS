@@ -216,7 +216,7 @@
                     post : true,
                     cpvItems : JSON.stringify(angular.toJson(cpvs))
                 }, function(data) {
-                    respond.concat(data);
+                    respond = respond.concat(data);
                     respond_count++;
 
                     if(respond_count == 3) {
@@ -236,7 +236,7 @@
                     post : true,
                     cpvItems : JSON.stringify(angular.toJson(cpvds))
                 }, function(data) {
-                    respond.concat(data);
+                    respond = respond.concat(data);
                     respond_count++;
 
                     if(respond_count == 3) {
@@ -254,7 +254,7 @@
                     post : true,
                     cpvItems : JSON.stringify(angular.toJson(cpvas))
                 }, function(data) {
-                    respond.concat(data);
+                    respond = respond.concat(data);
                     respond_count++;
 
                     if(respond_count == 3) {
