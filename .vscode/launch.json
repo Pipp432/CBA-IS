@@ -17,6 +17,7 @@
             "program": "${file}",
             "cwd": "${fileDirname}",
             "port": 0,
+            //"runtimeExecutable": "E:\\CBA-IS\\CBA_IS\\domains\\uaterp.cbachula.com\\public_html\\app\\_core\\main", //?????
             "runtimeArgs": [
                 "-dxdebug.start_with_request=yes"
             ],
