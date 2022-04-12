@@ -1720,7 +1720,7 @@ class accModel extends model {
     }
 
     public function getDashboardPvc_confirm() {
-        $sql = $this->prepare("select ex_no, pv_date, total_paid, approved_employee, employee_nickname_thai from PVC inner join Employee on approved_employee=employee_id where ex_no is not null");
+        $sql = $this->prepare("select pv_no, pv_date, total_paid, approved_employee, employee_nickname_thai from PVC inner join Employee on approved_employee=employee_id where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
