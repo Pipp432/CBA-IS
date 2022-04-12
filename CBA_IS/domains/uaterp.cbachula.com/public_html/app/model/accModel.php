@@ -1371,6 +1371,19 @@ class accModel extends model {
         }
     }
 
+    public function getPVAReceiptData($pv_no) {
+        $sql = $this->prepare("SELECT slip_type,slip_data from PVA_bundle where pv_no = ?");
+        $sql->execute([$pv_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['slip_type']);
+            echo base64_decode($data['slip_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
+        }
+    }
+
     // Confirm PV Module
     public function confirmPV() {
         
