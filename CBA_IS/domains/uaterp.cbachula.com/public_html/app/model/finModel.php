@@ -1716,20 +1716,21 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                  pv_status = 2 
                                 WHERE internal_pva_no = ?");
             $success = $success && $sql->execute([$pva_no,$pva['internal_pva_no']]);
-
             $product_names = $product_names . $pva['product_names'] . "\r\n";
             $total_paid = $total_paid + $pva['total_paid'];
             if(!$success) break;
         }
 
         if($success) {
-            $sql = $this->prepare("INSERT INTO PVA_bundle (pv_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,?,?,2)");
-            $success = $success && $sql->execute([$pva_no,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,$total_paid,$product_names]);
+            $sql = $this->prepare("INSERT INTO PVA_bundle (pv_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2)");
+            $success = $success && $sql->execute([$pva_no,$total_paid,$product_names]);
         }
         
         if($success) {
             echo $pva_no;
         } else {
+            echo 'failed';            
+            print_r($sql->errorInfo());
             foreach($pvas as $pva) {
                 $sql = $this->prepare("UPDATE PVA SET 
                                      pv_no = null,
@@ -1737,8 +1738,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                     WHERE internal_pva_no = ?");
                 $sql->execute([$pva['internal_pva_no']]); //set pre pva back
             }
-            echo 'failed';
-            print_r($sql->errorInfo());
         }
     }
 
