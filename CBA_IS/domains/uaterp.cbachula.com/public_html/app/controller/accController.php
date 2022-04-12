@@ -116,6 +116,8 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->getPVDConfirmPV()); 
         } else if (uri::get(2)==='get_pva') {
             $this->positionEcho('acc', $this->model->getPVAConfirmPV()); 
+        }else if (uri::get(2)==='get_pva') {
+            $this->positionEcho('acc', $this->model->getPVCConfirmPV()); 
         } else if (uri::get(2)==='get_receipt') {
             $this->requirePostition("acc");
             if (!empty(Uri::get(3))) {

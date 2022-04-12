@@ -2438,6 +2438,12 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 
 
     }
+    public function getPVCConfirmPV(){
+        $sql=$this->prepare("SELECT * FROM PVC WHERE confirmed IS NULL");
+        $sql->execute([]);
+        if ($sql->rowCount() > 0) return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
+        else return "error";
+    }
 }
     
 

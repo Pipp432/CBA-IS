@@ -157,6 +157,13 @@
                 $scope.pvs.push(value);
             });
         });
+        $http.get('/acc/confirm_payment_voucher/get_pvc').then(function(response){ 
+            angular.forEach(response['data'], function (value) {
+                value.pv_type = "pvc";
+                $scope.pvs.push(value);
+            });
+        });
+        console.log( $scope.pvs);
         
         $scope.addCpvItem = function(pv) {
             var newPv = true;
