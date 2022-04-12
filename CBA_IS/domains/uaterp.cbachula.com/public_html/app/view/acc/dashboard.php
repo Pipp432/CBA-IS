@@ -279,7 +279,7 @@
                         <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.re_req_no}}</a>
                     </td>
                     <td>
-                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
+                        <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
                     </td>
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
