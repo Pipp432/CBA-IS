@@ -36,7 +36,7 @@
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
                         <td><b>สั่งจ่าย</b> {{detail[0].pv_name}}</td>
-                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_pay}}</td>
+                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_type}}</td>
                         <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].pv_due_date}}</td>
                     </tr>
                     <tr ng-show="detail[0].supplier_no != ''">

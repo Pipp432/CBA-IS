@@ -1187,7 +1187,7 @@ class accModel extends model {
         
         $sql = $this->prepare("insert into PV (pv_no, pv_date, pv_type, vat_type, supplier_no, pv_name, pv_address, total_paid, approved_employee, paid, cancelled, note, thai_text, total_vat, due_date, bank)
                                 values (?, CURRENT_TIMESTAMP, 'Expense', 1, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)");  
-        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_details,pv_due_date,pv_pay,approved_employee,pv_address,total_paid,total_paid_thai) 
+        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_details,pv_due_date,pv_type,approved_employee,pv_address,total_paid,total_paid_thai) 
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");  
         $sql->execute([
             $pvno,
