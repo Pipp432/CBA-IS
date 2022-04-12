@@ -241,7 +241,7 @@
                     <td>{{dashboard.ex_no}}</td>
                     <td>{{dashboard.withdraw_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>{{dashboard.employee_id}}</td>
+                    <td>{{dashboard.employee_id}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
             </table>
             
@@ -272,7 +272,7 @@
                     <td>{{dashboard.ex_no}}</td>
                     <td>{{dashboard.withdraw_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>{{dashboard.employee_id}}</td>
+                    <td>{{dashboard.employee_id}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
             </table>
             
