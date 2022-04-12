@@ -63,22 +63,25 @@
             }
         });
     }
-    function sentslipForSup(name1,type1,file1,no){
+    function sentslipForSup(name1,type1,file1,name2,type2,file2,no){
          $.post("/fin/WithdrawalSlip/createslipForSup", {
             post: true,
             filename : name1,
             filetype : type1,
             filedata : file1,
+            filename2 : name2,
+            filetype2 : type2,
+            filedata2 : file2,
             pvno : no
             
         }, function(result){
-            if (result === "valid") {
+            if (result == true) {
                 location.replace("/fin/WS");
                  alert("อัพโหลดหลักฐานการโอนเงินเรียบร้อยแล้วครับ");
             } 
             else{
                 location.replace("/fin/WS");
-                alert("Not Success อัพใหม่นะครับบบ");
+                alert(result);
             }
         });
     }
@@ -309,8 +312,13 @@
         $file1 = file_get_contents($_FILES['7_file1']['tmp_name']);
         $file1=base64_encode($file1);
         $type1 = $_FILES['7_file1']['type'];
+        
+        $name2 = $_FILES['7_file2']['name'];
+        $file2 = file_get_contents($_FILES['7_file2']['tmp_name']);
+        $file2 = base64_encode($file2);
+        $type2 = $_FILES['7_file2']['type'];
         $pvno=$_POST['pvno'];
-        echo"<script>sentslipForSup('$name1','$type1','$file1','$pvno');</script>";
+        echo"<script>sentslipForSup('$name1','$type1','$file1','$name2','$type2','$file2','$pvno');</script>";
         
     }
 
