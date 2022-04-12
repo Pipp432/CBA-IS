@@ -258,6 +258,9 @@
                     <th>เลข PV-C</th>
                     <th>วันที่</th>
                     <th>จำนวนเงิน</th>
+                    <th>Slip</th>
+                    <th>เอกสาร IV</th>
+                    <th>เอกสาร PVC</th>
                     <th>ผู้ออกใบ PVC</th>
                     <th>ผู้กดยืนยัน</th>
                 </tr>
@@ -271,6 +274,13 @@
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
+                    <td>{{dashboard.}}</td>
+                    <td>
+                        <a href="https://uaterp.cbachula.com/file/re_req/{{pv.re_req_no}}">{{dashboard.re_req_no}}</a>
+                    </td>
+                    <td>
+                        <a href="">{{dashboard.pv_no}}</a>
+                    </td>
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
             </table>
