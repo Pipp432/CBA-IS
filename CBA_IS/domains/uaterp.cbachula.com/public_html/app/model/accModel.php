@@ -1720,12 +1720,25 @@ class accModel extends model {
     }
 
     public function getDashboardPvc_confirm() {
-        $sql = $this->prepare("select pv_no, pv_date, total_paid, approved_employee, employee_nickname_thai from PVC inner join Employee on approved_employee=employee_id where ex_no is not null");
+        $sql = $this->prepare("select pv_no, pv_date, total_paid, approved_employee, employee_nickname_thai, re_req_no, ex_no from PVC inner join Employee on approved_employee=employee_id where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return [];
+    }
+
+    public function getPVCRR($re_req_no){
+        $spl = $this->prepare("select quotation_type, quotation_name, quotation_data from Reimbursement_Request where re_req_no=?");
+        $sql->execute([$re_req_no]);
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['quotation_type']);
+            echo base64_decode($data['quotation_data']);
+        } else {
+            echo 'หาใบไม่เจอ';
+            print_r($sql->errorInfo());
+        }
     }
     
     // Dashboard Module
