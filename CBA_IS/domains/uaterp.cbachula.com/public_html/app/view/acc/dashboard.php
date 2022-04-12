@@ -207,7 +207,6 @@
                     <td>{{dashboard.total_paid}}</td>
                     <td>
                         <span ng-show="dashboard.pv_status < 4">fin ยังไม่ upload slip</span>
-                        <!-- todo get pvd slip -->
                         <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
 
                     </td>
