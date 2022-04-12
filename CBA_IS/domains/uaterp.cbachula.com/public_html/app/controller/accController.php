@@ -127,7 +127,10 @@ class accController extends controller {
             }
         } else if (uri::get(2)==='post_cpv_items') {
             $this->positionEcho('acc', $this->model->confirmPV());
-        } else if (uri::get(2)==='post_cpvd_items') {
+        } else if (uri::get(2)==='post_cpvc_items') {
+            $this->positionEcho('acc', $this->model->confirmPVC());
+        }
+        else if (uri::get(2)==='post_cpvd_items') {
             $this->positionEcho('acc', $this->model->confirmPVD());
         } else if (uri::get(2)==='post_cpva_items') {
             $this->positionEcho('acc', $this->model->confirmPVA());

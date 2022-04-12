@@ -1478,6 +1478,16 @@ class accModel extends model {
             echo ' ';
         }
     }
+    public function confirmPVC() {
+        $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
+        $pv_no_array = json_decode($cpvItemsArray, true);
+        foreach($pv_no_array as $value) {
+            $sql = $this->prepare("UPDATE PVC SET confirmed = 1 WHERE pvd_no = ?");    
+            $sql->execute([$value]);
+            echo $value;
+            echo ' ';
+        }
+    }
 
     public function confirmPVA() {
         $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
