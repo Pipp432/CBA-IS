@@ -274,12 +274,12 @@
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>{{dashboard.}}</td>
+                    <td>{{dashboard.pv_no}}</td>
                     <td>
-                        <a href="https://uaterp.cbachula.com/file/re_req/{{pv.re_req_no}}">{{dashboard.re_req_no}}</a>
+                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.re_req_no}}</a>
                     </td>
                     <td>
-                        <a href="">{{dashboard.pv_no}}</a>
+                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
                     </td>
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
