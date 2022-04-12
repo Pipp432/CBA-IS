@@ -27,7 +27,9 @@
                             <option value="Expense">ค่าใช้จ่าย</option>
                             <option value="เงินมัดจำ">เงินมัดจำ</option>
                             <option value="pva">PV-A</option>
+                            <option value="pvd">PV-C</option>
                             <option value="pvd">PV-D</option>
+                            
                         </select>
                     </div>
                 </div>
