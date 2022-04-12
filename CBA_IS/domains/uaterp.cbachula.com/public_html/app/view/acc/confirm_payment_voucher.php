@@ -158,8 +158,11 @@
             });
         });
         $http.get('/acc/confirm_payment_voucher/get_pvc').then(function(response){ 
-            $scope.pvs = response.data;
-            console.log( $scope.pvs)
+            angular.forEach(response['data'], function (value) {
+                value.pv_type = "pvc";
+                $scope.pvs.push(value);
+            });
+            console.log($scope.pvs)
         });
         console.log( $scope.pvs);
         
