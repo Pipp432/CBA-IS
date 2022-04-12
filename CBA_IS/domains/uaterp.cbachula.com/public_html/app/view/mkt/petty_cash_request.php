@@ -89,9 +89,9 @@
 
                         <div class="col-md-4">
 
-                            <label for="invoice/receipt">Invoice/Receipt</label>
+                            <label for="ivrc">Invoice/Receipt</label>
 
-                            <input type="file" class="form-control-file" id="invoice/receipt" name="Invoice_Receipt_pic">
+                            <input type="file" class="form-control-file" id="ivrc" name="ivrc">
 
 
                         </div>
@@ -100,7 +100,7 @@
 
                             <label for="bankSlip">Bank Slip</label>
 
-                            <input type="file" class="form-control-file" id="bankSlip" name="bank_slip">
+                            <input type="file" class="form-control-file" id="bankSlip" name="bankSlip">
 
                         </div>
 
@@ -257,13 +257,21 @@
 
             $('#confirmModal').modal('hide');
 
-            var formData = new FormData(form);
+            var formData = new FormData();
 
+            formData.append('invoice/receipt', $('#ivrc')[0].files[0]);
+            formData.append('slip', $('#bankSlip')[0].files[0]);
+            formData.append('rq_no', $scope.rq_no);
+            formData.append('employee_id', $scope.employee_id.toUpperCase());
+            formData.append('lineId', $scope.line_id);
+            formData.append('employee_name', $scope.employee_name);
+            formData.append('product_name', $scope.product_name);
+            formData.append('cost', $scope.price);
 
             $.ajax({
-                url: 'petty_cash_request/post_img_Request',
+                url: 'petty_cash_request/post_pva',
                 type: "POST",
-                dataType: 'json',
+                dataType: 'text',
                 method: 'POST',
                 data: formData,
                 cache: false,
@@ -271,44 +279,27 @@
                 contentType: false,
             }).done(function (data) {
                 console.log(data);
-                console.log(data['success']);
-                if(data['success']) {
-                    $scope.rq_no = data['rq_no'];
-                    $scope.postRequest2();
+                if(data == 'success') {
+                    addModal('uploadSuccessModal', 'upload', 'success');
+                    $('#uploadSuccessModal').modal('toggle');
+                    $('#uploadSuccessModal').on('hide.bs.modal', function (e) {
+                        location.reload();
+                    });
                 } else {
-                    addModal('uploadFailModal', 'upload imgae', 'fail');
+                    addModal('uploadFailModal', 'upload failed', data);
                     $('#uploadFailModal').modal('toggle');
+                    $('#uploadFailModal').on('hide.bs.modal', function (e) {
+                        location.reload();
+                    });
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log('ajax.fail');
-                addModal('uploadFailModal', 'upload imgae', 'fail');
-                $('#uploadFailModal').modal('toggle');
+                addModal('postFailModal', 'upload imgae', 'fail');
+                $('#postFailModal').modal('toggle');
+                $('#postFailModal').on('hide.bs.modal', function (e) {
+                    location.reload();
+                });
             });         
-        }
-        $scope.postRequest2 = function () {
-
-            $.post("petty_cash_request/post_Request", {
-
-                post: true,
-
-                rq_no: $scope.rq_no,
-
-                employee_id: $scope.employee_id.toUpperCase(),
-
-                lineId: $scope.line_id,
-
-                employee_name : $scope.employee_name,
-
-                product_name: $scope.product_name,
-
-                cost: $scope.price,
-
-            }, function (data) {
-
-                addModal('successModal', 'เบิกเงินรองจ่าย', data);
-
-                $('#successModal').modal('toggle');
-            });
         }
     });
 </script>
