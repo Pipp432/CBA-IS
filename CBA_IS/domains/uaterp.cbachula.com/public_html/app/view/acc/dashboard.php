@@ -268,7 +268,7 @@
                 </tr>
                 <!-- todo view file -->
                 <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
-                    <td>{{dashboard.ex_no}}</td>
+                    <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
