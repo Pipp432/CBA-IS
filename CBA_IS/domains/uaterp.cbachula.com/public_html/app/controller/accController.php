@@ -45,7 +45,9 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addIvrc());
         }
          
+        
     }
+
     
     public function payment_voucher() {
         if(empty(uri::get(2))) {
@@ -188,6 +190,7 @@ class accController extends controller {
             $this->view->dashboardPo = $this->model->getDashboardPo();
 			$this->view->dashboardCr = $this->model->getDashboardCr();
             $this->view->dashboardPvc = $this->model->getDashboardPvc();
+            $this->view->dashboardPvc_confirm = $this->model->getDashboardPvc_confirm();
             $this->view->render("acc/dashboard", "navbar");
         } else if (uri::get(2)==='pv_slip') {
             if (!empty(Uri::get(3))) {

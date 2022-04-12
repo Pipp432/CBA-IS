@@ -1187,10 +1187,18 @@ class accModel extends model {
         
         $sql = $this->prepare("insert into PV (pv_no, pv_date, pv_type, vat_type, supplier_no, pv_name, pv_address, total_paid, approved_employee, paid, cancelled, note, thai_text, total_vat, due_date, bank)
                                 values (?, CURRENT_TIMESTAMP, 'Expense', 1, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)");  
+        $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_name,pv_date,pv_details,pv_due_date,pv_pay,approved_employee,pv_address,total_paid,total_paid_thai) 
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");  
         $sql->execute([
             $pvno,
             '',
             input::post('pv_name'),
+            input::post('pv_date'),
+            input::post('pv_detail'),
+            input::post('dueDate'),
+           
+            "Expense",
+            json_decode(session::get('employee_detail'), true)['employee_id'],
             input::post('pv_address'),
             (double) input::post('totalPaid'),
             json_decode(session::get('employee_detail'), true)['employee_id'],
@@ -1676,7 +1684,7 @@ class accModel extends model {
     }
     
     public function getDashboardPvc() {
-        $sql = $this->prepare("select * from Reimbursement_Request where ex_no is not null");
+        $sql = $this->prepare("select ex_no, withdraw_date, total_paid, employee_id, employee_nickname_thai from Reimbursement_Request inner join Employee using(employee_id) where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1685,7 +1693,7 @@ class accModel extends model {
     }
 
     public function getDashboardPvc_confirm() {
-        $sql = $this->prepare("select * from Reimbursement_Request where ex_no is not null");
+        $sql = $this->prepare("select ex_no, pv_date, total_paid, approved_employee, employee_nickname_thai from PVC inner join Employee on approved_employee=employee_id where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
