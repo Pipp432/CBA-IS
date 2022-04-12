@@ -258,8 +258,7 @@
                     <th>เลข PV-C</th>
                     <th>วันที่</th>
                     <th>จำนวนเงิน</th>
-                    <th>อัพสลิป</th>
-                    <th>ผู้ออกใบเบิกค่าใช้จ่าย</th>
+                    <th>ผู้ออกใบ PVC</th>
                     <th>ผู้กดยืนยัน</th>
                 </tr>
                 <tr ng-show="dashboards.length == 0">
@@ -270,9 +269,9 @@
                 <!-- todo view file -->
                 <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
                     <td>{{dashboard.ex_no}}</td>
-                    <td>{{dashboard.withdraw_date}}</td>
+                    <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>{{dashboard.employee_id}} {{dashboard.employee_nickname_thai}}</td>
+                    <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
             </table>
             
@@ -303,6 +302,7 @@
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
         $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
+        $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
         $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
         $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
         $scope.pvType = '';
@@ -361,7 +361,7 @@
         }
 
         $scope.getDashboardPVC_confirm = function(){
-            $scope.dashboards = $scope.dashboardsPvc; 
+            $scope.dashboards = $scope.dashboardsPvc_confirm; 
             $scope.doc = 'PV';
             $scope.pvType = 'pvc';
             $scope.temp = 'PV-C';
