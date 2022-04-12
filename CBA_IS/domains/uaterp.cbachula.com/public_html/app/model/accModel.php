@@ -1711,7 +1711,7 @@ class accModel extends model {
     }
     
     public function getDashboardPvc() {
-        $sql = $this->prepare("select * from Reimbursement_Request where ex_no is not null");
+        $sql = $this->prepare("select * from Reimbursement_Request inner join Employee using(employee_id) where ex_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
