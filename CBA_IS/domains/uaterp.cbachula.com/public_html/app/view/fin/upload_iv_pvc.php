@@ -87,7 +87,7 @@
     app.controller('moduleAppController', function($scope, $http, $compile) {
         $scope.pvcs =[];
       $scope.getDetail = function(){
-          $http.get("/fin/upload_slip_pvc/get_PVCs").then(function(response){
+          $http.get("/fin/upload_iv_pvc/get_PVCs").then(function(response){
             $scope.pvcs = response.data; $scope.isLoad = false;
           })
       }
@@ -98,7 +98,7 @@
     console.log(pair); 
 }
           $.ajax({
-            url : `/fin/upload_slip_pvc/add_iv/${pv_no}`,
+            url : `/fin/upload_iv_pvc/add_iv/${pv_no}`,
             type: 'POST',
             dataType: 'json',
             method: 'POST',

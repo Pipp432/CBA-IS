@@ -1871,7 +1871,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
     public function getPVCsForIV(){
-        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1 AND iv_name IS NULL");
+        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1  AND iv_name IS NULL");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

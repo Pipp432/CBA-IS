@@ -76,7 +76,7 @@ public function upload_iv_pvc(){
         $this->positionEcho('fin', $this->model->getPVCsForIV());
 
     }
-    else if(uri::get(2)==='add_slip'){
+    else if(uri::get(2)==='add_iv'){
         $this->positionEcho('fin', $this->model->addIVToPVC(uri::get(3)));
 
     }
