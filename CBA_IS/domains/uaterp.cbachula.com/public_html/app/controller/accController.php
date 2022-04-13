@@ -81,7 +81,9 @@ class accController extends controller {
             }
         } else if (uri::get(2)==='post_pva') {
             $this->positionEcho('acc', $this->model->addPVA());
-        } else if (uri::get(2)==='post_pvb') {
+        } else if (uri::get(2)==='get_quotatiob') {
+            $this->positionEcho('acc', $this->model->getQuotation());
+        }else if (uri::get(2)==='post_pvb') {
             $this->positionEcho('acc', $this->model->addPVB());
         } else if (uri::get(2)==='post_pvc') {
             $this->positionEcho('acc', $this->model->addPVC());

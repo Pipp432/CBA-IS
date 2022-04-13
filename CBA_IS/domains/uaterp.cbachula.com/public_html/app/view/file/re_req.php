@@ -85,7 +85,7 @@
         <div>
             
             <p><u>หลักฐานในการขอเบิกเงิน</u></p>
-            <p>(&nbsp;{{details[0].evidence =="quotation" ? "X" : "" }}&nbsp;)&nbsp;ใบกำกับภาษี&emsp;&emsp;(&nbsp;{{details[0].evidence =="billAndID" ? "X" : "" }}&nbsp;)&nbsp;บิลเงินสด + นามบัตรหริอสำเนาบัตรประชาชนเจ้าของร้าน&emsp;&emsp;(&nbsp;{{details[0].evidence =="invoice" ? "X" : "" }}&nbsp;)&nbsp;ใบเสนอราคา</p>
+            <p>(&nbsp;{{details[0].evidence == "quotation" ? "X" : "" }}&nbsp;)&nbsp;ใบกำกับภาษี&emsp;&emsp;(&nbsp;{{details[0].evidence == "billAndID" ? "X" : "" }}&nbsp;)&nbsp;บิลเงินสด + นามบัตรหริอสำเนาบัตรประชาชนเจ้าของร้าน&emsp;&emsp;(&nbsp;{{details[0].evidence == "tax" ? "X" : "" }}&nbsp;)&nbsp;ใบเสนอราคา</p>
         </div>
        
         <div class="row px-2 mt-2">

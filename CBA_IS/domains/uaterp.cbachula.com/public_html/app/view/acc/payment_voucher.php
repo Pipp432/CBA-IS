@@ -98,10 +98,7 @@
                         <label for="pvItemDebit">เดบิต</label>
                         <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
                     </div>
-                    <div class="col-md-4">
-                        <label for="addPvItemButton" style="color:white;">.</label>
-                        <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem(pvItemRR)">ยืนยันรายการ</button>
-                    </div>
+                    
                 </div>
 				<div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PA'">
                     <table class="table table-hover my-1" ng-show="wss.length == 0">
@@ -214,7 +211,7 @@
                             <a href="/file/re_req/{{re_req.re_req_no}}" target="_blank">{{re_req.re_req_no}}</a>
                             </td>
                             <td style="text-align: center;">
-                                <a href="/acc/payment_voucher/get_quotation/{{re_req.PVC_No}}" target="_blank">{{re_req.quotation_name}}</a><br>  
+                                <a href="/acc/payment_voucher/get_quotation/{{re_req.re_req_no}}" target="_blank">{{re_req.quotation_name}}</a><br>  
                             </td>
                             <td style="text-align: center;">{{re_req.withdraw_name}}</td>
                             
@@ -257,20 +254,20 @@
                         <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
                             <td>{{pvItem.withdraw_date}}</td>
-                            <td>{{pvItem.debit}}</td>
+                            <td>{{pvItemDebit}}</td>
                             <td>{{pvItem.tax_number}}</td>
                             <td>{{pvItem.pv_details}}</td>
                             <td>{{pvItem.re_req_no}}</td>
-                            <td style="text-align: right;">{{(pvItem.total_paid)*7/107| number:2}}</td>
-                            <td style="text-align: right;">{{pvItem.total_paid | number:2}}</td>
+                            <td style="text-align: right;">{{(pvItemPaidTotal)*7/107| number:2}}</td>
+                            <td style="text-align: right;">{{pvItemPaidTotal | number:2}}</td>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="7">ภาษีสุทธิ</th>
-                            <th style="text-align: right;">{{totalVat | number:2}}</th>
+                            <th style="text-align: right;">{{(pvItemPaidTotal)*7/107 | number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="7">รวมสุทธิ</th>
-                            <th style="text-align: right;">{{totalPaid | number:2}}</th>
+                            <th style="text-align: right;">{{pvItemPaidTotal| number:2}}</th>
                         </tr>
                     </table>
                 </div>
@@ -788,8 +785,8 @@
                         re_req_no:$scope.pvDetails[0].re_req_no,
                         company_code : $scope.company_code,
                         pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
-                        totalPaid : $scope.totalPaid,
-                        totalPaidThai : NumToThai($scope.totalPaid),
+                        totalPaid : $scope.pvItemPaidTotal,
+                        totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
                         bank : $scope.bank
@@ -801,13 +798,21 @@
                         // $('#successModal').on('hide.bs.modal', function (e) {
                         //     // window.location.assign('/');
                         // });
+                    }).fail(function(error){
+                        console.log(error)
                     });
                     
                 }
                 
             } else if($scope.selectedPaymentType==='PD') {
                 
-            } 
+            }
+            addModal('successModal', 'Payment Voucher', 'สำเร็จ');
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                           window.location.assign("https://uaterp.cbachula.com/"); 
+                        });
+            
             
         }
 

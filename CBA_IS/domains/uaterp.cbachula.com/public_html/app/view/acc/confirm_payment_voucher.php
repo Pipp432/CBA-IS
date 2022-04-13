@@ -292,7 +292,7 @@
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
-                            location.reload();
+                            window.location.assign("https://uaterp.cbachula.com/");
                         });
                     }
                 });

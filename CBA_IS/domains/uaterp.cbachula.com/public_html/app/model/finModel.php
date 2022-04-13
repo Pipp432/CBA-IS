@@ -316,7 +316,7 @@ class finModel extends model {
         return json_encode([]);
     }
     public function getReReq(){
-        $sql = $this->prepare("select * from Reimbursement_Request where ex_no IS Null");
+        $sql = $this->prepare("SELECT * from Reimbursement_Request where ex_no IS Null and evidence IS Null and company is null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1842,7 +1842,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         else echo implode(" ",$sql->errorInfo());
     }
     public function getPVCs(){
-        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1 AND slip_name IS NULL");
+        $sql = $this->prepare("SELECT * FROM PVC WHERE slip_name IS NULL");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1871,7 +1871,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
     public function getPVCsForIV(){
-        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1  AND iv_name IS NULL");
+        $sql = $this->prepare("SELECT * FROM PVC WHERE  iv_name IS NULL");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
