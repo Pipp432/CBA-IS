@@ -207,8 +207,7 @@
                     <td>{{dashboard.total_paid}}</td>
                     <td>
                         <span ng-show="dashboard.pv_status < 4">fin ยังไม่ upload slip</span>
-                        <!-- todo get pvd slip -->
-                        <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
+                        <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{dashboard.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
 
                     </td>
                     <!-- todo convert status to readable -->
@@ -270,13 +269,16 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>{{dashboard.pv_no}}</td>
                     <td>
-                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.re_req_no}}</a>
+                        <a href="/acc/dashboard/get_PVC_slip/{{dashboard.re_req_no}}">slip</a>
+
+                    </td>
+                    <td>
+                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.ex_no}}</a>
                     </td>
                     <td>
                         <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
