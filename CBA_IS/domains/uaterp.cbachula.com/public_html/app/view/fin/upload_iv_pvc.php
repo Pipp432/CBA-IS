@@ -108,8 +108,15 @@
             contentType: false,
         }).fail(function(response){
             console.log(response)
+        }).done(function(){
+            addModal('successModal','สำเร็จ');
+                $('#successModal').modal('toggle');
+                $scope.goToMainMenu();
         });
           
+      }
+      $scope.goToMainMenu = function(){
+          window.assign.location("https://uaterp.cbachula.com/");
       }
   	});
 
