@@ -274,7 +274,7 @@
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>
-                        <a href="/acc/dashboard/get_PVC_slip/{{dashboard.re_req_no}}">slip</a>
+                        <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.slip_data}}">slip</a>
 
                     </td>
                     <td>
