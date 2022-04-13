@@ -1841,6 +1841,36 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         if($success) echo 'success';  
         else echo implode(" ",$sql->errorInfo());
     }
+    public function getPVCs(){
+        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+    public function addSlipToPVC($pv_no){
+        $slip_name = $_FILES['file']['name'];
+        $slip_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
+        $slip_type = $_FILES['file']['type'];
+
+        $sql = $this->prepare("UPDATE PVC SET 
+                                slip_name = ?,
+                                slip_data = ?,
+                                slip_type = ?
+                               WHERE pv_no = ?");
+        $success = $sql->execute([$slip_name,$slip_data,$slip_type,$pv_no]);
+
+        if($success) {
+
+            echo $_FILES['file'];
+              
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
+        }
+        
+    }
 
 
 

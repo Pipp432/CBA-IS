@@ -55,7 +55,21 @@ public function show_ws_form() {
         } else {
             $this->model->showWsForm(uri::get(2));
         }
+}
+
+public function upload_slip_pvc(){
+    if(empty(uri::get(2))) {
+        $this->view->render("fin/upload_slip_pvc","navbar");
+    }else if(uri::get(2)==='get_PVCs'){
+        $this->positionEcho('fin', $this->model->getPVCs());
+
     }
+    else if(uri::get(2)==='add_slip'){
+        $this->positionEcho('fin', $this->model->addSlipToPVC(uri::get(3)));
+
+    }
+}
+
 
 public function ws_list() {
 $list = $this->model->getWsFormList();

@@ -218,6 +218,8 @@
                     cpvds.push(value.pv_no);
                 } else if(value.pv_type == "pva") {
                     cpvas.push(value.pv_no);
+                }else if(value.pv_type == "pvc") {
+                    cpvcs.push(value.pv_no);
                 } else cpvs.push(value);
             });
 
@@ -280,6 +282,7 @@
             if(cpvcs.length != 0) {
                 $.post("/acc/confirm_payment_voucher/post_cpvc_items", {
                     post : true,
+                   
                     cpvItems : JSON.stringify(angular.toJson(cpvcs))
                 }, function(data) {
                     respond.concat(data);
@@ -296,7 +299,7 @@
             } else respond_count++;
 
 
-
+            console.log(cpvcs);
         }
 
 

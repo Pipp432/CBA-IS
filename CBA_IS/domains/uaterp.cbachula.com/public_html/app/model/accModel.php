@@ -1495,8 +1495,10 @@ class accModel extends model {
         $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
         $pv_no_array = json_decode($cpvItemsArray, true);
         foreach($pv_no_array as $value) {
-            $sql = $this->prepare("UPDATE PVC SET confirmed = 1 WHERE pvd_no = ?");    
-            $sql->execute([$value]);
+            $sql = $this->prepare("UPDATE PVC SET confirmed = 1,confirmed_employee=? WHERE pv_no = ?");    
+            $sql->execute([
+                json_decode(session::get('employee_detail'), true)['employee_id']
+            ,$value]);
             echo $value;
             echo ' ';
         }
