@@ -1842,7 +1842,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         else echo implode(" ",$sql->errorInfo());
     }
     public function getPVCs(){
-        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1");
+        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1 AND slip_name IS NULL");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1869,6 +1869,14 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             echo 'failed';
             print_r($sql->errorInfo());
         }
+    }
+    public function getPVCsForIV(){
+        $sql = $this->prepare("SELECT * FROM PVC WHERE confirmed=1 AND iv_name IS NULL");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
     }
         
         public function addIVToPVC($pv_no){

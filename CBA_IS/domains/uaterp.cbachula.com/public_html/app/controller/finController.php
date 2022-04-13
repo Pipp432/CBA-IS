@@ -73,7 +73,7 @@ public function upload_iv_pvc(){
     if(empty(uri::get(2))) {
         $this->view->render("fin/upload_iv_pvc","navbar");
     }else if(uri::get(2)==='get_PVCs'){
-        $this->positionEcho('fin', $this->model->getPVCs());
+        $this->positionEcho('fin', $this->model->getPVCsForIV());
 
     }
     else if(uri::get(2)==='add_slip'){
