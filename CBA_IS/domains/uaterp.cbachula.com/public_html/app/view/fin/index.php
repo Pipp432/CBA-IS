@@ -15,6 +15,7 @@
         <script>addModuleLink('finRow', '/fin/reimbursement_request', 'money', 'ใบขอเบิกค่าใช้จ่าย');</script>
         <script>addModuleLink('finRow', '/fin/validate_petty_cash_request', 'check-circle-o', 'โอนใบเบิกเงินรองจ่าย');</script>
         <script>addModuleLink('finRow', '/fin/create_pva', 'check-circle-o', 'ทำใบขอเบิกเงินรองจ่าย (PV-A)');</script>
+        <script>addModuleLink('finRow', '/fin/upload_slip_pvc', 'check-circle-o', 'อัพโหลด slip PVC');</script>
 		<script>addModuleLink('finRow', '/is/thelastday', 'heart', 'The Last Day');</script>
     </div>
     
