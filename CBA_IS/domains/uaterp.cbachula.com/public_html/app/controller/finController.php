@@ -69,7 +69,18 @@ public function upload_slip_pvc(){
 
     }
 }
+public function upload_iv_pvc(){
+    if(empty(uri::get(2))) {
+        $this->view->render("fin/upload_iv_pvc","navbar");
+    }else if(uri::get(2)==='get_PVCs'){
+        $this->positionEcho('fin', $this->model->getPVCs());
 
+    }
+    else if(uri::get(2)==='add_slip'){
+        $this->positionEcho('fin', $this->model->addIVToPVC(uri::get(3)));
+
+    }
+}
 
 public function ws_list() {
 $list = $this->model->getWsFormList();

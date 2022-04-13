@@ -1869,10 +1869,32 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             echo 'failed';
             print_r($sql->errorInfo());
         }
+    }
         
+        public function addIVToPVC($pv_no){
+            $iv_name = $_FILES['file']['name'];
+            $iv_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
+            $iv_type = $_FILES['file']['type'];
+    
+            $sql = $this->prepare("UPDATE PVC SET 
+                                    iv_name = ?,
+                                    iv_data = ?,
+                                    iv_type = ?
+                                   WHERE pv_no = ?");
+            $success = $sql->execute([$iv_name,$iv_data,$iv_type,$pv_no]);
+    
+            if($success) {
+    
+                echo $_FILES['file'];
+                  
+            } else {
+                echo 'failed';
+                print_r($sql->errorInfo());
+            }
+            
+        }
     }
 
 
 
     
-}
