@@ -24,7 +24,7 @@
                             <option value="PD">PV-D คืนเงินลูกค้า</option>
                         </select>
                     </div>
-                    <div class="col-md-3" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+                    <div class="col-md-3" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
                         <label for="pvNameTextbox" id="pvNameLabel"></label>
                         <input type="text" class="form-control" id="pvNameTextbox" ng-model="pvName" ng-show="selectedPaymentType!='PB' || otherExpense">
                         <select class="form-control" ng-model="selectedSupplier" ng-change="selectSupplier()" id="dropdownSupplier" ng-show="selectedPaymentType=='PB'">
@@ -46,7 +46,7 @@
                             <label class="custom-control-label" for="customCheck1">ค่าใช้จ่ายอื่น ๆ</label>
                         </div>-->
                     </div>
-                    <div class="col-md-6" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+                    <div class="col-md-6" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
                         <label for="pvAddressTextbox">ที่อยู่</label>
                         <input type="text" class="form-control" id="pvAddressTextbox" ng-model="pvAddress">
                     </div>
@@ -58,7 +58,7 @@
         <!-- ADDING PV ITEMS -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
-        <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType != ''">
+        <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType != ''">
             <div class="card-body">
                 <div class="row mx-0">
                     <h4 class="my-1">
@@ -229,7 +229,7 @@
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <?php print_r($pvItems) ?>
 		<?php echo $pvItems ?>
-        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
             <div class="card-body">
                 
                 <div class="row mx-0">
@@ -298,7 +298,7 @@
         <!-- ADDING PV-D  -->
         <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
         <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show = "selectedPaymentType == 'PD' ">
-        <div class="card-body">
+            <div class="card-body">
                 <div class="row mx-0">
                     <div class="col-md-12">
                         <label for="filter_anything">PVD no</label>
@@ -394,6 +394,55 @@
             </div>
         </div>
 
+        <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+        <!-- ADDING PV-A  -->
+        <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+
+
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show = "selectedPaymentType == 'PA'">
+            <div class="card-body">
+                <div class="row mx-0">
+                    <div class="col-md-12">
+                        <label for="filter_pva_no">PVA no</label>
+                        <input type="text" class="form-control" id="filter_pva_no" ng-model="filter_pva_no" style="text-transform:uppercase">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                <h4 class="my-1" ng-show="PVAs.length != 0">รายละเอียดใบ PV-A</h4>
+                </div>
+                <table class="table table-hover my-1" ng-show="PVAs.length == 0">
+                    <tr>
+                        <th>ยังไม่มีการขอใบ PVA</th>
+                    </tr>
+                </table>
+                <table class="table table-hover my-1" ng-show="PVAs.length != 0">
+                    <tr>
+                        <th class = "center_cell">PVA no</th>
+                        <th class = "center_cell">date time</th>
+                        <th class = "center_cell">total paid</th>
+                        <th class = "center_cell">product names</th>
+                    </tr>
+                    <tr ng-repeat = "PVA in PVAs | unique:'pv_no'  | filter:{pv_no:filter_pva_no}" ng-click="selectPVA(PVA)" ng-show = "selected_PVA.length == 0">
+                        <td class = "center_cell">{{PVA.pv_no}}</td>
+                        <td class = "center_cell">{{PVA.pv_date}} {{PVA.pv_time}}</td>
+                        <td class = "center_cell">{{PVA.total_paid}}</td>
+                        <td class = "center_cell">{{PVA.product_names}}</td>
+                    </tr>
+                    <tr ng-show = "selected_PVA.length != 0">
+                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVA()"></i> {{selected_PVA.pv_no}}</td>
+                        <td class = "center_cell">{{selected_PVA.pv_date}} {{selected_PVA.pv_time}}</td>
+                        <td class = "center_cell">{{selected_PVA.total_paid}}</td>
+                        <td class = "center_cell">{{selected_PVA.product_names}}</td>
+                    </tr>
+                </table>
+                <div ng-show = "selected_PVA.length != 0">
+                    <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVA()" ng-disabled="selected_PVA.editing">ยืนยัน PVA</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
 
 
@@ -464,53 +513,10 @@
         $scope.dueDate='';
         $scope.ci_no = '';
         $scope.selected_PVD = [];
+        $scope.selected_PVA = [];
 
 
-        $scope.selectPVD = function($PVD) {
-            $scope.selected_PVD = $PVD;
-            // console.log($scope.selected_PVD);
-            //todo get customer and iv data
-        }
 
-        $scope.dropPVD = function() {
-            $scope.selected_PVD = [];
-        }
-        // $scope.selectCompanypvd = function() {
-        //     console.log($scope.selected_PVD.company_code);
-        // }
-
-        $scope.updatePVD = function() {
-        //     console.log($scope.selected_PVD);
-        //     console.log($scope.selected_PVD.company_code);
-            if(!$scope.selected_PVD.editing) {
-                $.post("/acc/payment_voucher/update_PVD", {
-                    post : true,
-                    pvd_no : $scope.selected_PVD.pvd_no,
-                    company_code : $scope.selected_PVD.company_code,
-                    recipent : $scope.selected_PVD.recipent,
-                    bank : $scope.selected_PVD.bank,
-                    bank_no : $scope.selected_PVD.bank_no,
-                    address : $scope.selected_PVD.location,     
-                }, function(data) {
-                    addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
-                    $('#pvdeditsuccessModalupdate').modal('toggle');
-                });
-            }
-        }
-
-        $scope.postPVD = function() {
-            if(!$scope.selected_PVD.editing) {
-                $.post("/acc/payment_voucher/post_PVD", {
-                    post : true,
-                    pvd_no : $scope.selected_PVD.pvd_no,
-                    company_code : $scope.selected_PVD.company_code,
-                }, function(data) {
-                    addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
-                    $('#pvdUpdateSuccessModalupdate').modal('toggle');
-                    window.location.assign('/');
-                });
-            }
-        }
         
         $scope.selectPaymentType = function() {
             
@@ -528,11 +534,12 @@
             $scope.ReReqs = [];
             $scope.isLoad = true;
             $scope.PVDs = [];
+            $scope.PVAs = [];
             
             if($scope.selectedPaymentType === '') {
             
             } else if($scope.selectedPaymentType === 'PA') {
-                $http.get('/acc/payment_voucher/get_ws').then(function(response){$scope.wss = response.data; $scope.isLoad = false;});
+                $http.get('/acc/payment_voucher/get_PVA').then(function(response){$scope.PVAs = response.data; $scope.isLoad = false; console.log($scope.PVAs);});
             } else if($scope.selectedPaymentType === 'PB') {
                 $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){$scope.rrcinopvs = response.data; $scope.isLoad = false;});
                 $('#pvNameLabel').html('จ่าย Supplier');
@@ -584,6 +591,75 @@
                 // $scope.pvAddress = 'อาคารไชยยศสมบัติ 1 ชั้นใต้ดิน เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330';
                 $scope.company_code = JSON.parse($scope.selectedCompany).company_code;
             }
+        }
+
+        $scope.selectPVD = function($PVD) {
+            $scope.selected_PVD = $PVD;
+            // console.log($scope.selected_PVD);
+            //todo get customer and iv data
+        }
+
+        $scope.dropPVD = function() {
+            $scope.selected_PVD = [];
+        }
+        // $scope.selectCompanypvd = function() {
+        //     console.log($scope.selected_PVD.company_code);
+        // }
+
+        $scope.updatePVD = function() {
+        //     console.log($scope.selected_PVD);
+        //     console.log($scope.selected_PVD.company_code);
+            if(!$scope.selected_PVD.editing) {
+                $.post("/acc/payment_voucher/update_PVD", {
+                    post : true,
+                    pvd_no : $scope.selected_PVD.pvd_no,
+                    company_code : $scope.selected_PVD.company_code,
+                    recipent : $scope.selected_PVD.recipent,
+                    bank : $scope.selected_PVD.bank,
+                    bank_no : $scope.selected_PVD.bank_no,
+                    address : $scope.selected_PVD.location,     
+                }, function(data) {
+                    addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    $('#pvdeditsuccessModalupdate').modal('toggle');
+                });
+            }
+        }
+
+        $scope.postPVD = function() {
+            if(!$scope.selected_PVD.editing) {
+                $.post("/acc/payment_voucher/post_PVD", {
+                    post : true,
+                    pvd_no : $scope.selected_PVD.pvd_no,
+                    company_code : $scope.selected_PVD.company_code,
+                }, function(data) {
+                    addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    $('#pvdUpdateSuccessModalupdate').modal('toggle');
+                    $('#pvdUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
+                        location.reload();
+                    });
+                });
+            }
+        }
+
+        $scope.selectPVA = function($PVA) {
+            $scope.selected_PVA = $PVA;
+        }
+
+        $scope.dropPVA = function() {
+            $scope.selected_PVA = [];
+        }
+
+        $scope.postPVA = function() {
+            $.post("/acc/payment_voucher/post_PVA", {
+                post : true,
+                pv_no : $scope.selected_PVA.pv_no,
+            }, function(data) {
+                addModal('pvaUpdateSuccessModalupdate', 'PV-A', 'confirm ' + $scope.selected_PVA.pv_no +  data);
+                $('#pvaUpdateSuccessModalupdate').modal('toggle');
+                $('#pvaUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
+                    location.reload();
+                });
+            });
         }
         
         $scope.getrrcinopvDetail = function(rrcinopv) {
