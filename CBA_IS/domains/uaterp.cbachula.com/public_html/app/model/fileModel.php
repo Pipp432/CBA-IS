@@ -238,7 +238,7 @@ class fileModel extends model {
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return json_encode([$pv_no]);
+        return json_encode([]);
 	}
 
     public function getCs($cs_no) {
