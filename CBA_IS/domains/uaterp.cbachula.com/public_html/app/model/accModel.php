@@ -1302,8 +1302,13 @@ class accModel extends model {
 	
 	// PV Module
     private function assignPv($type, $companyNo) {
+        if($type==='C'){
+            $table  = 'PVC';
+        }else{
+            $table  = 'PV';
+        }
         $pvPrefix = $companyNo.'P'.$type.'-';
-        $sql = $this->prepare("select ifnull(max(pv_no),0) as max from PV where pv_no like ?");
+        $sql = $this->prepare("select ifnull(max(pv_no),0) as max from". $table ."where pv_no like ?");
         $sql->execute([$pvPrefix.'%']);
         $maxPvNo = $sql->fetchAll()[0]['max'];
         $runningNo = '';
