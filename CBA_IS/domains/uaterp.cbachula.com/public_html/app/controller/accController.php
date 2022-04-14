@@ -103,7 +103,11 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->updatePVDForPV()); 
         } else if(uri::get(2)==='post_PVD'){
             $this->positionEcho('acc', $this->model->postPVDForPV()); 
-        } 
+        } else if(uri::get(2)==='get_PVA'){
+            $this->positionEcho('acc', $this->model->getPVAForPV());
+        } else if(uri::get(2)==='post_PVA'){
+            $this->positionEcho('acc', $this->model->postPVAForPV());
+        }
 
     }
     

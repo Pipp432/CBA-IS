@@ -953,6 +953,42 @@ class accModel extends model {
         
         echo $pvno;
     }   
+
+    public function getPVAForPV() {
+        $sql = $this->prepare("SELECT
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names
+                                from PVA_bundle
+                                where pv_status = 2");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function postPVAForPV() {
+        $success = true;
+        $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 3 WHERE pv_no = ?");
+        $success = $success && $sql->execute([$_POST['pv_no']]);
+        if($success) {
+            $sql = $this->prepare("UPDATE PVA SET pv_status = 3 WHERE pv_no = ?");
+            $success = $success && $sql->execute([$_POST['pv_no']]);
+        }
+        if($success) {
+            echo 'success';
+        } else {
+            $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 2 WHERE pv_no = ?");
+            $sql->execute([$_POST['pv_no']]);
+            echo "error";
+            print_r($sql->errorInfo());
+        }
+        
+    }
+    
 	
     // PV-B Module
 	public function getRRCINOPV() {
@@ -2511,6 +2547,16 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         if ($sql->rowCount() > 0) return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
         else return "error";
     }
+
+
+
+
+
+
+
+
+
+
 }
     
 
