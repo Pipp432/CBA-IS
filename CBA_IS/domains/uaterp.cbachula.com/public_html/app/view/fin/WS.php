@@ -12,8 +12,6 @@
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuMenu"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">เลือกรายการ </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuMenu">
-                    <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type1"
-                        aria-expanded="true" aria-controls="type1">เบิกจ่ายประเภท A</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type3"
                         aria-expanded="false" aria-controls="type3">เบิกจ่ายประเภท C</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type4"
