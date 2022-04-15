@@ -201,18 +201,11 @@ class fileController extends controller {
     public function pva() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        }else if(uri::get(2)=="pva"){
-            $this->positionEcho('acc', $this->model->getPva(Uri::get(3)));
-            $this->view->render("file/pva");
-
-        }else {
-            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
-                $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
-                $this->view->pv = $this->model->getPva(uri::get(2));
-                $this->view->render("file/pva");
-            } else {
-                $this->err404();
-            }
+        } else {
+            $this->requirePostition("acc");
+            $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
+            $this->view->pv = $this->model->getPva(Uri::get(2));
+            $this->view->render("file/pva", "navbar");
         }
     }
 

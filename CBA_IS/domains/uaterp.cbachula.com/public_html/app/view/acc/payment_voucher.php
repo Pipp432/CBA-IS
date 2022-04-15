@@ -543,7 +543,7 @@
             if($scope.selectedPaymentType === '') {
             
             } else if($scope.selectedPaymentType === 'PA') {
-                $http.get('/acc/payment_voucher/get_PVA').then(function(response){$scope.PVAs = response.data; $scope.isLoad = false; console.log($scope.PVAs);});
+                $http.get('/acc/payment_voucher/get_PVA').then(function(response){$scope.PVAs = response.data; $scope.isLoad = false;});
             } else if($scope.selectedPaymentType === 'PB') {
                 $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){$scope.rrcinopvs = response.data; $scope.isLoad = false;});
                 $('#pvNameLabel').html('จ่าย Supplier');
@@ -661,6 +661,7 @@
                 addModal('pvaUpdateSuccessModalupdate', 'PV-A', 'confirm ' + $scope.selected_PVA.pv_no +  data);
                 $('#pvaUpdateSuccessModalupdate').modal('toggle');
                 $('#pvaUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
+                    window.open('/file/pva/' + $scope.selected_PVA.pv_no);
                     location.reload();
                 });
             });

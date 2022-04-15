@@ -200,7 +200,7 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFilePVA(dashboard)">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}} {{dashboard.pv_time}}</td>
                     <td>{{dashboard.product_names}}</td>
@@ -396,6 +396,10 @@
             } else {
                 window.open('/file/' + $scope.doc.toLowerCase() + '/' + file.file_no);
             }
+        }
+
+        $scope.viewFilePVA = function($dashboard) {
+            window.open('/file/pva/' + $dashboard.pv_no);
         }
         
     });

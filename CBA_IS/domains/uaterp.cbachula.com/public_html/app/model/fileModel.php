@@ -233,12 +233,12 @@ class fileModel extends model {
 	}
     
     public function getPva($pv_no) {
-		$sql = $this->prepare("SELECT * FROM `PVA_Bundle` WHERE pv_no = ? ");
+		$sql = $this->prepare("SELECT * FROM PVA_bundle WHERE pv_no = ? ");
         $sql->execute([$pv_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+        return json_encode([]);
 	}
 
     public function getCs($cs_no) {
