@@ -98,6 +98,10 @@
                         <label for="pvItemDebit">เดบิต</label>
                         <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
                     </div>
+                    <div class="col-md-4">
+                        <label for="addPvItemButton" style="color:white;">.</label>
+                        <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem()">ยืนยันรายการ</button>
+                    </div>
                     
                 </div>
 				<div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PA'">
