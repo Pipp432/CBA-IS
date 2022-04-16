@@ -49,13 +49,14 @@
                             <th>จำนวนเงิน</th>
                         </tr>
                         <tr ng-repeat="pv in pvs | unique:'pv_no' | filter:{pv_no:filterPVNo, pv_type:filterPVType}" ng-click="addCpvItem(pv)">
-                            <td>{{pv.pv_no}}</td>
-                            <td>{{pv.pv_date}}</td>
-                            <td>{{pv.pv_type}}</td>
-                            <td><ul class="my-0">
-                                <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" ng-repeat="pv_item in pvs" ng-show="pv_item.pv_no===pv.pv_no">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
+                            <td style="text-align: center;">{{pv.pv_no}}</td>
+                            <td  style="text-align: center;">{{pv.pv_date}}</td>
+                            <td  style="text-align: center;">{{pv.pv_type}}</td>
+                            <td  style="text-align: center;"><ul class="my-0">
+                                <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc'" ng-repeat="pv_item in pvs track by $index" ng-show="pv_item.pv_no===pv.pv_no">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
                                 <li ng-show = "pv.pv_type == 'pvd'">-</li>
                                 <li ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</li>
+                                <li ng-show = "pv.pv_type == 'pvc'">{{pv.pv_details}}</li>
                             </ul></td>
                             <td style="text-align: right;">
                                 {{pv.total_paid | number:2}}<br>
@@ -93,11 +94,12 @@
                         </tr>
                         <tr ng-repeat="cpvItem in cpvItems | unique:'pv_no'">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropCpvItem(cpvItem)"></i></td>
-                            <td>{{cpvItem.pv_no}}</td>
-                            <td>{{cpvItem.pv_date}}</td>
-                            <td>{{cpvItem.pv_type}}</td>
-                            <td><ul class="my-0">
-                                <li ng-repeat="cpv_item in cpvItems" ng-show="cpv_item.pv_no===cpvItem.pv_no">{{cpv_item.detail}} ({{cpv_item.paid_total | number:2}})</li>
+                            <td style="text-align: center;">{{cpvItem.pv_no}}</td>
+                            <td style="text-align: center;">{{cpvItem.pv_date}}</td>
+                            <td style="text-align: center;">{{cpvItem.pv_type}}</td>
+                            <td style="text-align: center;"><ul class="my-0">
+                                <li ng-repeat="cpv_item in cpvItems" ng-show="cpv_item.pv_no===cpvItem.pv_no && cpvItem.pv_type != 'pvc'">{{cpv_item.detail}} ({{cpv_item.paid_total | number:2}})</li>
+                                <li ng-show = "cpvItem.pv_type == 'pvc'">{{cpvItem.pv_details}}</li>
                             </ul></td>
                             <td style="text-align: right;">{{cpvItem.total_paid | number:2}}</td>
                         </tr>
@@ -162,7 +164,6 @@
                 value.pv_type = "pvc";
                 $scope.pvs.push(value);
             });
-            console.log($scope.pvs)
         });
         console.log( $scope.pvs);
         
@@ -202,6 +203,7 @@
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
             }
+            console.log( $scope.cpvItems)
         }
         
         $scope.postCpvItems = function() {

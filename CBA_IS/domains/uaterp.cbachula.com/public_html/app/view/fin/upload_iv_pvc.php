@@ -108,8 +108,10 @@
             contentType: false,
         }).fail(function(response){
             console.log(response)
+        }).done(function(d){
+              $scope.goToMainMenu();
         })
-           $scope.goToMainMenu();
+         
       }
       $scope.goToMainMenu = function(){
           window.location.assign("https://uaterp.cbachula.com/");

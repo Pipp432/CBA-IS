@@ -109,10 +109,10 @@
         }).fail(function(response){
             console.log(response)
         }).done(function(){
-            
+             $scope.goToMainMenu();
               
         });
-            $scope.goToMainMenu();
+           
       }
       $scope.goToMainMenu = function(){
           window.location.assign("https://uaterp.cbachula.com/");

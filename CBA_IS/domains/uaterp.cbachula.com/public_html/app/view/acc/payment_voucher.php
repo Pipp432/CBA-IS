@@ -714,7 +714,7 @@
                         "pv_name" : String($scope.pvName),
                         "pv_address" : String($scope.pvAddress),
                         "details": String($scope.pvItemDetail),
-                        "selected_company":String(company.company_code),
+                        "selected_company":String($scope.selectedCompany),
                         "confirm":"1",
                         "return_tax": tax
                     }).done(function(data,status){
@@ -743,6 +743,7 @@
 
                                
             }
+            location.reload();
            
         }
         
@@ -790,6 +791,7 @@
             } else if($scope.selectedPaymentType==='PA') {
                 
                 if($scope.selectedCompany==='') {
+                    console.log("A")
                     $('#formValidate9').modal('toggle');
                 } else {
                     $.post("/acc/payment_voucher/post_pva", {
@@ -844,6 +846,7 @@
                 // if($scope.otherExpense) $scope.company_code = '3';
                 
                 if($scope.selectedCompany==='') {
+                    console.log("C")
                     $('#formValidate9').modal('toggle');
                 } else {
                     var d = new Date();
@@ -888,11 +891,11 @@
             } else if($scope.selectedPaymentType==='PD') {
                 
             }
-            addModal('successModal', 'Payment Voucher', 'สำเร็จ');
-                        $('#successModal').modal('toggle');
-                        $('#successModal').on('hide.bs.modal', function (e) {
-                           window.location.assign("https://uaterp.cbachula.com/"); 
-                        });
+            // addModal('successModal', 'Payment Voucher', 'สำเร็จ');
+            //             $('#successModal').modal('toggle');
+            //             $('#successModal').on('hide.bs.modal', function (e) {
+            //                window.location.assign("https://uaterp.cbachula.com/"); 
+            //             });
             
             
         }
@@ -913,6 +916,8 @@
                 $scope.pvDetails = [data];
                 
             }
+            $scope.pvItemDebit = $scope.pvDetails[0].debit;
+            $scope.pvItemDetail = $scope.pvDetails[0].pv_details
             
             
         })
