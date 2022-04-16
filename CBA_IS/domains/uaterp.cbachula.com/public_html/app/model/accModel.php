@@ -956,7 +956,7 @@ class accModel extends model {
 
     public function getPVAForPV() {
         $sql = $this->prepare("SELECT
-                                	pv_no,
+                                	internal_bundle_no,
                                     pv_time,
                                     pv_date,
                                     total_paid,
@@ -972,21 +972,47 @@ class accModel extends model {
 
     public function postPVAForPV() {
         $success = true;
-        $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 3 WHERE pv_no = ?");
-        $success = $success && $sql->execute([$_POST['pv_no']]);
+        $pv_no = $this->assignPVA($_POST['program']);
+        $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
+        $success = $success && $sql->execute([$pv_no,$_POST['internal_bundle_no']]);
         if($success) {
-            $sql = $this->prepare("UPDATE PVA SET pv_status = 3 WHERE pv_no = ?");
-            $success = $success && $sql->execute([$_POST['pv_no']]);
+            $sql = $this->prepare("UPDATE PVA SET pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
+            $success = $success && $sql->execute([$pv_no,$_POST['internal_bundle_no']]);
         }
         if($success) {
-            echo 'success';
+            echo $pv_no;
         } else {
-            $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 2 WHERE pv_no = ?");
-            $sql->execute([$_POST['pv_no']]);
+            echo $pv_no;
             echo "error";
             print_r($sql->errorInfo());
+            $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 2, pv_no = null WHERE internal_bundle_no = ?");
+            $sql->execute([$_POST['internal_bundle_no']]);
+            
+            
         }
         
+    }
+
+    private function assignPVA($program) {
+        $rqPrefix = $program.'PA-';
+        $sql = $this->prepare( "select ifnull(max(pv_no),0) as max from PVA where pv_no like ?" );
+        $sql->execute( [ $program.'PA-%' ] );
+        $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
+        $runningNo = '';
+        if ( $maxRqNo == '0' ) {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+            if ( strlen( $latestRunningNo ) == 5 ) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $rqPrefix . $runningNo;
     }
     
 	
