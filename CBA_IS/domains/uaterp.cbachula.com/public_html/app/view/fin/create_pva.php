@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher</h2>
+        <h2 class="mt-3">รวมใบเบิกเงินรองจ่ายเพื่อขอ PV-A</h2>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING pre pva -->
@@ -58,14 +58,14 @@
             <div class="card-body">
                 <div class="row mx-0">
                     <h4 class="my-1">รายละเอียด PV-A</h4>
-                        <select class="form-control" ng-model="program">
+                        <!-- <select class="form-control" ng-model="program">
                             <option value=''>สั่งจ่ายในนาม</option>
                             <option value='1'>โครงการ 1</option>
                             <option value='2'>โครงการ 2</option>
                             <option value='3'>โครงการ 3</option>
                             <option value='8'>โครงการพิเศษ 1</option>
                             <option value='9'>โครงการพิเศษ 2</option>
-                        </select>
+                        </select> -->
                     <table class="table table-hover my-1" ng-show="cpvas.length == 0">
                         <tr>
                             <th>ยังไม่ได้เพิ่ม PV-A</th>
@@ -124,7 +124,7 @@
         $scope.filterPVNo = '';
         $scope.filterPVType = '';
         $scope.pvas = [];
-        $scope.program = '';
+        //$scope.program = '';
         
 
         $http.get('/fin/create_pva/get_pva').then(function(response){
@@ -155,7 +155,7 @@
         }
         
         $scope.formValidate = function() {
-            if($scope.cpvas.length===0 || $scope.program == '') {
+            if($scope.cpvas.length===0) {
                 $('#formValidate1').modal('toggle');
             } else {
                 var confirmModal = addConfirmModal('confirmModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ยืนยันการสร้าง PV-A', 'postcpvas()');
@@ -170,7 +170,7 @@
             $.post("/fin/create_pva/create_pva", {
                     post : true,
                     cpvItems : $scope.cpvas,
-                    program : $scope.program
+                    //program : $scope.program
                 }, function(data) {
                     if(data.length == 9){
                         addModal('successModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ใบ PV-A เลขที่ ' + data + ' สำเร็จ');

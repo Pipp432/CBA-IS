@@ -421,25 +421,33 @@
                 </table>
                 <table class="table table-hover my-1" ng-show="PVAs.length != 0">
                     <tr>
-                        <th class = "center_cell">PVA no</th>
+                        <th class = "center_cell">EXB no</th>
                         <th class = "center_cell">date time</th>
                         <th class = "center_cell">total paid</th>
                         <th class = "center_cell">product names</th>
                     </tr>
-                    <tr ng-repeat = "PVA in PVAs | unique:'pv_no'  | filter:{pv_no:filter_pva_no}" ng-click="selectPVA(PVA)" ng-show = "selected_PVA.length == 0">
-                        <td class = "center_cell">{{PVA.pv_no}}</td>
+                    <tr ng-repeat = "PVA in PVAs | unique:'internal_bundle_no'  | filter:{internal_bundle_no:filter_pva_no}" ng-click="selectPVA(PVA)" ng-show = "selected_PVA.length == 0">
+                        <td class = "center_cell">{{PVA.internal_bundle_no}}</td>
                         <td class = "center_cell">{{PVA.pv_date}} {{PVA.pv_time}}</td>
                         <td class = "center_cell">{{PVA.total_paid}}</td>
                         <td class = "center_cell">{{PVA.product_names}}</td>
                     </tr>
                     <tr ng-show = "selected_PVA.length != 0">
-                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVA()"></i> {{selected_PVA.pv_no}}</td>
+                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVA()"></i> {{selected_PVA.internal_bundle_no}}</td>
                         <td class = "center_cell">{{selected_PVA.pv_date}} {{selected_PVA.pv_time}}</td>
                         <td class = "center_cell">{{selected_PVA.total_paid}}</td>
                         <td class = "center_cell">{{selected_PVA.product_names}}</td>
                     </tr>
                 </table>
                 <div ng-show = "selected_PVA.length != 0">
+                    <select class="form-control" ng-model="program_pva">
+                        <option value=''>สั่งจ่ายในนาม</option>
+                        <option value='1'>โครงการ 1</option>
+                        <option value='2'>โครงการ 2</option>
+                        <option value='3'>โครงการ 3</option>
+                        <option value='8'>โครงการพิเศษ 1</option>
+                        <option value='9'>โครงการพิเศษ 2</option>
+                    </select>
                     <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVA()" ng-disabled="selected_PVA.editing">ยืนยัน PVA</button>
                     </div>
@@ -518,6 +526,7 @@
         $scope.ci_no = '';
         $scope.selected_PVD = [];
         $scope.selected_PVA = [];
+        $scope.program_pva = '';
 
 
 
@@ -654,17 +663,28 @@
         }
 
         $scope.postPVA = function() {
-            $.post("/acc/payment_voucher/post_PVA", {
-                post : true,
-                pv_no : $scope.selected_PVA.pv_no,
-            }, function(data) {
-                addModal('pvaUpdateSuccessModalupdate', 'PV-A', 'confirm ' + $scope.selected_PVA.pv_no +  data);
-                $('#pvaUpdateSuccessModalupdate').modal('toggle');
-                $('#pvaUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
-                    window.open('/file/pva/' + $scope.selected_PVA.pv_no);
-                    location.reload();
+            if($scope.program_pva=='') {
+                $('#formValidate9').modal('toggle');
+            } else {
+                $.post("/acc/payment_voucher/post_PVA", {
+                    post : true,
+                    program : $scope.program_pva,
+                    internal_bundle_no : $scope.selected_PVA.internal_bundle_no,
+                }, function(data) {
+                    if(data.length == 9){
+                        addModal('pvaUpdateSuccessModalupdate', 'PV-A', 'confirm ' + data);
+                        $('#pvaUpdateSuccessModalupdate').modal('toggle');
+                        $('#pvaUpdateSuccessModalupdate').on('hide.bs.modal', function (e) { 
+                            window.open('/file/pva/' + data);
+                            location.reload();
+                        });
+                    } else {
+                        addModal('failedModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ใบ PV-A failed');
+                        $('#failedModal').modal('toggle');
+                        console.log(data);
+                    }
                 });
-            });
+            }
         }
         
         $scope.getrrcinopvDetail = function(rrcinopv) {
