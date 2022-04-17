@@ -4575,7 +4575,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     $slip_file_data = base64_encode(file_get_contents($_FILES['slip']['tmp_name']));
     $slip_file_type = $_FILES['slip']['type'];
 
-    $sql = $this->prepare("INSERT INTO PVA (internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, total_paid, product_names,ivrc_name, ivrc_type, ivrc_data, slip_name, slip_type, slip_data, pv_status	) 
+    $sql = $this->prepare("INSERT INTO PVA (internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, total_paid, product_names,bank_name,bank_no,ivrc_name, ivrc_type, ivrc_data, slip_name, slip_type, slip_data, pv_status	) 
                             VALUE (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,0)");
     $success = $sql->execute([
       $internal_pva_no,
@@ -4584,6 +4584,8 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       input::post( 'lineId' ),
       ( double )input::post( 'cost' ),
       input::post( 'product_name' ),
+      input::post( 'bank_name' ),
+      input::post( 'bank_no' ),
       $ivrc_file_name,
       $ivrc_file_type,
       $ivrc_file_data,
