@@ -335,9 +335,9 @@ class finModel extends model {
     }
     public function assign_ex_no() {
 
-        $rqPrefix = 'EX-';
+        $rqPrefix = 'EXC-';
         $sql = $this->prepare( "select ifnull(max(ex_no),0) as max from Reimbursement_Request where ex_no like ?" );
-        $sql->execute( [ 'EX-%' ] );
+        $sql->execute( [ 'EXC-%' ] );
         $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
         $runningNo = '';
         if ( $maxRqNo == '0' ) {

@@ -10,7 +10,7 @@ use _core\helper\uri;
 class mktController extends controller {
 
     public function index() { 
-        $this->requirePostition("mkt");
+        // $this->requirePostition("mkt");
         $this->err404();
     }
     
