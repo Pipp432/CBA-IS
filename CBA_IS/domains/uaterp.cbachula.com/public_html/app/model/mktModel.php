@@ -4576,7 +4576,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     $slip_file_type = $_FILES['slip']['type'];
 
     $sql = $this->prepare("INSERT INTO PVA (internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, total_paid, product_names,bank_name,bank_no,ivrc_name, ivrc_type, ivrc_data, slip_name, slip_type, slip_data, pv_status	) 
-                            VALUE (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,0)");
+                            VALUE (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,?,?,0)");
     $success = $sql->execute([
       $internal_pva_no,
       input::post( 'employee_id' ),
