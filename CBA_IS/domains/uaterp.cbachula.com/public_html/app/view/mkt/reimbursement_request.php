@@ -347,10 +347,13 @@
                 
             },function(data,status){
                 console.log(data,status);
+               
+               
+                
+            }).done(function(done){ 
                 addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
-                $scope.toMainMenu();
-                
+                 $scope.toMainMenu();
             })
         }
        

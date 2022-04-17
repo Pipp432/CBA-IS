@@ -257,11 +257,11 @@
                         </tr>
                         <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
-                            <td>{{pvItem.withdraw_date}}</td>
-                            <td>{{pvItemDebit}}</td>
-                            <td>{{pvItem.tax_number}}</td>
-                            <td>{{pvItem.pv_details}}</td>
-                            <td>{{pvItem.re_req_no}}</td>
+                            <td style="text-align: center;">{{pvItem.withdraw_date}}</td>
+                            <td style="text-align: center;">{{pvItemDebit}}</td>
+                            <td style="text-align: center;">{{pvItem.tax_number}}</td>
+                            <td style="text-align: center;">{{pvItem.pv_details}}</td>
+                            <td style="text-align: center;">{{pvItem.re_req_no}}</td>
                             <td style="text-align: right;">{{(pvItemPaidTotal)*7/107| number:2}}</td>
                             <td style="text-align: right;">{{pvItemPaidTotal | number:2}}</td>
                         </tr>
@@ -760,10 +760,9 @@
                 
                 $scope.clearPvItem();
                 $scope.calculateTotalPrice();
-
-                               
+                           
             }
-            location.reload();
+            
            
         }
         
@@ -911,11 +910,11 @@
             } else if($scope.selectedPaymentType==='PD') {
                 
             }
-            // addModal('successModal', 'Payment Voucher', 'สำเร็จ');
-            //             $('#successModal').modal('toggle');
-            //             $('#successModal').on('hide.bs.modal', function (e) {
-            //                window.location.assign("https://uaterp.cbachula.com/"); 
-            //             });
+            addModal('successModal', 'Payment Voucher', 'สำเร็จ');
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                           window.location.assign("https://uaterp.cbachula.com/"); 
+                        });
             
             
         }

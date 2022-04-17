@@ -1430,13 +1430,13 @@ class accModel extends model {
     // Confirm PV Module
     public function getSlipData($pv_no) {
         
-        $sql = $this->prepare("select * from PV where PV.pv_no = ?");
+        $sql = $this->prepare("select * from PVC where PVC.pv_no = ?");
         $sql->execute([$pv_no]);
         
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
     		header('Content-type: '.$data['slip_type']);
-            echo $data['slip_data'];
+           echo base64_decode($data['slip_data']);
         } else {
             echo 'ไม่มีสลิปโอนเงินของ PV นี้';
         }

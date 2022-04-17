@@ -273,7 +273,7 @@
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>
-                        <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.slip_data}}">slip</a>
+                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">slip</a>
 
                     </td>
                     <td>

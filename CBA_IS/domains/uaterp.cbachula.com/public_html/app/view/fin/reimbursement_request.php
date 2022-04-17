@@ -155,7 +155,7 @@
         $(this).siblings('input[type="checkbox"]').prop('checked', false);
 
         $scope.submit = function(re_req_no){
-            const url = "https://uaterp.cbachula.com/home"
+         
             console.log(re_req_no)
             const options = document.querySelectorAll("input[type='checkbox']:checked")
           
@@ -170,9 +170,21 @@
 
            },function(data){
                console.log(data)
-           }).fail(function(jqXHR){console.log(jqXHR)})
-           window.location.replace(url);
-           
+           }).fail(function(jqXHR){console.log(jqXHR)}).done(function(){
+                addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
+                $('#successModal').modal('toggle');
+                $('#successModal').on('hidden.bs.modal', function (e) {
+                    $scope.toMainMenu();
+                })
+                
+
+            
+           })
+          
+        }
+        $scope.toMainMenu = function(){
+            const url = "https://uaterp.cbachula.com/home"
+            window.location.assign(url);
         }
 });
   	});
