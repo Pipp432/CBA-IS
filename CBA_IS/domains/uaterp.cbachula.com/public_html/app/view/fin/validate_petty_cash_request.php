@@ -27,6 +27,7 @@
                             <th>line id</th>
                             <th>ชื่อสินค้า</th>
                             <th>ค่าใช้จ่าย</th>
+                            <th>bank information</th>
                             <th>Slip โอนให้พนักงาน</th>
                             <th>confirm/reject</th>
                         </tr>
@@ -41,6 +42,7 @@
                             <td>{{minor_request.line_id}}</td>
                             <td>{{minor_request.product_names}}</td>
                             <td>{{minor_request.total_paid | number:2}}</td>
+                            <td>{{minor_request.bank_name}} {{minor_request.bank_no}} </td>
                             <td>
 
 
