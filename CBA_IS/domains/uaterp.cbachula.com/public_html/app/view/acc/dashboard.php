@@ -196,10 +196,9 @@
                 </tr>
                 <tr ng-show="dashboards.length == 0">
                     <th colspan="5">
-                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> no PV-D to show</h6>
+                        <h6 class="my-0" style="text-align:center;"> no PV-A to show</h6>
                     </th>
                 </tr>
-                <!-- todo view file -->
                 <tr ng-repeat="dashboard in dashboards" ng-click="viewFilePVA(dashboard)">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}} {{dashboard.pv_time}}</td>

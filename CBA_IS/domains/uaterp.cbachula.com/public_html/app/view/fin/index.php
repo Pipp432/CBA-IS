@@ -13,8 +13,9 @@
         <script>addModuleLink('finRow', '/fin/tr', 'folder-open-o', 'TR');</script>
         <script>addModuleLink('finRow', '/fin/pvc', 'file-text-o', 'PVC');</script>
         <script>addModuleLink('finRow', '/fin/reimbursement_request', 'money', 'ใบขอเบิกค่าใช้จ่าย');</script>
-        <script>addModuleLink('finRow', '/fin/validate_petty_cash_request', 'check-circle-o', 'โอนใบเบิกเงินรองจ่าย');</script>
-        <script>addModuleLink('finRow', '/fin/create_pva', 'check-circle-o', 'ทำใบขอเบิกเงินรองจ่าย (PV-A)');</script>
+        <!-- <script>addModuleLink('finRow', '/fin/validate_petty_cash_request', 'check-circle-o', 'โอนใบเบิกเงินรองจ่าย');</script> -->
+        <!-- <script>addModuleLink('finRow', '/fin/create_pva', 'check-circle-o', 'ทำใบขอเบิกเงินรองจ่าย (PV-A)');</script> -->
+        <script>addModuleLink('finRow', '/fin/pva_fin_hub', 'file-text-o', 'PVA');</script>
         <script>addModuleLink('finRow', '/fin/upload_slip_pvc', 'cloud-download', 'อัพโหลด slip PVC');</script>
         <script>addModuleLink('finRow', '/fin/upload_iv_pvc', 'cloud-download', 'อัพโหลด IV Sub สำหรับ ใบขอเบิกค่าใช้จ่าย');</script>
 		<script>addModuleLink('finRow', '/is/thelastday', 'heart', 'The Last Day');</script>

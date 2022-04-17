@@ -1679,7 +1679,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
 
-    //create real pva
+    //bundle pva
     public function getPVAForCreation(){
         $sql = $this->prepare("SELECT internal_pva_no,pv_date,pv_time,employee_id,employee_name,line_id,product_names,total_paid,fin_slip_name,slip_name,ivrc_name from PVA where pv_status = 1");
         $sql->execute();
@@ -1706,34 +1706,35 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     public function bundlePVA() {
         $pvas = $_POST['cpvItems'];
         $success = true;
-        $pva_no = $this->assignPVA($_POST['program']);
+        //$pva_no = $this->assignPVA($_POST['program']);
+        $internal_bundle_no = $this->assignInternalBundleNo();
         $product_names = '';
         $total_paid = 0;
 
         foreach($pvas as $pva) {
             $sql = $this->prepare("UPDATE PVA SET 
-                                 pv_no = ?,
+                                 internal_bundle_no = ?,
                                  pv_status = 2 
                                 WHERE internal_pva_no = ?");
-            $success = $success && $sql->execute([$pva_no,$pva['internal_pva_no']]);
+            $success = $success && $sql->execute([$internal_bundle_no,$pva['internal_pva_no']]);
             $product_names = $product_names . $pva['product_names'] . "\r\n";
             $total_paid = $total_paid + $pva['total_paid'];
             if(!$success) break;
         }
 
         if($success) {
-            $sql = $this->prepare("INSERT INTO PVA_bundle (pv_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2)");
-            $success = $success && $sql->execute([$pva_no,$total_paid,$product_names]);
+            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2)");
+            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names]);
         }
         
         if($success) {
-            echo $pva_no;
+            echo $internal_bundle_no;
         } else {
-            echo 'failed';            
-            print_r($sql->errorInfo());
+            echo 'failed'; 
+            print_r($sql->errorInfo());          
             foreach($pvas as $pva) {
                 $sql = $this->prepare("UPDATE PVA SET 
-                                     pv_no = null,
+                                     internal_bundle_no = null,
                                      pv_status = 1 
                                     WHERE internal_pva_no = ?");
                 $sql->execute([$pva['internal_pva_no']]); //set pre pva back
@@ -1741,10 +1742,13 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
 
-    private function assignPVA($program) {
-        $rqPrefix = $program.'PA-';
-        $sql = $this->prepare( "select ifnull(max(pv_no),0) as max from PVA where pv_no like ?" );
-        $sql->execute( [ $program.'PA-%' ] );
+    private function assignInternalBundleNo() {
+        if($scope.company_pva == '') {
+            
+        }
+        $rqPrefix = 'exb-';
+        $sql = $this->prepare( "select ifnull(max(internal_bundle_no),0) as max from PVA where internal_bundle_no like ?" );
+        $sql->execute( [ 'exb-%' ] );
         $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
         $runningNo = '';
         if ( $maxRqNo == '0' ) {
@@ -1762,6 +1766,28 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return $rqPrefix . $runningNo;
     }
+
+    // private function assignPVA($program) {
+    //     $rqPrefix = $program.'PA-';
+    //     $sql = $this->prepare( "select ifnull(max(pv_no),0) as max from PVA where pv_no like ?" );
+    //     $sql->execute( [ $program.'PA-%' ] );
+    //     $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
+    //     $runningNo = '';
+    //     if ( $maxRqNo == '0' ) {
+    //         $runningNo = '00001';
+    //     } else {
+    //         $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+    //         if ( strlen( $latestRunningNo ) == 5 ) {
+    //             $runningNo = $latestRunningNo;
+    //         } else {
+    //             for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+    //                 $runningNo .= '0';
+    //             }
+    //             $runningNo .= $latestRunningNo;
+    //         }
+    //     }
+    //     return $rqPrefix . $runningNo;
+    // }
 
     //real pva now
 
@@ -1879,29 +1905,62 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         return null;
     }
         
-        public function addIVToPVC($pv_no){
-            $iv_name = $_FILES['file']['name'];
-            $iv_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
-            $iv_type = $_FILES['file']['type'];
-    
-            $sql = $this->prepare("UPDATE PVC SET 
-                                    iv_name = ?,
-                                    iv_data = ?,
-                                    iv_type = ?
-                                   WHERE pv_no = ?");
-            $success = $sql->execute([$iv_name,$iv_data,$iv_type,$pv_no]);
-    
-            if($success) {
-    
-                echo $_FILES['file'];
-                  
-            } else {
-                echo 'failed';
-                print_r($sql->errorInfo());
-            }
-            
+    public function addIVToPVC($pv_no){
+        $iv_name = $_FILES['file']['name'];
+        $iv_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
+        $iv_type = $_FILES['file']['type'];
+
+        $sql = $this->prepare("UPDATE PVC SET 
+                                iv_name = ?,
+                                iv_data = ?,
+                                iv_type = ?
+                               WHERE pv_no = ?");
+        $success = $sql->execute([$iv_name,$iv_data,$iv_type,$pv_no]);
+
+        if($success) {
+
+            echo $_FILES['file'];
+              
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
         }
+        
     }
+
+    public function getStatusPva() {
+        $sql = $this->prepare("SELECT
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA_bundle");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getStatusPrePva() {
+        $sql = $this->prepare("select
+                                    internal_pva_no, 
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+}
 
 
 
