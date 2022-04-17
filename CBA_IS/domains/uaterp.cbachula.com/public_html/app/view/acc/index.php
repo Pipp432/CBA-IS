@@ -21,6 +21,8 @@
         <script>addModuleLink('accRow', '/acc/po_calculator', 'calculator', 'PO Calculator');</script>
         <script>addModuleLink('accRow', '/acc/search_porrci', 'search', 'Search PO/RR/CI');</script>
         <script>addModuleLink('accRow', '/acc/dashboard', 'folder-open-o', 'Dashboard');</script>
+        <script>addModuleLink('accRow', '/acc/dashboard', 'folder-open-o', 'Dashboard');</script>
+        <script>addModuleLink('accRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>;
 		<!-- <script>addModuleLink('accRow', '/is/thelastday', 'heart', 'The Last Day');</script> -->
     </div>
     
