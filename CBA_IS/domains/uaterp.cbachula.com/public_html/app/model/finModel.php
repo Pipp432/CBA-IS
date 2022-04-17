@@ -1905,29 +1905,62 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         return null;
     }
         
-        public function addIVToPVC($pv_no){
-            $iv_name = $_FILES['file']['name'];
-            $iv_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
-            $iv_type = $_FILES['file']['type'];
-    
-            $sql = $this->prepare("UPDATE PVC SET 
-                                    iv_name = ?,
-                                    iv_data = ?,
-                                    iv_type = ?
-                                   WHERE pv_no = ?");
-            $success = $sql->execute([$iv_name,$iv_data,$iv_type,$pv_no]);
-    
-            if($success) {
-    
-                echo $_FILES['file'];
-                  
-            } else {
-                echo 'failed';
-                print_r($sql->errorInfo());
-            }
-            
+    public function addIVToPVC($pv_no){
+        $iv_name = $_FILES['file']['name'];
+        $iv_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
+        $iv_type = $_FILES['file']['type'];
+
+        $sql = $this->prepare("UPDATE PVC SET 
+                                iv_name = ?,
+                                iv_data = ?,
+                                iv_type = ?
+                               WHERE pv_no = ?");
+        $success = $sql->execute([$iv_name,$iv_data,$iv_type,$pv_no]);
+
+        if($success) {
+
+            echo $_FILES['file'];
+              
+        } else {
+            echo 'failed';
+            print_r($sql->errorInfo());
         }
+        
     }
+
+    public function getStatusPva() {
+        $sql = $this->prepare("SELECT
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA_bundle");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getStatusPrePva() {
+        $sql = $this->prepare("select
+                                    internal_pva_no, 
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+}
 
 
 

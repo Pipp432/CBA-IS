@@ -286,7 +286,7 @@ foreach ($list as $value) {
         if(empty(uri::get(2))) {
         
         $this->requirePostition("fin");
-        $this->view->status2data = $this->model->GetStatus2Data();
+        //$this->view->status2data = $this->model->GetStatus2Data(); //cause error 500
         $this->view->pvforreceipt = $this->model->GetPVforReceipt();
         $this->view->pvfortranfer = $this->model->GetPVforTranfer();
         $this->view->wstype3data = $this->model->GetWSType3();
@@ -294,7 +294,7 @@ foreach ($list as $value) {
         $this->view->setTitle("Withdrawal Slip");
         $this->view->render("fin/WS","navbar");
         
-        } else if (uri::get(2)==='get_ws_form') {
+        } else if (uri::get(2)==='get_ws_form') { 
             $this->requirePostition("fin");
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('fin', $this->model->getWsForm(Uri::get(3)));
@@ -326,7 +326,7 @@ foreach ($list as $value) {
         if(empty(uri::get(2))) {
             $this->view->setTitle("confirm เบิกเงินรองจ่าย"); 
             $this->view->minor_requests = $this->model->getMinorRequestForFin();
-            $this->view->render("fin/validate_petty_cash_request", "navbar"); 
+            $this->view->render("fin/validate_petty_cash_request", "fin/pva_fin_hub"); 
         } else if(uri::get(2)==='get_re') {
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('fin', $this->model->getRe(Uri::get(3))); 
@@ -349,7 +349,7 @@ foreach ($list as $value) {
     public function create_pva() {
         if(empty(uri::get(2))) {
             $this->view->setTitle("create PV-A"); 
-            $this->view->render("fin/create_pva", "navbar"); 
+            $this->view->render("fin/create_pva", "fin/pva_fin_hub"); 
         } else if(uri::get(2) === "get_pva") {
             $this->positionEcho('fin', $this->model->getPVAForCreation()); 
         } else if(uri::get(2) === "create_pva") {
@@ -369,6 +369,33 @@ foreach ($list as $value) {
         else if (uri::get(2)==='conpvdItems') {
             $this->positionEcho('fin', $this->model->confirmPVD()); ///
         }
+    }
+
+    public function pva_fin_hub() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("PV-A");
+            $this->view->render("fin/pva_fin_hub"); 
+        } 
+    }
+
+    public function top_up_pva() { //since this page is copied from ws.php post request is done in /ws/...
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->pvas = $this->model->GetPVAforWS();
+            $this->view->setTitle("โอนเข้า PV-A");
+            $this->view->render("fin/top_up_pva","fin/pva_fin_hub"); 
+        } 
+    }
+
+    public function pva_status() { //since this page is copied from ws.php post request is done in /ws/...
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->pvas = $this->model->getStatusPva();
+            $this->view->prePvas = $this->model->getStatusPrePva();
+            $this->view->setTitle("ประวัติ PV-A");
+            $this->view->render("fin/pva_status","fin/pva_fin_hub"); 
+        } 
     }
 
 
