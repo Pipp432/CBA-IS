@@ -17,9 +17,9 @@
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type4"
                         aria-expanded="false" aria-controls="type4">อัพโหลดหลักฐานการโอนเงิน (เบิกจ่าย)</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type7"
-                        aria-expanded="false" aria-controls="type7">อัพโหลดหลักฐานการโอนเงิน (Supplier)</button>
+                        aria-expanded="false" aria-controls="type7">อัพโหลดหลักฐานการโอนเงิน (for PVB stage 1)</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type5"
-                        aria-expanded="false" aria-controls="type5">อัพโหลดใบสำคัญรับเงิน (for PVB)</button>
+                        aria-expanded="false" aria-controls="type5">อัพโหลดใบสำคัญรับเงิน (for PVB stage 2)</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#type6"
                         aria-expanded="false" aria-controls="type6">อัพโหลด IV/CR (ประเภท C)</button>
                     <button class="dropdown-item" type="button" data-toggle="collapse" data-target="#pva"
