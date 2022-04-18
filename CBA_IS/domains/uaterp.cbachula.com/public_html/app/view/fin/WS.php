@@ -186,6 +186,7 @@
 
                                 </tr>
                                 <?php
+                                
                             foreach($this->pvforreceipt as $row){
                                 ?>
                                 <tr

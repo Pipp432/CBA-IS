@@ -891,9 +891,12 @@ WHERE s.status='2'");
     }
     public function GetPVforReceipt()
       { 
-        $sql = $this->prepare("SELECT * FROM PV WHERE isnull(receipt_data) and not isnull(slip_data)");
+        $sql = $this->prepare("SELECT pv_no,total_paid,pv_type,pv_name FROM PV WHERE isnull(receipt_data) and not isnull(slip_data)");
         $sql->execute();
-        return $sql->fetchAll();
+        if ($sql->rowCount() > 0) {
+            return $sql->fetchAll(PDO::FETCH_ASSOC);
+        }
+        return [];
         
     }
     
@@ -1833,7 +1836,8 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 PVD.pvd_no,
                                 PVD.pvd_time,
                                 PVD.pvd_date,
-                                PVD.total_amount
+                                PVD.total_amount,
+                                PVD.invoice_no
 
                                 From PVD
                                 where PVD.PVD_status = 2

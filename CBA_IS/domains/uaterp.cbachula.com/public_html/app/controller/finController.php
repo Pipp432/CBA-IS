@@ -286,7 +286,7 @@ foreach ($list as $value) {
         if(empty(uri::get(2))) {
         
         $this->requirePostition("fin");
-        //$this->view->status2data = $this->model->GetStatus2Data(); //cause error 500
+        $this->view->status2data = $this->model->GetStatus2Data();
         $this->view->pvforreceipt = $this->model->GetPVforReceipt();
         $this->view->pvfortranfer = $this->model->GetPVforTranfer();
         $this->view->wstype3data = $this->model->GetWSType3();
