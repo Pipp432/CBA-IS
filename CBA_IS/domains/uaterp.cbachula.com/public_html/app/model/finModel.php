@@ -890,10 +890,13 @@ WHERE s.status='2'");
         
     }
     public function GetPVforReceipt()
-      { 
+    { 
         $sql = $this->prepare("SELECT * FROM PV WHERE isnull(receipt_data) and not isnull(slip_data)");
         $sql->execute();
-        return $sql->fetchAll();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
         
     }
     
