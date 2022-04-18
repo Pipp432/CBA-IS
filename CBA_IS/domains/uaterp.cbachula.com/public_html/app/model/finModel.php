@@ -1613,7 +1613,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
     //confirm petty cash request (pre pva)
     public function getMinorRequestForFin() {
-        $sql = $this->prepare("SELECT internal_pva_no,pv_date,pv_time,employee_id,employee_name,line_id,product_names,total_paid from PVA where pv_status = 0");
+        $sql = $this->prepare("SELECT internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, product_names, total_paid, bank_name, bank_no from PVA where pv_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return $sql->fetchAll();

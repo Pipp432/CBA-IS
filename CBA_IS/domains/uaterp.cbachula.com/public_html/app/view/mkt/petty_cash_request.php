@@ -84,6 +84,26 @@
                     </div>
 
                 </div>
+
+                <div class="row mx-0">
+
+                    <div class="col-md-4">
+
+                        <label for="bank">ธนาคาร</label>
+
+                        <input type="text" class="form-control" id="bank" ng-model="bank_name">
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label for="bankNo">เลขบัญชี</label>
+
+                        <input type="text" class="form-control" id="bankNo" ng-model="bank_no">
+
+                    </div>
+
+                </div>
                 <form id='form'>
                     <div class="row mx-0">
 
@@ -142,7 +162,7 @@
 
             addModal('formValidate2', 'เบิกเงินรองจ่าย', 'เพิ่ม line ID ก่อนนะครับ');
 
-            addModal('formValidate5', 'ใบสั่งขาย / Sales Order (SO)', 'ยังไม่ได้เพิ่มสินค้าเข้าใบสั่งขาย');
+            addModal('formValidate5', 'เบิกเงินรองจ่าย', 'กรอกข้อมูลไม่ครบ');
         </script>
 
 
@@ -175,6 +195,8 @@
         $scope.line_id = '';
         $scope.product_name = '';
         $scope.price = '';
+        $scope.bank_name = '';
+        $scope.bank_no = '';
 
         $scope.addEmployee = function () { //todo add current employee name and id automaticly
 
@@ -231,9 +253,9 @@
 
                 $('#formValidate3').modal('toggle');
 
-            } else if ($scope.price === '') {
+            } else if ($scope.price === '' || $scope.bank_name === '' || $scope.bank_no === '') {
 
-                $('#formValidate4').modal('toggle');
+                $('#formValidate5').modal('toggle');
 
             } else {
 
@@ -261,12 +283,13 @@
 
             formData.append('invoice/receipt', $('#ivrc')[0].files[0]);
             formData.append('slip', $('#bankSlip')[0].files[0]);
-            formData.append('rq_no', $scope.rq_no);
             formData.append('employee_id', $scope.employee_id.toUpperCase());
             formData.append('lineId', $scope.line_id);
             formData.append('employee_name', $scope.employee_name);
             formData.append('product_name', $scope.product_name);
             formData.append('cost', $scope.price);
+            formData.append('bank_name', $scope.bank_name);
+            formData.append('bank_no', $scope.bank_no);
 
             $.ajax({
                 url: 'petty_cash_request/post_pva',
