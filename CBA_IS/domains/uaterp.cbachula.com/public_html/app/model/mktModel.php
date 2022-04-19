@@ -4877,6 +4877,7 @@ public function uploadImgForPVC() {
   }
 }
 
+
 public function requestPVD(){
   $sql = $this->prepare("SELECT
                           Invoice.invoice_no
@@ -4885,27 +4886,26 @@ public function requestPVD(){
                           LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
                           LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
                           where SOX.sox_no = ?
-                            ");
+                        ");
   $sql->execute([input::post('sox_no')]);
   if ($sql->rowCount() > 0) {             
     $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no'];         
   }
 
   $pvdno = $this->assignPVD( ); 
-  $sql = $this->prepare("INSERT into PVD(pvd_no, pvd_date, pvd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, note, PVD_status)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0)");
+  $sql = $this->prepare("INSERT into PVD(pvd_no, pvd_date, pvd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, bank, bank_no, recipent, company_code, recipent_address, note, PVD_status)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, null, null, null, null, null, ?, 0)");
   $sql->execute([
     $pvdno,  
     input::post('employeeID'),
     input::post('employeeLine'),
     input::post('totalAmount'),
     input::post('vatID'),
-    input::post('sox_no'),  ////wae?
+    input::post('sox_no'),  
     $iv_no,
     input::post('note')
   ]);
 }
-
 /////////pvd/////////
 private function assignPVD() {
   $pvdPrefix = 'PVD-';

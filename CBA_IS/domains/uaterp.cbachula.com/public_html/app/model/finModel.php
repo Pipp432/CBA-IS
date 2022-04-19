@@ -1830,7 +1830,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
 
-    //PVD
     public function getPVD() {
         $sql = $this->prepare("SELECT
                                 PVD.pvd_no,
@@ -1851,9 +1850,8 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
 
 
+
     public function confirmPVD() {
-
-
         $pvd_no = $_POST['pvd_no'];
         $fileName = $_FILES['slip_file']['name'];
         $fileData = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
