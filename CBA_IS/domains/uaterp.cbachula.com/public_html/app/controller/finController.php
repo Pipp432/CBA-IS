@@ -397,6 +397,14 @@ foreach ($list as $value) {
             $this->view->render("fin/pva_status","fin/pva_fin_hub"); 
         } 
     }
-
+    public function pvc_status(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->pvcs = $this->model->getPVCStatus();
+            $this->view->reReqs = $this->model->getReReqStatus();
+            $this->view->render("fin/pvc_status"); 
+    }
+    }
+    
 
 }

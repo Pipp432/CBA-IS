@@ -1877,6 +1877,22 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return null;
     }
+    public function getPVCStatus(){
+        $sql = $this->prepare("SELECT * FROM PVC WHERE 1");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+    public function getReReqStatus(){
+        $sql = $this->prepare("SELECT * FROM Reimbursement_Request WHERE 1");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
     public function addSlipToPVC($pv_no){
         $slip_name = $_FILES['file']['name'];
         $slip_data = base64_encode(file_get_contents($_FILES['file']['tmp_name']));
