@@ -2569,6 +2569,19 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         if ($sql->rowCount() > 0) return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
         else return "error";
     }
+    public function getPVCReceiptData($pv_no){
+        $sql = $this->prepare("SELECT slip_type,slip_data from PVC where pv_no = ?");
+        $sql->execute([$pv_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['slip_type']);
+            echo base64_decode($data['slip_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
+        }
+
+    }
 
 
 

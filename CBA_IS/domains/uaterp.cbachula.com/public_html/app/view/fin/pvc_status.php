@@ -35,7 +35,7 @@
             
             <table class="table table-hover my-1">
                 <tr>
-                    <th>เลข PV-C</th>
+                    <th >เลข PV-C</th>
                     <th>วันที่</th>
                     <th>รายการ</th>
                     <th>จำนวนเงิน</th>
@@ -54,17 +54,23 @@
                     <td>{{pvc.product_names}}</td>
                     <td>{{pvc.total_paid}}</td>
                     <td>
-                        <span ng-show="pvc.pv_status < 4">fin ยังไม่ upload slip</span>
-                        <a ng-show = "pvc.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvcslip/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
+                        <span ng-show="pvc.slip_name == null">fin ยังไม่ upload slip</span>
+                        <a ng-show = "pvc.slip_name != null" href="/acc/confirm_payment_voucher/get_pvcslip/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
 
                     </td>
                     <td>
-                        <span ng-show="pvc.pv_status < 4">fin ยังไม่ upload ใบ iv</span>
-                        <a ng-show = "pvc.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvcslip/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">iv</a> 
+                        <span ng-show="pvc.iv_name == null">fin ยังไม่ upload ใบ iv</span>
+                        <a ng-show = "pvc.iv_name!= null" href="/acc/confirm_payment_voucher/get_pvcslip/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">iv</a> 
 
                     </td>
                   
-                    <td>{{pvc.pv_status}}</td>
+                    <td>
+                        <span ng-show="pvc.iv_name == null && pvc.slip_name == null && pvc.confirmed == 0">fin ยังไม่ upload ใบ iv และ slip</span>
+                        <span ng-show="pvc.iv_name == null && pvc.slip_name != null && pvc.confirmed == 0">fin ยังไม่ upload ใบ iv</span>
+                        <span ng-show="pvc.iv_name != null && pvc.slip_name == null && pvc.confirmed == 0">fin ยังไม่ upload ใบ slip</span>
+                        <span ng-show="pvc.iv_name != null && pvc.slip_name != null && pvc.confirmed == 0 ">acc ยังไม่ confirm</span>
+                        <span ng-show="pvc.iv_name != null && pvc.slip_name != null && pvc.confirmed == 1 ">acc confirm</span>
+                    </td>
                 </tr>
             </table>
             
