@@ -13,7 +13,7 @@
                 <h3 style="text-align: center;"><b>ใบสำคัญสั่งจ่าย<br>Payment Voucher</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">สำเนา</h5>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].pv_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].pv_date}}</h6>
             </div>
