@@ -107,6 +107,8 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->getPVAForPV());
         } else if(uri::get(2)==='post_PVA'){
             $this->positionEcho('acc', $this->model->postPVAForPV());
+        }else if(uri::get(2)==='get_quotation'){
+            $this->positionEcho('acc', $this->model->getQuotation(Uri::get(3)));
         }
 
     }

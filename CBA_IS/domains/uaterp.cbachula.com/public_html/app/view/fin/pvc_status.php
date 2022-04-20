@@ -51,7 +51,7 @@
                 <tr ng-repeat="pvc in pvcs" ng-click="viewFilepvc(pvc)">
                     <td>{{pvc.pv_no}}</td>
                     <td>{{pvc.pv_date}} {{pvc.pv_time}}</td>
-                    <td>{{pvc.product_names}}</td>
+                    <td>{{pvc.pv_details}}</td>
                     <td>{{pvc.total_paid}}</td>
                     <td>
                         <span ng-show="pvc.slip_name == null">fin ยังไม่ upload slip</span>
@@ -69,7 +69,7 @@
                         <span ng-show="pvc.iv_name == null && pvc.slip_name != null && pvc.confirmed == 0">fin ยังไม่ upload ใบ iv</span>
                         <span ng-show="pvc.iv_name != null && pvc.slip_name == null && pvc.confirmed == 0">fin ยังไม่ upload ใบ slip</span>
                         <span ng-show="pvc.iv_name != null && pvc.slip_name != null && pvc.confirmed == 0 ">acc ยังไม่ confirm</span>
-                        <span ng-show="pvc.iv_name != null && pvc.slip_name != null && pvc.confirmed == 1 ">acc confirm</span>
+                        <span ng-show="pvc.iv_name != null && pvc.slip_name != null && pvc.confirmed == 1 ">acc confirmed</span>
                     </td>
                 </tr>
             </table>

@@ -724,8 +724,7 @@
                                     
                 if($scope.selectedPaymentType==='PC')
                 { let tax= ($scope.tax ? "Yes" : "No")
-                    console.log(pvItemDateStr,$scope.pvItemDebit,$scope.pvItemPaidTotal,$scope.pvName,$scope.pvAddress,company )
-                    console.log($scope.vat, tax)
+                    
                     $.post(`/acc/payment_voucher/confirm/${$scope.pvItemRR}`,{
                         "debit" : String($scope.pvItemDebit),
                         "cr_name": String($scope.pvItemRR),
@@ -740,6 +739,8 @@
                     }).done(function(data,status){
                         console.log(data)
                         console.log(status)
+                        window.location.assign("https://uaterp.cbachula.com/")
+
                         
                     }).fail(function(e){
                         console.log(e)
@@ -903,7 +904,7 @@
                         // });
                     }).fail(function(error){
                         console.log(error)
-                    });
+                    })
                     
                 }
                 
@@ -937,6 +938,9 @@
             }
             $scope.pvItemDebit = $scope.pvDetails[0].debit;
             $scope.pvItemDetail = $scope.pvDetails[0].pv_details
+            $scope.pvItemDate = new Date($scope.pvDetails[0].pv_date)
+            $scope.pvName = $scope.pvDetails[0].pv_name
+            $scope.pvAddress = $scope.pvDetails[0].pv_address
             
             
         })
