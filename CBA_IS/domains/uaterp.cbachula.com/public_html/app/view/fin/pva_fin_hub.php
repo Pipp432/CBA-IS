@@ -30,7 +30,7 @@
     <div class="container mt-3" ng-controller="pvaHeadController">
         <select class="form-control" ng-model="page" ng-change = "goto(page)">
             <option value='pva_fin_hub'>เลือกหน้า PV-A</option>
-            <option value='validate_petty_cash_request'>โอนเงินให้พนักงาน</option>
+            <option value='validate_petty_cash_request'>confirm เบิกเงินรองจ่าย</option>
             <option value='create_pva'>รวมใบเบิกเงินรองจ่ายเพื่อขอ PV-A</option>
             <option value='top_up_pva'>โอนเงินเข้าบัญชี PV-A</option>
             <option value='pva_status'>ประวัติ PV-A</option>
