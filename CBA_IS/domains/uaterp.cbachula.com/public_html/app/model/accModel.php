@@ -470,7 +470,7 @@ class accModel extends model {
 
     public function getPVDConfirmPV() {
         $sql = "SELECT 
-                    pvd_no as pv_no, 
+                    pvd_no as pv_no,
                     pvd_date as pv_date,
                     total_amount as total_paid,
                     slipName as receipt_name
@@ -1401,7 +1401,7 @@ class accModel extends model {
                                     PVPrinting.*
                                 from PVPrinting
                                 inner join PV on PV.pv_no = PVPrinting.pv_no
-                                where PV.receipt_data is not null and PV.paid = 0");
+                                where (PV.slip_name is not null or PV.cr_name is not null) and PV.paid = 0"); 
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
