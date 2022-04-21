@@ -234,7 +234,7 @@
                     respond = respond.concat(data);
                     respond_count++;
 
-                    if(respond_count == 3) {
+                    if(respond_count == 4) {
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
@@ -254,7 +254,7 @@
                     respond = respond.concat(data);
                     respond_count++;
 
-                    if(respond_count == 3) {
+                    if(respond_count == 4) {
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
@@ -272,7 +272,7 @@
                     respond = respond.concat(data);
                     respond_count++;
 
-                    if(respond_count == 3) {
+                    if(respond_count == 4) {
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
@@ -290,11 +290,11 @@
                     respond.concat(data);
                     respond_count++;
 
-                    if(respond_count == 3) {
+                    if(respond_count == 4) {
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
-                            window.location.assign("https://uaterp.cbachula.com/");
+                            location.reload();
                         });
                     }
                 });
