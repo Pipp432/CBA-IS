@@ -1387,7 +1387,7 @@ class accModel extends model {
     
     // Confirm PV Module
 	public function getRRCIPV() {
-        $sql = $this->prepare("select
+        $sql = $this->prepare("SELECT
                                 	PV.pv_no,
                                     PV.pv_date,
                                     PV.pv_type,
