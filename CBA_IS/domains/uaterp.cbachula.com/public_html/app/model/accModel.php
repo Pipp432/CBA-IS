@@ -469,20 +469,19 @@ class accModel extends model {
     }
 
     public function getPVDConfirmPV() {
-        $sql = "SELECT 
-                    pvd_no as pv_no,
-                    pvd_date as pv_date,
-                    total_amount as total_paid,
-                    slipName as receipt_name
-                from PVD where PVD_status = 3";
-        $sql = $this->prepare($sql);
+        $sql = $this->prepare("SELECT 
+                                pvd_no as pv_no,
+                                pvd_date as pv_date,
+                                total_amount as total_paid,
+                                slipName as receipt_name
+                                from PVD 
+                                where PVD_status = 3");
         $sql->execute([]);
 
         if ($sql->rowCount() > 0) {
-            return json_encode($ret, JSON_UNESCAPED_UNICODE);
-        } else return json_encode([]); 
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        } return json_encode([]); 
     }
-
 
     // CN(PV-D) Module
     private function assignIv($iv_no) {
