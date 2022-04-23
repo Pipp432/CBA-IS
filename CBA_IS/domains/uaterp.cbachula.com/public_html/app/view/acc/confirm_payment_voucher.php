@@ -27,7 +27,7 @@
                             <option value="Expense">ค่าใช้จ่าย</option>
                             <option value="เงินมัดจำ">เงินมัดจำ</option>
                             <option value="pva">PV-A</option>
-                            <option value="pvd">PV-C</option>
+                            <option value="pvc">PV-C</option>
                             <option value="pvd">PV-D</option>
                             
                         </select>
@@ -53,7 +53,7 @@
                             <td  style="text-align: center;">{{pv.pv_date}}</td>
                             <td  style="text-align: center;">{{pv.pv_type}}</td>
                             <td  style="text-align: center;"><ul class="my-0">
-                                <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc'" ng-repeat="pv_item in pvs track by $index" ng-show="pv_item.pv_no===pv.pv_no">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
+                                <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc' && pv_item.pv_no===pv.pv_no" ng-repeat="pv_item in pvs track by $index">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
                                 <li ng-show = "pv.pv_type == 'pvd'">-</li>
                                 <li ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</li>
                                 <li ng-show = "pv.pv_type == 'pvc'">{{pv.pv_details}}</li>
@@ -143,7 +143,7 @@
         $scope.pvs = [];
         
         $http.get('/acc/confirm_payment_voucher/get_rr_ci_pv').then(function(response){
-            $scope.pvs.concat(response.data);
+            $scope.pvs = $scope.pvs.concat(response.data);
         });
 
         $http.get('/acc/confirm_payment_voucher/get_pvd').then(function(response){ 
@@ -165,7 +165,6 @@
                 $scope.pvs.push(value);
             });
         });
-        console.log( $scope.pvs);
         
         $scope.addCpvItem = function(pv) {
             var newPv = true;
