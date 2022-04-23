@@ -107,8 +107,17 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->getPVAForPV());
         } else if(uri::get(2)==='post_PVA'){
             $this->positionEcho('acc', $this->model->postPVAForPV());
+        }else if(uri::get(2)==='get_quotation'){
+            $this->positionEcho('acc', $this->model->getQuotation(Uri::get(3)));
+        } else if(uri::get(2)==='get_PVA_child'){
+            $this->positionEcho('acc', $this->model->getPVAChild());
+        } else if (uri::get(2)==='get_petty_cash_statement') {
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getPettyCashStatement(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
         }
-
     }
     
     public function confirm_payment_voucher() {
@@ -135,6 +144,20 @@ class accController extends controller {
             $this->requirePostition("acc");
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('acc', $this->model->getPVAReceiptData(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        } else if (uri::get(2)==='get_pvcslip') {
+            $this->requirePostition("acc");
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getPVCReceiptData(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        } else if (uri::get(2)==='get_pvdslip') {
+            $this->requirePostition("acc");
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getPVDReceiptData(Uri::get(3)));
             } else {
                 $this->err404();
             }
@@ -340,6 +363,7 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->confirmPrintIV());
         } 
     }
+    
 
 
 }

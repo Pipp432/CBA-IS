@@ -9,55 +9,79 @@
 
         <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
             <div class="card-body">
-                <label for="dateTextbox">วันที่เบิก</label>
-                <input type="date" class="form-control" id="dateTextbox" ng-change="getWithdrawDate()" ng-model="withdrawDate">
-                <br>
-                <label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
-                <input type="text" class="form-control" id="withdrawNameTextbox" ng-change="addWithdrawName()" ng-model="withdrawName" >
-                <br>
-                <label for="iDTextbox">รหัสพนักงาน</label>
-                <input type="text" class="form-control" id="iDTextbox" ng-blur ="getEmployeeId()" ng-model="employeeId">
-                <br>
-                <label for="lineIdTextbox">LINE ID พนักงาน</label>
-                <input type="text" class="form-control" id="lineIdTextbox"  ng-model="employeeLine">
-                <br>
-                <label for="taxIDTextbox">เลขที่ผู้เสียภาษีอากร</label>
-                <input type="text" class="form-control" id="taxIDTextbox" ng-model="taxNumber">
-                <br>
-                <label for="BankDropdown">ธนาคาร</label>
-                <select class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="bankName" id="bankDropdown" onchange="checkBank(this.value)"; ng-change = "addBankName()">
-                            <option value="" selected="selected">เลือกธนาคาร</option>
-
-                            <option value="กสิกรไทย">กสิกรไทย</option>
-
-                            <option value="ไทยพาณิชย์">ไทยพาณิชย์</option>
-
-                            <option value="กรุงไทย">กรุงไทย</option>
-
-                            <option value="TMB">TMB</option>
-
-                            <option value="others">อื่นๆ</option>
-                        </select>
-                        <br>
-                    <div id="otherBank" style='display:none;'>
-                        <label>Enter bank name</label>
-                        <br>
-                        <input type="text" class="form-control" ng-model="otherBankName"/>
+                <div class="row mx-0">
+                    <div class = "col-md-6">
+                        <label for="dateTextbox">วันที่เบิก</label>
+                        <input type="date" class="form-control" id="dateTextbox" ng-change="getWithdrawDate()" ng-model="withdrawDate">
+                        
                     </div>
-                <br>
-                <label>ชื่อบัญชีธนาคารที่รับโอน</label>
-                <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookNumber" >
+                    <div class = "col-md-4">
+                        <label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
+                        <input type="text" class="form-control" id="withdrawNameTextbox" ng-change="addWithdrawName()" ng-model="withdrawName" >
+                        <br>
+                    </div>
+                </div>
+                <div class = "row mx-0">
+                    <div class = "col-md-6">
+                        <label for="iDTextbox">รหัสพนักงาน</label>
+                        <input type="text" class="form-control" id="iDTextbox" ng-blur ="getEmployeeId()" ng-model="employeeId">
+                    </div>
+                    <div class = "col-md-4">
 
-                <br>
-                <label>เลขที่บัญชีธนาคารที่รับโอน</label>
-                <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookName" >
-                
-                <br> 
-                <label>ผู้ร้บรอง</label>
-                <input type="text" class="form-control" id="authorizerNameTextbox" ng-model="authorizerName" >
-                
-                <br> 
+                    
+                        <label for="lineIdTextbox">LINE ID พนักงาน</label>
+                        <input type="text" class="form-control" id="lineIdTextbox"  ng-model="employeeLine">
+                        <br>
+                    </div>
+                </div>
+                <div class = "row mx-0">
+                    <div class = "col-md-6">
+                        <label for="taxIDTextbox">เลขที่ผู้เสียภาษีอากร</label>
+                        <input type="text" class="form-control" id="taxIDTextbox" ng-model="taxNumber">
+                        <br>
+                    </div>
+                    <div class = "col-md-2">
+                        <label for="BankDropdown">ธนาคาร</label>
+                        <select class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="bankName" id="bankDropdown" onchange="checkBank(this.value)"; ng-change = "addBankName()">
+                                    <option value="" selected="selected">เลือกธนาคาร</option>
 
+                                    <option value="กสิกรไทย">กสิกรไทย</option>
+
+                                    <option value="ไทยพาณิชย์">ไทยพาณิชย์</option>
+
+                                    <option value="กรุงไทย">กรุงไทย</option>
+
+                                    <option value="TMB">TMB</option>
+
+                                    <option value="others">อื่นๆ</option>
+                                </select>
+                                <br>
+                            <div id="otherBank" style='display:none;'>
+                                <label>Enter bank name</label>
+                                <br>
+                                <input type="text" class="form-control" ng-model="otherBankName"/>
+                            </div>
+                    </div>
+                        <br>
+                </div>
+                <div class="row mx-0">
+                    <div class = "col-md-6">
+                        <label>ชื่อบัญชีธนาคารที่รับโอน</label>
+                        <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookNumber" >
+
+                        <br>
+                    </div>
+                    <div class = "col-md-4">
+                        <label>เลขที่บัญชีธนาคารที่รับโอน</label>
+                        <input type="text" class="form-control" id="bookBankNameTextbox"  ng-model="bankBookName" >
+                        
+                        <br>
+                    </div>
+                  </div>    
+                        <label>ผู้ร้บรอง</label>
+                        <input type="text" class="form-control" id="authorizerNameTextbox" ng-model="authorizerName" >
+                        <br> 
+             
                 <div class="card-body">
                     <table id ="inputTable">
                         <tr>
@@ -347,10 +371,13 @@
                 
             },function(data,status){
                 console.log(data,status);
+               
+               
+                
+            }).done(function(done){ 
                 addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
-                $scope.toMainMenu();
-                
+                 $scope.toMainMenu();
             })
         }
        

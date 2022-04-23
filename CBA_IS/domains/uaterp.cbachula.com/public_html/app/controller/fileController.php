@@ -199,6 +199,7 @@ class fileController extends controller {
     }
    
     public function pva() { 
+
         if(empty(uri::get(2))) {
             $this->err404();
         } else {

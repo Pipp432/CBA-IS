@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController" ng-init="onload()">
 
-        <h2 class="mt-3">รายการจัดส่งสินค้าจากคลัง / Inventory Report Delivery (IRD)</h2>
+        <h2 class="mt-3">ยืนยันการจัดเตรียม / Confirm Preparation</h2>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING CI/RR -->
@@ -33,9 +33,8 @@
 							<th>ราคารวม</th>
 							<th>รายละเอียด</th>
                         </tr>
-    
                         <tr ng-repeat="sr in soxx | unique: 'sox_no'" ng-click="addIrdItem(sr)">
-                            <td >{{sr.sox_date}}</td>
+                            <td >{{sr.sox_datetime}}</td>
                             <td>{{sr.sox_no}}</td>
 							<td>{{sr.sox_type}}</td>
 							<td>
@@ -49,7 +48,14 @@
 							<td>
 							  <div class="card card-body">
 								  <table>
-									  <tr ng-repeat="sr_item in soxx" ng-show="sr_item.sox_no===sr.sox_no"">
+                                      <tr>
+                                          <th>เลข SO</th>
+                                          <th>เลขสินค้า</th>
+                                          <th>ชื่อสินค้า</th>
+                                          <th>จำนวน</th>
+
+                                    </tr>
+									  <tr ng-repeat="sr_item in soxx" ng-show="sr_item.sox_no===sr.sox_no">
 										  <td>{{sr_item.so_no}}</td>
 										  <td>{{sr_item.product_no}}</td>
 										  <td>{{sr_item.product_name}}</td> 
@@ -71,7 +77,7 @@
         <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;">
             <div class="card-body">
                 <div class="row mx-0">
-                    <h4 class="my-1">รายละเอียดยืนยันการบันทึก IRD </h4>
+                    <h4 class="my-1">รายละเอียดยืนยันการจัดเตรียม</h4>
                     <table class="table table-hover my-1" ng-show="irdItems.length == 0">
                         <tr>
                             <th>ยังไม่ได้เพิ่มเลข SOX</th>
@@ -91,7 +97,7 @@
                         </tr>
                         <tr ng-repeat="irdItem in irdItems | unique: 'sox_no'">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropIrdItem(irdItem)"></i></td>
-							<td>{{irdItem.sox_date}}</td>
+							<td style="text-align: center;">{{irdItem.sox_datetime}}</td>
                             <td style="text-align: center;">{{irdItem.sox_no}}</td>
                             <td style="text-align: center;">{{irdItem.sox_type}}</td>
 							<td style="text-align: center;">
@@ -109,7 +115,7 @@
                 </div>
                 <hr>
                 <div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postIrdItems()">บันทึก IRD</button>
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postIrdItems()">ยืนยันการจัดเตรียม</button>
                 </div>
                 
             </div>
@@ -147,8 +153,7 @@
         
         $scope.selectedCompany = '';
         $scope.irdItems = [];
-        $scope.sox_no='';
-        $scope.srs = <?php echo $this->srs; ?>;
+
         $scope.scrollToTop = function() {
             
             window.scrollTo({ top: 0});
@@ -159,32 +164,32 @@
             window.scrollTo({ left: 0, top: document.body.scrollHeight});
             
         }
-        //เอามาจากยืนยันการจัดเตรียม
+        $scope.current_no='';
+        //ไม่ต้องแก้
 		$scope.addIrdItem = function(sr) {
             var newSox = true;
             angular.forEach($scope.irdItems, function (value, key) {
+                //console.log(value,key);
                 if(value.sox_no == sr.sox_no) {
 					newSox = false;
                 }
             });
             if(newSox) {
-                angular.forEach($scope.srs, function (value, key) {
+                angular.forEach($scope.soxx, function (value, key) {
                     if(value.sox_no == sr.sox_no) {
                         $scope.irdItems.push(value);
                     }
+                    //console.log($scope.irdItems);
                 });
             }
-            $scope.sox_no=sr.sox_no;
+            $scope.current_no=sr.sox_no;
 			$scope.calculateTotalBox();
         }
-
-
-
-        $scope.onload=function(){
-            $http.get('/scm/ird/get_status').then(function(response){$scope.soxx = response.data; $scope.isLoad = false;console.log(response.data);});
+		
+		$scope.onload=function(){
+            $http.get('/scm/confirm_prepare/get_sox').then(function(response){$scope.soxx = response.data; $scope.isLoad = false;console.log(response.data);});
         }
-		
-		
+
         $scope.dropIrdItem = function(sr) {
             var tempIrdItem = [];
             angular.forEach($scope.irdItems, function (value, key) {
@@ -195,7 +200,6 @@
             $scope.irdItems = tempIrdItem;
             $scope.calculateTotalBox();
         }
-
         
         $scope.calculateTotalBox = function() {
             $scope.count = 0
@@ -208,30 +212,25 @@
 			$scope.count = $scope.sox.length
             });
         }
-        
+        //แก้ส่งsoxที่กดยืนยันไปให้ปุ่มird
 		$scope.postIrdItems = function() {
-			if($scope.irdItems.length === 0) {
+            if($scope.irdItems.length === 0) {
                 $('#formValidate1').modal('toggle');
             } else{
 				$('#confirmModal').modal('hide');
-            $.post("/scm/ird/post_ird_items", {
+            $.post("/scm/confirm_prepare/update_ird_items", {
                 post : true,
                 irdItems : JSON.stringify(angular.toJson($scope.irdItems))
-            }, function(data) {
+            }, function(data) { 
 				console.log(data);
-                addModal('successModal', 'ใบนำสินค้าออกจากคลัง / Inventory Report Delivery (IRD)', 'บันทึก ' + data + ' สำเร็จ');
+                addModal('successModal', 'ยืนยันการตรวจสอบ / Confirm Preparation', 'บันทึก ' + data + ' สำเร็จ');
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
-					window.open('/file/ird/' + data.substring(0, 9));
-                    window.location.replace('/scm/ird');
+                window.location.assign('/scm/confirm_prepare');
                 });
-            });
-        
-				
-			}
-        }
-		
-		
+                });   
+		    }
+        }	
         
 
   	});

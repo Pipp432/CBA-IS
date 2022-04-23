@@ -1726,8 +1726,41 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
 
         if($success) {
-            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2)");
-            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names]);
+
+            $pcs_name = $_FILES['pettyCashStatement']['name'];
+            $pcs_data = base64_encode(file_get_contents($_FILES['pettyCashStatement']['tmp_name']));
+            $pcs_type = $fileType = $_FILES['pettyCashStatement']['type'];
+
+
+
+            $sql = $this->prepare("INSERT INTO PVA_bundle(
+                                        internal_bundle_no,
+                                        pv_date,
+                                        pv_time,
+                                        total_paid,
+                                        product_names,
+                                        pv_status,
+                                        additional_cash,
+                                        additional_cash_reason,
+                                        PCS_name,
+                                        PCS_type,
+                                        PCS_data,
+                                        employee_id
+                                    )
+                                    VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?,?)");
+            $success = $success && $sql->execute([$internal_bundle_no,
+                                                    $total_paid,
+                                                    $product_names,
+                                                    $_POST["additionalCash"],
+                                                    $_POST["whyMoreCash"],
+                                                    $pcs_name,
+                                                    $pcs_type,
+                                                    $pcs_data,
+                                                    json_decode(session::get('employee_detail'),true)['employee_id']]);
+
+            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status,additional_cash,additional_cash_reason,PCS_name,PCS_type,PCS_data) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?)");
+            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names,$_POST["additionalCash"],$_POST["whyMoreCash"],$pcs_name,$pcs_type,$pcs_data]);
+
         }
         
         if($success) {
@@ -1746,12 +1779,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     }
 
     private function assignInternalBundleNo() {
-        if($scope.company_pva == '') {
-            
-        }
-        $rqPrefix = 'exb-';
+        $rqPrefix = 'BPA-';
         $sql = $this->prepare( "select ifnull(max(internal_bundle_no),0) as max from PVA where internal_bundle_no like ?" );
-        $sql->execute( [ 'exb-%' ] );
+        $sql->execute( [ 'BPA-%' ] );
         $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
         $runningNo = '';
         if ( $maxRqNo == '0' ) {
@@ -1830,13 +1860,13 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
     }
 
-    //PVD
     public function getPVD() {
         $sql = $this->prepare("SELECT
                                 PVD.pvd_no,
                                 PVD.pvd_time,
                                 PVD.pvd_date,
                                 PVD.total_amount,
+                                PVD.employee_id,
                                 PVD.invoice_no
 
                                 From PVD
@@ -1851,9 +1881,8 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
 
 
+
     public function confirmPVD() {
-
-
         $pvd_no = $_POST['pvd_no'];
         $fileName = $_FILES['slip_file']['name'];
         $fileData = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
@@ -1873,6 +1902,22 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     }
     public function getPVCs(){
         $sql = $this->prepare("SELECT * FROM PVC WHERE slip_name IS NULL");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+    public function getPVCStatus(){
+        $sql = $this->prepare("SELECT * FROM PVC WHERE 1");
+        $sql-> execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+    public function getReReqStatus(){
+        $sql = $this->prepare("SELECT * FROM Reimbursement_Request WHERE 1");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

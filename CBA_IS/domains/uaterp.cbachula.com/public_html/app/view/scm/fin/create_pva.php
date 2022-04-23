@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ออกใบเติมเงินรองจ่าย</h2>
+        <h2 class="mt-3">รวมใบเบิกเงินรองจ่ายเพื่อขอ PV-A</h2>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING pre pva -->
@@ -15,8 +15,8 @@
             <div class="card-body">
                 <div class="row mx-0">
                     <div class="col-md-6">
-                        <label for="filterInternalPvaNo">เลขที่ใบเบิกเงินรองจ่าย</label>
-                        <input type="text" class="form-control" id="filterInternalPvaNo" ng-model="filterInternalPvaNo">
+                        <label for="filterEmployeeID">เลขที่ พนักงาน</label>
+                        <input type="text" class="form-control" id="filterEmployeeID" ng-model="filterEmployeeID">
                     </div>
                 </div>
                 <hr>
@@ -28,14 +28,14 @@
                     </table>
                     <table class="table table-hover my-1" ng-show="pvas.length != 0" >
                         <tr>
-                            <th>เลขที่ใบเบิกเงินรองจ่าย</th>
+                            <th>เลขที่พนักงาน</th>
                             <th>วันที่</th>
-                            <th>รายการ</th>
+                            <th>รายการการสั่งจ่าย</th>
                             <th>จำนวนเงิน</th>
                             <th>เอกสาร</th>
                         </tr>
-                        <tr ng-repeat="pva in pvas | unique:'internal_pva_no' | filter:{internal_pva_no:filterInternalPvaNo}" ng-click="addCpvItem(pva)" style="text-align: center;">
-                            <td>{{pva.internal_pva_no}}</td>
+                        <tr ng-repeat="pva in pvas | unique:'internal_pva_no' | filter:{employee_id:filterEmployeeID}" ng-click="addCpvItem(pva)" style="text-align: center;">
+                            <td>{{pva.employee_id}}</td>
                             <td>{{pva.pv_date}} {{pva.pv_time}}</td>
                             <td>{{pva.product_names}}</td>
                             <td>{{pva.total_paid | number:2}}</td>
@@ -74,38 +74,22 @@
                     <table class="table table-hover my-1" ng-show="cpvas.length != 0">
                         <tr>
                             <th></th>
-                            <th>เลขที่ใบเบิกเงินรองจ่าย</th>
+                            <th>เลขที่พนักงาน</th>
                             <th>วันที่</th>
-                            <th>รายการ</th>
+                            <th>รายการของ</th>
                             <th>จำนวนเงิน</th>
                         </tr>
                         <tr ng-repeat="cpvItem in cpvas | unique:'internal_pva_no'" style="text-align: center;">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropCpvItem(cpvItem)"></i></td>
-                            <td>{{cpvItem.internal_pva_no}}</td>
+                            <td>{{cpvItem.employee_id}}</td>
                             <td>{{cpvItem.pv_date}} {{pva.pv_time}}</td>
                             <td>{{cpvItem.product_names}}</td>
                             <td>{{cpvItem.total_paid | number:2}}</td>
                         </tr>
                     </table>
                 </div>
-
-                <br>
-
-                <div class="row mx-0">
-                    <label for="petty_cash_statement">Petty cash statement</label><br>
-                    <input id='petty_cash_statement' type="file" class="form-control-file" name='petty_cash_statement'>
-                </div>
-                <div class="row-md-4">
-                    <label for="additional_cash">จำนวนที่ต้องการเติมเพิ่ม</label><br>
-                    <input id='additional_cash' type="number" name='additional_cash' ng-model = 'additionalCash'>
-                </div>
-                <div class="row-md-4">
-                    <label for="why_more_cash">เหตุผล</label><br>
-                    <input id='why_more_cash' type="text" name='why_more_cash' ng-model = "whyMoreCash">
-                </div>
-
                 <div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">สร้างใบเติมเงินรองจ่าย</button>
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">ยืนยัน PV-A</button>
                 </div>
             </div>
         </div>
@@ -140,8 +124,6 @@
         $scope.filterPVNo = '';
         $scope.filterPVType = '';
         $scope.pvas = [];
-        $scope.additionalCash = 0;
-        $scope.whyMoreCash = '';
         //$scope.program = '';
         
 
@@ -176,7 +158,7 @@
             if($scope.cpvas.length===0) {
                 $('#formValidate1').modal('toggle');
             } else {
-                var confirmModal = addConfirmModal('confirmModal', 'ยืนยันการสร้าง ใบเติมเงินรองจ่าย / Confirm ใบเติมเงินรองจ่าย creation', 'ยืนยันการสร้าง ใบเติมเงินรองจ่าย', 'postcpvas()');
+                var confirmModal = addConfirmModal('confirmModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ยืนยันการสร้าง PV-A', 'postcpvas()');
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
             }
@@ -185,41 +167,25 @@
         $scope.postcpvas = function() {
             $('#confirmModal').modal('hide');
 
-
-            var formData = new FormData();
-            formData.append('pettyCashStatement', $('#petty_cash_statement')[0].files[0]);
-            formData.append('additionalCash', $scope.additionalCash);
-            formData.append('whyMoreCash', $scope.whyMoreCash);
-            formData.append('cpvItems' , $scope.cpvas);
-
-            $.ajax({ 
-                url: '/fin/create_pva/create_pva',  
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                method: 'POST',
-                type: 'POST',
-            }).done(function (data) {
-                if(data.length == 9){
-                        addModal('successModal', 'สร้างใบเติมเงินรองจ่ายสำเร็จ', data);
+            $.post("/fin/create_pva/create_pva", {
+                    post : true,
+                    cpvItems : $scope.cpvas,
+                    //program : $scope.program
+                }, function(data) {
+                    if(data.length == 9){
+                        addModal('successModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ใบ PV-A เลขที่ ' + data + ' สำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
                             location.reload();
                         });
                     } else {
-                        addModal('failedModal', 'สร้างใบเติมเงินรองจ่าย มีความผิกพลาด', 'บอก is หน่อย');
+                        addModal('failedModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ใบ PV-A failed');
                         $('#failedModal').modal('toggle');
                         console.log(data);
                     }
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.log('ajax.fail');
-                addModal('uploadFailModal', 'สร้างใบเติมเงินรองจ่าย มีความผิกพลาด', 'บอก is หน่อย');
-                $('#uploadFailModal').modal('toggle');
-            });
 
 
-
+                });
         }
 
         

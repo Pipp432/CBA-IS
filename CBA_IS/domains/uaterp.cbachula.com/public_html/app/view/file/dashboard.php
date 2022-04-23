@@ -196,17 +196,19 @@
                 </tr>
                 <tr ng-show="dashboards.length == 0">
                     <th colspan="5">
-                        <h6 class="my-0" style="text-align:center;"> no PV-A to show</h6>
+                        <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> no PV-D to show</h6>
                     </th>
                 </tr>
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFilePVA(dashboard)">
+                <!-- todo view file -->
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}} {{dashboard.pv_time}}</td>
                     <td>{{dashboard.product_names}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>
                         <span ng-show="dashboard.pv_status < 4">fin ยังไม่ upload slip</span>
-                        <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{dashboard.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
+                        <!-- todo get pvd slip -->
+                        <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
 
                     </td>
                     <!-- todo convert status to readable -->
@@ -256,10 +258,8 @@
                     <th>เลข PV-C</th>
                     <th>วันที่</th>
                     <th>จำนวนเงิน</th>
-                    <th>Slip</th>
-                    <th>เอกสาร IV</th>
-                    <th>เอกสาร PVC</th>
-                    <th>ผู้ออกใบ PVC</th>
+                    <th>อัพสลิป</th>
+                    <th>ผู้ออกใบเบิกค่าใช้จ่าย</th>
                     <th>ผู้กดยืนยัน</th>
                 </tr>
                 <tr ng-show="dashboards.length == 0">
@@ -268,21 +268,11 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards">
-                    <td>{{dashboard.pv_no}}</td>
-                    <td>{{dashboard.pv_date}}</td>
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                    <td>{{dashboard.ex_no}}</td>
+                    <td>{{dashboard.withdraw_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
-                    <td>
-                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">slip</a>
-
-                    </td>
-                    <td>
-                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.ex_no}}</a>
-                    </td>
-                    <td>
-                        <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
-                    </td>
-                    <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
+                    <td>{{dashboard.employee_id}} {{dashboard.employee_nickname_thai}}</td>
                 </tr>
             </table>
             
@@ -313,7 +303,6 @@
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
         $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
-        $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
         $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
         $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
         $scope.pvType = '';
@@ -372,7 +361,7 @@
         }
 
         $scope.getDashboardPVC_confirm = function(){
-            $scope.dashboards = $scope.dashboardsPvc_confirm; 
+            $scope.dashboards = $scope.dashboardsPvc; 
             $scope.doc = 'PV';
             $scope.pvType = 'pvc';
             $scope.temp = 'PV-C';
@@ -395,10 +384,6 @@
             } else {
                 window.open('/file/' + $scope.doc.toLowerCase() + '/' + file.file_no);
             }
-        }
-
-        $scope.viewFilePVA = function($dashboard) {
-            window.open('/file/pva/' + $dashboard.pv_no);
         }
         
     });

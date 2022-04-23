@@ -10,7 +10,7 @@
                 <img src="/public/img/cba-logo.png" alt="cba-logo" style="width: 60%;">
             </div>
             <div class="col-4 px-0">
-                <h3 style="text-align: center;"><b>ใบสั่งเติมเงินรองจ่าย<br>Payment Voucher - A</b></h3>
+                <h3 style="text-align: center;"><b>ใบสำคัญสั่งจ่าย<br>Payment Voucher</b></h3>
             </div>
             <div class="col-4 px-0">
                 <h5 style="text-align: right;">ตัวจริง</h5>
@@ -35,9 +35,10 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <td><b>สั่งจ่าย</b> Finance </td>
+                        <td><b>สั่งจ่าย</b> กรมสรรพากร</td>
+                        <td><b>จ่ายเพื่อ</b> ภาษีมูลค่าเพิ่ม</td>
+                        <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].due_date}}</td>
                     </tr>
-                    
                 </table>
             </div>
         </div>  
@@ -45,20 +46,31 @@
         <div class="row px-2 mt-2">
             <table style="border-collapse: collapse; width: 100%;">
                 <tr>
-                    <th>ใบสำคัญลงวันที่</th>
+                    <th>เอกสารอ้างอิงลงวันที่</th>
+                    <th>หมายเลขอ้างอิง<br>ใบกำกับภาษี/ใบเบิกค่าใช้จ่าย</th>
                     <th>รายละเอียด</th>
-                    <th>จำนวนเงิน</th>
+                    <th>จำนวน</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+                <tr ng-repeat="item in detail">
+                    <td style="text-align: left;">{{item.file_date}}</td>
+                    <td style="text-align: left;">{{item.iv_no}}</td>
+                    <td style="text-align: left;">{{item.detail}}</td>
+                    <td style="text-align: right;">{{item.paid_total | number:2}}</td>
+                    <td style="text-align: left;">{{item.note}}</td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{detail[0].pv_date}}</td>
-                    <td style="text-align: left;">{{detail[0].product_names}}</td>
-                    <td style="text-align: right;">{{detail[0].total_paid | number:2}}</td>
-                    
+                    <th colspan="1" style="text-align: center;">จำนวนเงิน</th>
+                    <th colspan="2" style="text-align: left;">{{detail[0].thai_text}}</th>
+                    <th colspan="1" style="text-align: center;">รวม</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].total_paid | number:2}}</th>
                 </tr>
-            
             </table>
         </div>  
         
+        <div class="row px-2 mt-3">
+            <p><i>หมายเหตุ : จ่าย {{detail[0].bank}}</i></p>
+        </div>  
     
     </div>
 

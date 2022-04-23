@@ -4542,30 +4542,31 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 
 
 
-  public function assignInternalPVDNo() {
-    $sql = $this->prepare( "SELECT ifnull(max(internal_pva_no),0) as max from PVA" );
-    $sql->execute();
+  public function assignInternalPVANo() {
+    $rqPrefix = 'EXA-';
+    $sql = $this->prepare( "select ifnull(max(internal_pva_no),0) as max from PVA where internal_pva_no like ?" );
+    $sql->execute( [ 'EXA-%' ] );
     $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
     $runningNo = '';
     if ( $maxRqNo == '0' ) {
-      $runningNo = '00001';
+        $runningNo = '00001';
     } else {
-      $latestRunningNo = ( (int) $maxRqNo) + 1;
-      if ( strlen( $latestRunningNo ) == 5 ) {
-        $runningNo = $latestRunningNo;
-      } else {
-        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-          $runningNo .= '0';
+        $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+        if ( strlen( $latestRunningNo ) == 5 ) {
+            $runningNo = $latestRunningNo;
+        } else {
+            for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+                $runningNo .= '0';
+            }
+            $runningNo .= $latestRunningNo;
         }
-        $runningNo .= $latestRunningNo;
-      }
     }
-    return $runningNo;
+    return $rqPrefix . $runningNo;
   }
 
   public function addRequestPettyMoney() { 
 
-    $internal_pva_no = $this->assignInternalPVDNo();
+    $internal_pva_no = $this->assignInternalPVANo();
 
     $ivrc_file_name = $_FILES['invoice/receipt']['name'];
     $ivrc_file_data = base64_encode(file_get_contents($_FILES['invoice/receipt']['tmp_name']));
@@ -4877,6 +4878,7 @@ public function uploadImgForPVC() {
   }
 }
 
+
 public function requestPVD(){
   $sql = $this->prepare("SELECT
                           Invoice.invoice_no
@@ -4885,27 +4887,26 @@ public function requestPVD(){
                           LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
                           LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
                           where SOX.sox_no = ?
-                            ");
+                        ");
   $sql->execute([input::post('sox_no')]);
   if ($sql->rowCount() > 0) {             
     $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no'];         
   }
 
   $pvdno = $this->assignPVD( ); 
-  $sql = $this->prepare("INSERT into PVD(pvd_no, pvd_date, pvd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, note, PVD_status)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0)");
+  $sql = $this->prepare("INSERT into PVD(pvd_no, pvd_date, pvd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, bank, bank_no, recipent, company_code, recipent_address, note, PVD_status)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, null, null, null, null, null, ?, 0)");
   $sql->execute([
     $pvdno,  
     input::post('employeeID'),
     input::post('employeeLine'),
     input::post('totalAmount'),
     input::post('vatID'),
-    input::post('sox_no'),  ////wae?
+    input::post('sox_no'),  
     $iv_no,
     input::post('note')
   ]);
 }
-
 /////////pvd/////////
 private function assignPVD() {
   $pvdPrefix = 'PVD-';
