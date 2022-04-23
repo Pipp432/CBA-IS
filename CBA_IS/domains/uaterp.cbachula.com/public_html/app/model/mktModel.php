@@ -4542,30 +4542,31 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 
 
 
-  public function assignInternalPVDNo() {
-    $sql = $this->prepare( "SELECT ifnull(max(internal_pva_no),0) as max from PVA" );
-    $sql->execute();
+  public function assignInternalPVANo() {
+    $rqPrefix = 'EXA-';
+    $sql = $this->prepare( "select ifnull(max(internal_pva_no),0) as max from PVA where internal_pva_no like ?" );
+    $sql->execute( [ 'EXA-%' ] );
     $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
     $runningNo = '';
     if ( $maxRqNo == '0' ) {
-      $runningNo = '00001';
+        $runningNo = '00001';
     } else {
-      $latestRunningNo = ( (int) $maxRqNo) + 1;
-      if ( strlen( $latestRunningNo ) == 5 ) {
-        $runningNo = $latestRunningNo;
-      } else {
-        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-          $runningNo .= '0';
+        $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
+        if ( strlen( $latestRunningNo ) == 5 ) {
+            $runningNo = $latestRunningNo;
+        } else {
+            for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
+                $runningNo .= '0';
+            }
+            $runningNo .= $latestRunningNo;
         }
-        $runningNo .= $latestRunningNo;
-      }
     }
-    return $runningNo;
+    return $rqPrefix . $runningNo;
   }
 
   public function addRequestPettyMoney() { 
 
-    $internal_pva_no = $this->assignInternalPVDNo();
+    $internal_pva_no = $this->assignInternalPVANo();
 
     $ivrc_file_name = $_FILES['invoice/receipt']['name'];
     $ivrc_file_data = base64_encode(file_get_contents($_FILES['invoice/receipt']['tmp_name']));

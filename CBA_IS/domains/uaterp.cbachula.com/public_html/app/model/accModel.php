@@ -468,21 +468,22 @@ class accModel extends model {
         else print_r($statement->errorInfo());
     }
 
+
     public function getPVDConfirmPV() {
-        $sql = "SELECT 
-                    pvd_no as pv_no, 
-                    pvd_date as pv_date,
-                    total_amount as total_paid,
-                    slipName as receipt_name
-                from PVD where PVD_status = 3";
-        $sql = $this->prepare($sql);
+        $sql = $this->prepare("SELECT 
+                                pvd_no as pv_no,
+                                pvd_date as pv_date,
+                                total_amount as total_paid,
+                                slipName as receipt_name
+                                
+                                from PVD 
+                                where PVD_status = 3");
         $sql->execute([]);
 
         if ($sql->rowCount() > 0) {
-            return json_encode($ret, JSON_UNESCAPED_UNICODE);
-        } else return json_encode([]); 
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        } return json_encode([]); 
     }
-
 
     // CN(PV-D) Module
     private function assignIv($iv_no) {
@@ -1388,7 +1389,7 @@ class accModel extends model {
     
     // Confirm PV Module
 	public function getRRCIPV() {
-        $sql = $this->prepare("select
+        $sql = $this->prepare("SELECT
                                 	PV.pv_no,
                                     PV.pv_date,
                                     PV.pv_type,
@@ -1396,12 +1397,13 @@ class accModel extends model {
                                     PV.vat_type,
                                     PV.total_paid,
                                     PV.total_vat,
+                                    IFNULL(PV.cr_name,'ไม่มีชื่อใบ CR') AS cr_name,
                                     PV.receipt_name,
                                     PV.paid,
                                     PVPrinting.*
                                 from PVPrinting
                                 inner join PV on PV.pv_no = PVPrinting.pv_no
-                                where PV.receipt_data is not null and PV.paid = 0");
+                                where (PV.slip_name is not null or PV.cr_name is not null) and PV.paid = 0"); 
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1446,7 +1448,7 @@ class accModel extends model {
     // Confirm PV Module
     public function getReceiptData($pv_no) {
         
-        $sql = $this->prepare("select * from PV where PV.pv_no = ?");
+        $sql = $this->prepare("select receipt_type,receipt_data from PV where PV.pv_no = ?");
         $sql->execute([$pv_no]);
         
         if ($sql->rowCount()>0) {
@@ -2486,6 +2488,7 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 
 		//}
 	}
+
     public function getReReqDetail($re_req_no){
         $sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE ex_no IS NOT NULL AND confirmed != '1' ");
         $data =$sql->execute([$re_req_no]);   
@@ -2580,8 +2583,30 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         } else {
             echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
         }
+    }
+
+    
+    public function getPVDReceiptData($pvd_no){
+        $sql = $this->prepare("SELECT 
+                                pvd_no as pv_no,
+                                slipType as receipt_type ,
+                                slipData as receipt_data ,
+                                slipName as receipt_name 
+                                
+                                from PVD 
+                                where pvd_no = ?");
+        $sql->execute([$pvd_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['receipt_type']);
+            echo base64_decode($data['receipt_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
+        }
 
     }
+
 
 
 
