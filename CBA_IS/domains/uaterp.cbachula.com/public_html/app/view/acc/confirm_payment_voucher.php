@@ -61,6 +61,7 @@
                             <td style="text-align: right;">
                                 {{pv.total_paid | number:2}}<br>
                                 <a ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" href="/acc/confirm_payment_voucher/get_receipt/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
+                                <a ng-show = "pv.pv_type == 'Supplier' && pv.receipt_name === null" href="/acc/dashboard/get_PVB_CR/{{pv.pv_no}}" target="_blank">{{pv.cr_name}}</a>
                                 <a ng-show = "pv.pv_type == 'pvd'" href="/acc/confirm_payment_voucher/get_pvdslip/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
                                 <a ng-show = "pv.pv_type == 'pva'" href="/acc/confirm_payment_voucher/get_pvaslip/{{pv.pv_no}}" target="_blank">slip</a> 
                                 <!-- todo get pva slip -->

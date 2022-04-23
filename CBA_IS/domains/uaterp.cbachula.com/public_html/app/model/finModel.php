@@ -1746,12 +1746,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     }
 
     private function assignInternalBundleNo() {
-        if($scope.company_pva == '') {
-            
-        }
-        $rqPrefix = 'exb-';
+        $rqPrefix = 'bpa-';
         $sql = $this->prepare( "select ifnull(max(internal_bundle_no),0) as max from PVA where internal_bundle_no like ?" );
-        $sql->execute( [ 'exb-%' ] );
+        $sql->execute( [ 'bpa-%' ] );
         $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
         $runningNo = '';
         if ( $maxRqNo == '0' ) {

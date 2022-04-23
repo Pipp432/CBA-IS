@@ -848,10 +848,11 @@ class accModel extends model {
     }
 
     public function getPVBCR($pv_no){
-        $sql = "SELECT * from PV where pv_no = ?";
+        $sql = "SELECT cr_type,cr_data from PV where pv_no = ?";
         $sql = $this->prepare($sql); 
         $sql->execute([$pv_no]);
 
+        
         if ($sql->rowCount()>0) {
             $data = $sql->fetchAll()[0];
             header('Content-type: '.$data['cr_type']);
@@ -1395,6 +1396,7 @@ class accModel extends model {
                                     PV.vat_type,
                                     PV.total_paid,
                                     PV.total_vat,
+                                    IFNULL(PV.cr_name,'ไม่มีชื่อใบ CR') AS cr_name,
                                     PV.receipt_name,
                                     PV.paid,
                                     PVPrinting.*
@@ -1445,7 +1447,7 @@ class accModel extends model {
     // Confirm PV Module
     public function getReceiptData($pv_no) {
         
-        $sql = $this->prepare("select * from PV where PV.pv_no = ?");
+        $sql = $this->prepare("select receipt_type,receipt_data from PV where PV.pv_no = ?");
         $sql->execute([$pv_no]);
         
         if ($sql->rowCount()>0) {

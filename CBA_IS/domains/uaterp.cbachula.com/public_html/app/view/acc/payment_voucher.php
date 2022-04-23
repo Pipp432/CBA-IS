@@ -419,6 +419,16 @@
                         <th>ยังไม่มีการขอใบ PVA</th>
                     </tr>
                 </table>
+                <div class="row mx-0 mt-2" ng-show = "PVAs.length != 0">
+                    <div class="col-md-2">
+                        <label for="pvaItemDebit">เดบิต</label>
+                        <input type="text" class="form-control" id="pvaItemDebit" ng-model="pvaDebit">
+                    </div>
+                    <div class="custom-control custom-checkbox mt-2">
+                        <input type="checkbox" class="custom-control-input" id="wantVat" ng-model="vatPva" ng-click="vat_pva_check()">
+                        <label class="custom-control-label" for="wantVat">ขอคืนภาษี</label>
+                    </div>
+                </div>
                 <table class="table table-hover my-1" ng-show="PVAs.length != 0">
                     <tr>
                         <th class = "center_cell">EXB no</th>
@@ -527,7 +537,7 @@
         $scope.selected_PVD = [];
         $scope.selected_PVA = [];
         $scope.program_pva = '';
-
+        $scope.vatPva = false;
 
 
         
@@ -549,6 +559,7 @@
             $scope.PVDs = [];
             $scope.PVAs = [];
             
+
             if($scope.selectedPaymentType === '') {
             
             } else if($scope.selectedPaymentType === 'PA') {
@@ -669,6 +680,8 @@
                 $.post("/acc/payment_voucher/post_PVA", {
                     post : true,
                     program : $scope.program_pva,
+                    debit : $scope.pvaDebit,
+                    want_vat : $scope.vatPva,
                     internal_bundle_no : $scope.selected_PVA.internal_bundle_no,
                 }, function(data) {
                     if(data.length == 9){
@@ -685,6 +698,10 @@
                     }
                 });
             }
+        }
+
+        $scope.vat_pva_check = function() {
+            $scope.vatPva = !$scope.vatPva;
         }
         
         $scope.getrrcinopvDetail = function(rrcinopv) {
