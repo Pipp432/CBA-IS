@@ -956,13 +956,18 @@ class accModel extends model {
 
     public function getPVAForPV() {
         $sql = $this->prepare("SELECT
-                                	internal_bundle_no,
-                                    pv_time,
-                                    pv_date,
-                                    total_paid,
-                                    product_names
+                                	PVA_bundle.internal_bundle_no,
+                                    PVA_bundle.pv_time,
+                                    PVA_bundle.pv_date,
+                                    PVA_bundle.total_paid,
+                                    PVA_bundle.product_names,
+                                    PVA_bundle.additional_cash,
+                                    PVA_bundle.additional_cash_reason,
+                                    PVA_bundle.employee_id,
+                                    Employee.employee_nickname_eng
                                 from PVA_bundle
-                                where pv_status = 2");
+                                INNER JOIN Employee ON BINARY Employee.employee_id = BINARY PVA_bundle.employee_id
+                                where PVA_bundle.pv_status = 2");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -970,14 +975,53 @@ class accModel extends model {
         return json_encode([]);
     }
 
+    public function getPVAChild() {
+        $sql = $this->prepare("SELECT
+                                	internal_pva_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    tax,
+                                    ivrc_name,
+                                    slip_name,
+                                    fin_slip_name
+                                from PVA
+                                where internal_bundle_no = ?");
+        $sql->execute([$_POST['internal_bundle_no']]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    
+
+    public function getPettyCashStatement($bundle_no){
+        $sql = "SELECT 	PCS_type,PCS_data from PVA_bundle where internal_bundle_no = ?";
+        $sql = $this->prepare($sql); 
+        $sql->execute([$pv_no]);
+
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+            header('Content-type: '.$data['PCS_type']);
+            echo $data['PCS_data'];
+        } else {
+            echo 'ไม่มีใบ petty cash statement ของเลข BPA นี้';
+        }
+    }
+
     public function postPVAForPV() {
         $success = true;
+        $pva_childs = $_POST['pva_child'];
         $pv_no = $this->assignPVA($_POST['program']);
-        $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
-        $success = $success && $sql->execute([$pv_no,$_POST['internal_bundle_no']]);
+        $sql = $this->prepare("UPDATE PVA_bundle SET approve_employee_id = ?, approve_date = ? ,notes = ?, pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
+        $success = $success && $sql->execute([json_decode(session::get('employee_detail'),true)['employee_id'],$_POST['approve_date'],$_POST["notes"], $pv_no,$_POST['internal_bundle_no']]);
         if($success) {
-            $sql = $this->prepare("UPDATE PVA SET pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
-            $success = $success && $sql->execute([$pv_no,$_POST['internal_bundle_no']]);
+            foreach($pva_childs as $pva_child) {
+                $sql = $this->prepare("UPDATE PVA SET tax = ?,debit = ?,pv_status = 3, pv_no = ? WHERE internal_pva_no = ?");
+                $success = $success && $sql->execute([$pva_child['tax'],$pva_child["debit"],$pv_no,$pva_child['internal_pva_no']]);
+            }
         }
         if($success) {
             echo $pv_no;
@@ -987,8 +1031,8 @@ class accModel extends model {
             print_r($sql->errorInfo());
             $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 2, pv_no = null WHERE internal_bundle_no = ?");
             $sql->execute([$_POST['internal_bundle_no']]);
-            
-            
+            $sql = $this->prepare("UPDATE PVA SET pv_status = 2, pv_no = null WHERE internal_bundle_no = ?");
+            $sql->execute([$_POST['internal_bundle_no']]);
         }
         
     }
@@ -2581,7 +2625,27 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         } else {
             echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
         }
+    }
 
+    
+    public function getPVDReceiptData($pvd_no){
+        $sql = $this->prepare("SELECT 
+                                pvd_no as pv_no,
+                                slipType as receipt_type ,
+                                slipData as receipt_data ,
+                                slipName as receipt_name 
+                                
+                                from PVD 
+                                where pvd_no = ?");
+        $sql->execute([$pvd_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['receipt_type']);
+            echo base64_decode($data['receipt_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
+        }
     }
 
 

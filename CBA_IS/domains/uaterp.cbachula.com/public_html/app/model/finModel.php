@@ -1732,8 +1732,30 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             $pcs_type = $fileType = $_FILES['pettyCashStatement']['type'];
 
 
-            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status,additional_cash,additional_cash_reason,PCS_name,PCS_type,PCS_data) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?)");
-            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names,$_POST["additionalCash"],$_POST["whyMoreCash"],$pcs_name,$pcs_type,$pcs_data]);
+            $sql = $this->prepare("INSERT INTO PVA_bundle(
+                                        internal_bundle_no,
+                                        pv_date,
+                                        pv_time,
+                                        total_paid,
+                                        product_names,
+                                        pv_status,
+                                        additional_cash,
+                                        additional_cash_reason,
+                                        PCS_name,
+                                        PCS_type,
+                                        PCS_data,
+                                        employee_id
+                                    )
+                                    VALUES(?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?,?)");
+            $success = $success && $sql->execute([$internal_bundle_no,
+                                                    $total_paid,
+                                                    $product_names,
+                                                    $_POST["additionalCash"],
+                                                    $_POST["whyMoreCash"],
+                                                    $pcs_name,
+                                                    $pcs_type,
+                                                    $pcs_data,
+                                                    json_decode(session::get('employee_detail'),true)['employee_id']]);
         }
         
         if($success) {

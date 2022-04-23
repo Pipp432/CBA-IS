@@ -24,6 +24,10 @@
                             <option value="PD">PV-D คืนเงินลูกค้า</option>
                         </select>
                     </div>
+                    <div class="col-md-3" ng-show="selectedPaymentType == 'PA'">
+                        <label for="pvNameTextboxPVA">สั่งจ่าย</label>
+                        <input type="text" class="form-control" id="pvNameTextboxPVA" ng-model="pvaName" ng-disabled="true">
+                    </div>
                     <div class="col-md-3" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
                         <label for="pvNameTextbox" id="pvNameLabel"></label>
                         <input type="text" class="form-control" id="pvNameTextbox" ng-model="pvName" ng-show="selectedPaymentType!='PB' || otherExpense">
@@ -406,7 +410,25 @@
         <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show = "selectedPaymentType == 'PA'">
             <div class="card-body">
                 <div class="row mx-0">
-                    <div class="col-md-12">
+                    <h4 class="my-1">
+                        เพิ่มรายละเอียดลงใบสำคัญสั่งจ่าย 
+                    </h4>
+                </div>
+                <div class="row mx-0 mt-2">
+                    <div class="col-md-3">
+                        <label for="pvaItemDate">ใบสำคัญลงวันที่</label>
+                        <input class="form-control" type="date" id="pvaItemDate" ng-model="pvaItemDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="pvaItemNo">เลขที่ใบเติมเงิรรองจ่าย</label>
+                        <input type="text" class="form-control" id="pvaItemNo" ng-model="selected_PVA.internal_bundle_no" ng-disabled="true">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row mx-0">
+                    <div class="col-md-8">
                         <label for="filter_pva_no">PVA no</label>
                         <input type="text" class="form-control" id="filter_pva_no" ng-model="filter_pva_no" style="text-transform:uppercase">
                     </div>
@@ -419,45 +441,93 @@
                         <th>ยังไม่มีการขอใบ PVA</th>
                     </tr>
                 </table>
-                <div class="row mx-0 mt-2" ng-show = "PVAs.length != 0">
-                    <div class="col-md-2">
-                        <label for="pvaItemDebit">เดบิต</label>
-                        <input type="text" class="form-control" id="pvaItemDebit" ng-model="pvaDebit">
-                    </div>
-                    <div class="custom-control custom-checkbox mt-2">
-                        <input type="checkbox" class="custom-control-input" id="wantVat" ng-model="vatPva" ng-click="vat_pva_check()">
-                        <label class="custom-control-label" for="wantVat">ขอคืนภาษี</label>
-                    </div>
-                </div>
                 <table class="table table-hover my-1" ng-show="PVAs.length != 0">
                     <tr>
-                        <th class = "center_cell">EXB no</th>
-                        <th class = "center_cell">date time</th>
+                        <th class = "center_cell">เลขที่ BPA</th>
+                        <th class = "center_cell">วันที่</th>
                         <th class = "center_cell">total paid</th>
-                        <th class = "center_cell">product names</th>
+                        <th class = "center_cell">petty cash statement</th>
+                        <th class = "center_cell">ผู้ออก</th>
                     </tr>
-                    <tr ng-repeat = "PVA in PVAs | unique:'internal_bundle_no'  | filter:{internal_bundle_no:filter_pva_no}" ng-click="selectPVA(PVA)" ng-show = "selected_PVA.length == 0">
+                    <tr ng-repeat = "PVA in PVAs | unique:'internal_bundle_no'  | filter:{internal_bundle_no:filter_pva_no}" ng-click="selectPVA(PVA)"">
                         <td class = "center_cell">{{PVA.internal_bundle_no}}</td>
                         <td class = "center_cell">{{PVA.pv_date}} {{PVA.pv_time}}</td>
                         <td class = "center_cell">{{PVA.total_paid}}</td>
-                        <td class = "center_cell">{{PVA.product_names}}</td>
+                        <td class = "center_cell"><a href="/acc/payment_voucher/get_petty_cash_statement/{{PVA.internal_bundle_no}}" target="_blank">statement</a></td>
+                        <td class = "center_cell">{{PVA.employee_id}} {{PVA.employee_nickname_eng}}</td>
                     </tr>
-                    <tr ng-show = "selected_PVA.length != 0">
-                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVA()"></i> {{selected_PVA.internal_bundle_no}}</td>
-                        <td class = "center_cell">{{selected_PVA.pv_date}} {{selected_PVA.pv_time}}</td>
-                        <td class = "center_cell">{{selected_PVA.total_paid}}</td>
-                        <td class = "center_cell">{{selected_PVA.product_names}}</td>
+
+                </table>
+
+            </div>
+
+            <div class="card-body" ng-show = "selected_PVA.length != 0">
+                <!-- <i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVA()"></i> -->
+                <table class="table table-hover my-1">
+                    <tr>
+                        <th class = "center_cell">วันที่</th>
+                        <th class = "center_cell">เลขที่ใบเบิกรองจ่าย</th>
+                        <th class = "center_cell">รายการ</th>
+                        <th class = "center_cell">จำนวนเงิน</th>
+                        <th class = "center_cell">invoice/reciept</th>
+                        <th class = "center_cell">slip</th>
+                        <th class = "center_cell">เดบิต</th>
+                        <th class = "center_cell">ภาษีซื้อ</th>
+                    </tr>
+                    <tr ng-repeat = "child in selected_PVA_child">
+                        <td class = "center_cell">{{child.pv_date}}</td>
+                        <td class = "center_cell">{{child.internal_pva_no}}</td>
+                        <td class = "center_cell">{{child.product_names}}</td> 
+                        <td class = "center_cell">{{child.total_paid}}</td>
+                        <td class = "center_cell"> 
+                            <a href="/fin/validate_petty_cash_request/get_re/{{child.internal_pva_no}}" target="_blank">{{child.ivrc_name}}</a>
+                            <a href="/fin/validate_petty_cash_request/get_iv/{{child.internal_pva_no}}" target="_blank">{{child.slip_name}}</a>
+                        </td>
+                        <td class = "center_cell"> 
+                            <a href="/fin/create_pva/get_fin_slip/{{child.internal_pva_no}}" target="_blank">{{child.fin_slip_name}}</a> 
+                        </td>
+                        <td class = "center_cell"> 
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="{{child.internal_pva_no}}_debit" ng-model="child.debit">
+                            </div>
+                        </td>
+                        <td class = "center_cell"> 
+                            <div class="col-md-6">
+                                    <input type="checkbox" class="form-control" id="{{child.internal_pva_no}}_tax" ng-model="child.tax">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class = "center_cell">จำนวนที่ต้องการเติมเพิ่ม</td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"> {{selected_PVA.additional_cash}} </td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                    </tr>
+
+                    <tr>
+                        <td class = "center_cell">รวมทั้งสิ้น</td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell">{{pva_total}}</td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
+                        <td class = "center_cell"></td>
                     </tr>
                 </table>
-                <div ng-show = "selected_PVA.length != 0">
-                    <select class="form-control" ng-model="program_pva">
-                        <option value=''>สั่งจ่ายในนาม</option>
-                        <option value='1'>โครงการ 1</option>
-                        <option value='2'>โครงการ 2</option>
-                        <option value='3'>โครงการ 3</option>
-                        <option value='8'>โครงการพิเศษ 1</option>
-                        <option value='9'>โครงการพิเศษ 2</option>
-                    </select>
+
+                <div class="row mx-0">
+                    <div class="col-md-12">
+                        <label for="notes">หมายเหตุ</label>
+                        <input type="text" class="form-control" id="notes" ng-model="PVA_notes">
+                    </div>
+                </div>
+
+                <div>
                     <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVA()" ng-disabled="selected_PVA.editing">ยืนยัน PVA</button>
                     </div>
@@ -538,7 +608,9 @@
         $scope.selected_PVA = [];
         $scope.program_pva = '';
         $scope.vatPva = false;
-
+        $scope.pva_total = 0;
+        $scope.pvaName = 'พนักงานรองจ่าย';
+        $scope.PVA_notes = '';
 
         
         $scope.selectPaymentType = function() {
@@ -563,7 +635,11 @@
             if($scope.selectedPaymentType === '') {
             
             } else if($scope.selectedPaymentType === 'PA') {
-                $http.get('/acc/payment_voucher/get_PVA').then(function(response){$scope.PVAs = response.data; $scope.isLoad = false;});
+                $http.get('/acc/payment_voucher/get_PVA').then(
+                    function(response){
+                        $scope.PVAs = response.data; 
+                        $scope.isLoad = false;
+                    });
             } else if($scope.selectedPaymentType === 'PB') {
                 $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){$scope.rrcinopvs = response.data; $scope.isLoad = false;});
                 $('#pvNameLabel').html('จ่าย Supplier');
@@ -666,33 +742,47 @@
         }
 
         $scope.selectPVA = function($PVA) {
+            $scope.PVA_notes = '';
             $scope.selected_PVA = $PVA;
+            $scope.pva_total = $PVA.total_paid + $PVA.additional_cash;
+            $.post("/acc/payment_voucher/get_PVA_child", { //should be using get request pls fix when have time
+                post : true,
+                internal_bundle_no : $PVA.internal_bundle_no
+            }, (data) => {
+                $scope.selected_PVA_child = data;
+            });
+            
         }
 
         $scope.dropPVA = function() {
             $scope.selected_PVA = [];
+            $scope.selected_PVA_child = [];
+            $scope.pva_total = 0;
         }
 
         $scope.postPVA = function() {
-            if($scope.program_pva=='') {
+            if(false) {
                 $('#formValidate9').modal('toggle');
             } else {
                 $.post("/acc/payment_voucher/post_PVA", {
                     post : true,
-                    program : $scope.program_pva,
+                    program : 3,
                     debit : $scope.pvaDebit,
                     want_vat : $scope.vatPva,
                     internal_bundle_no : $scope.selected_PVA.internal_bundle_no,
+                    pva_child : $scope.selected_PVA_child,
+                    approve_date : $scope.pvaItemDate,
+                    notes : $scope.PVA_notes
                 }, function(data) {
                     if(data.length == 9){
-                        addModal('pvaUpdateSuccessModalupdate', 'PV-A', 'confirm ' + data);
+                        addModal('pvaUpdateSuccessModalupdate', 'สร้างใบสำคัญสั่งจ่ายสำเร็จ',data);
                         $('#pvaUpdateSuccessModalupdate').modal('toggle');
                         $('#pvaUpdateSuccessModalupdate').on('hide.bs.modal', function (e) { 
                             window.open('/file/pva/' + data);
                             location.reload();
                         });
                     } else {
-                        addModal('failedModal', 'ยืนยันการสร้าง PV-A / Confirm PV-A creation', 'ใบ PV-A failed');
+                        addModal('failedModal', 'สร้างใบสำคัญสั่งจ่ายสำเร็จ error', 'ใบ PV-A failed ส่ง console ให้ is หน่อย');
                         $('#failedModal').modal('toggle');
                         console.log(data);
                     }
@@ -700,9 +790,6 @@
             }
         }
 
-        $scope.vat_pva_check = function() {
-            $scope.vatPva = !$scope.vatPva;
-        }
         
         $scope.getrrcinopvDetail = function(rrcinopv) {
             $("#pvItemRR").prop("disabled", true);
