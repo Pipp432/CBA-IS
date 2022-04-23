@@ -1726,8 +1726,14 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
 
         if($success) {
-            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2)");
-            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names]);
+
+            $pcs_name = $_FILES['pettyCashStatement']['name'];
+            $pcs_data = base64_encode(file_get_contents($_FILES['pettyCashStatement']['tmp_name']));
+            $pcs_type = $fileType = $_FILES['pettyCashStatement']['type'];
+
+
+            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status,additional_cash,additional_cash_reason,PCS_name,PCS_type,PCS_data) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?)");
+            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names,$_POST["additionalCash"],$_POST["whyMoreCash"],$pcs_name,$pcs_type,$pcs_data]);
         }
         
         if($success) {
@@ -1746,9 +1752,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     }
 
     private function assignInternalBundleNo() {
-        $rqPrefix = 'bpa-';
+        $rqPrefix = 'BPA-';
         $sql = $this->prepare( "select ifnull(max(internal_bundle_no),0) as max from PVA where internal_bundle_no like ?" );
-        $sql->execute( [ 'bpa-%' ] );
+        $sql->execute( [ 'BPA-%' ] );
         $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
         $runningNo = '';
         if ( $maxRqNo == '0' ) {
@@ -1833,6 +1839,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 PVD.pvd_time,
                                 PVD.pvd_date,
                                 PVD.total_amount,
+                                PVD.employee_id,
                                 PVD.invoice_no
 
                                 From PVD
