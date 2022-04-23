@@ -768,6 +768,9 @@ class scmModel extends model {
 			// update SOX
 			$sql = $this->prepare("update SOX set ird_no = ? where sox_no = ?");
 			$sql->execute([$irdno, $value['sox_no']]);
+            //9 is done
+            $sql = $this->prepare("update SOX set sox_status = ? where sox_no = ?");
+			$sql->execute([9, $value['sox_no']]);
 			
 		}
 		
@@ -794,9 +797,18 @@ class scmModel extends model {
 	}
 	
     //ปุ่มยืนยัน-ช่องล่าง
-    public function updateIRD($sox_no){
-        $sql=$this->prepare("UPDATE `SOX` SET `sox_status`=? WHERE sox_no=?");
-        $sql->execute([1,$sox_no]);
+    public function updateIRD(){
+        //$sql=$this->prepare("UPDATE `SOX` SET `sox_status`=? WHERE sox_no=?");
+        //$sql->execute([1,$sox_no]);
+        $irdItemsArray = json_decode(input::post('irdItems'), true); 
+        $irdItemsArray = json_decode($irdItemsArray, true);
+		
+        //1 is done for confirm
+        foreach ($irdItemsArray as $value){
+            $sql=$this->prepare("update SOX SET sox_status=? where sox_no=?");
+            $sql->execute([1,$value['sox_no']]);
+        }
+
     }
 
     public function get_detail(){
@@ -833,7 +845,6 @@ class scmModel extends model {
         $irdItemArray = json_decode( $irdItemArray, true );
         $irdList = array();
         foreach ( $irdItemArray as $value ) {
-
             if ( array_key_exists( $value[ 'sox_no' ], $irdList ) ) {
         
             } else {
@@ -842,17 +853,16 @@ class scmModel extends model {
             }
         }
     }
-    
     //ปุ่มird-ช่องบน
     public function get_status(){
         $sql=$this->prepare("SELECT * FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
-        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
         INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
-        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 9");
+        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
