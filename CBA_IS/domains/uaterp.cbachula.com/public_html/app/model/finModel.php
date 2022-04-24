@@ -1732,7 +1732,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             $pcs_type = $fileType = $_FILES['pettyCashStatement']['type'];
 
 
-
             $sql = $this->prepare("INSERT INTO PVA_bundle(
                                         internal_bundle_no,
                                         pv_date,
@@ -1757,10 +1756,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                                     $pcs_type,
                                                     $pcs_data,
                                                     json_decode(session::get('employee_detail'),true)['employee_id']]);
-
-            $sql = $this->prepare("INSERT INTO PVA_bundle (internal_bundle_no,pv_date,pv_time,total_paid,product_names,pv_status,additional_cash,additional_cash_reason,PCS_name,PCS_type,PCS_data) VALUES (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,2,?,?,?,?,?)");
-            $success = $success && $sql->execute([$internal_bundle_no,$total_paid,$product_names,$_POST["additionalCash"],$_POST["whyMoreCash"],$pcs_name,$pcs_type,$pcs_data]);
-
         }
         
         if($success) {
@@ -2003,6 +1998,41 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                     product_names,
                                     pv_status
                                 from PVA");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    /////////////// pvd hub  ///////////////////////////////////////
+    /////////////// pvd hub  ///////////////////////////////////////
+    public function getStatusPvd() {
+        $sql = $this->prepare("SELECT
+                                	pvd_no,
+                                    pvd_time,
+                                    pvd_date,
+                                    total_amount,
+                                    PVD_status,
+                                    slipName
+                                from PVD");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getStatusPrePvd() {
+        $sql = $this->prepare("select
+                                    pvd_no,
+                                    pvd_time,
+                                    pvd_date,
+                                    total_amount,
+                                    invoice_no,
+                                    PVD_status
+
+                                from PVD");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

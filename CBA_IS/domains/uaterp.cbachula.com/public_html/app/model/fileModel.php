@@ -157,6 +157,48 @@ class fileModel extends model {
         return null;
 	}
     
+    
+    public function getPVD($iv_no) {
+		$sql = $this->prepare("select
+                                    PVD.pvd_no,
+                                    PVD.note,
+                                	Invoice.invoice_no,
+                                    Invoice.invoice_date,
+                                    Invoice.file_no,
+                                    exInvoice.customer_name,
+                                    exInvoice.employee_id,
+                                    exInvoice.customer_address,
+                                    exInvoice.invoice_no as ex_invoice_no,
+                                    exInvoice.invoice_date as ex_invoice_date,
+                                    Invoice.note,
+                                    exInvoice.id_no,
+                                    InvoicePrinting.product_no,
+                                    Product.product_name,
+                                    InvoicePrinting.quantity,
+                                    Product.unit,
+                                    InvoicePrinting.sales_price,
+                                    InvoicePrinting.total_sales_price,
+                                    Invoice.discount,
+                                    exInvoice.total_sales_no_vat as ex_total_sales_no_vat,
+                                    (exInvoice.total_sales_no_vat - Invoice.total_sales_no_vat) as diff_total_sales_no_vat,
+                                    Invoice.total_sales_no_vat as cn_total_sales_no_vat,
+                                    Invoice.total_sales_vat as cn_total_sales_vat,
+                                    Invoice.total_sales_price as cn_total_sales_price,
+                                    Invoice.sales_price_thai
+                                from PVD
+                                left join InvoicePrinting on PVD.invoice_no = InvoicePrinting.invoice_no 
+                                inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
+                                left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
+                                left join Product on Product.product_no = InvoicePrinting.product_no
+    							where Invoice.invoice_no = ?");
+        $sql->execute([$iv_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+	}
+
+
     public function getCr($cr_no) {
 		$sql = $this->prepare("select
                                 	CR.cr_no,

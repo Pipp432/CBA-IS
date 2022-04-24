@@ -363,15 +363,33 @@ foreach ($list as $value) {
         if(empty(uri::get(2))) {
             $this->requirePostition("fin");
             $this->view->setTitle("Confirm PV-D");
-            $this->view->pvds = $this->model->getPVD(); ///
+            $this->view->pvds = $this->model->getPVD(); 
             $this->view->render("fin/upslip_pvd", "navbar"); 
         } 
         else if (uri::get(2)==='conpvdItems') {
-            $this->positionEcho('fin', $this->model->confirmPVD()); ///
+            $this->positionEcho('fin', $this->model->confirmPVD()); 
         }
     }
 
-    public function pva_fin_hub() {
+    public function pvd_fin_hub() {     //nn
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("PV-D");
+            $this->view->render("fin/pvd_fin_hub"); 
+        } 
+    }
+
+    public function pvd_status() {       //nn
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->pvds = $this->model->getStatusPvd();
+            $this->view->prePvds = $this->model->getStatusPrePvd();
+            $this->view->setTitle("ประวัติ PV-D");
+            $this->view->render("fin/pvd_status","fin/pvd_fin_hub"); 
+        } 
+    }
+
+    public function pva_fin_hub() {        
         if(empty(uri::get(2))) {
             $this->requirePostition("fin");
             $this->view->setTitle("PV-A");
