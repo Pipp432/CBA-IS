@@ -1782,7 +1782,8 @@ class accModel extends model {
                                     approved_employee as file_emp_id,
                                     employee_nickname_thai as file_emp_name,
                                     PV.slip_name,
-                                    PV.receipt_name
+                                    PV.receipt_name,
+                                    PV.pv_name
                                 from PV
                                 inner join Employee on Employee.employee_id = PV.approved_employee
 								where cancelled = 0

@@ -2022,23 +2022,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return json_encode([]);
     }
-
-    public function getStatusPrePvd() {
-        $sql = $this->prepare("select
-                                    pvd_no,
-                                    pvd_time,
-                                    pvd_date,
-                                    total_amount,
-                                    invoice_no,
-                                    PVD_status
-
-                                from PVD");
-        $sql->execute();
-        if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return json_encode([]);
-    }
 }
 
 

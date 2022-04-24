@@ -318,7 +318,7 @@
                     addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', data);
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
-                            window.location.assign('/');
+                           
                         });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.log('ajax.fail');

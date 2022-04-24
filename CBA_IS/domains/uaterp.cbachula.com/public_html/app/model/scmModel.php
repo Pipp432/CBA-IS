@@ -978,9 +978,24 @@ class scmModel extends model {
     return [];
   }
 	
-	
-	public function getSOXnoIRD() {
-		$sql = $this->prepare("SELECT DISTINCT sox_no, customer_name, address, zip_code, customer_tel, t.sox_type FROM 
+	public function getSOXnoIRD(){
+        $sql=$this->prepare("SELECT * FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no
+        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
+        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
+        WHERE sox_status=9");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
+
+	public function getSOXnoIRD2() {
+		$sql = $this->prepare("SELECT DISTINCT iv_no, product_no, product_name, quantity, customer_name, address, zip_code, customer_tel, t.sox_type FROM 
 								((select
 									concat(Customer.customer_name,' ',Customer.customer_surname) as customer_name,
 									SOX.address,
