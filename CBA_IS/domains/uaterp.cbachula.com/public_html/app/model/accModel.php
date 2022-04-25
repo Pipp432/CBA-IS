@@ -1018,9 +1018,32 @@ class accModel extends model {
         $sql = $this->prepare("UPDATE PVA_bundle SET approve_employee_id = ?, approve_date = ? ,notes = ?, pv_status = 3, pv_no = ? WHERE internal_bundle_no = ?");
         $success = $success && $sql->execute([json_decode(session::get('employee_detail'),true)['employee_id'],$_POST['approve_date'],$_POST["notes"], $pv_no,$_POST['internal_bundle_no']]);
         if($success) {
+
+            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            $sql->execute([$pv_no, 1, "11-1310", 0, (double) ($pva_child["total_paid"] *7/107), 'PV']);
+
             foreach($pva_childs as $pva_child) {
+                // Dr เงินรองจ่าย - โครงการ 3
                 $sql = $this->prepare("UPDATE PVA SET tax = ?,debit = ?,pv_status = 3, pv_no = ? WHERE internal_pva_no = ?");
                 $success = $success && $sql->execute([$pva_child['tax'],$pva_child["debit"],$pv_no,$pva_child['internal_pva_no']]);
+
+                if($pva_childs["tax"]) {
+                    // Dr ค่าใช้จ่าย with tax    
+                    $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"] *100/107), 0, 'PV']);
+
+                    $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$pva_child["internal_pva_no"], 2, "61-1300", (double) ($pva_child["total_paid"] *7/107), 0, 'PV']);
+
+                } else {
+                    // Dr ค่าใช้จ่าย without tax
+                    $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PV']);
+                }
             }
         }
         if($success) {
@@ -1033,6 +1056,7 @@ class accModel extends model {
             $sql->execute([$_POST['internal_bundle_no']]);
             $sql = $this->prepare("UPDATE PVA SET pv_status = 2, pv_no = null WHERE internal_bundle_no = ?");
             $sql->execute([$_POST['internal_bundle_no']]);
+            //account detail is not deleted.
         }
         
     }
@@ -1644,10 +1668,29 @@ class accModel extends model {
             $sql = $this->prepare("UPDATE PVA_bundle SET pv_status = 5 WHERE pv_no = ?");
             $success = $success && $sql->execute([$value]);
             if($success) {
+                //calculate real total
+                $sql = $this->prepare("SELECT
+                                        total_paid,
+                                        additional_cash
+                                    from PVA_bundle
+                                    where pv_no = ?");
+                $sql->execute([$value]);
+                $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+                $tot = $temp[0]["total_paid"] + $temp[0]["additional_cash"];
+                //dr เงินรองจ่าย
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['pv_no'], '2', '11-1310', (double) $tot, 0, 'PV']);
+                //cr เงินฝากออมทรัพย์
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['pv_no'], '3', '12-1300', 0, (double) $tot, 'PV']);
+
+
                 $sql = $this->prepare("UPDATE PVA SET pv_status = 5 WHERE pv_no = ?");
                 $success = $success && $sql->execute([$value]);
             }
-            if($success) {
+            if($success) { //there is no check on acc detail
                 echo $value;
                 echo ' ';
             } else {

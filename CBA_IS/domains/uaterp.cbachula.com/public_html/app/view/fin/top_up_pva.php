@@ -6,7 +6,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">สลิบโอนเงินเข้าบัญชี PV-A</h2>
+        <h2 class="mt-3">แนบหลักฐานเติมเงินรองจ่าย</h2>
 
         <div>
                 <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
@@ -14,9 +14,8 @@
                         <div class="row mx-0 mt-2">
                             <table class="table table-hover my-1">
                                 <tr>
-                                    <th>pv no</th>
-                                    <th>รายการสินค้า</th>
-                                    <th>ค่าใช้จ่าย</th>
+                                    <th>PV-A no</th>
+                                    <th>จำนวนเงินเติม</th>
                                     <th>upload slip</th>
                                     <th>confirm</th>
                                 </tr>
@@ -26,7 +25,6 @@
                                 <tr ng-repeat="pva in pvas | unique:'pv_no' | orderBy:'pv_no'"
                                     ng-show="pvas.length > 0">
                                     <td>{{pva.pv_no}}</td>
-                                    <td style = "white-space: normal;">{{pva.product_names}}</td>
                                     <td>{{pva.total_paid | number:2}}</td>
                                     <td>
                                         <input id='{{pva.pv_no}}' type="file" class="form-control-file"
