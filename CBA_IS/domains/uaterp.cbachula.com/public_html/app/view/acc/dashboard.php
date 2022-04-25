@@ -93,6 +93,8 @@
                     <th>{{temp}}</th>
                     <th ng-show="doc == 'PV'">ชื่อ Supplier</th>
 					<th ng-show="doc == 'PO'">เลข SO</th>
+                    <th ng-show="doc == 'IV_CR'">เลข SOX</th>
+                    <th ng-show="doc == 'IV_CR'">ไฟล์ CR</th>
                     <th>วันที่</th>
                     <th>ผู้อนุมัติ</th>
                     <th ng-show="doc == 'PV'">สถานะ</th>
@@ -110,6 +112,8 @@
                     <td>{{dashboard.temp}}</td>
                     <td ng-show="doc == 'PV'">{{dashboard.pv_name}}</td>
 					<td ng-show="doc == 'PO'">{{dashboard.so}}</td>
+                    <td ng-show="doc == 'IV_CR'">{{dashboard.sox_no}}</td>
+                    <td ng-show="doc == 'IV_CR'">N/A [WIP]</td>
                     <td>{{dashboard.file_date}} {{dashboard.file_time}}</td>
                     <td>{{dashboard.file_emp_id}} {{dashboard.file_emp_name}}</td>
                     <td ng-show="doc == 'PV'">
@@ -299,6 +303,7 @@
         $scope.doc = '';
         $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
 		$scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
+        console.log($scope.dashboardsIv)
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;

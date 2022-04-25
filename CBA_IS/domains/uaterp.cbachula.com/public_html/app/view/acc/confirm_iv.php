@@ -66,7 +66,7 @@
             }, function(data) {
                 addModal('successModal', 'Confirm IV', 'Confirm Successful');
                 $('#successModal').modal('toggle');
-                $('#successModal').on('hide.bs.modal', function (e) { location.assign('/acc/print_iv') });  //{ location.assign('/acc/dashboard') }
+                $('#successModal').on('hide.bs.modal', function (e) {  });  //{ location.assign('/acc/dashboard') }
             });
         }
      

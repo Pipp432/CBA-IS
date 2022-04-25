@@ -1741,9 +1741,11 @@ class accModel extends model {
                                     invoice_type,
                                     approved_employee as file_emp_id,
                                     employee_nickname_thai as file_emp_name,
-                                    file_no as temp
+                                    file_no as temp,
+                                    sox_no
                                 from Invoice 
                                 inner join Employee on Employee.employee_id = Invoice.approved_employee
+                                inner join SOXPrinting on SOXPrinting.so_no = file_no
                                 where confirmPrint = 1 and acc_confirm = 1
                                 order by invoice_date desc, invoice_time desc");
         $sql->execute();
