@@ -127,6 +127,20 @@ class fileController extends controller {
             }
         }
     }
+
+    public function pvd() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบลดหนี้ Peyment Voucher-D #".uri::get(2));
+                $this->view->cn = $this->model->getPVD(uri::get(2));
+                $this->view->render("file/pvd");
+            } else {
+                $this->err404();
+            }
+        }
+    }
     
     public function cr() { 
         if(empty(uri::get(2))) {

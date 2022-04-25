@@ -157,6 +157,48 @@ class fileModel extends model {
         return null;
 	}
     
+    
+    // exInvoice.customer_name,
+                                    // exInvoice.employee_id,
+                                    // exInvoice.customer_address,
+                                    // exInvoice.invoice_no as ex_invoice_no,
+                                    // exInvoice.invoice_date as ex_invoice_date,
+
+                                    //left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
+    public function getPVD($iv_no) {
+		$sql = $this->prepare("SELECT
+                                    
+                                	Invoice.invoice_no,
+                                    Invoice.invoice_date,
+                                    Invoice.file_no,
+                                    Invoice.customer_name,
+                                    Invoice.customer_address,
+                                    InvoicePrinting.product_no,
+                                    Product.product_name,
+                                    InvoicePrinting.quantity,
+                                    Product.unit,
+                                    InvoicePrinting.sales_price,
+                                    InvoicePrinting.total_sales_price,
+                                    Invoice.discount,
+                                    Invoice.total_sales_no_vat ,
+                                    Invoice.total_sales_vat ,
+                                    Invoice.total_sales_price ,
+                                    Invoice.sales_price_thai
+                                from InvoicePrinting
+                                
+                                left join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
+                                left join Product on Product.product_no = InvoicePrinting.product_no
+                                
+                                
+    							where Invoice.invoice_no = ?");
+        $sql->execute([$iv_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+	}
+
+
     public function getCr($cr_no) {
 		$sql = $this->prepare("select
                                 	CR.cr_no,

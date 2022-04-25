@@ -20,30 +20,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card text-white bg-secondary m-2" ng-click="getDashboardIV()">
-                    <div class="card-body">
-                        <h5 class="card-title my-0">ใบกำกับภาษี (IV)</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card text-white bg-secondary m-2" ng-click="getDashboardCR()">
-                    <div class="card-body">
-                        <h5 class="card-title my-0">ใบเสร็จรับเงิน (CR)</h5>
-                    </div>
-                </div>
-            </div>
-		</div>
-		<div class="row row-cols-2 row-cols-md-3 mt-2 p-0">
-           <div class="col">
-                <div class="card text-white bg-info m-2" ng-click="getDashboardPV()">
-                    <div class="card-body">
-                        <h5 class="card-title my-0">ใบสำคัญสั่งจ่าย (PV)</h5>
-                    </div>
-                </div>
-            </div>
-
+            
             <div class="col">
                 <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()">
                     <div class="card-body">
@@ -53,9 +30,20 @@
             </div>
 
             <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPV()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">ใบสำคัญสั่งจ่าย (PV)</h5>
+                    </div>
+                </div>
+            </div>
+
+		</div>
+		<div class="row row-cols-2 row-cols-md-3 mt-2 p-0">
+
+            <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVA()">
                     <div class="card-body">
-                        <h5 class="card-title my-0">ใบ PVA (PVA)</h5>
+                        <h5 class="card-title my-0">PV-A (เงินรองจ่าย)</h5>
                     </div>
                 </div>
             </div>
@@ -63,7 +51,7 @@
             <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVB()">
                     <div class="card-body">
-                        <h5 class="card-title my-0">ใบSupplier (PVB)</h5>
+                        <h5 class="card-title my-0">PV-B (Supplier)</h5>
                     </div>
                 </div>
             </div>
@@ -71,7 +59,7 @@
             <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVD()">
                     <div class="card-body">
-                        <h5 class="card-title my-0">ใบSupplier (PVD)</h5>
+                        <h5 class="card-title my-0">PV-D (ใบลดหนี้))</h5>
                     </div>
                 </div>
             </div>
@@ -87,7 +75,7 @@
             <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVC_confirm()">
                     <div class="card-body">
-                        <h5 class="card-title my-0">PVC</h5>
+                        <h5 class="card-title my-0">PV-C (ค่าใช้จ่าย)</h5>
                     </div>
                 </div>
             </div>
@@ -103,6 +91,7 @@
                 <tr>
                     <th>เลข {{doc}}</th>
                     <th>{{temp}}</th>
+                    <th ng-show="doc == 'PV'">ชื่อ Supplier</th>
 					<th ng-show="doc == 'PO'">เลข SO</th>
                     <th>วันที่</th>
                     <th>ผู้อนุมัติ</th>
@@ -119,6 +108,7 @@
                         <span ng-show="doc == 'IV' && dashboard.invoice_type == 'CN'">(ลดหนี้)</span>
                     </td>
                     <td>{{dashboard.temp}}</td>
+                    <td ng-show="doc == 'PV'">{{dashboard.pv_name}}</td>
 					<td ng-show="doc == 'PO'">{{dashboard.so}}</td>
                     <td>{{dashboard.file_date}} {{dashboard.file_time}}</td>
                     <td>{{dashboard.file_emp_id}} {{dashboard.file_emp_name}}</td>
