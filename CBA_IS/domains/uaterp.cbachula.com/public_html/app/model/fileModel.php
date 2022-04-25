@@ -275,10 +275,23 @@ class fileModel extends model {
 	}
     
     public function getPva($pv_no) {
-		$sql = $this->prepare("SELECT * FROM PVA_bundle WHERE pv_no = ? ");
+		$sql = $this->prepare("SELECT total_paid,additional_cash,pv_date,pv_no,notes FROM PVA_bundle WHERE pv_no = ? ");
         $sql->execute([$pv_no]);
         if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+            $ret = $sql->fetchAll(PDO::FETCH_ASSOC);
+            $ret[1] = $this->convert($ret[0]["total_paid"] + $ret[0]["additional_cash"]);
+            return json_encode($ret, JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([$pv_no]);
+	}
+
+    public function getPvaChild($pv_no) {
+		$sql = $this->prepare("SELECT total_paid,internal_pva_no,pv_date FROM PVA WHERE pv_no = ? ");
+        $sql->execute([$pv_no]);
+        if ($sql->rowCount() > 0) {
+            $ret = $sql->fetchAll(PDO::FETCH_ASSOC);
+            $ret[1] = $this->convert($ret[0]["total_paid"]);
+            return json_encode($ret, JSON_UNESCAPED_UNICODE);
         }
         return json_encode([$pv_no]);
 	}

@@ -13,7 +13,7 @@
                 <h3 style="text-align: center;"><b>ใบสั่งเติมเงินรองจ่าย<br>Payment Voucher - A</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">ตัวจริง</h5>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].pv_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].pv_date}}</h6>
             </div>
@@ -22,9 +22,9 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ 3)</b><br>
                     อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
-                    โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
+                    <br>
                 </p>
             </div>
         </div>  
@@ -35,9 +35,11 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <td><b>สั่งจ่าย</b> Finance </td>
+                        <td><b>สั่งจ่าย</b> พนักงานรองจ่าย </td>
                     </tr>
-                    
+                    <tr>
+                        <td><b>จ่ายเพื่อ</b> เติมเงินรองจ่าย </td>
+                    </tr>
                 </table>
             </div>
         </div>  
@@ -45,20 +47,33 @@
         <div class="row px-2 mt-2">
             <table style="border-collapse: collapse; width: 100%;">
                 <tr>
-                    <th>ใบสำคัญลงวันที่</th>
-                    <th>รายละเอียด</th>
-                    <th>จำนวนเงิน</th>
+                    <th>ใบเบิกเงินรองจ่ายลงวันที่</th>
+                    <th>เลขที่ใบเบิกเงินรองจ่าย</th>
+                    <th>จำนวน</th>
                 </tr>
-                <tr>
-                    <td style="text-align: left;">{{detail[0].pv_date}}</td>
-                    <td style="text-align: left;">{{detail[0].product_names}}</td>
-                    <td style="text-align: right;">{{detail[0].total_paid | number:2}}</td>
-                    
+                <tr ng-repeat = "child in pvaChilds">
+                    <td style="text-align: left;">{{child.pv_date}}</td>
+                    <td style="text-align: left;">{{child.internal_pva_no}}</td>
+                    <td style="text-align: right;">{{child.total_paid | number:2}}</td>
                 </tr>
             
+                <tr>
+                    <td style="text-align: left;">จำนวนที่ต้องการเติมเพิ่ม</td>
+                    <td style="text-align: left;"></td>
+                    <td style="text-align: right;">{{details[0].additional_cash | number:2}}</td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: left;">จำนวนรวม {{details[1]}}</td>
+                    <td style="text-align: left;"></td>
+                    <td style="text-align: right;">{{details[0].total_paid + details[0].additional_cash | number:2}}</td>
+                </tr>
             </table>
         </div>  
-        
+
+        <div class="row px-2 mt-2">
+            หมายเหตุ : {{details[0].notes}}
+        </div> 
     
     </div>
 
@@ -77,7 +92,8 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->pv; ?>;
-            $scope.company = $scope.detail[0].pv_no.substring(0,1);
+            //$scope.company = $scope.detail[0].pv_no.substring(0,1);
+            $scope.pvaChilds = <?php echo $this->pvaChilds; ?>;
         }
     });
     

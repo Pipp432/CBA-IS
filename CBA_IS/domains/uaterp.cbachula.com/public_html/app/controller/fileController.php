@@ -220,6 +220,7 @@ class fileController extends controller {
             $this->requirePostition("acc");
             $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
             $this->view->pv = $this->model->getPva(Uri::get(2));
+            $this->view->pvaChilds = $this->model->getPvaChild(Uri::get(2));
             $this->view->render("file/pva");
         }
     }
