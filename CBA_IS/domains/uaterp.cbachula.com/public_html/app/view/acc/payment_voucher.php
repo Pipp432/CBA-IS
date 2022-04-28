@@ -429,7 +429,7 @@
             <div class="card-body">
                 <div class="row mx-0">
                     <div class="col-md-8">
-                        <label for="filter_pva_no">PVA no</label>
+                        <label for="filter_pva_no">BPA no</label>
                         <input type="text" class="form-control" id="filter_pva_no" ng-model="filter_pva_no" style="text-transform:uppercase">
                     </div>
                 </div>
@@ -452,7 +452,7 @@
                     <tr ng-repeat = "PVA in PVAs | unique:'internal_bundle_no'  | filter:{internal_bundle_no:filter_pva_no}" ng-click="selectPVA(PVA)"">
                         <td class = "center_cell">{{PVA.internal_bundle_no}}</td>
                         <td class = "center_cell">{{PVA.pv_date}} {{PVA.pv_time}}</td>
-                        <td class = "center_cell">{{PVA.total_paid}}</td>
+                        <td class = "center_cell">{{PVA.total_paid | number:2}}</td>
                         <td class = "center_cell"><a href="/acc/payment_voucher/get_petty_cash_statement/{{PVA.internal_bundle_no}}" target="_blank">statement</a></td>
                         <td class = "center_cell">{{PVA.employee_id}} {{PVA.employee_nickname_eng}}</td>
                     </tr>
@@ -478,7 +478,7 @@
                         <td class = "center_cell">{{child.pv_date}}</td>
                         <td class = "center_cell">{{child.internal_pva_no}}</td>
                         <td class = "center_cell">{{child.product_names}}</td> 
-                        <td class = "center_cell">{{child.total_paid}}</td>
+                        <td class = "center_cell">{{child.total_paid | number:2}}</td>
                         <td class = "center_cell"> 
                             <a href="/fin/validate_petty_cash_request/get_re/{{child.internal_pva_no}}" target="_blank">{{child.ivrc_name}}</a>
                             <a href="/fin/validate_petty_cash_request/get_iv/{{child.internal_pva_no}}" target="_blank">{{child.slip_name}}</a>
@@ -487,14 +487,10 @@
                             <a href="/fin/create_pva/get_fin_slip/{{child.internal_pva_no}}" target="_blank">{{child.fin_slip_name}}</a> 
                         </td>
                         <td class = "center_cell"> 
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="{{child.internal_pva_no}}_debit" ng-model="child.debit">
-                            </div>
+                            <input type="text" class="form-control" id="{{child.internal_pva_no}}_debit" ng-model="child.debit">
                         </td>
                         <td class = "center_cell"> 
-                            <div class="col-md-6">
-                                    <input type="checkbox" class="form-control" id="{{child.internal_pva_no}}_tax" ng-model="child.tax">
-                            </div>
+                            <input type="checkbox" class="form-control" id="{{child.internal_pva_no}}_tax" ng-model="child.tax">
                         </td>
                     </tr>
                     <tr>
@@ -512,7 +508,7 @@
                         <td class = "center_cell">รวมทั้งสิ้น</td>
                         <td class = "center_cell"></td>
                         <td class = "center_cell"></td>
-                        <td class = "center_cell">{{pva_total}}</td>
+                        <td class = "center_cell">{{pva_total | number:2}}</td>
                         <td class = "center_cell"></td>
                         <td class = "center_cell"></td>
                         <td class = "center_cell"></td>
@@ -744,12 +740,13 @@
         $scope.selectPVA = function($PVA) {
             $scope.PVA_notes = '';
             $scope.selected_PVA = $PVA;
-            $scope.pva_total = $PVA.total_paid + $PVA.additional_cash;
+            $scope.pva_total =  parseFloat($PVA.total_paid) +  parseFloat($PVA.additional_cash);
             $.post("/acc/payment_voucher/get_PVA_child", { //should be using get request pls fix when have time
                 post : true,
                 internal_bundle_no : $PVA.internal_bundle_no
             }, (data) => {
-                $scope.selected_PVA_child = data;
+                $scope.selected_PVA_child = JSON.parse(data);
+                $scope.$apply();
             });
             
         }

@@ -190,7 +190,7 @@
             formData.append('pettyCashStatement', $('#petty_cash_statement')[0].files[0]);
             formData.append('additionalCash', $scope.additionalCash);
             formData.append('whyMoreCash', $scope.whyMoreCash);
-            formData.append('cpvItems' , $scope.cpvas);
+            formData.append('cpvItems' , JSON.stringify($scope.cpvas));
 
             $.ajax({ 
                 url: '/fin/create_pva/create_pva',  

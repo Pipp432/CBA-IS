@@ -1028,7 +1028,7 @@ class accModel extends model {
                 $sql = $this->prepare("UPDATE PVA SET tax = ?,debit = ?,pv_status = 3, pv_no = ? WHERE internal_pva_no = ?");
                 $success = $success && $sql->execute([$pva_child['tax'],$pva_child["debit"],$pv_no,$pva_child['internal_pva_no']]);
 
-                if($pva_childs["tax"]) {
+                if($pva_child["tax"]) {
                     // Dr ค่าใช้จ่าย with tax    
                     $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
@@ -1676,7 +1676,7 @@ class accModel extends model {
                                     where pv_no = ?");
                 $sql->execute([$value]);
                 $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $tot = $temp[0]["total_paid"] + $temp[0]["additional_cash"];
+                $tot = intval($temp[0]["total_paid"]) + intval($temp[0]["additional_cash"]);
                 //dr เงินรองจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 

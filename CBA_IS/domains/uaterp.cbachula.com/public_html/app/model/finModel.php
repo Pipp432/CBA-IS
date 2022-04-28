@@ -1707,7 +1707,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     }
 
     public function bundlePVA() {
-        $pvas = $_POST['cpvItems'];
+        $pvas = json_decode($_POST['cpvItems'],true);
         $success = true;
         //$pva_no = $this->assignPVA($_POST['program']);
         $internal_bundle_no = $this->assignInternalBundleNo();
@@ -1730,7 +1730,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             $pcs_name = $_FILES['pettyCashStatement']['name'];
             $pcs_data = base64_encode(file_get_contents($_FILES['pettyCashStatement']['tmp_name']));
             $pcs_type = $fileType = $_FILES['pettyCashStatement']['type'];
-
+ 
 
             $sql = $this->prepare("INSERT INTO PVA_bundle(
                                         internal_bundle_no,
