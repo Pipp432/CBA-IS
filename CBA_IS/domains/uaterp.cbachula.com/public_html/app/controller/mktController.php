@@ -479,13 +479,13 @@ class mktController extends controller {
 
     public function pre_pvd() {
         if(empty(uri::get(2))) {
-            //$this->requirePostition("mkt");
             $this->view->setTitle("Payment Voucher D (PV-D)");
             $this->view->render("mkt/pre_pvd","navbar");
-        } else if (uri::get(2)==='post_requestpvd') {
-            $this->positionEcho('mkt', $this->model->requestPVD());
+        } else if (uri::get(2)==='post_requestwsd') {
+            $this->positionEcho('mkt', $this->model->requestWSD());
         }
     }
+
 
 }
 

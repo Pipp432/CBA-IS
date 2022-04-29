@@ -244,7 +244,38 @@ class scmController extends controller {
         echo '</table>';
         
     }
-	
+	public function get_address(){
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=address.xls");
+        $data = $this->model->getAddress();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>sox_no</th>';
+                echo '<th>iv_no</th>';
+                echo '<th>ลบท/EMS</th>';
+                echo '<th>ชื่อ</th>';
+                echo '<th>ที่อยู่</th>';
+                echo '<th>โทร</th>';
+                echo '<th>print</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['invoice_no'].'</td>';
+                    echo '<td>'.$value['note'].'</td>';
+                    echo '<td>'.$value['customer_name'].'</td>';
+                    echo '<td>'.$value['address'].'</td>';
+                    echo '<td>'.$value['customer_tel'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+    }
+
 	public function get_sox_no_ird() {
         
         header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -254,23 +285,17 @@ class scmController extends controller {
         echo '<table style="width:100%">';
         
             echo '<tr>';
+                echo '<th>sox_no</th>';
                 echo '<th>iv_no</th>';
-                echo '<th>customer_name</th>';
-                echo '<th>address</th>';
-                echo '<th>zip_code</th>';
-                echo '<th>customer_tel</th>';
-                echo '<th>sox_type</th>';
-                echo '<th>detail</th>';
+                echo '<th>Product No.</th>';
+                echo '<th>Product Name.</th>';
+                echo '<th>Quantity</th>';
             echo '</tr>';
             
             foreach($data as $value) {
                 echo '<tr>';
-                    echo '<td>'.$value['iv_no'].'</td>';
-                    echo '<td>'.$value['customer_name'].'</td>';
-                    echo '<td>'.$value['address'].'</td>';
-                    echo '<td>'.$value['zip_code'].'</td>';
-                    echo '<td>'.$value['customer_tel'].'</td>';
-                    echo '<td>'.$value['sox_type'].'</td>';
+                    echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['product_no'].'</td>';
                     echo '<td>'.$value['product_name'].'</td>';
                     echo '<td>'.$value['quantity'].'</td>';

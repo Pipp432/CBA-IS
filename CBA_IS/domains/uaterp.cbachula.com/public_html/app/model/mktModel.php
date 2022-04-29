@@ -4690,7 +4690,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     $Quotation_pic = $_FILES['quotation_pic']; 
     
     
-    if(filesize($Quotation_pic['tmp_name']) > 50000) {
+    if(filesize($Quotation_pic['tmp_name']) > 16000) {
       $success = false;
       $re->cause = 'File size too big!! Max file size is 50 kb.';
     } else if(!@is_array(getimagesize($Quotation_pic['tmp_name']))){
@@ -4879,7 +4879,7 @@ public function uploadImgForPVC() {
 }
 
 
-public function requestPVD(){
+public function requestWSD(){
   $sql = $this->prepare("SELECT
                           Invoice.invoice_no
                           FROM
@@ -4893,11 +4893,11 @@ public function requestPVD(){
     $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no'];         
   }
 
-  $pvdno = $this->assignPVD( ); 
-  $sql = $this->prepare("INSERT into PVD(pvd_no, pvd_date, pvd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, bank, bank_no, recipent, company_code, recipent_address, note, PVD_status)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, null, null, null, null, null, ?, 0)");
+  $wsdno = $this->assignWSD( ); 
+  $sql = $this->prepare("INSERT into WSD(wsd_no, wsd_date, wsd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, note, wsd_status)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0)");
   $sql->execute([
-    $pvdno,  
+    $wsdno,  
     input::post('employeeID'),
     input::post('employeeLine'),
     input::post('totalAmount'),
@@ -4907,17 +4907,18 @@ public function requestPVD(){
     input::post('note')
   ]);
 }
+
 /////////pvd/////////
-private function assignPVD() {
-  $pvdPrefix = 'PVD-';
-  $sql = $this->prepare( "select ifnull(max(pvd_no),0) as max from PVD where pvd_no like ?" );
-  $sql->execute( [ 'PVD-%' ] );
-  $maxpvdNo = $sql->fetchAll()[ 0 ][ 'max' ];
+private function assignWSD() {
+  $wsdPrefix = 'WSD-';
+  $sql = $this->prepare( "select ifnull(max(wsd_no),0) as max from WSD where wsd_no like ?" );
+  $sql->execute( [ 'WSD-%' ] );
+  $maxwsdNo = $sql->fetchAll()[ 0 ][ 'max' ];
   $runningNo = '';
-  if ( $maxpvdNo == '0' ) {
+  if ( $maxwsdNo == '0' ) {
     $runningNo = '00001';
   } else {
-    $latestRunningNo = ( int )substr( $maxpvdNo, 4 ) + 1;
+    $latestRunningNo = ( int )substr( $maxwsdNo, 4 ) + 1;
     if ( strlen( $latestRunningNo ) == 5 ) {
       $runningNo = $latestRunningNo;
     } else {
@@ -4927,9 +4928,8 @@ private function assignPVD() {
       $runningNo .= $latestRunningNo;
     }
   }
-  return $pvdPrefix . $runningNo;
+  return $wsdPrefix . $runningNo;
 }
-
 
   
 

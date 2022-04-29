@@ -126,7 +126,6 @@ class fileModel extends model {
                                     Invoice.invoice_date,
                                     Invoice.file_no,
                                     exInvoice.customer_name,
-                                    exInvoice.employee_id,
                                     exInvoice.customer_address,
                                     exInvoice.invoice_no as ex_invoice_no,
                                     exInvoice.invoice_date as ex_invoice_date,
@@ -144,11 +143,18 @@ class fileModel extends model {
                                     Invoice.total_sales_no_vat as cn_total_sales_no_vat,
                                     Invoice.total_sales_vat as cn_total_sales_vat,
                                     Invoice.total_sales_price as cn_total_sales_price,
-                                    Invoice.sales_price_thai
+                                    Invoice.sales_price_thai,
+                                    WSD.wsd_no,
+                                    CN.cn_no,
+                                    CN.cn_date,
+                                    CN.employee_id
+                                    
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no
+                                left join WSD on WSD.invoice_no = Invoice.invoice_no
+                                left join CN on CN.wsd_no = WSD.wsd_no
     							where Invoice.invoice_no = ?");
         $sql->execute([$iv_no]);
         if ($sql->rowCount() > 0) {
@@ -157,17 +163,8 @@ class fileModel extends model {
         return null;
 	}
     
-    
-    // exInvoice.customer_name,
-                                    // exInvoice.employee_id,
-                                    // exInvoice.customer_address,
-                                    // exInvoice.invoice_no as ex_invoice_no,
-                                    // exInvoice.invoice_date as ex_invoice_date,
-
-                                    //left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
     public function getPVD($iv_no) {
 		$sql = $this->prepare("SELECT
-                                    
                                 	Invoice.invoice_no,
                                     Invoice.invoice_date,
                                     Invoice.file_no,
@@ -179,16 +176,20 @@ class fileModel extends model {
                                     Product.unit,
                                     InvoicePrinting.sales_price,
                                     InvoicePrinting.total_sales_price,
-                                    Invoice.discount,
+                                    -- Invoice.discount,
                                     Invoice.total_sales_no_vat ,
                                     Invoice.total_sales_vat ,
                                     Invoice.total_sales_price ,
-                                    Invoice.sales_price_thai
+                                    Invoice.sales_price_thai,
+                                    PVD.vat_id,
+                                    PVD.employee_id,
+                                    PVD.pvd_no,
+                                    PVD.pvd_date
+
                                 from InvoicePrinting
-                                
                                 left join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no
-                                
+                                left join PVD on InvoicePrinting.invoice_no = PVD.invoice_no 
                                 
     							where Invoice.invoice_no = ?");
         $sql->execute([$iv_no]);
@@ -197,7 +198,6 @@ class fileModel extends model {
         }
         return null;
 	}
-
 
     public function getCr($cr_no) {
 		$sql = $this->prepare("select

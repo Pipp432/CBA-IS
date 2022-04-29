@@ -267,9 +267,8 @@ class accModel extends model {
     } 
     
     // CN(PV-D) Module
-    
-    public function getpvd() {
-        $sql = "SELECT * from PVD where PVD_status = 0";
+    public function getWSD() {
+        $sql = "SELECT * from WSD where wsd_status = 0";
         $statement = $this->prepare($sql);
         $statement->execute([]);
 
@@ -278,16 +277,16 @@ class accModel extends model {
         } else return []; 
     }
 
-    public function updatePVDCreditNote() {
-        $sql = "UPDATE PVD SET 
+    public function updateWSDCreditNote() {
+        $sql = "UPDATE WSD SET 
         employee_id = ?,
         employee_line = ?,
         total_amount = ?,
         vat_id = ?,
         sox_no = ?,
         invoice_no = ?,
-        note = ? 
-        where PVD_status = 0 AND pvd_no = ?"; 
+        note = ?
+        where  wsd_status = 0 and wsd_no = ?"; 
         $statement = $this->prepare($sql);
         $success = $statement->execute([
             input::post("employee_id"),
@@ -297,11 +296,35 @@ class accModel extends model {
             input::post("sox_no"),
             input::post("invoice_no"),
             input::post("note"),
-            input::post("pvd_no"),
+            input::post("wsd_no"),
         ]);
         if($success) echo 'success';
         else echo print_r($statement->errorInfo());
 
+        // $statement = $this->prepare("UPDATE WSD set
+        //                                 wsd_status");
+    }
+
+    private function assignCN($company) {
+        $ivPrefix = $company.'CN-';
+        $sql=$this->prepare("select ifnull(max(cn_no),0) as max from CN where cn_no like ?");
+        $sql->execute([$ivPrefix.'%']);
+        $maxIvNo = $sql->fetchAll()[0]['max'];
+        $runningNo = '';
+        if($maxIvNo=='0') {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = (int) substr($maxIvNo, 4) + 1;
+            if(strlen($latestRunningNo)==5) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ($x = 1; $x <= 5 - strlen($latestRunningNo); $x++) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $ivPrefix.$runningNo;
     }
 
     public function getIvForCn() {
@@ -337,22 +360,41 @@ class accModel extends model {
         // $cnItemsArray = json_decode(input::post('cnItems'), true); 
         // $cnItemsArray = json_decode($cnItemsArray, true); 
         
-        //update PVD status 
-        $sql = "UPDATE PVD SET 
-            PVD_status = 1
-        where PVD_status = 0 AND pvd_no = ?"; 
-        $statement = $this->prepare($sql);
-        $success = $statement->execute([
-            input::post("pvd_no"),
+        $cn_no = $this->assignCN(input::post('company'));
+
+        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)");
+        $sql->execute([
+            $cn_no,  
+            json_decode(session::get('employee_detail'), true)['employee_id'],
+            input::post('wsd_no')
         ]);
+
+        $sql = $this->prepare("UPDATE WSD set wsd_status=1
+                                where WSD.wsd_no =");
+        $success = $statement->execute([
+                        input::post("wsd_no")
+                        ]);
+        if($success) echo 'success';
+        else echo print_r($statement->errorInfo());
+
+
+        //update PVD status 
+        // $sql = "UPDATE PVD SET 
+        //     PVD_status = 1
+        // where PVD_status = 0 AND pvd_no = ?"; 
+        // $statement = $this->prepare($sql);
+        // $success = $statement->execute([
+        //     input::post("pvd_no"),
+        // ]);
 
         if($success) {
             echo ' success(';
-            echo input::post("pvd_no");
+            echo input::post("cn_no");
             echo')';
         } else {
             echo ' failed(';
-            echo input::post("pvd_no");
+            echo input::post("cn_no");
             echo')';
         }
 
@@ -427,7 +469,29 @@ class accModel extends model {
 
     //pvd module
     public function getPVDForPV() {
-        $sql = "SELECT * from PVD where PVD_status = 1";
+        $sql = "SELECT 
+                    WSD.wsd_no,
+                    CN.cn_no,
+                    CN.cn_date,
+                    CN.cn_time,
+                    CN.employee_id,
+                    CN.wsd_no,
+                    CN.company_code,
+                    CN.bank,
+                    CN.bank_no,
+                    CN.recipient,
+                    CN.recipient_address,
+                    WSD.invoice_no,
+                    WSD.sox_no,
+                    WSD.total_amount,
+                    WSD.vat_id,
+                    WSD.note,
+                    WSD.wsd_status
+
+                from CN
+                left join WSD on CN.wsd_no = WSD.wsd_no
+                where wsd_status = 1";
+
         $statement = $this->prepare($sql);
         $statement->execute([]);
 
@@ -438,31 +502,61 @@ class accModel extends model {
 
     public function updatePVDForPV() {
 
-        $sql = "UPDATE PVD SET  
-            company_code = ?, recipent = ?, bank = ?, bank_no = ?, recipent_address = ?
-            WHERE PVD_status = 1 AND pvd_no = ?";
+        $sql = "UPDATE CN SET  
+            company_code = ?, recipient = ?, bank = ?, bank_no = ?, recipient_address = ?
+            WHERE cn_no = ?";
         $statement = $this->prepare($sql);
         $success = $statement->execute([
             input::post("company_code"),
-            input::post("recipent"),
+            input::post("recipient"),
             input::post("bank"),
             input::post("bank_no"),
             input::post("address"),
-            input::post("pvd_no"),
+            input::post("cn_no"),
         ]);
         if($success) echo ' สำเร็จ';
         else print_r($statement->errorInfo());
+
+
     }
 
     
     public function postPVDForPV() {
-        $sql = "UPDATE PVD SET 
-            PVD_status = 2, company_code = ?
-        where PVD_status = 1 AND pvd_no = ?"; 
-        $statement = $this->prepare($sql);
-        $success = $statement->execute([
+        $pvd_no = $this->assignPVD(input::post('company'));
+
+        $statement = $this->prepare("INSERT into PVD (pvd_no, 
+                                                      pvd_date, 
+                                                      pvd_time, 
+                                                      employee_id, 
+                                                      employee_line,
+                                                      total_amount,
+                                                      vat_id, 
+                                                      sox_no,
+                                                      invoice_no,
+                                                      bank, 
+                                                      bank_no, 
+                                                      recipient, 
+                                                      company_code, 
+                                                      recipient_address, 
+                                                      note, 
+                                                      PVD_status)
+                                    values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2)");  
+        
+        $sql->execute([
+            $pvd_no,
+            json_decode(session::get('employee_detail'), true)['employee_id'],
+            input::post("employee_line"),
+            input::post("total_amount"),
+            input::post("vat_id"),
+            input::post("sox_no"),
+            input::post("invoice_no"),
+            input::post("bank"),
+            input::post("bank_no"),
+            input::post("recipient"),
             input::post("company_code"),
-            input::post("pvd_no"),
+            input::post("address"),
+            input::post("note")
+            
         ]);
         if($success) echo ' สำเร็จ';
         else print_r($statement->errorInfo());
@@ -473,7 +567,8 @@ class accModel extends model {
                                 pvd_no as pv_no,
                                 pvd_date as pv_date,
                                 total_amount as total_paid,
-                                slipName as receipt_name
+                                slipName as receipt_name,
+                                PVD.invoice_no 
                                 from PVD 
                                 where PVD_status = 3");
         $sql->execute([]);
@@ -481,6 +576,28 @@ class accModel extends model {
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         } return json_encode([]); 
+    }
+
+    private function assignPVD($company) {
+        $ivPrefix = $company.'PD-';
+        $sql=$this->prepare("select ifnull(max(pvd_no),0) as max from PVD where pvd_no like ?");
+        $sql->execute([$ivPrefix.'%']);
+        $maxIvNo = $sql->fetchAll()[0]['max'];
+        $runningNo = '';
+        if($maxIvNo=='0') {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = (int) substr($maxIvNo, 4) + 1;
+            if(strlen($latestRunningNo)==5) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ($x = 1; $x <= 5 - strlen($latestRunningNo); $x++) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $ivPrefix.$runningNo;
     }
 
     // CN(PV-D) Module
@@ -1676,7 +1793,7 @@ class accModel extends model {
                                     where pv_no = ?");
                 $sql->execute([$value]);
                 $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $tot = intval($temp[0]["total_paid"]) + intval($temp[0]["additional_cash"]);
+                $tot = $temp[0]["total_paid"] + $temp[0]["additional_cash"];
                 //dr เงินรองจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
@@ -1865,7 +1982,8 @@ class accModel extends model {
                                     employee_nickname_thai as file_emp_name,
                                     PV.slip_name,
                                     PV.receipt_name,
-                                    PV.cr_name
+                                    PV.cr_name,
+                                    PV.pv_name
                                 from PV
                                 inner join Employee on Employee.employee_id = PV.approved_employee
 								where cancelled = 0 AND pv_type = 'Supplier'
@@ -1878,7 +1996,47 @@ class accModel extends model {
     }
 
     public function getDashboardPvd() {
-        $sql = $this->prepare("SELECT pvd_no,invoice_no,sox_no,pvd_date,pvd_time,PVD_status FROM PVD");
+        $sql = $this->prepare("SELECT 
+                                    PVD.pvd_no,
+                                    PVD.invoice_no,
+                                    PVD.sox_no,
+                                    PVD.pvd_date,
+                                    PVD.pvd_time,
+                                    PVD.PVD_status,
+                                    WSD.wsd_no,
+                                    WSD.wsd_status,
+                                    CN.cn_no,
+                                    CN.cn_date,
+                                    CN.cn_time
+
+                                    FROM PVD
+                                    left join WSD on WSD.invoice_no = PVD.invoice_no
+                                    left join CN on CN.wsd_no = WSD.wsd_no
+                                ");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+    public function getDashboardPrePvd() {
+        $sql = $this->prepare("SELECT 
+                                    PVD.pvd_no,
+                                    PVD.invoice_no,
+                                    PVD.sox_no,
+                                    PVD.pvd_date,
+                                    PVD.pvd_time,
+                                    PVD.PVD_status,
+                                    WSD.wsd_no,
+                                    WSD.wsd_status,
+                                    CN.cn_no,
+                                    CN.cn_date,
+                                    CN.cn_time
+
+                                    FROM PVD
+                                    left join WSD on WSD.invoice_no = PVD.invoice_no
+                                    left join CN on CN.wsd_no = WSD.wsd_no
+                                ");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

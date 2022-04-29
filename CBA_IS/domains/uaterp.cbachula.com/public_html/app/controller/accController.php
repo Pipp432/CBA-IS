@@ -173,18 +173,19 @@ class accController extends controller {
         }
     }
     
+    
     public function credit_note() {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
             $this->view->setTitle("Credit Note");
-            $this->view->PVDs = $this->model->getPVD();
+            $this->view->WSDs = $this->model->getWSD();
             $this->view->render("acc/credit_note", "navbar");
         } else if (uri::get(2)==='post_iv') {
             $this->positionEcho('acc', $this->model->getIvForCn());
         } else if (uri::get(2)==='post_cn') {
             $this->positionEcho('acc', $this->model->addCn());
         } else if (uri::get(2)==='update_PVD') {
-            $this->positionEcho('acc', $this->model->updatePVDCreditNote());
+            $this->positionEcho('acc', $this->model->updateWSDCreditNote());
         }
     }
     
@@ -228,6 +229,7 @@ class accController extends controller {
             $this->view->dashboardPva = $this->model->getDashboardPva();
             $this->view->dashboardPvb = $this->model->getDashboardPvb();
             $this->view->dashboardPvd = $this->model->getDashboardPvd();
+            $this->view->dashboardPrePvd = $this->model->getDashboardPrePvd();
             $this->view->dashboardPo = $this->model->getDashboardPo();
 			$this->view->dashboardCr = $this->model->getDashboardCr();
             $this->view->dashboardPvc = $this->model->getDashboardPvc();
