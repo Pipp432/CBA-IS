@@ -452,7 +452,7 @@
                     <tr ng-repeat = "PVA in PVAs | unique:'internal_bundle_no'  | filter:{internal_bundle_no:filter_pva_no}" ng-click="selectPVA(PVA)"">
                         <td class = "center_cell">{{PVA.internal_bundle_no}}</td>
                         <td class = "center_cell">{{PVA.pv_date}} {{PVA.pv_time}}</td>
-                        <td class = "center_cell">{{PVA.total_paid | number:2}}</td>
+                        <td class = "center_cell">{{PVA.total | number:2}}</td>
                         <td class = "center_cell"><a href="/acc/payment_voucher/get_petty_cash_statement/{{PVA.internal_bundle_no}}" target="_blank">statement</a></td>
                         <td class = "center_cell">{{PVA.employee_id}} {{PVA.employee_nickname_eng}}</td>
                     </tr>
@@ -528,6 +528,9 @@
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVA()" ng-disabled="selected_PVA.editing">ยืนยัน PVA</button>
                     </div>
 
+                    <!-- <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="test()" ng-disabled="selected_PVA.editing">test</button>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -634,6 +637,9 @@
                 $http.get('/acc/payment_voucher/get_PVA').then(
                     function(response){
                         $scope.PVAs = response.data; 
+                        angular.forEach($scope.PVAs, function (value, key) {
+                            value.total = parseFloat(value.total_paid) +  parseFloat(value.additional_cash);
+                        });
                         $scope.isLoad = false;
                     });
             } else if($scope.selectedPaymentType === 'PB') {
@@ -751,6 +757,10 @@
             
         }
 
+        // $scope.test = () => {
+        //     console.log($scope.selected_PVA_child);
+        //     console.log($scope.selected_PVA);
+        // }
         $scope.dropPVA = function() {
             $scope.selected_PVA = [];
             $scope.selected_PVA_child = [];
@@ -764,8 +774,7 @@
                 $.post("/acc/payment_voucher/post_PVA", {
                     post : true,
                     program : 3,
-                    debit : $scope.pvaDebit,
-                    want_vat : $scope.vatPva,
+                    total_no_add : parseFloat($scope.selected_PVA.total_paid),
                     internal_bundle_no : $scope.selected_PVA.internal_bundle_no,
                     pva_child : $scope.selected_PVA_child,
                     approve_date : $scope.pvaItemDate,
