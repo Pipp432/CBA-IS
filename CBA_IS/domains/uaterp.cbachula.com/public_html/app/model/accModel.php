@@ -268,14 +268,46 @@ class accModel extends model {
     
     // CN(PV-D) Module
     public function getWSD() {
-        $sql = "SELECT * from WSD where wsd_status = 0";
+        $sql = "SELECT 
+                    WSD.wsd_no,
+                    WSD.wsd_date,
+                    WSD.wsd_time,
+                    WSD.employee_id,
+                    WSD.employee_line,
+                    WSD.invoice_no,
+                    WSD.sox_no,
+                    WSD.total_amount,
+                    WSD.vat_id,
+                    WSD.note,
+                    WSD.wsd_status,
+                    Invoice.total_sales_price as iv_total_sales_price
+                   
+
+
+                    from WSD 
+                    Left join Invoice on WSD.invoice_no = Invoice.invoice_no
+                    where wsd_status = 0";
         $statement = $this->prepare($sql);
         $statement->execute([]);
+
+        //หา total sale no vat
+        // if($value['so_total_sales_vat2'] != 0) {
+        //     $total_sales_no_vat = ((double) $value['so_total_sales_price2']) / 1.07;
+        //     $total_sales_vat = ((double) $value['so_total_sales_price2'] / 107) * 7;
+        //     $total_sales_price = (double) $value['so_total_sales_price2'];
+        // } else {
+        //     $total_sales_no_vat = (double) $value['so_total_sales_price2'];
+        //     $total_sales_vat = 0;
+        //     $total_sales_price = (double) $value['so_total_sales_price2'];
+        // }
+
+
 
         if ($statement->rowCount() > 0) {
             return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         } else return []; 
     }
+
 
     public function updateWSDCreditNote() {
         $sql = "UPDATE WSD SET 
@@ -362,22 +394,64 @@ class accModel extends model {
         
         $cn_no = $this->assignCN(input::post('company'));
 
-        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?)");
+        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no, debit)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)");
         $sql->execute([
             $cn_no,  
             json_decode(session::get('employee_detail'), true)['employee_id'],
-            input::post('wsd_no')
+            input::post('wsd_no'),
+            input::post('debit')
         ]);
 
         $sql = $this->prepare("UPDATE WSD set wsd_status=1
                                 where WSD.wsd_no =");
-        $success = $statement->execute([
-                        input::post("wsd_no")
-                        ]);
-        if($success) echo 'success';
-        else echo print_r($statement->errorInfo());
+        // $success = $statement->execute([
+        //                 input::post("wsd_no")]);
 
+        $sql->execute([
+            input::post('wsd_no')
+        ]);
+        // if($success) echo 'success';
+        // else echo print_r($statement->errorInfo());
+                    
+        // // Dr 11.1 สินค้ารับคืนและส่วนลด 41-1x10
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([
+        //     $invoice_no,
+        //     '3',
+        //     '41-1'.$invoice_no[0].'10',
+        //     (double) input::post('debit'),
+        //     0,
+        //     'CN'
+        // ]);
+
+        // // Dr 11.1 ภาษีขาย 62-1x00
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([
+        //     $invoice_no,
+        //     '3',
+        //     '62-1'.$invoice_no[0].'00',
+        //     (double) input::post('debit'),
+        //     0,
+        //     'CN'
+        // ]);
+
+        // // Cr 11.1 เงินคืนค่ารับสินค้าคืน - โครงการ X
+        // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        // $sql->execute([
+        //     $invoice_no,
+        //     '3',
+        //     '24-1'.$invoice_no[0].'20',
+        //     0,
+        //     (double) input::post('credit'),
+        //     'CN'
+        // ]);
+
+    
+        
 
         //update PVD status 
         // $sql = "UPDATE PVD SET 
@@ -1683,7 +1757,7 @@ class accModel extends model {
         // Cr เงินฝากออมทรัพย์ - โครงการ X
         $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                 values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        $sql->execute([$cpvItemsArray[0]['pv_no'], $i, '12-1'.$cpvItemsArray[0]['pv_no'][0].'10', 0, (double) $cpvItemsArray[0]['total_paid'], 'PV']);
+        $sql->execute([$cpvItemsArray[0]['pv_no'], $i, '12-1'.$cpvItemsArray[0]['pv_no'][0].'00', 0, (double) $cpvItemsArray[0]['total_paid'], 'PV']);
         
         // ============================================================================================================================================================
         // END CBA2020 ACC
@@ -1793,7 +1867,7 @@ class accModel extends model {
                                     where pv_no = ?");
                 $sql->execute([$value]);
                 $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $tot = $temp[0]["total_paid"] + $temp[0]["additional_cash"];
+                $tot = intval($temp[0]["total_paid"]) + intval($temp[0]["additional_cash"]);
                 //dr เงินรองจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 

@@ -59,9 +59,7 @@ public function show_ws_form() {
 
 public function upload_slip_pvc(){
     if(empty(uri::get(2))) {
-        $this->view->setTitle("upload slip PV-C");
         $this->view->render("fin/upload_slip_pvc","navbar");
-    
     }else if(uri::get(2)==='get_PVCs'){
         $this->positionEcho('fin', $this->model->getPVCs());
 
@@ -72,11 +70,8 @@ public function upload_slip_pvc(){
     }
 }
 public function upload_iv_pvc(){
-   
     if(empty(uri::get(2))) {
-        $this->view->setTitle("upload iv PV-C");
         $this->view->render("fin/upload_iv_pvc","navbar");
-        
     }else if(uri::get(2)==='get_PVCs'){
         $this->positionEcho('fin', $this->model->getPVCsForIV());
 
@@ -423,11 +418,9 @@ foreach ($list as $value) {
     public function pvc_status(){
         if(empty(uri::get(2))) {
             $this->requirePostition("fin");
-            $this->view->setTitle("PV-C");
             $this->view->pvcs = $this->model->getPVCStatus();
             $this->view->reReqs = $this->model->getReReqStatus();
-            $this->view->render("fin/pvc_status", "navbar"); 
-            
+            $this->view->render("fin/pvc_status"); 
     }
     }
     

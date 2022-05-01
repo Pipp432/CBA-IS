@@ -119,18 +119,14 @@ class fileModel extends model {
         return  json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
        
 	}
-    
     public function getCn($iv_no) {
-		$sql = $this->prepare("select
-                                	Invoice.invoice_no,
+		$sql = $this->prepare("SELECT
+                                	WSD.invoice_no as ex_invoice_no,
                                     Invoice.invoice_date,
                                     Invoice.file_no,
-                                    exInvoice.customer_name,
-                                    exInvoice.customer_address,
-                                    exInvoice.invoice_no as ex_invoice_no,
-                                    exInvoice.invoice_date as ex_invoice_date,
-                                    Invoice.note,
-                                    exInvoice.id_no,
+                                    Invoice.customer_name,
+                                    Invoice.customer_address,
+                                    -- exInvoice.id_no,
                                     InvoicePrinting.product_no,
                                     Product.product_name,
                                     InvoicePrinting.quantity,
@@ -145,9 +141,11 @@ class fileModel extends model {
                                     Invoice.total_sales_price as cn_total_sales_price,
                                     Invoice.sales_price_thai,
                                     WSD.wsd_no,
+                                    WSD.note,
                                     CN.cn_no,
                                     CN.cn_date,
-                                    CN.employee_id
+                                    CN.employee_id,
+                                    WSD.vat_id as id_no
                                     
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
@@ -162,7 +160,6 @@ class fileModel extends model {
         }
         return null;
 	}
-    
     public function getPVD($iv_no) {
 		$sql = $this->prepare("SELECT
                                 	Invoice.invoice_no,
