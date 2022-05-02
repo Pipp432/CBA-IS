@@ -317,7 +317,7 @@
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log('ajax.fail');
-                addModal('postFailModal', 'upload imgae', 'fail');
+                addModal('postFailModal', 'upload image', 'fail');
                 $('#postFailModal').modal('toggle');
                 $('#postFailModal').on('hide.bs.modal', function (e) {
                     location.reload();

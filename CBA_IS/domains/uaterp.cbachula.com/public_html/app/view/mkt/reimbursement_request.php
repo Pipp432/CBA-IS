@@ -341,14 +341,14 @@
                     $scope.rq_no = data['rq_no'];
                     $scope.postReReq();
                 } else {
-                    addModal('uploadFailModal', 'upload imgae', ' 1 fail');
+                    addModal('uploadFailModal', 'upload image', ' 1 fail');
                     $('#uploadFailModal').modal('toggle');
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
                 console.log(textStatus);
                 console.log(errorThrown);
-                addModal('uploadFailModal', 'upload imgae', '2 fail');
+                addModal('uploadFailModal', 'upload image', '2 fail');
                 $('#uploadFailModal').modal('toggle');
             });    
         }

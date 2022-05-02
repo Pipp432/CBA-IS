@@ -276,12 +276,12 @@
                     $scope.rq_no = data['rq_no'];
                     $scope.postRequest2();
                 } else {
-                    addModal('uploadFailModal', 'upload imgae', 'fail');
+                    addModal('uploadFailModal', 'upload image', 'fail');
                     $('#uploadFailModal').modal('toggle');
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log('ajax.fail');
-                addModal('uploadFailModal', 'upload imgae', 'fail');
+                addModal('uploadFailModal', 'upload image', 'fail');
                 $('#uploadFailModal').modal('toggle');
             });         
         }

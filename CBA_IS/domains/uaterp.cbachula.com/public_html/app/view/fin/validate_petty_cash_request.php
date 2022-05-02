@@ -138,14 +138,14 @@
                     contentType: false,
                 }).done(function (data) {
                     if (data == 'success') {
-                        addModal('succModal', 'upload imgae', 'success');
+                        addModal('succModal', 'upload image', 'success');
                         $('#succModal').modal('toggle');
                         $('#succModal').on('hide.bs.modal', function (e) {
                             location.reload();
                         });
                     } else {
                         console.log(data);
-                        addModal('uploadFailModal', 'upload imgae', 'fail' + data);
+                        addModal('uploadFailModal', 'upload image', 'fail' + data);
                         $('#uploadFailModal').modal('toggle');
                         $('#uploadFailModal').on('hide.bs.modal', function (e) {
                             location.reload();
@@ -153,7 +153,7 @@
                     }
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.log('ajax.fail');
-                    addModal('uploadFailModal', 'upload imgae', 'fail');
+                    addModal('uploadFailModal', 'upload image', 'fail');
                     $('#uploadFailModal').modal('toggle');
                     $('#uploadFailModal').on('hide.bs.modal', function (e) {
                         location.reload();

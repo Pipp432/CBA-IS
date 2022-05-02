@@ -4688,15 +4688,13 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
   
   public function uploadImgForReReq() {
     $Quotation_pic = $_FILES['quotation_pic']; 
+   
     
     
-    if(filesize($Quotation_pic['tmp_name']) > 16000) {
+    if(filesize($Quotation_pic['tmp_name']) > 16000000) {
       $success = false;
       $re->cause = 'File size too big!! Max file size is 50 kb.';
-    } else if(!@is_array(getimagesize($Quotation_pic['tmp_name']))){
-      $success = false;
-      $re->cause = 'File is not an image.';
-    } else {
+    }  else {
     $rq_no = $this->assign_re_req_no();
      
      if(isset($Quotation_pic)) {
