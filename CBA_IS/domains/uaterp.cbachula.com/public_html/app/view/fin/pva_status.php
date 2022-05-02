@@ -50,7 +50,7 @@
                 <tr ng-repeat="pva in pvas" ng-click="viewFilePVA(pva)">
                     <td>{{pva.pv_no}}</td>
                     <td>{{pva.pv_date}} {{pva.pv_time}}</td>
-                    <td>{{pva.product_names}}</td>
+                    <td class = "newLine">{{pva.product_names}}</td>
                     <td>{{pva.total_paid}}</td>
                     <td>
                         <span ng-show="pva.pv_status < 4">fin ยังไม่ upload slip</span>
@@ -109,6 +109,7 @@
     td { border-bottom: 1px solid lightgray; }
     th { border-bottom: 1px solid lightgray; text-align: left; }
     .card:hover { transform: translate(0,-4px); box-shadow: 0 4px 8px lightgrey; }
+    .newLine {white-space: pre}
 </style>
 
 <script>
