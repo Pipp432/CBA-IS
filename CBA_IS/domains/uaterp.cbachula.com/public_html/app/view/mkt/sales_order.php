@@ -83,9 +83,16 @@
 					
 					<div class="col-md-12" style = "margin-top: 10px;">
 
-                        <label for="customerDetailTextbox">ที่อยู่ลูกค้า</label>
+                        <label for="dropdownAddress">ที่อยู่ลูกค้า</label>
+                        <select class="form-control" ng-model="address" id="dropdownAddress">
 
-                        <input type="text" class="form-control" id="customerDetailTextbox" ng-model="address" disabled>
+                            
+                            <option ng-repeat ="num in numbers">{{num.address}}</option>
+
+                            
+                        </select>
+
+                        
 
                     </div>
 
@@ -532,8 +539,8 @@
 
                         $scope.customer_name = '';
 
-                    } else {
-
+                    } else {$scope.numbers = response.data
+                        console.log(response.data)
                         $scope.customer_name = response.data[0].customer_name + ' ' + response.data[0].customer_surname + ' (' + response.data[0].customer_nickname + ')';
 						$scope.address = response.data[0].address;
 

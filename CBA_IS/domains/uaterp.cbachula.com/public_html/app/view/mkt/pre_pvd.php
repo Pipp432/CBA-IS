@@ -116,20 +116,20 @@
                 $('#vatID').val() == '' || $('#note').val() == '') 
                 {$('#formValidate1').modal('toggle'); 
 			}else {
-                var confirmModal = addConfirmModal('confirmModal', 'คำร้องขอใบลดหนี้ PV-D', 'ยืนยันการส่งคำร้องขอใบลดหนี้ PV-D ', 'postRequestPVD()');
+                var confirmModal = addConfirmModal('confirmModal', 'คำร้องขอใบลดหนี้ PV-D', 'ยืนยันการส่งคำร้องขอใบลดหนี้ PV-D ', 'postRequestWSD()');
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
             }
         }
         
-        $scope.postRequestPVD = function() {
+        $scope.postRequestWSD = function() {
             
             $('#confirmModal').modal('hide');
             
             //var provinceStr = (($('#customerProvince').val() == 'กรุงเทพมหานคร') ? '' : 'จังหวัด') + $('#customerProvince').val();
             console.log($scope.sox_no);
 
-            $.post("/mkt/pre_pvd/post_requestpvd", {
+            $.post("/mkt/pre_pvd/post_requestwsd", {
                 employeeID : $('#employeeID').val(),
                 employeeLine : $('#employeeLine').val(),
                 sox_no : $scope.sox_no,

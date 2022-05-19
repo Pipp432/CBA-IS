@@ -281,12 +281,12 @@ class accModel extends model {
                     WSD.note,
                     WSD.wsd_status,
                     Invoice.total_sales_price as iv_total_sales_price
-                   
 
 
                     from WSD 
                     Left join Invoice on WSD.invoice_no = Invoice.invoice_no
-                    where wsd_status = 0";
+       
+                    where WSD.wsd_status = 0 ";
         $statement = $this->prepare($sql);
         $statement->execute([]);
 
@@ -383,37 +383,49 @@ class accModel extends model {
         }
         return '';   
     }
-    
+
+
     // CN(PV-D) Module
     public function addCn() {
-        
-        //$iv_no = $this->assignIv(input::post('file_no')); 
-        
-        // $cnItemsArray = json_decode(input::post('cnItems'), true); 
-        // $cnItemsArray = json_decode($cnItemsArray, true); 
-        
+
         $cn_no = $this->assignCN(input::post('company'));
 
-        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no, debit)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)");
-        $sql->execute([
+        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no, new_total_sales_price, diff_total_sales_price, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai)
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?)");
+        // $statement = $this->prepare($sql);
+        $success = $sql->execute([
             $cn_no,  
             json_decode(session::get('employee_detail'), true)['employee_id'],
             input::post('wsd_no'),
-            input::post('debit')
+            input::post('new_total_sales_price'),
+            input::post('diff_total_sales_price'),
+            input::post('vat_total_sales_no_vat'),
+            input::post('sum_total_sales_no_vat'),
+            input::post('new_sales_price_thai')
+        
         ]);
 
-        $sql = $this->prepare("UPDATE WSD set wsd_status=1
-                                where WSD.wsd_no =");
-        // $success = $statement->execute([
-        //                 input::post("wsd_no")]);
+        // if($success) echo 'success';
+        // else echo print_r($statement->errorInfo());
 
+
+        if($success) {
+            echo ' success(';
+            echo input::post("cn_no");
+            echo')';
+        } else {
+            echo ' failed(';
+            echo input::post("cn_no");
+            echo')';
+        }
+
+
+        $sql = $this->prepare("UPDATE WSD set wsd_status=1
+                                where WSD.wsd_no = ?");
         $sql->execute([
             input::post('wsd_no')
         ]);
-        // if($success) echo 'success';
-        // else echo print_r($statement->errorInfo());
-                    
+
         // // Dr 11.1 สินค้ารับคืนและส่วนลด 41-1x10
         // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
         //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
@@ -451,26 +463,6 @@ class accModel extends model {
         // ]);
 
     
-        
-
-        //update PVD status 
-        // $sql = "UPDATE PVD SET 
-        //     PVD_status = 1
-        // where PVD_status = 0 AND pvd_no = ?"; 
-        // $statement = $this->prepare($sql);
-        // $success = $statement->execute([
-        //     input::post("pvd_no"),
-        // ]);
-
-        if($success) {
-            echo ' success(';
-            echo input::post("cn_no");
-            echo')';
-        } else {
-            echo ' failed(';
-            echo input::post("cn_no");
-            echo')';
-        }
 
         //moved to end of pvd process also in acc ??????
 

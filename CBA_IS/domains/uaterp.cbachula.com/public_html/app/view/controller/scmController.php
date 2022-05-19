@@ -36,17 +36,6 @@ class scmController extends controller {
         }
     }
 
-    public function adjust_po() {
-        if(empty(uri::get(2))) {
-            $this->requirePostition("scm");
-            $this->view->setTitle("Adjust PO");
-            $this->view->pos = $this->model->getPosForCpo();
-            $this->view->render("scm/adjust_po", "navbar");
-        } else if (uri::get(2)==='post_cpo_items') {
-            $this->positionEcho('scm', $this->model->addCpo());
-        }
-    }
-
     public function receiving_report() {
         if(empty(uri::get(2))) {
             $this->requirePostition("scm");

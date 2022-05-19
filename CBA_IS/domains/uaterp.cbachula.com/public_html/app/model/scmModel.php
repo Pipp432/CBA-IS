@@ -168,7 +168,8 @@ class scmModel extends model {
                                 	POPrinting.product_no,
                                 	POPrinting.quantity,
                                     POPrinting.total_purchase_price,
-                                	Product.product_name
+                                	Product.product_name,
+                                    Product.purchase_price
                                 from POPrinting
                                 inner join PO on PO.po_no = POPrinting.po_no
                                 inner join Product on Product.product_no = POPrinting.product_no

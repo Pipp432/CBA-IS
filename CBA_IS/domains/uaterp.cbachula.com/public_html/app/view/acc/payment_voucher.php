@@ -21,7 +21,7 @@
                             <option value="PA">เงินรองจ่าย(PV-A)</option>
                             <option value="PB">จ่าย Supplier</option>
                             <option value="PC">ค่าใช้จ่าย(PV-C)</option>
-                            <option value="PD">PV-D คืนเงินลูกค้า</option>
+                            <option value="PD">ลดหนี้(PV-D)</option>
                         </select>
                     </div>
                     <div class="col-md-3" ng-show="selectedPaymentType == 'PA'">
@@ -205,7 +205,7 @@
                         <tr>
                             <th>เลข EX</th>
                             <th>วันที่</th>
-                            <th>ใบสำคัญสั่งจ่าย</th>
+                            <th>ใบขอเบิกค่าใช้จ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
                             <th>ผู้ขอเบิก</th>
                            
@@ -309,48 +309,52 @@
             <div class="card-body">
                 <div class="row mx-0">
                     <div class="col-md-12">
-                        <label for="filter_anything">PVD no</label>
+                        <label for="filter_anything">CN no</label>
                         <input type="text" class="form-control" id="filter_anything" ng-model="filter_anything" style="text-transform:uppercase">
                     </div>
                 </div>
                 <div class="col-md-8">
-                <h4 class="my-1" ng-show="PVDs.length != 0">รายละเอียดใบ PV-D</h4>
+                <h4 class="my-1" ng-show="PVDs.length != 0">รายละเอียดใบ CN</h4>
                 </div>
                 <table class="table table-hover my-1" ng-show="PVDs.length == 0">
                     <tr>
-                        <th>ยังไม่มีการขอใบ PVD</th>
+                        <th>ยังไม่มีการขอใบ CN</th>
                     </tr>
                 </table>
                 <table class="table table-hover my-1" ng-show="PVDs.length != 0">
                     <tr>
-                        <th class = "center_cell">PVD no</th>
+                        <th class = "center_cell">CN no</th>
                         <th class = "center_cell">employee id</th>
-                        <th class = "center_cell">employee line</th>
                         <th class = "center_cell">total_amount</th>
                         <th class = "center_cell">vat id</th>
                         <th class = "center_cell">sox no</th>
                         <th class = "center_cell">invoice id</th>
                         <th class = "center_cell">note</th>
+                        <th class = "center_cell">เอกสาร CN</th>
                     </tr>
-                    <tr ng-repeat = "PVD in PVDs | unique:'pvd_no'  | filter:{pvd_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
-                        <td class = "center_cell">{{PVD.pvd_no}}</td>
+                    <tr ng-repeat = "PVD in PVDs | unique:'cn_no'  | filter:{cn_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
+                        <td class = "center_cell">{{PVD.cn_no}}</td>
                         <td class = "center_cell">{{PVD.employee_id}}</td>
-                        <td class = "center_cell">{{PVD.employee_line}}</td>
                         <td class = "center_cell">{{PVD.total_amount}}</td>
                         <td class = "center_cell">{{PVD.vat_id}}</td>
                         <td class = "center_cell">{{PVD.sox_no}}</td>
                         <td class = "center_cell">{{PVD.invoice_no}}</td>
                         <td class = "center_cell">{{PVD.note}}</td>
+                        <td>
+                            <a href="https://uaterp.cbachula.com/file/cn/{{PVD.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
+                        </td>
                     </tr>
                     <tr ng-show = "selected_PVD.length != 0">
-                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.pvd_no}}</td>
+                        <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.cn_no}}</td>
                         <td class = "center_cell">{{selected_PVD.employee_id}}</td>
-                        <td class = "center_cell">{{selected_PVD.employee_line}}</td>
                         <td class = "center_cell">{{selected_PVD.total_amount}}</td>
                         <td class = "center_cell">{{selected_PVD.vat_id}}</td>
                         <td class = "center_cell">{{selected_PVD.sox_no}}</td>
                         <td class = "center_cell">{{selected_PVD.invoice_no}}</td>
                         <td class = "center_cell">{{selected_PVD.note}}</td>
+                        <td>
+                            <a href="https://uaterp.cbachula.com/file/cn/{{PVD.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
+                        </td>
                     </tr>
                 </table>
                 <div ng-show = "selected_PVD.length != 0">
@@ -364,31 +368,34 @@
                             <input type="checkbox" id = "checkboxPVD" ng-change = 'updatePVD()' ng-model = 'selected_PVD.editing'/> 
                     </div>    
                     <div class="row mx-0">
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             
-                            <label for="pvNameTextboxPVD">สั่งจ่าย</label>
+                            <label for="pvNameTextboxPVD">สั่งจ่ายในนาม</label>
                             <input type="text" class="form-control" id="pvNameTextboxPVD" ng-model="selected_PVD.recipent" ng-disabled="!selected_PVD.editing">
-                            <select class="form-control" ng-model="selected_PVD.company_code" ng-change="selectCompanypvd()">
-                                <option value="">สั่งจ่ายในนาม</option>
+                        </div> 
+                        <div class="col-md-2">
+                            <label for="companyPVD">โครงการ</label>
+                            <input type="text" class="form-control" id="companyPVD" ng-model="selected_PVD.company_code" ng-disabled="!selected_PVD.editing">
+                                <!-- <option value="">สั่งจ่ายในนาม</option>
                                 <option value='1'>โครงการ 1</option>
                                 <option value='2'>โครงการ 2</option>
                                 <option value='3'>โครงการ 3</option>
                                 <option value='9'>โครงการพิเศษ 1</option>
-                                <option value='8'>โครงการพิเศษ 2</option>
-                            </select>
-                        </div>    
-                        <div class="col-md-6">
+                                <option value='8'>โครงการพิเศษ 2</option> -->
+                        </div>      
+                    </div>  
+                    <div class="row mx-0">
+                        <div class="col-md-8">
                             <label for="locationPVD">ที่อยู่</label>
                             <input type="text" class="form-control" id="locationPVD" ng-model="selected_PVD.location" ng-disabled="!selected_PVD.editing">
-                        </div>   
-                    </div>  
-
+                        </div> 
+                    </div>
                     <div class="row mx-0">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="bankPVD">ธนาคาร</label>
                             <input type="text" class="form-control" id="bankPVD" ng-model="selected_PVD.bank" ng-disabled="!selected_PVD.editing">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="bankNoPVD">เลขธนาคาร</label>
                             <input type="text" class="form-control" id="bankNoPVD" ng-model="selected_PVD.bank_no" ng-disabled="!selected_PVD.editing">
                         </div>   
@@ -714,14 +721,14 @@
             if(!$scope.selected_PVD.editing) {
                 $.post("/acc/payment_voucher/update_PVD", {
                     post : true,
-                    pvd_no : $scope.selected_PVD.pvd_no,
+                    cn_no : $scope.selected_PVD.cn_no,
                     company_code : $scope.selected_PVD.company_code,
-                    recipent : $scope.selected_PVD.recipent,
+                    recipient : $scope.selected_PVD.recipient,
                     bank : $scope.selected_PVD.bank,
                     bank_no : $scope.selected_PVD.bank_no,
                     address : $scope.selected_PVD.location,     
                 }, function(data) {
-                    addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.cn_no.toUpperCase() +  data);
                     $('#pvdeditsuccessModalupdate').modal('toggle');
                 });
             }
@@ -731,10 +738,14 @@
             if(!$scope.selected_PVD.editing) {
                 $.post("/acc/payment_voucher/post_PVD", {
                     post : true,
-                    pvd_no : $scope.selected_PVD.pvd_no,
+                    cn_no : $scope.selected_PVD.cn_no,
                     company_code : $scope.selected_PVD.company_code,
+                    recipient : $scope.selected_PVD.recipient,
+                    bank : $scope.selected_PVD.bank,
+                    bank_no : $scope.selected_PVD.bank_no,
+                    address : $scope.selected_PVD.location, 
                 }, function(data) {
-                    addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.pvd_no.toUpperCase() +  data);
+                    addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.cn_no.toUpperCase() +  data);
                     $('#pvdUpdateSuccessModalupdate').modal('toggle');
                     $('#pvdUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
                         location.reload();
@@ -761,6 +772,7 @@
         //     console.log($scope.selected_PVA_child);
         //     console.log($scope.selected_PVA);
         // }
+
         $scope.dropPVA = function() {
             $scope.selected_PVA = [];
             $scope.selected_PVA_child = [];
@@ -1059,6 +1071,10 @@
             console.log($scope.totalPaid)
          
             
+        }
+
+        $scope.stopEvent = function(e){
+            e.stopPropagation();
         }
 
   	});

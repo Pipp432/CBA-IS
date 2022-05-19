@@ -661,24 +661,27 @@ class mktModel extends model {
       $final_price = $dimension_price;
     }
 
-    $final_price = $final_price;
+    $final_price = $final_price * 0.95;
 
-    if ( $bin_id == '0,0' ) {
-      $final_price += 1.45;
-    } else if ( $bin_id == '0+4' ) {
-      $final_price += 2.4;
-    } else if ( $bin_id == 'A' ) {
-      $final_price += 2.8;
+    if ( $bin_id == 'A' ) {
+      $final_price += 5.1;
     } else if ( $bin_id == '2A' ) {
-      $final_price += 3.6;
-    } else if ( $bin_id == 'B' ) {
-      $final_price += 4.6;
-    } else if ( $bin_id == '2B' ) {
       $final_price += 5.9;
-    } else if ( $bin_id == 'C' ) {
+    } else if ( $bin_id == 'B' ) {
       $final_price += 6.2;
-    } 
-  
+    } else if ( $bin_id == 'C' ) {
+      $final_price += 7.7;
+    } else if ( $bin_id == '2C' ) {
+      $final_price += 11.5;
+    } else if ( $bin_id == 'D' ) {
+      $final_price += 10.4;
+    } else if ( $bin_id == 'E' ) {
+      $final_price += 11.4;
+    } else if ( $bin_id == 'I' ) {
+      $final_price += 15.6;
+    } else if ( $bin_id == 'S' ) {
+      $final_price += 4.7;
+    }
 
     return $final_price;
 
@@ -1034,16 +1037,17 @@ class mktModel extends model {
 	  }
       return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
     } else {
-      $data = [ 'username' => '6241153926@student.chula.ac.th',
-        'api_key' => '9df6d9456992fede5095c28587c8ab32',
+      $data = [ 'username' => 'amyamita',
+        'api_key' => 'cd0f60f75255f3eb5a692dfe580d7c5a',
         'bins' => [
-          ["w"=> 8.5, "h"=> 9, "d"=> 13, "id"=> "0,0"],
-          ["w"=> 11, "h"=> 10, "d"=> 17, "id"=> "0+4"],
-          ["w"=> 14, "h"=> 6, "d"=> 20, "id"=> "A"],
-          ["w"=> 14, "h"=> 12, "d"=> 20, "id"=> "2A"],
-          ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
-          ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
-          ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
+          [ "w" => 14, "h" => 6, "d" => 20, "id" => "A" ],
+          [ "w" => 14, "h" => 12, "d" => 20, "id" => "2A" ],
+          [ "w" => 17, "h" => 9, "d" => 25, "id" => "B" ],
+          [ "w" => 20, "h" => 11, "d" => 30, "id" => "C" ],
+          [ "w" => 20, "h" => 22, "d" => 30, "id" => "2C" ],
+          [ "w" => 22, "h" => 14, "d" => 35, "id" => "D" ],
+          [ "w" => 24, "h" => 17, "d" => 40, "id" => "E" ],
+          [ "w" => 30, "h" => 22, "d" => 45, "id" => "I" ]
         ]
       ];
 
@@ -1132,21 +1136,23 @@ class mktModel extends model {
         foreach ( $bins as $bin ) {
           $latest = $bin[ 'id' ];
           if ( $bin[ 'id' ] == $bin_id ) {
-            if ( $bin_id == '0,0' ) {
-              $weight += 50;
-            } else if ( $bin_id == '0+4' ) {
-              $weight += 50;
-            } else if ( $bin_id == 'A' ) {
+            if ( $bin_id == 'A' ) {
               $weight += 80;
             } else if ( $bin_id == '2A' ) {
               $weight += 90;
             } else if ( $bin_id == 'B' ) {
               $weight += 130;
-            } else if ( $bin_id == '2B' ) {
-              $weight += 130;
             } else if ( $bin_id == 'C' ) {
               $weight += 190;
-            } 
+            } else if ( $bin_id == '2C' ) {
+              $weight += 200;
+            } else if ( $bin_id == 'D' ) {
+              $weight += 250;
+            } else if ( $bin_id == 'E' ) {
+              $weight += 310;
+            } else if ( $bin_id == 'I' ) {
+              $weight += 360;
+            }
           }
         }
 		  $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
@@ -1339,7 +1345,7 @@ class mktModel extends model {
                                 left join (select Product.product_no, StockInXiaomi.quantity_in - ifnull(outt.quan_out,0) as stockXiaomi from StockInXiaomi 
                                             left join Product on Product.product_description = StockInXiaomi.product_description
                                             left join (select StockOutXiaomi.product_no, sum(StockOutXiaomi.quantity_out) as quan_out from StockOutXiaomi where done = 0 group by StockOutXiaomi.product_no) outt on outt.product_no = Product.product_no) stockXiaomi on stockXiaomi.product_no = Product.product_no
-                                where Product.product_line = ? and Product.status = '1'" );
+                                where Product.product_line = ? and Product.status = '1' and Product.product_no not in (SELECT product_no FROM Product WHERE product_type in ('stock','order') AND (weight = 0 OR width = 0 OR length = 0 OR height = 0) and Product.product_name not like '%ส่วนลด%' and Product.product_name not like '%บัตรเงินสด%')" );
     $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
@@ -1353,6 +1359,8 @@ class mktModel extends model {
     $sono = $this->assignSo( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
     $customerAddress = '';
     $depositSox = '';
+
+  
 	
 	  
 	// Promotion Week 4 - Check Point Range
@@ -1428,7 +1436,7 @@ class mktModel extends model {
           $sql = $this->prepare( "insert into SOX (sox_no, sox_datetime, employee_id, customer_tel, address, so_sales_no_vat, so_sales_vat, so_sales_price, so_total_discount,
 											transportation_no_vat, transportation_vat, transportation_price, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, slip_uploaded, done, ird_no) 
 											values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, 0, 0, -1, '-')" );
-          $success = $sql->execute( [
+          $sql->execute( [
             $soxno,
             input::post( 'sellerNo' ),
             input::post( 'customerTel' ),
@@ -1441,12 +1449,6 @@ class mktModel extends model {
             ( double )input::post( 'totalVat' ),
             ( double )input::post( 'totalPrice' )
           ] );
-
-          // if(!$success) {
-          //   echo 'error on insert sox';
-          //   echo 'เห็นตรงนี้ส่งให้ is ด่วน!!!';
-          //   print_r($sql->errorInfo()) ;
-          // }
 
           $sql = $this->prepare( "insert into SOXPrinting (sox_no, so_no, product_line, total_sales_no_vat, total_sales_vat, total_sales_price) values (?, ?, ?, ?, ?, ?)" );
           $sql->execute( [
@@ -1551,7 +1553,7 @@ class mktModel extends model {
           $sql = $this->prepare( "insert into SOX (sox_no, sox_datetime, employee_id, customer_tel, address, so_sales_no_vat, so_sales_vat, so_sales_price, so_total_discount,
                                             transportation_no_vat, transportation_vat, transportation_price, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, slip_uploaded, done, ird_no) 
                                             values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?, ?, 0, 0, -1, '-')" );
-          $success = $sql->execute( [
+          $sql->execute( [
             $sdxno,
             input::post( 'sellerNo' ),
             input::post( 'customerTel' ),
@@ -1563,12 +1565,6 @@ class mktModel extends model {
             ( double )$value[ 'sales_vat' ] * $value[ 'quantity' ],
             ( double )$value[ 'sales_price' ] * $value[ 'quantity' ]
           ] );
-
-          // if(!$success) {
-          //   echo 'error on insert sdx';
-          //   echo 'เห็นตรงนี้ส่งให้ is ด่วน!!!';
-          //   print_r($sql->errorInfo()) ;
-          // }
 
           $sql = $this->prepare( "insert into SOXPrinting (sox_no, so_no, product_line, total_sales_no_vat, total_sales_vat, total_sales_price) values (?, ?, ?, ?, ?, ?)" );
           $sql->execute( [
@@ -1656,7 +1652,7 @@ class mktModel extends model {
     } else {
 
       echo 'เกิดข้อผิดพลาด รบกวนออก SO ใหม่';
-      
+
     }
 
   }
@@ -1704,6 +1700,18 @@ class mktModel extends model {
       }
     }
     return 'SOX-' . $runningNo;
+  }
+
+  // cancel_Sox Module
+  public function getSOX() {
+    $sql = $this->prepare( "SELECT SOXPrinting.sox_no, SOXPrinting.so_no ,SOX.customer_tel, SOX.done, SOX.slip_uploaded
+                                    FROM SOXPrinting inner JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+                                    where SOXPrinting.so_no = ? and SOX.done = -1 and SOX.slip_uploaded = 0 " );
+    $sql->execute( [ input::postAngular( 'so_no' ) ] );
+    if ( $sql->rowCount() > 0 ) {
+      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    }
+    return json_encode( [] );
   }
 
   // =====================================================================================================================================================================================
@@ -1879,7 +1887,7 @@ class mktModel extends model {
 							inner join SO on POPrinting.so_no=SO.so_no
                             inner join Supplier on Supplier.supplier_no = PO.supplier_no and Supplier.product_line = PO.product_line
                             left join SOXPrinting on SO.so_no=SOXPrinting.so_no
-                            where PO.product_type = 'Install' and POPrinting.received = 2 and POPrinting.cancelled = 0 and PO.approved_employee = ?" );
+                            where PO.product_type = 'Install' and POPrinting.received = 0 and POPrinting.cancelled = 0 and PO.approved_employee = ?" );
     $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
@@ -4539,396 +4547,4 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 		$sql->execute([]);
 		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
 	}
-
-
-
-  public function assignInternalPVANo() {
-    $rqPrefix = 'EXA-';
-    $sql = $this->prepare( "select ifnull(max(internal_pva_no),0) as max from PVA where internal_pva_no like ?" );
-    $sql->execute( [ 'EXA-%' ] );
-    $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
-    $runningNo = '';
-    if ( $maxRqNo == '0' ) {
-        $runningNo = '00001';
-    } else {
-        $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
-        if ( strlen( $latestRunningNo ) == 5 ) {
-            $runningNo = $latestRunningNo;
-        } else {
-            for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-                $runningNo .= '0';
-            }
-            $runningNo .= $latestRunningNo;
-        }
-    }
-    return $rqPrefix . $runningNo;
-  }
-
-  public function addRequestPettyMoney() { 
-
-    $internal_pva_no = $this->assignInternalPVANo();
-
-    $ivrc_file_name = $_FILES['invoice/receipt']['name'];
-    $ivrc_file_data = base64_encode(file_get_contents($_FILES['invoice/receipt']['tmp_name']));
-    $ivrc_file_type = $_FILES['invoice/receipt']['type'];
-
-    $slip_file_name = $_FILES['slip']['name'];
-    $slip_file_data = base64_encode(file_get_contents($_FILES['slip']['tmp_name']));
-    $slip_file_type = $_FILES['slip']['type'];
-
-    $sql = $this->prepare("INSERT INTO PVA (internal_pva_no, pv_date, pv_time, employee_id, employee_name, line_id, total_paid, product_names,bank_name,bank_no,ivrc_name, ivrc_type, ivrc_data, slip_name, slip_type, slip_data, pv_status	) 
-                            VALUE (?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?,?,?,0)");
-    $success = $sql->execute([
-      $internal_pva_no,
-      input::post( 'employee_id' ),
-      input::post( 'employee_name' ),
-      input::post( 'lineId' ),
-      ( double )input::post( 'cost' ),
-      input::post( 'product_name' ),
-      input::post( 'bank_name' ),
-      input::post( 'bank_no' ),
-      $ivrc_file_name,
-      $ivrc_file_type,
-      $ivrc_file_data,
-      $slip_file_name,
-      $slip_file_type,
-      $slip_file_data,
-    ]);
-    
-    if ($success) {
-      echo 'success';
-    } else {
-      echo $internal_pva_no  . ' error'.'<br>';
-      print_r($sql->errorInfo());
-    }
-
-  }
-
-  public function assign_pvc_no() {
-
-    $rqPrefix = 'PVC-';
-    $sql = $this->prepare( "select ifnull(max(PVC_No),0) as max from PVC_Demo where PVC_No like ?" );
-    $sql->execute( [ 'PVC-%' ] );
-    $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
-    $runningNo = '';
-    if ( $maxRqNo == '0' ) {
-      $runningNo = '00001';
-    } else {
-      $latestRunningNo = ( int )substr( $maxRqNo, 4 ) + 1;
-      if ( strlen( $latestRunningNo ) == 5 ) {
-        $runningNo = $latestRunningNo;
-      } else {
-        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-          $runningNo .= '0';
-        }
-        $runningNo .= $latestRunningNo;
-      }
-    }
-    return $rqPrefix . $runningNo;
-  }
-  
-  public function assign_re_req_no() {
-
-    $rqPrefix = 'ReReq-';
-    $sql = $this->prepare(  "select ifnull(max(re_req_no),0) as max from Reimbursement_Request where re_req_no like 'REREQ-%'" );
-    $sql->execute();
-    $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
-  
-    $runningNo = '';
-    if ( $maxRqNo == '0' ) {
-      $runningNo = '00001';
-    } else {
-      $latestRunningNo = ( int )substr( $maxRqNo, 6 ) + 1;
-     
-      if ( strlen( $latestRunningNo ) == 5 ) {
-        $runningNo = $latestRunningNo;
-      } else {
-        for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-          $runningNo .= '0';
-        }
-        $runningNo .= $latestRunningNo;
-      }
-    }
-    
-    return $rqPrefix . $runningNo;
-  }
-  public function addReReqDetails(){
-    
-    $sql = $this->prepare("update Reimbursement_Request SET withdraw_date=?, withdraw_name=?, employee_id=?, 
-    line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? ,authorizer_name=?, 
-    details=? WHERE re_req_no  = ?");
-    $success = $sql->execute([
-      
-      input::post( 'withdrawDate' ),
-      input::post( 'withdrawName' ),
-      input::post( 'employeeId' ),
-      input::post( 'employeeLine' ),
-      input::post( 'bankName' ),
-      input::post( 'taxNumber' ),
-      input::post( 'bankBookName' ),
-      input::post( 'bankBookNumber' ),
-      input::post( 'authorizerName' ),
-      input::post( 'table' ),
-      input::post( 're_req_no' )
-      
-      
-    ]);
-    if ($success){ echo ' help สำเร็จ';
-    echo input::post( 're_req_no ' ).'<br>';
-      print_r($sql->errorInfo());}
-    else {
-     
-      echo input::post( 're_req_no ' ).'<br>';
-      print_r($sql->errorInfo());
-    }
-    
-    
-  }
-  
-  
-  public function uploadImgForReReq() {
-    $Quotation_pic = $_FILES['quotation_pic']; 
-   
-    
-    
-    if(filesize($Quotation_pic['tmp_name']) > 16000000) {
-      $success = false;
-      $re->cause = 'File size too big!! Max file size is 50 kb.';
-    }  else {
-    $rq_no = $this->assign_re_req_no();
-     
-     if(isset($Quotation_pic)) {
-       $file1 = file_get_contents($Quotation_pic['tmp_name']);
-       $file1 = base64_encode($file1);
-       $file1Name = $Quotation_pic['name'];
-       $file1Type = $Quotation_pic['type'];
-     }
-      
-  
-      $sql = $this->prepare("insert into Reimbursement_Request (re_req_no, quotation_name, quotation_type, quotation_data)
-                               values( ?, ?, ?, ?)" );
-      $success = $sql->execute([
-         $rq_no,
-         $file1Name,
-         $file1Type,
-         $file1
-       
-      ]);
-      
-  
-      $re->rq_no = $rq_no;
-    }
-    if ($success) {
-      $re->success = true;
-      echo json_encode($re);
-    } else {
-      $re->success = false;
-      $re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
-      echo json_encode($re);
-    }
-   
-  }
-
-public function getStockPo() {
-  $sql = $this->prepare( "SELECT
-  PO.po_no,
-  PO.po_date,
-  PO.supplier_no,
-  Supplier.supplier_name,
-  PO.product_type,
-  PO.total_purchase_no_vat,
-  PO.total_purchase_vat,
-  PO.total_purchase_price,
-  PO.approved_employee,
-  PO.product_line,
-  POPrinting.quantity,
-  POPrinting.so_no,
-  POPrinting.purchase_no_vat AS poprinting_purchase_no_vat,
-  POPrinting.purchase_vat AS poprinting_purchase_vat,
-  POPrinting.purchase_price AS poprinting_purchase_price,
-  POPrinting.total_purchase_price AS poprinting_total_purchase_price,
-  Product.product_no,
-  Product.product_name,
-  Invoice.commission,
-  Invoice.total_sales_no_vat,
-  Invoice.total_sales_vat,
-  Invoice.total_sales_price
-FROM
-  PO
-INNER JOIN POPrinting ON POPrinting.po_no = PO.po_no
-LEFT JOIN Product ON Product.product_no = POPrinting.product_no
-LEFT JOIN Invoice ON Invoice.file_no = POPrinting.so_no
-INNER JOIN Supplier ON Supplier.supplier_no = PO.supplier_no AND Supplier.product_line = PO.product_line
-WHERE
-(PO.product_type = 'Stock' OR PO.product_type = 'install') AND POPrinting.received = 0 AND POPrinting.cancelled = 0 AND PO.approved_employee = ?" );
-  $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
-  if ( $sql->rowCount() > 0 ) {
-    return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
-  }
-  return json_encode( [] );
-}
-
-public function confirmPO() {
-
-  $ciItemsArray = json_decode( input::post( 'ciItems' ), true );
-  $ciItemsArray = json_decode( $ciItemsArray, true );
-
-  $poList = array();
-  //echo print_r($ciItemsArray);
-  foreach ( $ciItemsArray as $value ) {
-
-    if ( array_key_exists( $value[ 'po_no' ], $poList ) ) {
-
-    } else {
-
-      // $poList += [ $value[ 'po_no' ] => 'ha' ];
-
-      $sql = $this->prepare( "update PO set received = 2 where po_no = ?");
-      $success1 = $sql->execute([$value[ 'po_no' ]]);
-      //echo $value[ 'po_no' ];
-      //echo print_r($sql->errorInfo());
-      $sql = $this->prepare( "update POPrinting set received = 2 where po_no = ?");
-      $success2 = $sql->execute([$value[ 'po_no' ]]);
-      //echo print_r($sql->errorInfo());
-    }
-  }
-
-  //if($sucess1 && $success2) {
-    echo $cino . ' (' . $value[ 'po_no' ] . ') ';
-  // } else {
-  //   echo $success1;
-  //   echo '                ';
-  //   echo $success2;
-  //   echo 'fail';
-  // }
-}
-public function addPVC(){
-    
-  $sql = $this->prepare("update  PVC_Demo SET Withdraw_Date=?, Withdraw_Name=?, Employee_ID=?, 
-  Employee_Line=?, Bank_Name=?, Tax_Number=?, Bank_Book_Name=?, Bank_Book_Number=? ,Authorize_Name=?, 
-  Table_Of_Details=? WHERE PVC_No = ?");
-  $success = $sql->execute([
-    
-    input::post( 'withdrawDate' ),
-    input::post( 'withdrawName' ),
-    input::post( 'employeeId' ),
-    input::post( 'employeeLine' ),
-    input::post( 'bankName' ),
-    input::post( 'taxNumber' ),
-    input::post( 'bankBookName' ),
-    input::post( 'bankNumber' ),
-    input::post( 'authorizerName' ),
-    input::post( 'table' ),
-    input::post( 'PVC_No' )
-    
-    
-  ]);
-  if ($success){ echo ' help สำเร็จ';
-  echo input::post( 'PVC_No' ).'<br>';
-    print_r($sql->errorInfo());}
-  else {
-       ' error'.'<br>';
-    echo input::post( 'PVC_No' ).'<br>';
-    print_r($sql->errorInfo());
-  }
-  
-}
-
-
-public function uploadImgForPVC() {
-  $Quotation_pic = $_FILES['Quotation_pic'];
-  if(filesize($Quotation_pic['tmp_name']) > 50000) {
-    $success = false;
-    $re->cause = 'File size too big!! Max file size is 50 kb.';
-  } else if(!@is_array(getimagesize($Quotation_pic['tmp_name']))){
-    $success = false;
-    $re->cause = 'File is not an image.';
-  } else {
-   $rq_no = $this->assign_pvc_no();
-   
-   if(isset($Quotation_pic)) {
-     $file1 = file_get_contents($Quotation_pic['tmp_name']);
-     $file1 = base64_encode($file1);
-     $file1Name = $Quotation_pic['name'];
-     $file1Type = $Quotation_pic['type'];
-   }
-    
-
-    $sql = $this->prepare("insert into PVC_Demo (PVC_No, quotation_name, quotation_type, quotation_image)
-                             values( ?, ?, ?, ?)" );
-    $success = $sql->execute([
-       $rq_no,
-       $file1Name,
-       $file1Type,
-       $file1
-     
-    ]);
-
-    $re->rq_no = $rq_no;
-  }
-  if ($success) {
-    $re->success = true;
-    echo json_encode($re);
-  } else {
-    $re->success = false;
-    $re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
-    echo json_encode($re);
-  }
-}
-
-
-public function requestWSD(){
-  $sql = $this->prepare("SELECT
-                          Invoice.invoice_no
-                          FROM
-                              SOX
-                          LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
-                          LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
-                          where SOX.sox_no = ?
-                        ");
-  $sql->execute([input::post('sox_no')]);
-  if ($sql->rowCount() > 0) {             
-    $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no'];         
-  }
-
-  $wsdno = $this->assignWSD( ); 
-  $sql = $this->prepare("INSERT into WSD(wsd_no, wsd_date, wsd_time, employee_id, employee_line, total_amount, vat_id, sox_no, invoice_no, note, wsd_status)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0)");
-  $sql->execute([
-    $wsdno,  
-    input::post('employeeID'),
-    input::post('employeeLine'),
-    input::post('totalAmount'),
-    input::post('vatID'),
-    input::post('sox_no'),  
-    $iv_no,
-    input::post('note')
-  ]);
-}
-
-/////////pvd/////////
-private function assignWSD() {
-  $wsdPrefix = 'WSD-';
-  $sql = $this->prepare( "select ifnull(max(wsd_no),0) as max from WSD where wsd_no like ?" );
-  $sql->execute( [ 'WSD-%' ] );
-  $maxwsdNo = $sql->fetchAll()[ 0 ][ 'max' ];
-  $runningNo = '';
-  if ( $maxwsdNo == '0' ) {
-    $runningNo = '00001';
-  } else {
-    $latestRunningNo = ( int )substr( $maxwsdNo, 4 ) + 1;
-    if ( strlen( $latestRunningNo ) == 5 ) {
-      $runningNo = $latestRunningNo;
-    } else {
-      for ( $x = 1; $x <= 5 - strlen( $latestRunningNo ); $x++ ) {
-        $runningNo .= '0';
-      }
-      $runningNo .= $latestRunningNo;
-    }
-  }
-  return $wsdPrefix . $runningNo;
-}
-
-  
-
 }

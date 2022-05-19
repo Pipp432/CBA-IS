@@ -16,10 +16,10 @@
         <!-- <script>addModuleLink('finRow', '/fin/validate_petty_cash_request', 'check-circle-o', 'โอนใบเบิกเงินรองจ่าย');</script> -->
         <!-- <script>addModuleLink('finRow', '/fin/create_pva', 'check-circle-o', 'ทำใบขอเบิกเงินรองจ่าย (PV-A)');</script> -->
         <script>addModuleLink('finRow', '/fin/pva_fin_hub', 'file-text-o', 'PVA');</script>
-        <script>addModuleLink('finRow', '/fin/pvd_fin_hub', 'file-text-o', 'PVD');</script>
-        <script>addModuleLink('finRow', '/fin/upload_slip_pvc', 'cloud-download', 'อัพโหลด slip PVC');</script>
-        <!--<script>addModuleLink('finRow', '/fin/upslip_pvd', 'cloud-download', 'อัพโหลด slip PVD');</script>-->
-        <script>addModuleLink('finRow', '/fin/upload_iv_pvc', 'cloud-download', 'อัพโหลด IV Sub สำหรับ ใบขอเบิกค่าใช้จ่าย');</script>
+        <!-- <script>addModuleLink('finRow', '/fin/pvd_fin_hub', 'file-text-o', 'PVD');</script> -->
+        <script>addModuleLink('finRow', '/fin/upload_slip_pvc', 'cloud-download', 'อัปโหลด slip PVC');</script>
+        <script>addModuleLink('finRow', '/fin/upslip_pvd', 'cloud-download', 'อัปโหลด slip PVD');</script>
+        <script>addModuleLink('finRow', '/fin/upload_iv_pvc', 'cloud-download', 'อัปโหลด IV Sub สำหรับ ใบขอเบิกค่าใช้จ่าย');</script>
 		<!-- <script>addModuleLink('finRow', '/is/thelastday', 'heart', 'The Last Day');</script> -->
         <script>addModuleLink('finRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>
     </div>
