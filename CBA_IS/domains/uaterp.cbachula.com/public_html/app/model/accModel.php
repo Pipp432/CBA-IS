@@ -947,10 +947,10 @@ class accModel extends model {
                 //echo print_r($sql->errorInfo());
                 
                 // ============================================================================================================================================================
-                // NEW CBA2020 ACC
-                
-                if($value['type'] == 'RR' || $value['type'] == 'CI') {
-                    //8.กระบวนการชำระเงินแก่ supplier (สินค้า Install) 
+                // NEW CBA2022 ACC
+                //8.กระบวนการชำระเงินแก่ supplier (สินค้า Install) 
+                //ACC ได้รับ Tax Invoice จาก Supplier
+                if($value['type'] == 'RR' || $value['type'] == 'CI') { 
                     // insert AccountDetail sequence 8
                     // Dr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
@@ -965,16 +965,16 @@ class accModel extends model {
                     
                     // insert AccountDetail sequence 10
                     // Dr ค่าขนส่งเมื่อซื้อ-โครงการ X (ถ้ามี) (51-2X00)
-                    //$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                    //values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    //$sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '51-2'.$value['ci_no'][0].'00', (double) $value['??'], 0, 'CIV']);
+                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                    values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '51-2'.$value['ci_no'][0].'00', (double) $value['??'], 0, 'CIV']);
 
-                    // insert AccountDetail sequence 10
+                    // insert AccountDetail sequence 11
                     // Cr เจ้าหนี้การค้า - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
-                //(กลับมาดู)
+                    $sql->execute([$value['ci_no'], '11', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
+                
                 } else if ($value['type'] == 'RE') {
                     
                     // insert AccountDetail sequence 8
@@ -1144,27 +1144,28 @@ class accModel extends model {
             //                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
             //$sql->execute([$pvno, 2, '12-1300', 0, (double) $pvItem['total_paid'], 'PV']);
             //CBA2022
+            //กลับมาดู2022
             // insert AccountDetail sequence 1
             // Dr ค่าใช้จ่าย
-			if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
-				$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-									values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-				$sql->execute([$pvno, 1, $pvItem['debit'], (double) $pvItem['total_paid'], 0, 'PV']);
-			}
+			//if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
+			//	$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+			//						values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+			//	$sql->execute([$pvno, 1, $pvItem['debit'], (double) $pvItem['total_paid'], 0, 'PV']);
+			//}
             
 			// insert AccountDetail sequence 2
 			// Dr ภาษีซื้อ - โครงการ x (ถ้ามี)
-			if ($pvItem["vat_check"]=='1'){
-				$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-									values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-				$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', (double) $pvItem['total_paid'], 0, 'PV']);
-			}
+			//if ($pvItem["vat_check"]=='1'){
+			//	$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+			//						values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+			//	$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', (double) $pvItem['total_paid'], 0, 'PV']);
+			//}
 
             // insert AccountDetail sequence 5
             // Cr เงินรองจ่าย - โครงการ x
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$pvno, 5, '11-1'.$pvno[0].'10', 0, (double) $pvItem['total_paid'], 'PV']);
+           // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+           //                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+           // $sql->execute([$pvno, 5, '11-1'.$pvno[0].'10', 0, (double) $pvItem['total_paid'], 'PV']);
 
         }
         
@@ -1239,13 +1240,6 @@ class accModel extends model {
         }
         if($success) {
 
-            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $success = $success && $sql->execute([$pv_no, 1, "11-1310", 0, (double) ($_POST["total_no_add"]), 'PV']);
-            if(!$success){
-                print_r($sql->errorInfo());
-            }
-
             if($success) {
                 foreach($pva_childs as $pva_child) {
                     // Dr เงินรองจ่าย - โครงการ 3
@@ -1262,16 +1256,16 @@ class accModel extends model {
                         if(!empty($pva_child["debit"])){ 
                             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"] *100/107), 0, 'PV']);
+                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], '1', $pva_child["debit"], (double) ($pva_child["total_paid"] *100/107), 0, 'PVA']);
                             if(!$success){
                                 print_r($sql->errorInfo());
                                 break;
                             }
                         }
-
+                        
                         $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $success = $success && $sql->execute([$pva_child["internal_pva_no"], 2, "61-1300", (double) ($pva_child["total_paid"] *7/107), 0, 'PV']);
+                        $success = $success && $sql->execute([$pva_child["internal_pva_no"], '2', "61-1300", (double) ($pva_child["total_paid"] *7/107), 0, 'PVA']);
                         if(!$success){
                             print_r($sql->errorInfo());
                             break;
@@ -1282,7 +1276,7 @@ class accModel extends model {
                         if(!empty($pva_child["debit"])){ 
                             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PV']);
+                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], '1', $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PVA']);
                             if(!$success){
                                 print_r($sql->errorInfo());
                                 break;
@@ -1290,6 +1284,13 @@ class accModel extends model {
                         }
                     }
                 }
+            }
+            // Cr เงินรองจ่าย - โครงการ 3 
+            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            $success = $success && $sql->execute([$pv_no, '3', "11-1310", 0, (double) ($_POST["total_no_add"]), 'PVA']);
+            if(!$success){
+                print_r($sql->errorInfo());
             }
         }
         if($success) {
@@ -1462,18 +1463,17 @@ class accModel extends model {
             ]);
             
             $i++;
-            //8.2 ACC ตรวจสอบหลักฐานและยืนยันว่าได้รับ CR จาก supplier (กด Confirm payment voucher : PV-B) 
-
+            //กระบวนการชำระเงินแก่ supplier  (กด Confirm payment voucher : PV-B) 
             // insert AccountDetail sequence 3
             // // Dr เจ้าหนี้การค้า - Supplier XXX
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$value['ci_no'], '3', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'],0, 'PVB']);
+            $sql->execute([$value['ci_no'], 1 , $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'],0, 'PVB']);
 
             // Cr เงินฝากออมทรัพย์ - โครงการ X
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                  values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$iv_no, '4', '12-1'.$iv_no[0].'00', 0, (double) input::post('diff_total_sales_price'), 'PVB']);
+            $sql->execute([$iv_no, 2 , '12-1'.$iv_no[0].'00', 0, (double) $value['confirm_total'], 'PVB']);
 
             // insert AccountDetail sequence 12
             // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
@@ -1652,41 +1652,40 @@ class accModel extends model {
         //     $sql->execute([$pvno, $pvItem['rr_no']]);
             
         //     $i++;
-
-        //     // insert AccountDetail sequence 1
-        //     // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
-        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        //     $sql->execute([$pvno, 1, '12-1'.$pvno[0].'10', (double) $pvItem['total_paid'], 0, 'PV']);
-
-        //     // insert AccountDetail sequence 2
-        //     // Cr เงินฝากออมทรัพย์ - โครงการ x
-        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        //     $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PV']);
             
         //     // insert AccountDetail sequence 3
         //     // Dr ค่าใช้จ่าย 
-		// 	if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
-		// 		$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-		// 							values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-		// 		$sql->execute([$pvno, 3, $pvItem['debit'], (double) $pvItem['total_paid']/1.07, 0, 'PV']);
-		// 	}
+		if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
+			$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+								values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+			$sql->execute([$pvno, 1, $pvItem['debit'], (double) $pvItem['total_paid']/1.07, 0, 'PVC']);
+		}
             
         //     // insert AccountDetail sequence 4
         //     // Dr ภาษีซื้อ - โครงการ X
-		// 	if ($pvItem["vat_check"]=='1'){
-		// 		$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-		// 							values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-		// 		$sql->execute([$pvno, 4, '61-1'.$pvno[0].'00', ((double) $pvItem['total_paid'])*7/107, 0, 'PV']);
-		// 	}
+		if ($pvItem["vat_check"]=='1'){
+			$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+								values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+			$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', ((double) $pvItem['total_paid'])*7/107, 0, 'PVC']);
+		}
 
         //     // insert AccountDetail sequence 5
         //     // Cr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
-        //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-        //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-        //     $sql->execute([$pvno, 5, '12-1'.$pvno[0].'10', 0, (double) $pvItem['total_paid'], 'PV']);
+            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            $sql->execute([$pvno, 3, '23-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PVC']);
             
+        // insert AccountDetail sequence 1
+        //     // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
+             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                 values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+             $sql->execute([$pvno, 1, '23-1'.$pvno[0].'00', (double) $pvItem['total_paid'], 0, 'PVC']);
+
+        //     // insert AccountDetail sequence 2
+        //     // Cr เงินฝากออมทรัพย์ - โครงการ x
+             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                 values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+             $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PVC']);
             
         // }
         
@@ -1919,7 +1918,7 @@ class accModel extends model {
                 '24-1'.$value[0].'20',
                 (double) input::post('sum_total_sales_no_vat'),
                 0,
-                'PD'
+                'PVD'
             ]);
 
             //sequence 2 PD
@@ -1932,7 +1931,7 @@ class accModel extends model {
                 '12-1'.$value[0].'00',
                 0,
                 (double) input::post('sum_total_sales_no_vat'),
-                'PD'
+                'PVD'
             ]);
 
             //sequence 3 PD
@@ -1945,7 +1944,7 @@ class accModel extends model {
                 '22-1'.$value[0].'00',
                 (double) input::post('diff_total_sales_price'),
                 0,
-                'PD'
+                'PVD'
             ]);
 
              //sequence 4 PD
@@ -1958,7 +1957,7 @@ class accModel extends model {
                 '52-1'.$value[0].'00',
                 0,
                 (double) input::post('diff_total_sales_price'),
-                'PD'
+                'PVD'
             ]);
         }
 
@@ -2050,11 +2049,11 @@ class accModel extends model {
                 //dr เงินรองจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['pv_no'], '2', '11-1310', (double) $tot, 0, 'PV']);
+                $sql->execute([$value['pv_no'], 4, '11-1'.$pvno[0].'10', (double) $tot, 0, 'PV']);
                 //cr เงินฝากออมทรัพย์
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['pv_no'], '3', '12-1300', 0, (double) $tot, 'PV']);
+                $sql->execute([$value['pv_no'], 5, '12-1300', 0, (double) $tot, 'PV']);
 
 
                 $sql = $this->prepare("UPDATE PVA SET pv_status = 5 WHERE pv_no = ?");
@@ -2109,6 +2108,16 @@ class accModel extends model {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return null;
+        //3.กระบวนการซื้อสินค้าประเภท Stock และ Order
+                //DR.ซื้อ - โครงการ X 
+        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([$iv_no, '1', '51-1'.$rr_no[0].'00', (double) $total_purchase_price, 0, 'RR']);
+        
+        // Cr .เจ้าหนี้การค้ารอ Tax Invoice - ชื่อ Supplier
+        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([$iv_no, '2', '21-2'.$value['supplier_no'], 0, (double) $total_purchase_price, 'RR']);
     }   
 	
 	// Search PO RR CI 
@@ -2504,9 +2513,12 @@ class accModel extends model {
                 ]);
                 
                 // ============================================================================================================================================================
-                // NEW CBA2020 ACC
-                
+                //CBA 2022
+               
+                // NEW CBA2022 ACC
                 // insert AccountDetail sequence 1
+                //กระบวนการขายสินค้า Stock และ Order 
+                //เมื่อลูกค้าชำระเงิน ( ACC กดยืนยัน Tax invoice) sequence 1-3 IV
                 // Dr เงินฝากออมทรัพย์
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
@@ -2516,7 +2528,7 @@ class accModel extends model {
                 // Cr ขาย - โครงการ X
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$iv_no, '2', '41-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
+                $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
                 
                 // insert AccountDetail sequence 3
                 // Cr ภาษีขาย - โครงการ X
@@ -2524,18 +2536,37 @@ class accModel extends model {
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                 $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
                 
-                // insert AccountDetail sequence 4 
+                // Dr เงินฝากออมทรัพย์
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '4', '24-1'.$iv_no[0].'00', (double) $total_sales_price, 0, 'IV']);
+                
+                // insert AccountDetail sequence 2
+                // Cr ขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '5', '41-1'.$iv_no[0].'00', 0, (double) $total_sales_price, 'IV']);
+                
                 // Dr ค่า Commission
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['cs_no'], '4', '52-1000', $SumCommission, 0, 'CS']);
+                $sql->execute([$value['cs_no'], '6', '52-1000', $SumCommission, 0, 'CS']);
                 
-                // insert AccountDetail sequence 5
+            
                 // Cr ค่า Commission ค้างจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['cs_no'], '5', '22-0000', 0, $SumCommission, 'CS']);
-                
+                $sql->execute([$value['cs_no'], '7', '22-1'.$iv_no[0].'00', 0, $SumCommission, 'CS']);
+
+                //FIN โอนเงินจาก Pool กลางเข้าออมทรัพย์ (กด TR)
+                //Dr. เงินฝากออมทรัพย์ – โครงการ X 
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '1', '12-1'.$iv_no[0].'00', (double) $total_sales_price, 0, 'CR']);
+                //Cr.  เงินฝากออมทรัพย์
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '1', '12-0000',0, (double) $total_sales_price, 'CR']);
                 // ============================================================================================================================================================
                 // END CBA2020 ACC
                 

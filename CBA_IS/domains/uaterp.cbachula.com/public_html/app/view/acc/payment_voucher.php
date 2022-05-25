@@ -94,18 +94,32 @@
                     </div>
                 </div>
                 <div class="row mx-0 mt-2">
+                   
                     <div class="col-md-6">
-                        <label for="pvItemDetail">รายละเอียด</label>
-                        <input type="text" class="form-control" id="pvItemDetail" ng-model="pvItemDetail">
+                        <label for="pvItemDebit">ที่อยู่</label>
+                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="pvItemDebit">สั่งจ่าย</label>
+                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="pvItemDebit">จ่ายออกจาก</label>
+                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
                     </div>
                     <div class="col-md-2">
                         <label for="pvItemDebit">เดบิต</label>
                         <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
                     </div>
+                    <div class="col-md-8">
+                        <label for="pvItemDetail">รายละเอียด</label>
+                        <input type="text" class="form-control" id="pvItemDetail" ng-model="pvItemDetail">
+                    </div>
                     <div class="col-md-4">
                         <label for="addPvItemButton" style="color:white;">.</label>
                         <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem()">ยืนยันรายการ</button>
                     </div>
+                    
                     
                 </div>
 				<div class="row mx-0 mt-2" ng-show="selectedPaymentType == 'PA'">
@@ -205,19 +219,16 @@
                         <tr>
                             <th>เลข EX</th>
                             <th>วันที่อนุมัติ</th>
-                            <th>ใบขอเบิกค่าใช้จ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
                             <th>ผู้ขอเบิก</th>
                            
                         </tr>
                         <!-- <tr ng-repeat="pvc in PVCs | filter:{form_no:pvItemRR} |filter:{ws_type:'3'}" ng-click="getWsDetail(ws)"> -->
                         <tr ng-repeat="re_req in ReReqs track by $index" ng-click="getReReqDetail(re_req,$index)">
-                            <td style="text-align: center;">{{re_req.ex_no}}</td>
-                            <td style="text-align: center;">{{re_req.withdraw_date}}</td>
+                            <td style="text-align: center;"><a href="/file/re_req/{{re_req.re_req_no}} ">{{re_req.ex_no}}</a></td>
+                            <td style="text-align: center;">{{re_req.authorize_date}}</td>
                             <!-- <td><a href="/acc/payment_voucher/get_PVCs_form/{{pvc.PVC_No}}" target="_blank">{{pvc.PVC_No}}</a></td> -->
-                            <td style="text-align: center;">
-                            <a href="/file/re_req/{{re_req.re_req_no}}" target="_blank">{{re_req.re_req_no}}</a>
-                            </td>
+                            
                             <td style="text-align: center;">
                                 <a href="/acc/payment_voucher/get_quotation/{{re_req.re_req_no}}" target="_blank">{{re_req.quotation_name}}</a><br>  
                             </td>
@@ -1040,8 +1051,10 @@
         }
 
         $scope.getReReqDetail = function(re_req,index) {
+            $("#vatCheck").prop('checked',true);
            
             $("#pvItemRR").prop("disabled", true);
+           
             $scope.pvItemRR = re_req.ex_no;
             console.log($scope.pvItemRR);
             $scope.pvDetails = JSON.parse($scope.ReReqs[index]["details"])
@@ -1049,6 +1062,12 @@
             $scope.pvItems = $scope.ReReqs[index]
             console.log( $scope.pvItems);
             $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
+            var date = $scope.pvItems["authorize_date"];
+            console.log(date)
+            
+            const input_date = document.getElementById("pvItemDate");
+            console.log(input_date.value);
+
             
             ($scope.ReReqs).forEach(data=>{
                 if(data.ex_no===$scope.pvItemRR){
@@ -1057,7 +1076,7 @@
             }
             $scope.pvItemDebit = $scope.pvDetails[0].debit;
             $scope.pvItemDetail = $scope.pvDetails[0].pv_details
-            $scope.pvItemDate = new Date($scope.pvDetails[0].pv_date)
+            $scope.pvItemDate = new Date($scope.pvDetails[0].authorize_date)
             $scope.pvName = $scope.pvDetails[0].pv_name
             $scope.pvAddress = $scope.pvDetails[0].pv_address
             

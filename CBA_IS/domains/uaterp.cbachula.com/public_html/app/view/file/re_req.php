@@ -17,7 +17,7 @@
                 
                     <h5 style="text-align: right;"><b>เลขที่ {{details[0].ex_no==null ? "ยังไม่ confirm" : details[0].ex_no}}</b></h5>
               
-                <h6 style="text-align: right;">วันที่อนุมัติ {{details[0].withdraw_date}}</h6>
+                <h6 style="text-align: right;">วันที่อนุมัติ {{details[0].authorize_date}}</h6>
             </div>
         </div>
         

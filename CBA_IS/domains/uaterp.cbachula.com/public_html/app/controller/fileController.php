@@ -84,6 +84,22 @@ class fileController extends controller {
             }
         }
     }
+
+    public function iv_cr2() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบกำกับภาษี/ใบเสร็จรับเงิน #".uri::get(2));
+                $this->view->iv = $this->model->getIv(uri::get(2));
+                $this->view->serial = uri::get(3);
+                $this->view->render("file/iv_cr2");
+            } else {
+                $this->err404();
+            }
+        }
+    }
+
     public function iv() { 
         if(empty(uri::get(2))) {
             $this->err404();
@@ -98,6 +114,7 @@ class fileController extends controller {
             }
         }
     }
+
 	public function tr() { 
         if(empty(uri::get(2))) {
             $this->err404();
