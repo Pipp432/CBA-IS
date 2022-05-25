@@ -387,6 +387,7 @@ class mktController extends controller {
 	
 	public function sales_and_margin(){	
 		$this->requirePostition("mkt");
+        $this->view->setTitle("sales_and_margin"); 
 		$this->view->top10_so_data = $this->model->get_top10_so();
 		$this->view->top10_margin_data = $this->model->get_top10_margin();
 		$this->view->fa_sales_total = $this->model->get_fa_sales_total();
@@ -402,6 +403,7 @@ class mktController extends controller {
 		$this->view->render("mkt/sales_and_margin", "navbar");
 	}
 	public function sp_tracking(){
+        $this->view->setTitle("sp_tracking"); 
 		$this->requirePostition("mkt");
 		$this->view->sp_data = $this->model->get_sp_data();
 		$this->view->top10_sp_data = $this->model->get_top10_sp();
@@ -411,6 +413,7 @@ class mktController extends controller {
 	
 	public function actualsales_margin(){
 		$this->requireSignIn();
+        $this->view->setTitle("actualsales_margin");
 		$this->view->forecast_vs_actual = $this->model->get_accumsales_forecast_diff();
 		$this->view->fa_sales_total = $this->model->get_fa_sales_total_all();
 		$this->view->fa_margin_total = $this->model->get_fa_margin_total_all();
@@ -418,6 +421,7 @@ class mktController extends controller {
 	}
 	
 	public function sp_response() {
+        $this->view->setTitle("sp_response"); 
 		$this->view->sp_contributing_data = $this->model->get_sp_contributing();
 		$this->view->sp_engagement_data = $this->model->get_sp_engagement();
 		$this->view->sp_data = $this->model->get_sp_data_all();
@@ -479,27 +483,13 @@ class mktController extends controller {
 
     public function pre_pvd() {
         if(empty(uri::get(2))) {
-            //$this->requirePostition("mkt");
             $this->view->setTitle("Payment Voucher D (PV-D)");
             $this->view->render("mkt/pre_pvd","navbar");
-        } else if (uri::get(2)==='post_requestpvd') {
-            $this->positionEcho('mkt', $this->model->requestPVD());
+        } else if (uri::get(2)==='post_requestwsd') {
+            $this->positionEcho('mkt', $this->model->requestWSD());
         }
     }
 
-    public function Cancel_Sox() {
-        if(empty(uri::get(2))) {
-            $this->requirePostition("mkt");
-            $this->view->setTitle("Cancel Sox");
-            $this->view->suppliers = $this->model->getSuppliers();
-            $this->view->products = $this->model->getProducts();
-            $this->view->render("mkt/Cancel_Sox", "navbar");
-        } else if (uri::get(2)==='get_SOX') {
-            $this->positionEcho('mkt', $this->model->getSOX());
-        } else if (uri::get(2)==='post_so_items') {
-            $this->positionEcho('mkt', $this->model->addSo());
-        }
-    }
 
 }
 

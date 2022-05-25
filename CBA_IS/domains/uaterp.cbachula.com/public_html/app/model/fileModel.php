@@ -112,54 +112,9 @@ class fileModel extends model {
     							where Invoice.invoice_no = ? ");
         $sql->execute([$iv_no]);
        
-    
-
-
-        
         return  json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
        
 	}
-    // old ver
-    // public function getCn($iv_no) {
-	// 	$sql = $this->prepare("SELECT
-    //                             	WSD.invoice_no as ex_invoice_no,
-    //                                 Invoice.invoice_date,
-    //                                 Invoice.file_no,
-    //                                 Invoice.customer_name,
-    //                                 Invoice.customer_address,
-    //                                 -- exInvoice.id_no,
-    //                                 InvoicePrinting.product_no,
-    //                                 Product.product_name,
-    //                                 InvoicePrinting.quantity,
-    //                                 Product.unit,
-    //                                 InvoicePrinting.sales_price,
-    //                                 InvoicePrinting.total_sales_price,
-    //                                 Invoice.discount,
-    //                                 exInvoice.total_sales_no_vat as ex_total_sales_no_vat,
-    //                                 (exInvoice.total_sales_no_vat - Invoice.total_sales_no_vat) as diff_total_sales_no_vat,
-    //                                 Invoice.total_sales_no_vat as cn_total_sales_no_vat,
-    //                                 Invoice.total_sales_vat as cn_total_sales_vat,
-    //                                 Invoice.total_sales_price as cn_total_sales_price,
-    //                                 Invoice.sales_price_thai,
-    //                                 WSD.wsd_no,
-    //                                 WSD.note,
-    //                                 CN.cn_no,
-    //                                 CN.cn_date,
-    //                                 CN.employee_id,
-    //                                 WSD.vat_id as id_no
-    //                             from InvoicePrinting
-    //                             inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
-    //                             left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
-    //                             left join Product on Product.product_no = InvoicePrinting.product_no
-    //                             left join WSD on WSD.invoice_no = Invoice.invoice_no
-    //                             left join CN on CN.wsd_no = WSD.wsd_no
-    // 							where Invoice.invoice_no = ?");
-    //     $sql->execute([$iv_no]);
-    //     if ($sql->rowCount() > 0) {
-    //         return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-    //     }
-    //     return null;
-	// }
 
     public function getCn($iv_no) {
 		$sql = $this->prepare("SELECT
@@ -168,31 +123,38 @@ class fileModel extends model {
                                     Invoice.file_no,
                                     Invoice.customer_name,
                                     Invoice.customer_address,
-                                    InvoicePrinting.product_no,
+                                    CNPrinting.product_no,
                                     Product.product_name,
-                                    InvoicePrinting.quantity,
                                     Product.unit,
-                                    InvoicePrinting.sales_price,
-                                    InvoicePrinting.total_sales_price,
+                                    CNPrinting.new_quantity,
+                                    CNPrinting.sales_price,
+                                    CNPrinting.new_total_sales,
                                     Invoice.total_sales_price as cn_total_sales_price,
-                                    CN.new_total_sales_price,
-                                    CN.diff_total_sales_price,
-                                    CN.vat_total_sales_no_vat,
-                                    CN.sum_total_sales_no_vat,
-                                    CN.new_sales_price_thai,
+                                    CNPrinting.new_total_sales_price,
+                                    CNPrinting.diff_total_sales_price,
+                                    CNPrinting.vat_total_sales_no_vat,
+                                    CNPrinting.sum_total_sales_no_vat,
+                                    CNPrinting.new_sales_price_thai,
                                     WSD.wsd_no,
                                     WSD.note,
                                     CN.cn_no,
                                     CN.cn_date,
                                     CN.employee_id,
                                     WSD.vat_id as id_no
-                                from InvoicePrinting
-                                inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
-                                left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
-                                left join Product on Product.product_no = InvoicePrinting.product_no
-                                left join WSD on WSD.invoice_no = Invoice.invoice_no
+                                from CNPrinting
+                                left join WSD on CNPrinting.wsd_no = WSD.wsd_no
+                                left join Invoice on WSD.invoice_no = Invoice.invoice_no
+                                left join Product on CNPrinting.product_no = Product.product_no
                                 left join CN on CN.wsd_no = WSD.wsd_no
-    							where Invoice.invoice_no = ?");
+
+
+                                -- inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
+                                -- left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
+                                -- left join Product on Product.product_no = InvoicePrinting.product_no
+                                -- left join WSD on WSD.invoice_no = Invoice.invoice_no
+                                -- left join CN on CN.wsd_no = WSD.wsd_no
+                                -- left join CNPrinting on CN.wsd_no = CNPrinting.wsd_no
+    							where WSD.invoice_no = ?");
         $sql->execute([$iv_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -200,41 +162,50 @@ class fileModel extends model {
         return null;
 	}
 
-    public function getPVD($iv_no) {
-		$sql = $this->prepare("SELECT
-                                	Invoice.invoice_no,
+    public function getPVD($cn_no) {
+		$sql = $this->prepare("SELECT WSD.invoice_no as ex_invoice_no,
                                     Invoice.invoice_date,
                                     Invoice.file_no,
                                     Invoice.customer_name,
                                     Invoice.customer_address,
-                                    InvoicePrinting.product_no,
+                                    CNPrinting.product_no,
                                     Product.product_name,
-                                    InvoicePrinting.quantity,
                                     Product.unit,
-                                    InvoicePrinting.sales_price,
-                                    InvoicePrinting.total_sales_price,
-                                    -- Invoice.discount,
-                                    Invoice.total_sales_no_vat ,
-                                    Invoice.total_sales_vat ,
-                                    Invoice.total_sales_price ,
-                                    Invoice.sales_price_thai,
-                                    PVD.vat_id,
-                                    PVD.employee_id,
+                                    CNPrinting.new_quantity,
+                                    CNPrinting.sales_price,
+                                    CNPrinting.new_total_sales,
+                                    Invoice.total_sales_price as cn_total_sales_price,
+                                    CNPrinting.new_total_sales_price,
+                                    CNPrinting.diff_total_sales_price,
+                                    CNPrinting.vat_total_sales_no_vat,
+                                    CNPrinting.sum_total_sales_no_vat,
+                                    CNPrinting.new_sales_price_thai,
+                                    WSD.wsd_no,
+                                    WSD.note,
+                                    CN.cn_no,
+                                    CN.cn_date,
+                                    CN.employee_id,
+                                    WSD.vat_id as id_no,
                                     PVD.pvd_no,
                                     PVD.pvd_date
+                               
 
-                                from InvoicePrinting
-                                left join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
-                                left join Product on Product.product_no = InvoicePrinting.product_no
-                                left join PVD on InvoicePrinting.invoice_no = PVD.invoice_no 
-                                
-    							where Invoice.invoice_no = ?");
-        $sql->execute([$iv_no]);
+
+                                from CNPrinting
+                                left join WSD on CNPrinting.wsd_no = WSD.wsd_no
+                                left join Invoice on WSD.invoice_no = Invoice.invoice_no
+                                left join Product on CNPrinting.product_no = Product.product_no
+                                left join CN on CN.wsd_no = WSD.wsd_no
+                                left join PVD on CN.cn_no = PVD.cn_no
+
+    							where CN.cn_no = ?");
+        $sql->execute([$cn_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return null;
 	}
+
 
     public function getCr($cr_no) {
 		$sql = $this->prepare("select

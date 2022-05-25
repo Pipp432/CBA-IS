@@ -423,6 +423,11 @@ foreach ($list as $value) {
             $this->view->render("fin/pvc_status"); 
     }
     }
-    
-
+    public function pvc_process(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+           
+            $this->view->render("fin/pvc_process","navbar"); 
+    }
+    }
 }

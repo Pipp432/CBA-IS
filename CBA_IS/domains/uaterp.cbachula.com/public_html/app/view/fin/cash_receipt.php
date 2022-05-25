@@ -42,7 +42,7 @@
                         <tr ng-show="soxs.length == 0">
                             <th colspan="10">ไม่มีเลข SOX ที่อัปโหลดสลิปการชำระเงิน</th>
                         </tr>
-                        <tr ng-repeat="sox in soxs | unique:'sox_no' | filter:{sox_no:filterSox} | orderBy:['-slip_uploaded', 'slip_dtaetime']" ng-click="addCrItem(sox)" ng-show="soxs.length > 0">
+                        <tr ng-repeat="sox in soxs | unique:'sox_no' | filter:{sox_no:filterSox} | orderBy:['-slip_uploaded', 'slip_datetime']| orderBy:reverse:true" ng-click="addCrItem(sox)" ng-show="soxs.length > 0">
                             <td>{{sox.sox_no}}</td>
                             <td>{{sox.employee_id}} {{sox.employee_nickname_thai}}</td>
                             <td>{{sox.customer_name}} {{sox.customer_surname}}</td>

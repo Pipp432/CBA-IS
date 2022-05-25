@@ -335,7 +335,7 @@
                     <tr ng-repeat = "PVD in PVDs | unique:'cn_no'  | filter:{cn_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
                         <td class = "center_cell">{{PVD.cn_no}}</td>
                         <td class = "center_cell">{{PVD.employee_id}}</td>
-                        <td class = "center_cell">{{PVD.total_amount}}</td>
+                        <td class = "center_cell">{{PVD.diff_total_sales_price}}</td>
                         <td class = "center_cell">{{PVD.vat_id}}</td>
                         <td class = "center_cell">{{PVD.sox_no}}</td>
                         <td class = "center_cell">{{PVD.invoice_no}}</td>
@@ -347,13 +347,13 @@
                     <tr ng-show = "selected_PVD.length != 0">
                         <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.cn_no}}</td>
                         <td class = "center_cell">{{selected_PVD.employee_id}}</td>
-                        <td class = "center_cell">{{selected_PVD.total_amount}}</td>
+                        <td class = "center_cell">{{selected_PVD.diff_total_sales_price}}</td>
                         <td class = "center_cell">{{selected_PVD.vat_id}}</td>
                         <td class = "center_cell">{{selected_PVD.sox_no}}</td>
                         <td class = "center_cell">{{selected_PVD.invoice_no}}</td>
                         <td class = "center_cell">{{selected_PVD.note}}</td>
                         <td>
-                            <a href="https://uaterp.cbachula.com/file/cn/{{PVD.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
+                            <a href="https://uaterp.cbachula.com/file/cn/{{selected_PVD.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
                         </td>
                     </tr>
                 </table>
@@ -736,18 +736,20 @@
 
         $scope.postPVD = function() {
             if(!$scope.selected_PVD.editing) {
+                // console.log($scope.company_code);
                 $.post("/acc/payment_voucher/post_PVD", {
                     post : true,
                     cn_no : $scope.selected_PVD.cn_no,
                     company_code : $scope.selected_PVD.company_code,
-                    recipient : $scope.selected_PVD.recipient,
-                    bank : $scope.selected_PVD.bank,
-                    bank_no : $scope.selected_PVD.bank_no,
-                    address : $scope.selected_PVD.location, 
+                    vat_id : $scope.selected_PVD.vat_id,
+                    diff_total_sales_price : $scope.selected_PVD.diff_total_sales_price,
+                    note : $scope.selected_PVD.note,
+                    wsd_no : $scope.selected_PVD.wsd_no
                 }, function(data) {
                     addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.cn_no.toUpperCase() +  data);
                     $('#pvdUpdateSuccessModalupdate').modal('toggle');
                     $('#pvdUpdateSuccessModalupdate').on('hide.bs.modal', function (e) {
+                        window.open('/file/pvd/' + $scope.selected_PVD.cn_no);
                         location.reload();
                     });
                 });

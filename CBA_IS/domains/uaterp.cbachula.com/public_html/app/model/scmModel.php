@@ -169,7 +169,8 @@ class scmModel extends model {
                                 	POPrinting.quantity,
                                     POPrinting.total_purchase_price,
                                 	Product.product_name,
-                                    Product.purchase_price
+                                    Product.purchase_price,
+                                    PO.product_line
                                 from POPrinting
                                 inner join PO on PO.po_no = POPrinting.po_no
                                 inner join Product on Product.product_no = POPrinting.product_no
@@ -202,6 +203,32 @@ class scmModel extends model {
                                         set PO.received = 0, POPrinting.received = 0 
                                         where PO.po_no = ? and PO.cancelled = 0 and POPrinting.cancelled = 0");                                             
                 $sql->execute([$cpoItem['po_no']]);
+                
+            }
+            
+        }
+        
+    }
+
+    public function addadjCpo() {
+        
+        $cpoItemsArray = json_decode(input::post('cpoItems'), true); 
+        $cpoItemsArray = json_decode($cpoItemsArray, true);
+        
+        $poList = array();
+        
+        foreach($cpoItemsArray as $cpoItem) {
+            
+            if (!in_array($cpoItem['po_no'], $poList)) {
+                  
+                $poList += [$cpoItem['po_no']];
+                echo $cpoItem['po_no'].' ';
+                
+                // update received in PO & POPrinting
+                $sql = $this->prepare("update PO inner join POPrinting on POPrinting.po_no = PO.po_no
+                                        set POPrinting.quantity = ? 
+                                        where PO.po_no = ? and PO.cancelled = 0 and POPrinting.cancelled = 0");                                             
+                $sql->execute([$cpoItem['quantity'],$cpoItem['po_no']]);
                 
             }
             

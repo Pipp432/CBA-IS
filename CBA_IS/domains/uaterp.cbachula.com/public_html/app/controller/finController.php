@@ -59,9 +59,7 @@ public function show_ws_form() {
 
 public function upload_slip_pvc(){
     if(empty(uri::get(2))) {
-        $this->view->setTitle("upload slip PV-C");
         $this->view->render("fin/upload_slip_pvc","navbar");
-    
     }else if(uri::get(2)==='get_PVCs'){
         $this->positionEcho('fin', $this->model->getPVCs());
 
@@ -72,11 +70,8 @@ public function upload_slip_pvc(){
     }
 }
 public function upload_iv_pvc(){
-   
     if(empty(uri::get(2))) {
-        $this->view->setTitle("upload iv PV-C");
         $this->view->render("fin/upload_iv_pvc","navbar");
-        
     }else if(uri::get(2)==='get_PVCs'){
         $this->positionEcho('fin', $this->model->getPVCsForIV());
 
@@ -376,6 +371,23 @@ foreach ($list as $value) {
         }
     }
 
+    public function pvd_fin_hub() {     //nn
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("PV-D");
+            $this->view->render("fin/pvd_fin_hub"); 
+        } 
+    }
+
+    public function pvd_status() {       //nn
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->pvds = $this->model->getStatusPvd();
+            $this->view->prePvds = $this->model->getStatusPrePvd();
+            $this->view->setTitle("ประวัติ PV-D");
+            $this->view->render("fin/pvd_status","fin/pvd_fin_hub"); 
+        } 
+    }
 
     public function pva_fin_hub() {        
         if(empty(uri::get(2))) {
@@ -406,13 +418,16 @@ foreach ($list as $value) {
     public function pvc_status(){
         if(empty(uri::get(2))) {
             $this->requirePostition("fin");
-            $this->view->setTitle("PV-C");
             $this->view->pvcs = $this->model->getPVCStatus();
             $this->view->reReqs = $this->model->getReReqStatus();
-            $this->view->render("fin/pvc_status", "navbar"); 
-            
+            $this->view->render("fin/pvc_status"); 
     }
     }
-    
-
+    public function pvc_process(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+           
+            $this->view->render("fin/pvc_process","navbar"); 
+    }
+    }
 }

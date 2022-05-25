@@ -1860,11 +1860,15 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 PVD.pvd_no,
                                 PVD.pvd_time,
                                 PVD.pvd_date,
-                                PVD.total_amount,
-                                PVD.employee_id,
-                                PVD.invoice_no
+                                PVD.diff_total_sales_price,
+                                PVD.cn_no,
+                                CN.bank,
+                                CN.bank_no,
+                                CN.recipient
 
                                 From PVD
+                                left join CN on PVD.cn_no = CN.cn_no
+
                                 where PVD.PVD_status = 2
                                 order by PVD.pvd_date, PVD.pvd_time");
         $sql->execute();
@@ -1890,11 +1894,13 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 slipType = ?
                                 where pvd_no  = ? ");
 
-        $success = $sql->execute([$fileData, $fileName, $fileType,$pvd_no]);
+        $success = $sql->execute([$fileData, $fileName, $fileType, $pvd_no]);
         
         if($success) echo 'success';  
         else echo implode(" ",$sql->errorInfo());
     }
+
+    
     public function getPVCs(){
         $sql = $this->prepare("SELECT * FROM PVC WHERE slip_name IS NULL");
         $sql-> execute();
