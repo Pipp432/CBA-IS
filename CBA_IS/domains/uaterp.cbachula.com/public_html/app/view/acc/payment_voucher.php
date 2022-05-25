@@ -28,7 +28,7 @@
                         <label for="pvNameTextboxPVA">สั่งจ่าย</label>
                         <input type="text" class="form-control" id="pvNameTextboxPVA" ng-model="pvaName" ng-disabled="true">
                     </div>
-                    <div class="col-md-3" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+                    <div class="col-md-3" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''&& selectedPaymentType!= 'PC'">
                         <label for="pvNameTextbox" id="pvNameLabel"></label>
                         <input type="text" class="form-control" id="pvNameTextbox" ng-model="pvName" ng-show="selectedPaymentType!='PB' || otherExpense">
                         <select class="form-control" ng-model="selectedSupplier" ng-change="selectSupplier()" id="dropdownSupplier" ng-show="selectedPaymentType=='PB'">
@@ -50,7 +50,7 @@
                             <label class="custom-control-label" for="customCheck1">ค่าใช้จ่ายอื่น ๆ</label>
                         </div>-->
                     </div>
-                    <div class="col-md-6" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+                    <div class="col-md-6" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''&& selectedPaymentType!= 'PC'">
                         <label for="pvAddressTextbox">ที่อยู่</label>
                         <input type="text" class="form-control" id="pvAddressTextbox" ng-model="pvAddress">
                     </div>
@@ -204,7 +204,7 @@
                     <table class="table table-hover my-1" ng-show="ReReqs.length != 0">
                         <tr>
                             <th>เลข EX</th>
-                            <th>วันที่</th>
+                            <th>วันที่อนุมัติ</th>
                             <th>ใบขอเบิกค่าใช้จ่าย</th>
                             <th>ใบกำกับภาษี / บิลเงินสด / ใบเสนอราคา</th>
                             <th>ผู้ขอเบิก</th>
@@ -364,30 +364,24 @@
                     </div>
                     <br>
                     <div class="col-md-3">
-                            <label for="checkboxPVD">แก้ไขข้อมูล</label>
                             <input type="checkbox" id = "checkboxPVD" ng-change = 'updatePVD()' ng-model = 'selected_PVD.editing'/> 
+                            <label for="checkboxPVD">แก้ไขข้อมูล&nbsp;</label>
                     </div>    
                     <div class="row mx-0">
                         <div class="col-md-6">
                             
                             <label for="pvNameTextboxPVD">สั่งจ่ายในนาม</label>
-                            <input type="text" class="form-control" id="pvNameTextboxPVD" ng-model="selected_PVD.recipent" ng-disabled="!selected_PVD.editing">
+                            <input type="text" class="form-control" id="pvNameTextboxPVD" ng-model="selected_PVD.recipient" ng-disabled="!selected_PVD.editing">
                         </div> 
                         <div class="col-md-2">
                             <label for="companyPVD">โครงการ</label>
                             <input type="text" class="form-control" id="companyPVD" ng-model="selected_PVD.company_code" ng-disabled="!selected_PVD.editing">
-                                <!-- <option value="">สั่งจ่ายในนาม</option>
-                                <option value='1'>โครงการ 1</option>
-                                <option value='2'>โครงการ 2</option>
-                                <option value='3'>โครงการ 3</option>
-                                <option value='9'>โครงการพิเศษ 1</option>
-                                <option value='8'>โครงการพิเศษ 2</option> -->
                         </div>      
                     </div>  
                     <div class="row mx-0">
-                        <div class="col-md-8">
+                        <div class="col-md-12">
                             <label for="locationPVD">ที่อยู่</label>
-                            <input type="text" class="form-control" id="locationPVD" ng-model="selected_PVD.location" ng-disabled="!selected_PVD.editing">
+                            <input type="text" class="form-control" id="locationPVD" ng-model="selected_PVD.recipient_address" ng-disabled="!selected_PVD.editing">
                         </div> 
                     </div>
                     <div class="row mx-0">
@@ -402,7 +396,7 @@
                     </div>  
 
                     <div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVD()" ng-disabled="selected_PVD.editing">บันทึก PV</button>
+                        <button type="button" class="btn btn-default btn-block my-1" ng-click="postPVD()" ng-disabled="selected_PVD.editing">บันทึก PV</button>
                     </div>
 
                 </div>
@@ -722,11 +716,12 @@
                 $.post("/acc/payment_voucher/update_PVD", {
                     post : true,
                     cn_no : $scope.selected_PVD.cn_no,
+                    wsd_no : $scope.selected_PVD.wsd_no,
                     company_code : $scope.selected_PVD.company_code,
                     recipient : $scope.selected_PVD.recipient,
                     bank : $scope.selected_PVD.bank,
                     bank_no : $scope.selected_PVD.bank_no,
-                    address : $scope.selected_PVD.location,     
+                    recipient_address : $scope.selected_PVD.recipient_address,     
                 }, function(data) {
                     addModal('pvdeditsuccessModalupdate', 'PV-D', 'edit ' + $scope.selected_PVD.cn_no.toUpperCase() +  data);
                     $('#pvdeditsuccessModalupdate').modal('toggle');

@@ -10,38 +10,36 @@
                 <img src="/public/img/cba-logo.png" alt="cba-logo" style="width: 60%;">
             </div>
             <div class="col-4 px-0">
-                <h3 style="text-align: center;"><b>ใบขอเบิกค่าใช้จ่าย<br></b></h3>
+                <h3 style="text-align: center;"><b>ใบเบิกค่าใช้จ่าย<br></b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">สำเนา</h5>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
                 
                     <h5 style="text-align: right;"><b>เลขที่ {{details[0].ex_no==null ? "ยังไม่ confirm" : details[0].ex_no}}</b></h5>
               
-                <h6 style="text-align: right;">วันที่ {{details[0].withdraw_date}}</h6>
+                <h6 style="text-align: right;">วันที่อนุมัติ {{details[0].withdraw_date}}</h6>
             </div>
         </div>
         
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2564 (โครงการ CBA 2022)</b><br>
-                    อาคารไชยยศสมบัติ 1 เลขที่ 254 ชั้นใต้ดิน ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
-                    โทร. 0-2218-5746-9 โทรสาร. 0-2218-5762
+                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                    อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
+                    โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
                 </p>
             </div>
         </div>
         <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].withdraw_name}}&nbsp;</span>
-                <span  style="text-align: left;">
-                   รหัสพนักงาน {{details[0].employee_id}}&nbsp;
+                <span id="time-HASH"> 
+                    ผู้เบิกเงิน {{details[0].employee_id}} {{details[0].withdraw_name}}&nbsp;
                 </span>
-               
             
-        </div>
+        </div><br>
         <div class="text">
-                <br><p>ธนาคารผู้รับโอน {{details[0].bank_name}}</p><br>
-                <p>เลขที่บัญชี {{details[0].bank_book_number}}</p><br>
-                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_name}}</p>
+                
+               
+                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_name}} ธนาคารผู้รับโอน {{details[0].bank_name}}เลขที่บัญชี {{details[0].bank_book_number}}</p>
         </div>        
         
         <hr>
@@ -67,14 +65,7 @@
             </div>
         </div> 
         <br>
-        <div class="row px-2 mt-2", id="HASH">
-                <span id="time-HASH"  > ผู้เบิกเงิน {{details[0].withdraw_name}}&nbsp;</span>
-                <span  style="text-align: left;">
-                   ผู้รับรอง {{details[0].Authorize_Name}}&nbsp;
-                </span>
-               
-            
-        </div>
+       
         <hr>
         <div>
             <p><b>(สำหรับฝ่ายการเงิน)<br></b></p>
@@ -90,11 +81,8 @@
        
         <div class="row px-2 mt-2">
                 <span>ลงชื่อ<img src="/public/img/fin_sign.jpg" width="100" 
-        height="75">(ผู้รับเรื่อง)</span>
-                <span  style="text-align: left;">
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;ลงชื่อ<img src="/public/img/accsign.jpg" width="100" 
-        height="75">(ผู้อนุมัติ)
-                </span>
+        height="75">(ผู้อันุมัติ)</span>
+               
         </div>
        
        

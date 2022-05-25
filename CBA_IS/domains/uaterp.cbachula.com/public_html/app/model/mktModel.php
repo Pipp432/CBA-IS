@@ -1712,8 +1712,7 @@ class mktModel extends model {
     INNER JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
     INNER JOIN SOPrinting ON SOXPrinting.so_no = SOPrinting.so_no
     INNER JOIN Product ON SOPrinting.product_no = Product.product_no
-    WHERE SOX.done = -1 and SOX.slip_uploaded = 0 and SOX.cancelled = 0 and SOX.sox_no = ?_;
-     " );
+    WHERE SOX.done = -1 and SOX.slip_uploaded = 0 and SOX.cancelled = 0 and SOX.sox_no = ?" );
     $sql->execute( [ input::postAngular( 'sox_no' ) ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
@@ -1722,21 +1721,23 @@ class mktModel extends model {
   }
   // Change_Cancel Module
   public function ChangeCancel() {
-    $sql = $this->prepare( "update SO
-    left join SOPrinting on SO.so_no = SOPrinting.so_no
-    left join PointLog on SO.so_no = PointLog.note
-    left join SOXPrinting on SOXPrinting.so_no = SOPrinting.so_no
-    left join SOX on SOX.sox_no = SOXPrinting.sox_no
-    set SO.cancelled = 1,
-    SOPrinting.cancelled = 1,
+    $sql = $this->prepare( "UPDATE SOX 
+    LEFT JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
+    LEFT JOIN SO ON SOXPrinting.so_no = SO.so_no
+    LEFT JOIN SOPrinting on SO.so_no = SOPrinting.so_no
+    LEFT JOIN PointLog on SOXPrinting.so_no = PointLog.note
+    SET
     SOX.cancelled = 1,
-    PointLog.cancelled = 1
-    where SO.so_no = ?;
+    SO.cancelled = 1,
+    SOPrinting.cancelled = 1,
+    PointLog.note = 1
+    WHERE SOX.sox_no = ?;
     
     DELETE FROM StockOut
     WHERE file_no in (select so_no from SO WHERE cancelled = 1)
+    
      " );
-    $sql->execute( [ input::postAngular( 'so_no' ) ] );
+    $sql->execute( [ input::postAngular( 'sox_no' ) ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
     }

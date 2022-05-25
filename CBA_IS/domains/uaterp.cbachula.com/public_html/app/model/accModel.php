@@ -1279,14 +1279,15 @@ class accModel extends model {
 
                     } else {
                         // Dr ค่าใช้จ่าย without tax
-                        $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $success = $success && $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PV']);
-                        if(!$success){
-                            print_r($sql->errorInfo());
-                            break;
+                        if(!empty($pva_child["debit"])){ 
+                            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], 1, $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PV']);
+                            if(!$success){
+                                print_r($sql->errorInfo());
+                                break;
+                            }
                         }
-
                     }
                 }
             }

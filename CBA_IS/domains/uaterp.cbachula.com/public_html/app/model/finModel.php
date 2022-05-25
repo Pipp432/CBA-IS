@@ -356,15 +356,18 @@ class finModel extends model {
         return $rqPrefix . $runningNo;
       }
     public function postAdditionReReqDetail(){
-        echo "<script>console.log('pain' );</script>";
-        $sql = $this->prepare("update Reimbursement_Request set Reimbursement_Request.evidence=?,Reimbursement_Request.company=?,Reimbursement_Request.ex_no=? where re_req_no=? ");
+        
+        $sql = $this->prepare("update Reimbursement_Request set Reimbursement_Request.evidence=?,Reimbursement_Request.company=?,Reimbursement_Request.ex_no=?,Reimbursement_Request.authorize_date=? where re_req_no=? ");
         $ex_no = $this->assign_ex_no();
         $sql-> execute([
         input::post('proof'),
         input::post('project'),
-        $ex_no,
-       input::post('re_req_number')
+        $ex_no,  
+        input::post('authorize_date'),
+        input::post('re_req_number')
+      
     ]);
+    return input::post('date');
     }
     
     // CR Module
