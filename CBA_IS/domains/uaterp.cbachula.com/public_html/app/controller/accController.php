@@ -323,23 +323,23 @@ class accController extends controller {
         }
     }
 	
-	public function confirm_ird() {
-		if(empty(uri::get(2))) {
-            $this->requirePostition("acc");
-            $this->view->setTitle("Confirm IRD");
-            $this->view->irds = $this->model->getIRDforConfirm();
-            $this->view->render("acc/confirm_ird", "navbar");
-		} else if (uri::get(2)==='post_cird_items') {
-            $this->positionEcho('acc', $this->model->confirmIRD());
-        } else if (uri::get(2)==='ird_file') {
-            $this->requirePostition("acc");
-            if (!empty(Uri::get(3))) {
-                $this->positionEcho('acc', $this->model->getIrdFile(Uri::get(3)));
-            } else {
-                $this->err404();
-            }
-        }
-	}
+	//public function confirm_ird() {
+	//	if(empty(uri::get(2))) {
+    //        $this->requirePostition("acc");
+    //        $this->view->setTitle("Confirm IRD");
+    //        $this->view->irds = $this->model->getIRDforConfirm();
+    //        $this->view->render("acc/confirm_ird", "navbar");
+	//	} else if (uri::get(2)==='post_cird_items') {
+    //        $this->positionEcho('acc', $this->model->confirmIRD());
+    //    } else if (uri::get(2)==='ird_file') {
+    //        $this->requirePostition("acc");
+    //        if (!empty(Uri::get(3))) {
+    //            $this->positionEcho('acc', $this->model->getIrdFile(Uri::get(3)));
+    //        } else {
+    //            $this->err404();
+    //        }
+    //    }
+	//}
 
 
     public function confirm_iv() {

@@ -1242,6 +1242,14 @@ class accModel extends model {
 
             if($success) {
                 foreach($pva_childs as $pva_child) {
+
+                    //if($pva_child["tax"] == "true") $pva_child["tax"] = 1;
+                    //else $pva_child["tax"] = 0;
+
+                    
+                    //$pva_child["tax"] == (int) $pva_child["tax"]; 
+
+
                     // Dr เงินรองจ่าย - โครงการ 3
                     $sql = $this->prepare("UPDATE PVA SET tax = ?,debit = ?,pv_status = 3, pv_no = ? WHERE internal_pva_no = ?");
                     $success = $success && $sql->execute([$pva_child['tax'],$pva_child["debit"],$pv_no,$pva_child['internal_pva_no']]);
@@ -1303,6 +1311,12 @@ class accModel extends model {
             $sql = $this->prepare("UPDATE PVA SET pv_status = 2, pv_no = null WHERE pv_no = ?");
             $sql->execute([$pv_no]);
             //account detail is not deleted.
+            $sql = $this->prepare("DELETE FROM AccountDetail file_no = ?"); 
+            $sql->execute([$pv_no]);
+            foreach($pva_childs as $pva_child) {
+                $sql = $this->prepare("DELETE FROM AccountDetail file_no = ?"); 
+                $sql->execute([$pva_child["internal_pva_no"]]);
+            }
         }
         
     }
@@ -2902,22 +2916,22 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         
     }
 		
-	public function confirmIRD() {
-		
-		$cirdItemsArray = json_decode(input::post('cirdItems'), true); 
-        $cirdItemsArray = json_decode($cirdItemsArray, true);
-        
-        foreach($cirdItemsArray as $value) {
-			
-			$sql = $this->prepare("update IRD 
-									set status = '1',
-										total_purchase = ?,
-										total_sales = ?
-									where ird_no = ? and cancelled = 0");
-			$sql->execute([$value['ird_total_purchase'],$value['ird_total_sales'],$value['ird_no']]);
-			
-		}
-	}
+	//public function confirmIRD() {
+	//	
+	//	$cirdItemsArray = json_decode(input::post('cirdItems'), true); 
+    //    $cirdItemsArray = json_decode($cirdItemsArray, true);
+    //    
+    //    foreach($cirdItemsArray as $value) {
+	//		
+	//		$sql = $this->prepare("update IRD 
+	//								set status = '1',
+	//									total_purchase = ?,
+	//									total_sales = ?
+	//								where ird_no = ? and cancelled = 0");
+	//		$sql->execute([$value['ird_total_purchase'],$value['ird_total_sales'],$value['ird_no']]);
+	//		
+	//	}
+	//}
 
 
     
@@ -3020,7 +3034,7 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
         bank_name, bank_book_name, bank_book_number, authorizer_name, details,
         evidence, company, debit, return_tax, confirmed, pv_name, pv_address, 
         pv_date, pv_company, total_paid, pv_details, pv_payout,
-         pv_payto FROM `Reimbursement_Request` WHERE Reimbursement_Request.ex_no IS NOT NULL ");
+         pv_payto,quotation_name FROM `Reimbursement_Request` WHERE Reimbursement_Request.ex_no IS NOT NULL ");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -3074,7 +3088,7 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
              $PVC_No]);
     }
     public function postConfirm($ex_no){
-        $sql=$this->prepare("UPDATE Reimbursement_Request SET debit=?, pv_date=?, pv_details=?,total_paid=?, pv_name=?, pv_address=?, pv_company=?,  return_tax=? WHERE ex_no =?");
+        $sql=$this->prepare("UPDATE Reimbursement_Request SET debit=?, pv_date=?, pv_details=?,total_paid=?, pv_name=?, pv_address=?, pv_company=?,  return_tax=?,pv_payout=?,pv_payto=? WHERE ex_no =?");
         $success=$sql->execute([
             input::post('debit'),
             input::post('pv_date'),
@@ -3085,6 +3099,8 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
             input::post('selected_company'),
             
             input::post('return_tax'),
+            input::post('pv_payout'),
+            input::post('pv_payto'),
             $ex_no
            
 

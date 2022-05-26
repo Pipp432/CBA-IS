@@ -96,16 +96,16 @@
                 <div class="row mx-0 mt-2">
                    
                     <div class="col-md-6">
-                        <label for="pvItemDebit">ที่อยู่</label>
-                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
+                        <label for="pvAddress">ที่อยู่</label>
+                        <input type="text" class="form-control" id="pvAddress" ng-model="pvAddress">
                     </div>
                     <div class="col-md-2">
-                        <label for="pvItemDebit">สั่งจ่าย</label>
-                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
+                        <label for="pvPayto">สั่งจ่าย</label>
+                        <input type="text" class="form-control" id="pvPayto" ng-model="pvPayto">
                     </div>
                     <div class="col-md-2">
-                        <label for="pvItemDebit">จ่ายออกจาก</label>
-                        <input type="text" class="form-control" id="pvItemDebit" ng-model="pvItemDebit">
+                        <label for="pvPayout">จ่ายออกจาก</label>
+                        <input type="text" class="form-control" id="pvPayout" ng-model="pvPayout">
                     </div>
                     <div class="col-md-2">
                         <label for="pvItemDebit">เดบิต</label>
@@ -261,7 +261,8 @@
                     </table>
                     <table class="table table-hover my-1" ng-show="pvDetails.length != 0">
                         <tr>
-                            <th colspan="2">วันที่</th>
+                            <th colspan="2">เลข EXC</th>
+                            <th>วันที่อนุมัติ</th>
                             <th>เดบิต</th>
                             <th>เลขที่ใบกำกับภาษี</th>
                             <th>รายละเอียด</th>
@@ -272,7 +273,8 @@
                         </tr>
                         <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
-                            <td style="text-align: center;">{{pvItem.withdraw_date}}</td>
+                            <td style="text-align: center;">{{pvItem.ex_no}}</td>
+                            <td style="text-align: center;">{{pvItem.authorize_date}}</td>
                             <td style="text-align: center;">{{pvItemDebit}}</td>
                             <td style="text-align: center;">{{pvItem.tax_number}}</td>
                             <td style="text-align: center;">{{pvItem.pv_details}}</td>
@@ -281,11 +283,11 @@
                             <td style="text-align: right;">{{pvItemPaidTotal | number:2}}</td>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="7">ภาษีสุทธิ</th>
+                            <th style="text-align: right;" colspan="8">ภาษีสุทธิ</th>
                             <th style="text-align: right;">{{(pvItemPaidTotal)*7/107 | number:2}}</th>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="7">รวมสุทธิ</th>
+                            <th style="text-align: right;" colspan="8">รวมสุทธิ</th>
                             <th style="text-align: right;">{{pvItemPaidTotal| number:2}}</th>
                         </tr>
                     </table>
@@ -622,6 +624,9 @@
         $scope.pva_total = 0;
         $scope.pvaName = 'พนักงานรองจ่าย';
         $scope.PVA_notes = '';
+        $scope.pvPayout='';
+        $scope.pvPayTo = '';
+
 
         
         $scope.selectPaymentType = function() {
@@ -870,6 +875,8 @@
                         "details": String($scope.pvItemDetail),
                         "selected_company":String($scope.selectedCompany),
                         "confirm":"1",
+                        "pv_payout": $scope.pvPayout,
+                        "pv_payto": $scope.pvPayto,
                         "return_tax": tax
                     }).done(function(data,status){
                         console.log(data)
@@ -1068,7 +1075,9 @@
             console.log( $scope.pvItems);
             $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
             var date = $scope.pvItems["authorize_date"];
-            console.log(date)
+            console.log($scope.pvItems)
+            $scope.pvPayto = $scope.pvItems["pv_payto"];
+            $scope.pvPayout = $scope.pvItems["pv_payout"];
             
             const input_date = document.getElementById("pvItemDate");
             console.log(input_date.value);
