@@ -499,8 +499,10 @@ class mktController extends controller {
             $this->view->render("mkt/Cancel_Sox", "navbar");
         } else if (uri::get(2)==='get_SOX') {
             $this->positionEcho('mkt', $this->model->getSOX());
-        } else if (uri::get(2)==='Change_Cancel') {
-            $this->positionEcho('mkt', $this->model->ChangeCancel());
+        } else if (uri::get(2)==='Change_CancelSOX') {
+            $this->positionEcho('mkt', $this->model->ChangeCancelSOX());
+        } else if (uri::get(2)==='Change_CancelSO') {
+            $this->positionEcho('mkt', $this->model->ChangeCancelSO());
         }
     }
 

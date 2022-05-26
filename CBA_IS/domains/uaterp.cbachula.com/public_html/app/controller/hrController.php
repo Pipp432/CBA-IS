@@ -5,7 +5,6 @@ namespace controller;
 use _core\controller;
 use _core\helper\input;
 use _core\helper\session;
-use _core\helper\uri;
 
 class hrController extends controller {
 
@@ -13,21 +12,15 @@ class hrController extends controller {
         $this->requirePostition("hr");
         $this->err404();
     }
-
-    public function add_point() {
+    public function addpoint() { 
         if(empty(uri::get(2))) {
             $this->requirePostition("hr");
-            $this->view->setTitle("Add Learning Point");
-            $this->view->render("hr/add_point", "navbar"); 
-        } else if (uri::get(2) === 'get_employee_id') {
-            $this->positionEcho('hr', $this->model->getemployeeid());
-        } else if (uri::get(2) === 'post_edit_point') {
+            $this->view->setTitle("add_point");
+            $this->view->render("hr/add_point", "navbar");
+            //$this->view->render("mkt/gg", "navbar");
+
+        } else if (uri::get(2)==='post_add_point') {
             $this->positionEcho('hr', $this->model->editPoint());
         }
-
-        
-    }
-
-
 
 }

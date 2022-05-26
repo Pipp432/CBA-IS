@@ -147,6 +147,8 @@
         $(this).siblings('input[type="checkbox"]').prop('checked', false);
 
         $scope.submit = function(re_req_no){
+
+           
             
             
             if(re_req_no=="") {
@@ -155,6 +157,7 @@
             const options = document.querySelectorAll("input[type='checkbox']:checked")
           
             const details = {"proof":options[0].value,"project":options[1].value};
+            console.log(details);
             var date = new Date();
             var dd = String(date.getDate()).padStart(2, '0');
             var mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -164,8 +167,8 @@
             console.log(date);
             
            $.post(`/fin/reimbursement_request/post_additional_data`,{
-               proof: $scope.details["proof"], 
-               project:$scope.details["project"],
+               proof: details["proof"], 
+               project:details["project"],
                re_req_number: $scope.currentNo,
                authorize_date: date
 
@@ -185,10 +188,10 @@
           
         }
        
-        // $scope.toMainMenu = function(){
-        //     const url = "https://uaterp.cbachula.com/home"
-        //     window.location.assign(url);
-        // }
+        $scope.toMainMenu = function(){
+            const url = "https://uaterp.cbachula.com/home"
+            window.location.assign(url);
+        }
 });
   	});
 

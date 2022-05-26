@@ -88,7 +88,7 @@ class accController extends controller {
         } else if (uri::get(2)==='post_pvc') {
             $this->positionEcho('acc', $this->model->addPVC());
         }else if (uri::get(2)==='get_ReReqs') {
-            $this->positionEcho('acc', $this->model->getReReqDetail(Uri::get(3)));
+            $this->positionEcho('acc', $this->model->getReReqsDetail());
         }else if (uri::get(2)==='get_PVC') {
             $this->positionEcho('acc', $this->model->getPVC());
         }else if (uri::get(2)==='due_date') {

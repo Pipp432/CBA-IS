@@ -367,7 +367,7 @@ class finModel extends model {
         input::post('re_req_number')
       
     ]);
-    return input::post('date');
+    return $sql->errorInfo()[0];
     }
     
     // CR Module

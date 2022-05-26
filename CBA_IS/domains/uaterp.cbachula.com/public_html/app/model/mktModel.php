@@ -1713,14 +1713,14 @@ class mktModel extends model {
     INNER JOIN SOPrinting ON SOXPrinting.so_no = SOPrinting.so_no
     INNER JOIN Product ON SOPrinting.product_no = Product.product_no
     WHERE SOX.done = -1 and SOX.slip_uploaded = 0 and SOX.cancelled = 0 and SOX.sox_no = ?" );
-    $sql->execute( [ input::postAngular( 'sox_no' ) ] );
+    $sql->execute([ input::postAngular( 'sox_no' ) ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
     }
     return json_encode( [] );
   }
-  // Change_Cancel Module
-  public function ChangeCancel() {
+  // Change_Cancel SOX Module
+  public function ChangeCancelSOX() {
     $sql = $this->prepare( "UPDATE SOX 
     LEFT JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
     LEFT JOIN SO ON SOXPrinting.so_no = SO.so_no
@@ -1731,13 +1731,13 @@ class mktModel extends model {
     SO.cancelled = 1,
     SOPrinting.cancelled = 1,
     PointLog.note = 1
-    WHERE SOX.sox_no = ?;
+    WHERE SOX.sox_no = ? and SOX.done = -1 and SOX.slip_uploaded = 0;
     
     DELETE FROM StockOut
     WHERE file_no in (select so_no from SO WHERE cancelled = 1)
     
      " );
-    $sql->execute( [ input::postAngular( 'sox_no' ) ] );
+    $sql->execute( [ input::post( 'sox' ) ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
     }
@@ -1759,7 +1759,7 @@ class mktModel extends model {
     return json_encode([]);
   }
 
-  //cancel_onlyso
+  //cancel_onlyso Select
   public function getso(){
     $sql = $this->prepare("SELECT  SOPrinting.so_no, SOPrinting.product_no, Product.product_name,SOPrinting.total_sales,SO.done
     FROM  SO
@@ -1772,6 +1772,25 @@ class mktModel extends model {
       return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
     }
     return json_encode([]);
+  }
+  // Change_Cancel SO Module
+  public function ChangeCancelSO() {
+    $sql = $this->prepare( "update SO
+    left join SOPrinting on SO.so_no = SOPrinting.so_no
+    left join PointLog on SO.so_no = PointLog.note
+    set SO.cancelled = 1,
+    SOPrinting.cancelled = 1,
+    PointLog.cancelled = 1
+    where SO.so_no = ? and SO.done = 0;
+    
+    DELETE FROM StockOut
+    WHERE file_no in (select so_no from SO WHERE cancelled = 1)
+     " );
+    $sql->execute( [ input::post( 'so' ) ] );
+    if ( $sql->rowCount() > 0 ) {
+      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    }
+    return json_encode( [] );
   }
   // =====================================================================================================================================================================================
   // =====================================================================================================================================================================================

@@ -3014,15 +3014,18 @@ join Supplier on Supplier.supplier_no = RE.supplier_no");
 
 		//}
 	}
-    public function getReReqDetail($re_req_no){
-        $sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE ex_no IS NOT NULL AND confirmed != '1' ");
-        $data =$sql->execute([$re_req_no]);   
-        if($sql->rowCount() > 0){
-           return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
-       }else{
-           echo $sql;
-           echo "Hello";
-       } 
+    public function getReReqsDetail(){
+        $sql = $this->prepare("SELECT re_req_no, ex_no, withdraw_date, 
+        authorize_date, withdraw_name, employee_id, line_id, tax_number, 
+        bank_name, bank_book_name, bank_book_number, authorizer_name, details,
+        evidence, company, debit, return_tax, confirmed, pv_name, pv_address, 
+        pv_date, pv_company, total_paid, pv_details, pv_payout,
+         pv_payto FROM `Reimbursement_Request` WHERE Reimbursement_Request.ex_no IS NOT NULL ");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
         
     }
 

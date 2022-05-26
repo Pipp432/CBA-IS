@@ -660,7 +660,12 @@
                 $("#pvAddressTextbox").prop("disabled", true);
             } else if($scope.selectedPaymentType==='PC') {
                 // $http.get('/acc/payment_voucher/get_ws').then(function(response){$scope.wss = response.data; $scope.isLoad = false;});
-                $http.get('/acc/payment_voucher/get_ReReqs').then(function(response){$scope.ReReqs = response.data; $scope.pvItem = $scope.ReReqs ;$scope.pvItems = $scope.ReReqs;$scope.isLoad = false;console.log($scope.ReReqs)});
+                $http.get('/acc/payment_voucher/get_ReReqs')
+                .then(function(response){
+                    $scope.ReReqs = response.data;
+                     $scope.pvItem = $scope.ReReqs ;
+                     $scope.pvItems = $scope.ReReqs;$scope.isLoad = false;
+                     console.log($scope.ReReqs)});
                 
                 
             } else if($scope.selectedPaymentType==='PD') {
