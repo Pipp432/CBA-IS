@@ -36,6 +36,7 @@
                             <th>VAT</th>
 							<th>Payment Amount</th>
                             <th>ราคารวม</th>
+                            <th>payment method</th>
 							<th>ขอใบกำกับภาษี</th>
 							<th>Auto Match Status</th>
                         </tr>
@@ -58,6 +59,7 @@
                                 </a>
                                 <br>{{sox.slip_datetime}}
                             </td>
+                            <td style="text-align: center">{{sox.payment_type}}</td>
 							<td style="text-align: center"><i ng-show="sox.fin_form==1" class="bi bi-check2-circle"></i></td>
 							<td style="text-align: center"><i ng-show="sox.id > 0" class="bi bi-check2-circle"></i></td>
                         </tr>
@@ -102,20 +104,24 @@
                             <th>จำนวน</th>
                             <th>ราคารวม</th>
                         </tr>
-                        <tr ng-repeat="soPrinting in crItems">
-                            <td>{{soPrinting.so_no}}</td>
-                            <td>{{soPrinting.product_name}}</td>
-                            <td style="text-align: right;">{{soPrinting.sales_price | number:2}}</td>
-                            <td style="text-align: right;">{{soPrinting.quantity}}</td>
-                            <td style="text-align: right;">{{soPrinting.sales_price * soPrinting.quantity | number:2}}</td>
+                        <tr ng-repeat="soPrinting in crItems| unique:'product_no'">
+                            <td style="text-align: center;">{{soPrinting.so_no}}</td>
+                            <td style="text-align: center;">{{soPrinting.product_name}}</td>
+                            <td style="text-align: center;">{{soPrinting.sales_price | number:2}}</td>
+                            <td style="text-align: center;">{{soPrinting.quantity}}</td>
+                            <td style="text-align: center;">{{soPrinting.sales_price * soPrinting.quantity | number:2}}</td>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="4">ส่วนลด</th>
                             <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_discount | number:2}}</th>
                         </tr>  
                         <tr>
+                            <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
+                            <th id="cardFee" style="text-align: right;">{{card_fee | number:2}}</th>
+                        </tr>  
+                        <tr>
                             <th style="text-align: right;" colspan="4">ราคารวม</th>
-                            <th id="totalPrice" style="text-align: right;">{{sox.sox_sales_price | number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{new_total_price| number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <!--<tr>
@@ -217,6 +223,8 @@
         $scope.soxs = <?php echo $this->soxs; ?>;
         var first = true;
 
+        console.log($scope.soxs)
+
 
         // $scope.test = function() {
         //     console.log( $('#textboxCusId').val());
@@ -257,7 +265,7 @@
                 }
             });
            
-            $scope.calculateCrItem();
+            $scope.calculateCrItem(sox);
             
         }
 
@@ -271,7 +279,7 @@
             return (sox.sox_datetime).split(' ')[1];
         }
         
-        $scope.calculateCrItem = function() {
+        $scope.calculateCrItem = function(sox) {
             
             $scope.soCal = [];
             var tempSoNo = '';
@@ -353,6 +361,22 @@
                 }
                 
             });
+
+            $scope.card_fee = '';
+            $scope.new_total_price = '';
+            if($scope.crItems.length != 0) {
+                $scope.card_fee = 0;
+                if($scope.crItems[0].payment_type == 'KS'){
+                    card_fee = (parseFloat(sox.sox_sales_price)*2.45)/100 ;
+                } else if($scope.crItems[0].payment_type == 'FB'){
+                    card_fee = (parseFloat(sox.sox_sales_price)*2.75)/100 ;
+                }
+                $scope.new_total_price = parseFloat(sox.sox_sales_price) + $scope.card_fee;
+            }
+
+            
+
+
             
         }
 

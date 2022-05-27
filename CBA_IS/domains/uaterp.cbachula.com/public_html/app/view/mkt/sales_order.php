@@ -102,7 +102,7 @@
 
                 <div class="row mx-0">
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
 
                         <label for="dropdownSupplier">Supplier</label>
 
@@ -138,6 +138,23 @@
 
                     </div>
 
+                  
+                    <div ng-show="selectedProductType == 'Install'">
+                    <label for="dropdownPaymentTyper">Payment Method</label>
+                        <select class="form-control" ng-model="selectedPaymentType" id="dropdownPaymentType">
+
+                            <option value="">เลือกวิธีจ่าย</option>
+
+                            <option value="CC">Credit Card</option>
+
+                            <option value="KS">K+ Shop</option>
+
+                            <option value="FB">FaceBook Pay</option>
+
+                        </select>
+
+                    </div>
+                    <br>
                     <div class="col-md-2">
 
                         <label for="buttonConfirmDetail" style="color:white;">.</label>
@@ -325,9 +342,22 @@
 							<th style="text-align: right;" colspan="6">
 								<div class="custom-control custom-checkbox">
 									<input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
-									<label class="custom-control-label" for="payment">ชำระเงินหลังรับสินค้า</label>
+									<label class="custom-control-label" for="payment">ชำระผ่าน Mobile Banking</label>
 								</div>
-							</th>
+							
+                            
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
+									<label class="custom-control-label" for="payment">ชำระผ่าน K+shop</label>
+								</div>
+                            
+                            
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
+								<label class="custom-control-label" for="payment">ชำระผ่าน Facebook Pay</label>
+							</div>
+
+                            </th>
 							<!--<div class="custom-control custom-checkbox mt-2">
 								<input type="checkbox" class="custom-control-input" id="fin_form" name="fin_form" value="0" ng-click="fin_form_check()">
 								<label class="custom-control-label" for="fin_form">กรอกฟอร์มแล้ว</label>
@@ -446,6 +476,11 @@
 			}else if(document.getElementById('payment').checked==false){
 					document.getElementById('payment').value = '0';
 			}
+            //if (document.getElementById('payment_K').checked==true){
+			//		document.getElementById('payment_K').value = '1';
+			//}else if(document.getElementById('payment_K').checked==false){
+			//		document.getElementById('payment_K').value = '0';
+			//}
         }
 
 
@@ -465,7 +500,7 @@
 
         $scope.showAfterSubmit = false;
 
-        
+        $scope.selectedPaymentType='';
 
         $scope.isEdit = true;
 
@@ -877,7 +912,9 @@
 
                 discount : $scope.discount,
 
-                soItems : JSON.stringify(angular.toJson($scope.soItems))
+                soItems : JSON.stringify(angular.toJson($scope.soItems)),
+                
+                paymentType: $scope.selectedPaymentType 
 
             }, function(data) {
 

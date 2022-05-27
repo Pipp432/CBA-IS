@@ -1434,8 +1434,8 @@ class mktModel extends model {
 	}*/
 
     // insert SO
-    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type, payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
-                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 1)" );
+    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type, payment ,payment_type, vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
+                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?, ?, ?,, ?, ?, ?, 0, ?, 1)" );
     $sql->execute( [
       $sono,
       input::post( 'sellerNo' ),
@@ -1443,6 +1443,7 @@ class mktModel extends model {
       json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ],
       input::post( 'productType' ),
       input::post( 'payment' ),
+      input::post('paymentType'),
       input::post( 'vatType' ),
       ( double )input::post( 'totalNoVat' ),
       ( double )input::post( 'totalVat' ),
@@ -2056,7 +2057,7 @@ class mktModel extends model {
 							inner join SO on POPrinting.so_no=SO.so_no
                             inner join Supplier on Supplier.supplier_no = PO.supplier_no and Supplier.product_line = PO.product_line
                             left join SOXPrinting on SO.so_no=SOXPrinting.so_no
-                            where PO.product_type = 'Install' and POPrinting.received = 2 and POPrinting.cancelled = 0 and PO.approved_employee = ?" );
+                            where PO.product_type = 'Install' and POPrinting.received = 0 and POPrinting.cancelled = 0 and PO.approved_employee = ?" );
     $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );

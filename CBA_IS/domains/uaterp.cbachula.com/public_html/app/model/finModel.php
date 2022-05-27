@@ -22,6 +22,7 @@ class finModel extends model {
                                     Customer.national_id,
                                     SO.so_no,
                                     SO.product_type,
+                                    SO.payment_type,
                                     SOPrinting.product_no,
                                     Product.product_name,
                                     SOPrinting.sales_no_vat,
@@ -406,6 +407,7 @@ class finModel extends model {
                     $total_sales_vat = 0;
                     $total_sales_price = (double) $value['so_total_sales_price2'];
                 }
+
                 
                 // insert IV
                 $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
@@ -450,6 +452,16 @@ class finModel extends model {
                     (double) $value['so_commission'],
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     $value['priceInThai']
+                ]);
+
+                // insert commission log
+                $sql = $this->prepare("insert into CommissionLog (cr_no, date, employee_id, commission, cancelled)
+                                        values(?,CURRENT_TIMESTAMP,?,?,0)");
+                                        
+                $sql->execute([
+                    $cr_no,
+                    $value['employee_id'],
+                    (double) $value['so_commission']
                 ]);
 					
 				//echo 'before';

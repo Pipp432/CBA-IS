@@ -997,14 +997,23 @@ class accModel extends model {
                     $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '61-1'.$value['ci_no'][0].'00', 0, (double) $value['confirm_vat'] * -1, 'CIV']);
                     
                 }
-                
-                // ============================================================================================================================================================
-                // END CBA2020 ACC
-                
-            } 
-                     
+                if(!$did){ //use first ci_no as ref
+                    $did = false;
+                    if($_POST["DR"]){
+                        // insert AccountDetail sequence 12
+                        // DR tax diff
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                        values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$value['ci_no'], '12', $_POST['ivrcDate'],$_POST["DR"],(double) $_POST["DRCR_cash"], 0, 'CIV']);
+                        // insert AccountDetail sequence 13
+                        // CR tax diff
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                                values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$value['ci_no'], '13', $_POST['ivrcDate'], $_POST["CR"], 0, (double) $_POST["DRCR_cash"], 'CIV']);
+                    }
+                }
+            }   
         }
-        
     }
 
     public function getIVPCFiles($type,$ci_no) { 
@@ -1242,12 +1251,13 @@ class accModel extends model {
         if($success) {
 
             if($success) {
+                $n = 1;
                 foreach($pva_childs as $pva_child) {
 
+                    //convert string bool to int
                     //if($pva_child["tax"] == "true") $pva_child["tax"] = 1;
                     //else $pva_child["tax"] = 0;
 
-                    
                     //$pva_child["tax"] == (int) $pva_child["tax"]; 
 
 
@@ -1265,7 +1275,8 @@ class accModel extends model {
                         if(!empty($pva_child["debit"])){ 
                             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], '1', $pva_child["debit"], (double) ($pva_child["total_paid"] *100/107), 0, 'PVA']);
+                            $success = $success && $sql->execute([$pv_no, $n, $pva_child["debit"], (double) ($pva_child["total_paid"] *100/107), 0, 'PVA']);
+                            $n++;
                             if(!$success){
                                 print_r($sql->errorInfo());
                                 break;
@@ -1274,7 +1285,8 @@ class accModel extends model {
                         
                         $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $success = $success && $sql->execute([$pva_child["internal_pva_no"], '2', "61-1300", (double) ($pva_child["total_paid"] *7/107), 0, 'PVA']);
+                        $success = $success && $sql->execute([$pv_no, $n, "61-1300", (double) ($pva_child["total_paid"] *7/107), 0, 'PVA']);
+                        $n++;
                         if(!$success){
                             print_r($sql->errorInfo());
                             break;
@@ -1285,7 +1297,8 @@ class accModel extends model {
                         if(!empty($pva_child["debit"])){ 
                             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $success = $success && $sql->execute([$pva_child["internal_pva_no"], '1', $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PVA']);
+                            $success = $success && $sql->execute([$pv_no, $n, $pva_child["debit"], (double) ($pva_child["total_paid"]), 0, 'PVA']);
+                            $n++;
                             if(!$success){
                                 print_r($sql->errorInfo());
                                 break;
@@ -1297,7 +1310,7 @@ class accModel extends model {
             // Cr เงินรองจ่าย - โครงการ 3 
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $success = $success && $sql->execute([$pv_no, '3', "11-1310", 0, (double) ($_POST["total_no_add"]), 'PVA']);
+            $success = $success && $sql->execute([$pv_no, $n, "11-1310", 0, (double) ($_POST["total_no_add"]), 'PVA']);
             if(!$success){
                 print_r($sql->errorInfo());
             }
@@ -1311,13 +1324,8 @@ class accModel extends model {
             $sql->execute([$pv_no]);
             $sql = $this->prepare("UPDATE PVA SET pv_status = 2, pv_no = null WHERE pv_no = ?");
             $sql->execute([$pv_no]);
-            //account detail is not deleted.
             $sql = $this->prepare("DELETE FROM AccountDetail file_no = ?"); 
             $sql->execute([$pv_no]);
-            foreach($pva_childs as $pva_child) {
-                $sql = $this->prepare("DELETE FROM AccountDetail file_no = ?"); 
-                $sql->execute([$pva_child["internal_pva_no"]]);
-            }
         }
         
     }
