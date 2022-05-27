@@ -13,10 +13,14 @@
                     <div class = "col-md-6">
                         <label for="dateTextbox">วันที่เบิก</label>
                         <input type="date" class="form-control" id="dateTextbox" ng-change="getWithdrawDate()" ng-model="withdrawDate">
+                    </div>
+                    <div class = "col-md-6">
+                        <label for="dateTextbox">วันครบกำหนดชำระเงิน</label>
+                        <input type="date" class="form-control" id="dateTextbox" ng-model="dueDate">
                         
                     </div>
-                    <div class = "col-md-4">
-                        <label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
+                    <div class = "col-md-8">
+                        <br><label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
                         <input type="text" class="form-control" id="withdrawNameTextbox" ng-change="addWithdrawName()" ng-model="withdrawName" >
                         <br>
                     </div>
@@ -179,6 +183,7 @@
     app.controller('moduleAppController', function($scope, $http, $compile) {
     
         $scope.withdrawDate='';
+        $scope.dueDate='';
         $scope.withdrawName='';
         $scope.employeeId ='';
         $scope.employeeLine=''
@@ -187,6 +192,7 @@
         $scope.bankBookNumber='';
         $scope.bankBookName='';
         $scope.authorizerName=''; 
+        $scope.createdDate= new Date();
        
 
         // Date utility functions
@@ -242,6 +248,12 @@
         }
         $scope.getWithdrawDate = function(){
             return processDate($scope.withdrawDate);
+        }
+        $scope.getCreatedDate = function(){
+            return processDate($scope.createdDate);
+        }
+        $scope.getDueDate = function(){
+            return processDate($scope.dueDate);
         }
         $scope.getWithdrawName = function(){
             return $scope.withdrawName
@@ -367,6 +379,8 @@
                 bankBookName: $scope.getBankBookName(),
                 bankBookNumber: $scope.getBankBookNumber(),
                 authorizerName: $scope.getAuthorizerName() ,
+                dueDate:$scope.getDueDate(),
+                createdDate: $scope.getCreatedDate(),
                 table : $scope.getTableData(),
                 
             },function(data,status){
@@ -383,7 +397,7 @@
        
         
         $scope.toMainMenu = function(){
-            const url = "https://uaterp.cbachula.com/home"
+            const url = "https://uaterp.cbachula.com/home";
             window.location.assign(url);
         }
         // $scope.postQuotationItems = function() {
@@ -414,5 +428,5 @@
             
         // }
         
-    })
+    });
     </script>

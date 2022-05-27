@@ -18,7 +18,7 @@ class finModel extends model {
                                     Customer.customer_name,
                                     Customer.customerTitle,
                                     Customer.customer_surname,
-                                    Customer.address,
+                                    SOX.address,
                                     Customer.national_id,
                                     SO.so_no,
                                     SO.product_type,

@@ -306,7 +306,7 @@ class accController extends controller {
     public function return_inventory() {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
-            $this->view->setTitle("Return Inventory (RE)");
+            $this->view->setTitle("Return Inventory (RI)");
             $this->view->suppliers = $this->model->getSuppliers();
             $this->view->REproducts = $this->model->getREProduct();
             $this->view->render("acc/return_inventory", "navbar");
@@ -314,12 +314,12 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->addRE());
         }
     }
-    public function re_dashboard() {
+    public function ri_dashboard() {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
-            $this->view->setTitle("RE-Dashboard");
+            $this->view->setTitle("RI-Dashboard");
             $this->view->REreport = $this->model->getREreport();
-            $this->view->render("acc/re_dashboard", "navbar");
+            $this->view->render("acc/ri_dashboard", "navbar");
         }
     }
 	

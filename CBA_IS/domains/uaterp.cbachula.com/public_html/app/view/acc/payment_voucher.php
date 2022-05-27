@@ -561,15 +561,15 @@
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
         <script>
-            addModal('formValidate1', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้กรอกวันที่');
-            addModal('formValidate2', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Supplier นี้สามารถขอภาษีซื้อได้');
-            addModal('formValidate3', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'เลือก Supplier ก่อนครับผม');
-            addModal('formValidate4', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกประเภทการสั่งจ่าย');
-            addModal('formValidate5', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มรายละเอียดสำหรับออกใบสำคัญสั่งจ่าย');
-            addModal('formValidate6', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มว่าสั่งจ่ายใคร');
-            addModal('formValidate7', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มเลขที่ใบสำคัญ');
-            addModal('formValidate8', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้ใส่จำนวนเงินสั่งจ่าย');
-            addModal('formValidate9', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกว่าสั่งจ่ายในนามอะไร');
+            // addModal('formValidate1', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้กรอกวันที่');
+            // addModal('formValidate2', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Supplier นี้สามารถขอภาษีซื้อได้');
+            // addModal('formValidate3', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'เลือก Supplier ก่อนครับผม');
+            // addModal('formValidate4', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกประเภทการสั่งจ่าย');
+            // addModal('formValidate5', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มรายละเอียดสำหรับออกใบสำคัญสั่งจ่าย');
+            // // addModal('formValidate6', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มว่าสั่งจ่ายใคร');
+            // addModal('formValidate7', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มเลขที่ใบสำคัญ');
+            // addModal('formValidate8', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้ใส่จำนวนเงินสั่งจ่าย');
+            // addModal('formValidate9', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกว่าสั่งจ่ายในนามอะไร');
         </script>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -626,6 +626,8 @@
         $scope.PVA_notes = '';
         $scope.pvPayout='';
         $scope.pvPayTo = '';
+        $scope.bank='';
+        $scope.dueDate='';
 
 
         
@@ -844,7 +846,7 @@
         
         $scope.addPvItem = function() {
             
-            if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && ($scope.pvName==='' || $scope.pvAddress==='')) {
+            if (($scope.selectedPaymentType==='PA') && ($scope.pvName==='' || $scope.pvAddress==='')) {
                 $('#formValidate6').modal('toggle');
             // } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemIV==='') {
             //     $('#formValidate7').modal('toggle');
@@ -1007,10 +1009,7 @@
                 
                 // if($scope.otherExpense) $scope.company_code = '3';
                 
-                if($scope.selectedCompany==='') {
-                    console.log("C")
-                    $('#formValidate9').modal('toggle');
-                } else {
+                
                     var d = new Date();
                     var month = d.getMonth()+1;
                     var day = d.getDate();
@@ -1028,14 +1027,20 @@
                         pv_date: output,
                         pv_detail:$scope.pvItemDetail,
                         ex_no:$scope.pvItemRR,
-                        re_req_no:$scope.pvDetails[0].re_req_no,
+                        re_req_no:$scope.pvItems["re_req_no"],
                         company_code : $scope.company_code,
                         pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
                         totalPaid : $scope.pvItemPaidTotal,
                         totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
-                        bank : $scope.bank
+                        bank : $scope.bank,
+                        payTo :$scope.pvItems["pv_payto"],
+                        payout:$scope.pvPayout,
+                        excDate:$scope.pvItems["create_date"],
+                        bankBookName:$scope.pvItems["bank_book_name"],
+                        bankBookNumber:$scope.pvItems["bank_book_number"],
+                        bankName:$scope.pvItems["bank_name"]
                     }, function(data) {
                         console.log(JSON.stringify(angular.toJson($scope.pvItems)))
                         console.log(data)
@@ -1048,7 +1053,7 @@
                         console.log(error)
                     })
                     
-                }
+                
                 
             } else if($scope.selectedPaymentType==='PD') {
                 
@@ -1068,19 +1073,24 @@
             $("#pvItemRR").prop("disabled", true);
            
             $scope.pvItemRR = re_req.ex_no;
-            console.log($scope.pvItemRR);
+            // console.log($scope.pvItemRR);
             $scope.pvDetails = JSON.parse($scope.ReReqs[index]["details"])
-            console.log( $scope.pvDetails[0].money)
+            // console.log( $scope.pvDetails[0].money)
             $scope.pvItems = $scope.ReReqs[index]
-            console.log( $scope.pvItems);
+            // console.log( $scope.pvItems);
             $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
             var date = $scope.pvItems["authorize_date"];
-            console.log($scope.pvItems)
+            // console.log($scope.pvItems)
             $scope.pvPayto = $scope.pvItems["pv_payto"];
             $scope.pvPayout = $scope.pvItems["pv_payout"];
+            $scope.bank = $scope.pvItems["bank_name"]
+            $scope.pvAddress = $scope.pvItems["pv_address"];
+            $scope.pvName = $scope.pvPayto
+           
+            $scope.dueDate = new Date($scope.pvItems["due_date"]);
             
             const input_date = document.getElementById("pvItemDate");
-            console.log(input_date.value);
+            // console.log(input_date.value);
 
             
             ($scope.ReReqs).forEach(data=>{

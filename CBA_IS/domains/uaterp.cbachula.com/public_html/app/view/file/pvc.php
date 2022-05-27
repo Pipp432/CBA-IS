@@ -35,8 +35,8 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <td><b>สั่งจ่าย</b> {{detail[0].pv_name}}</td>
-                        <td><b>จ่ายเพื่อ</b> {{detail[0].pv_type}}</td>
+                        <td><b>สั่งจ่าย</b> {{detail[0].pv_payto}}</td>
+                        <td><b>จ่ายเพื่อ</b> เบิกค่าใช้จ่าย</td>
                         <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].pv_due_date}}</td>
                     </tr>
                     <tr ng-show="detail[0].supplier_no != ''">
@@ -61,11 +61,11 @@
                     <th>หมายเหตุ</th>
                 </tr>
               
-                    <td style="text-align: left;">{{detail[0].pv_due_date}}</td>
+                    <td style="text-align: left;">{{detail[0].exc_date}}</td>
                     <td style="text-align: left;">{{detail[0].ex_no}}</td>
                     <td style="text-align: left;">{{detail[0].pv_details}}</td>
                     <td style="text-align: left;">{{detail[0].re_req_no}}</td>
-                    <td style="text-align: right;">{{item.paid_total | number:2}}</td>
+                    <td style="text-align: right;">{{detail[0].total_paid| number:2}}</td>
                     <td style="text-align: left;">{{item.note}}</td>
                 
                 <tr>
@@ -78,7 +78,7 @@
         </div>  
         
         <div class="row px-2 mt-3">
-            <p><i>หมายเหตุ : จ่าย {{detail[0].bank}}</i></p>
+            <p><i>หมายเหตุ : จ่าย {{detail[0].bank_book_number}} {{detail[0].bank_name}} {{detail[0].bank_book_name}}</i></p>
         </div>  
     
     </div>

@@ -238,11 +238,11 @@ class fileController extends controller {
             $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
             $this->view->pv = $this->model->getPva(Uri::get(2));
             $this->view->pvaChilds = $this->model->getPvaChild(Uri::get(2));
-            $this->view->render("file/pva");
+            $this->view->render("file/pva"); 
         }
     }
 
-    
+
     public function cs() { 
         if(empty(uri::get(2))) {
             $this->err404();

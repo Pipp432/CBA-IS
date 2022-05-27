@@ -857,7 +857,7 @@ class scmModel extends model {
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
         INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
-        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
+        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0 AND SO.po_no is not null");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1023,7 +1023,7 @@ class scmModel extends model {
     }
 
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SOX.sox_no, Invoice.invoice_no, GROUP_CONCAT(Product.product_no) product_no, GROUP_CONCAT(Product.product_name) product_name, SUM(SOPrinting.quantity) quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=9 GROUP BY sox_no,invoice_no");
+        $sql=$this->prepare("SELECT SOX.sox_no, Invoice.invoice_no, GROUP_CONCAT(Product.product_no) product_no, GROUP_CONCAT(Product.product_name) product_name, SUM(SOPrinting.quantity) quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 GROUP BY sox_no,invoice_no");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

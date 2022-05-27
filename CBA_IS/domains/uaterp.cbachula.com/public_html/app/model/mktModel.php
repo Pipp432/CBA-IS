@@ -68,908 +68,931 @@ class mktModel extends model {
     }
     return json_encode( [] );
   }
-  private function isBangkok( $address ) {
-    return strpos( $address, 'กรุงเทพ' ) || strpos( $address, 'กทม' ) || strpos( $address, 'bangkok' ) || strpos( $address, 'Bangkok' ) || strpos( $address, 'สมุทรปราการ' ) || strpos( $address, 'นนทบุรี' ) || strpos( $address, 'ปทุมธานี' );
-  }
+  // private function isBangkok( $address ) {
+  //   return strpos( $address, 'กรุงเทพ' ) || strpos( $address, 'กทม' ) || strpos( $address, 'bangkok' ) || strpos( $address, 'Bangkok' ) || strpos( $address, 'สมุทรปราการ' ) || strpos( $address, 'นนทบุรี' ) || strpos( $address, 'ปทุมธานี' );
+  // }
 
-  private function calculateWeight( $sos ) {
-    $weight = 0;
-    foreach ( $sos as $so ) {
-      $weight += ( double )$so[ 'weight' ] * ( double )$so[ 'quantity' ];
-    }
-    return $weight;
-  }
+  // private function calculateWeight( $sos ) {
+  //   $weight = 0;
+  //   foreach ( $sos as $so ) {
+  //     $weight += ( double )$so[ 'weight' ] * ( double )$so[ 'quantity' ];
+  //   }
+  //   return $weight;
+  // }
 
-  public function calculate_T_price( $dimension, $weight, $bin_id, $address ) {
-    if ( $dimension <= 40 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 25;
-      } else {
-        $dimension_price = 35;
-      }
-    } else if ( $dimension <= 50 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 30;
-      } else {
-        $dimension_price = 40;
-      }
-    } else if ( $dimension <= 60 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 35;
-      } else {
-        $dimension_price = 45;
-      }
-    } else if ( $dimension <= 70 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 40;
-      } else {
-        $dimension_price = 50;
-      }
-    } else if ( $dimension <= 80 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 45;
-      } else {
-        $dimension_price = 55;
-      }
-    } else if ( $dimension <= 85 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 60;
-      } else {
-        $dimension_price = 60;
-      }
-    } else if ( $dimension <= 90 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 70;
-      } else {
-        $dimension_price = 75;
-      }
-    } else if ( $dimension <= 95 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 80;
-      } else {
-        $dimension_price = 90;
-      }
-    } else if ( $dimension <= 100 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 95;
-      } else {
-        $dimension_price = 105;
-      }
-    } else if ( $dimension <= 105 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 100;
-      } else {
-        $dimension_price = 120;
-      }
-    } else if ( $dimension <= 110 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 110;
-      } else {
-        $dimension_price = 135;
-      }
-    } else if ( $dimension <= 115 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 120;
-      } else {
-        $dimension_price = 150;
-      }
-    } else if ( $dimension <= 120 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 130;
-      } else {
-        $dimension_price = 165;
-      }
-    } else if ( $dimension <= 125 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 140;
-      } else {
-        $dimension_price = 180;
-      }
-    } else if ( $dimension <= 130 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 150;
-      } else {
-        $dimension_price = 195;
-      }
-    } else if ( $dimension <= 135 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 160;
-      } else {
-        $dimension_price = 210;
-      }
-    } else if ( $dimension <= 140 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 170;
-      } else {
-        $dimension_price = 225;
-      }
-    } else if ( $dimension <= 145 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 180;
-      } else {
-        $dimension_price = 240;
-      }
-    } else if ( $dimension <= 150 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 190;
-      } else {
-        $dimension_price = 255;
-      }
-    } else if ( $dimension <= 155 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 200;
-      } else {
-        $dimension_price = 270;
-      }
-    } else if ( $dimension <= 160 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 210;
-      } else {
-        $dimension_price = 285;
-      }
-    } else if ( $dimension <= 165 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 220;
-      } else {
-        $dimension_price = 300;
-      }
-    } else if ( $dimension <= 170 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 230;
-      } else {
-        $dimension_price = 315;
-      }
-    } else if ( $dimension <= 175 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 240;
-      } else {
-        $dimension_price = 330;
-      }
-    } else if ( $dimension <= 180 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 250;
-      } else {
-        $dimension_price = 345;
-      }
-    } else if ( $dimension <= 185 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 260;
-      } else {
-        $dimension_price = 360;
-      }
-    } else if ( $dimension <= 190 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 270;
-      } else {
-        $dimension_price = 375;
-      }
-    } else if ( $dimension <= 195 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 280;
-      } else {
-        $dimension_price = 390;
-      }
-    } else if ( $dimension <= 200 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 290;
-      } else {
-        $dimension_price = 405;
-      }
-    } else if ( $dimension <= 205 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 300;
-      } else {
-        $dimension_price = 420;
-      }
-    } else if ( $dimension <= 210 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 310;
-      } else {
-        $dimension_price = 435;
-      }
-    } else if ( $dimension <= 215 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 320;
-      } else {
-        $dimension_price = 250;
-      }
-    } else if ( $dimension <= 220 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 330;
-      } else {
-        $dimension_price = 465;
-      }
-    } else if ( $dimension <= 225 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 340;
-      } else {
-        $dimension_price = 480;
-      }
-    } else if ( $dimension <= 230 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 350;
-      } else {
-        $dimension_price = 495;
-      }
-    } else if ( $dimension <= 235 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 360;
-      } else {
-        $dimension_price = 510;
-      }
-    } else if ( $dimension <= 240 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 370;
-      } else {
-        $dimension_price = 525;
-      }
-    } else if ( $dimension <= 245 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 380;
-      } else {
-        $dimension_price = 540;
-      }
-    } else if ( $dimension <= 250 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 390;
-      } else {
-        $dimension_price = 555;
-      }
-    } else if ( $dimension <= 255 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 400;
-      } else {
-        $dimension_price = 570;
-      }
-    } else if ( $dimension <= 260 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 410;
-      } else {
-        $dimension_price = 585;
-      }
-    } else if ( $dimension <= 265 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 420;
-      } else {
-        $dimension_price = 600;
-      }
-    } else if ( $dimension <= 270 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 430;
-      } else {
-        $dimension_price = 615;
-      }
-    } else if ( $dimension <= 275 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 440;
-      } else {
-        $dimension_price = 630;
-      }
-    } else if ( $dimension <= 280 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 450;
-      } else {
-        $dimension_price = 645;
-      }
+  private function calculate_total_weight($sos, $bin_id) {
+
+		$weight = 0;
+
+		switch ($bin_id) {
+            case '0,0':     $weight += 25; break;
+            case '0+4':     $weight += 41; break;
+            case 'A':       $weight += 46; break;
+            case '2A':      $weight += 67; break;
+            case 'B':       $weight += 77; break;
+            case '2B':      $weight += 108; break;
+            default:
+        }
+
+        foreach($sos as $so) { $weight += $so['weight'] * $so['quantity']; }
+        return $weight;
+
     }
 
-    if ( $weight <= 1000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 25;
-      } else {
-        $weight_price = 35;
-      }
-    } else if ( $weight <= 2000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 30;
-      } else {
-        $weight_price = 40;
-      }
-    } else if ( $weight <= 3000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 35;
-      } else {
-        $weight_price = 45;
-      }
-    } else if ( $weight <= 4000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 40;
-      } else {
-        $weight_price = 50;
-      }
-    } else if ( $weight <= 5000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 45;
-      } else {
-        $weight_price = 55;
-      }
-    } else if ( $weight <= 6000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 60;
-      } else {
-        $weight_price = 60;
-      }
-    } else if ( $weight <= 7000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 70;
-      } else {
-        $weight_price = 75;
-      }
-    } else if ( $weight <= 8000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 80;
-      } else {
-        $weight_price = 90;
-      }
-    } else if ( $weight <= 9000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 95;
-      } else {
-        $weight_price = 105;
-      }
-    } else if ( $weight <= 10000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 100;
-      } else {
-        $weight_price = 120;
-      }
-    } else if ( $weight <= 11000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 110;
-      } else {
-        $weight_price = 135;
-      }
-    } else if ( $weight <= 12000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 120;
-      } else {
-        $weight_price = 150;
-      }
-    } else if ( $weight <= 13000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 130;
-      } else {
-        $weight_price = 165;
-      }
-    } else if ( $weight <= 14000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 140;
-      } else {
-        $weight_price = 180;
-      }
-    } else if ( $weight <= 15000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 150;
-      } else {
-        $weight_price = 195;
-      }
-    } else if ( $weight <= 16000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 160;
-      } else {
-        $weight_price = 210;
-      }
-    } else if ( $weight <= 17000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 170;
-      } else {
-        $weight_price = 225;
-      }
-    } else if ( $weight <= 18000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 180;
-      } else {
-        $weight_price = 240;
-      }
-    } else if ( $weight <= 19000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 190;
-      } else {
-        $weight_price = 255;
-      }
-    } else if ( $weight <= 20000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 200;
-      } else {
-        $weight_price = 270;
-      }
-    } else if ( $weight <= 21000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 210;
-      } else {
-        $weight_price = 285;
-      }
-    } else if ( $weight <= 22000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 220;
-      } else {
-        $weight_price = 300;
-      }
-    } else if ( $weight <= 23000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 230;
-      } else {
-        $weight_price = 315;
-      }
-    } else if ( $weight <= 24000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 240;
-      } else {
-        $weight_price = 330;
-      }
-    } else if ( $weight <= 25000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 250;
-      } else {
-        $weight_price = 345;
-      }
-    } else if ( $weight <= 26000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 260;
-      } else {
-        $weight_price = 360;
-      }
-    } else if ( $weight <= 27000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 270;
-      } else {
-        $weight_price = 375;
-      }
-    } else if ( $weight <= 28000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 280;
-      } else {
-        $weight_price = 390;
-      }
-    } else if ( $weight <= 29000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 290;
-      } else {
-        $weight_price = 405;
-      }
-    } else if ( $weight <= 30000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 300;
-      } else {
-        $weight_price = 420;
-      }
-    } else if ( $weight <= 31000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 310;
-      } else {
-        $weight_price = 435;
-      }
-    } else if ( $weight <= 32000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 320;
-      } else {
-        $weight_price = 250;
-      }
-    } else if ( $weight <= 33000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 330;
-      } else {
-        $weight_price = 465;
-      }
-    } else if ( $weight <= 34000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 340;
-      } else {
-        $weight_price = 480;
-      }
-    } else if ( $weight <= 35000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 350;
-      } else {
-        $weight_price = 495;
-      }
-    } else if ( $weight <= 36000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 360;
-      } else {
-        $weight_price = 510;
-      }
-    } else if ( $weight <= 37000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 370;
-      } else {
-        $weight_price = 525;
-      }
-    } else if ( $weight <= 38000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 380;
-      } else {
-        $weight_price = 540;
-      }
-    } else if ( $weight <= 39000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 390;
-      } else {
-        $weight_price = 555;
-      }
-    } else if ( $weight <= 40000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 400;
-      } else {
-        $weight_price = 570;
-      }
-    } else if ( $weight <= 41000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 410;
-      } else {
-        $weight_price = 585;
-      }
-    } else if ( $weight <= 42000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 420;
-      } else {
-        $weight_price = 600;
-      }
-    } else if ( $weight <= 43000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 430;
-      } else {
-        $weight_price = 615;
-      }
-    } else if ( $weight <= 44000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 440;
-      } else {
-        $weight_price = 630;
-      }
-    } else if ( $weight <= 45000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 450;
-      } else {
-        $weight_price = 645;
-      }
-    } else if ( $weight <= 46000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 460;
-      } else {
-        $weight_price = 660;
-      }
-    } else if ( $weight <= 47000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 470;
-      } else {
-        $weight_price = 675;
-      }
-    } else if ( $weight <= 48000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 480;
-      } else {
-        $weight_price = 690;
-      }
-    } else if ( $weight <= 49000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 490;
-      } else {
-        $weight_price = 705;
-      }
-    } else if ( $weight <= 50000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 500;
-      } else {
-        $weight_price = 720;
-      }
-    }
 
-    if ( $weight_price >= $dimension_price ) {
-      $final_price = $weight_price;
-    } else if ( $weight_price < $dimension_price ) {
-      $final_price = $dimension_price;
-    }
+//   public function calculate_T_price( $dimension, $weight, $bin_id, $address ) {
+//     if ( $dimension <= 40 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 25;
+//       } else {
+//         $dimension_price = 35;
+//       }
+//     } else if ( $dimension <= 50 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 30;
+//       } else {
+//         $dimension_price = 40;
+//       }
+//     } else if ( $dimension <= 60 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 35;
+//       } else {
+//         $dimension_price = 45;
+//       }
+//     } else if ( $dimension <= 70 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 40;
+//       } else {
+//         $dimension_price = 50;
+//       }
+//     } else if ( $dimension <= 80 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 45;
+//       } else {
+//         $dimension_price = 55;
+//       }
+//     } else if ( $dimension <= 85 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 60;
+//       } else {
+//         $dimension_price = 60;
+//       }
+//     } else if ( $dimension <= 90 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 70;
+//       } else {
+//         $dimension_price = 75;
+//       }
+//     } else if ( $dimension <= 95 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 80;
+//       } else {
+//         $dimension_price = 90;
+//       }
+//     } else if ( $dimension <= 100 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 95;
+//       } else {
+//         $dimension_price = 105;
+//       }
+//     } else if ( $dimension <= 105 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 100;
+//       } else {
+//         $dimension_price = 120;
+//       }
+//     } else if ( $dimension <= 110 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 110;
+//       } else {
+//         $dimension_price = 135;
+//       }
+//     } else if ( $dimension <= 115 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 120;
+//       } else {
+//         $dimension_price = 150;
+//       }
+//     } else if ( $dimension <= 120 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 130;
+//       } else {
+//         $dimension_price = 165;
+//       }
+//     } else if ( $dimension <= 125 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 140;
+//       } else {
+//         $dimension_price = 180;
+//       }
+//     } else if ( $dimension <= 130 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 150;
+//       } else {
+//         $dimension_price = 195;
+//       }
+//     } else if ( $dimension <= 135 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 160;
+//       } else {
+//         $dimension_price = 210;
+//       }
+//     } else if ( $dimension <= 140 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 170;
+//       } else {
+//         $dimension_price = 225;
+//       }
+//     } else if ( $dimension <= 145 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 180;
+//       } else {
+//         $dimension_price = 240;
+//       }
+//     } else if ( $dimension <= 150 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 190;
+//       } else {
+//         $dimension_price = 255;
+//       }
+//     } else if ( $dimension <= 155 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 200;
+//       } else {
+//         $dimension_price = 270;
+//       }
+//     } else if ( $dimension <= 160 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 210;
+//       } else {
+//         $dimension_price = 285;
+//       }
+//     } else if ( $dimension <= 165 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 220;
+//       } else {
+//         $dimension_price = 300;
+//       }
+//     } else if ( $dimension <= 170 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 230;
+//       } else {
+//         $dimension_price = 315;
+//       }
+//     } else if ( $dimension <= 175 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 240;
+//       } else {
+//         $dimension_price = 330;
+//       }
+//     } else if ( $dimension <= 180 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 250;
+//       } else {
+//         $dimension_price = 345;
+//       }
+//     } else if ( $dimension <= 185 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 260;
+//       } else {
+//         $dimension_price = 360;
+//       }
+//     } else if ( $dimension <= 190 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 270;
+//       } else {
+//         $dimension_price = 375;
+//       }
+//     } else if ( $dimension <= 195 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 280;
+//       } else {
+//         $dimension_price = 390;
+//       }
+//     } else if ( $dimension <= 200 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 290;
+//       } else {
+//         $dimension_price = 405;
+//       }
+//     } else if ( $dimension <= 205 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 300;
+//       } else {
+//         $dimension_price = 420;
+//       }
+//     } else if ( $dimension <= 210 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 310;
+//       } else {
+//         $dimension_price = 435;
+//       }
+//     } else if ( $dimension <= 215 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 320;
+//       } else {
+//         $dimension_price = 250;
+//       }
+//     } else if ( $dimension <= 220 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 330;
+//       } else {
+//         $dimension_price = 465;
+//       }
+//     } else if ( $dimension <= 225 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 340;
+//       } else {
+//         $dimension_price = 480;
+//       }
+//     } else if ( $dimension <= 230 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 350;
+//       } else {
+//         $dimension_price = 495;
+//       }
+//     } else if ( $dimension <= 235 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 360;
+//       } else {
+//         $dimension_price = 510;
+//       }
+//     } else if ( $dimension <= 240 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 370;
+//       } else {
+//         $dimension_price = 525;
+//       }
+//     } else if ( $dimension <= 245 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 380;
+//       } else {
+//         $dimension_price = 540;
+//       }
+//     } else if ( $dimension <= 250 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 390;
+//       } else {
+//         $dimension_price = 555;
+//       }
+//     } else if ( $dimension <= 255 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 400;
+//       } else {
+//         $dimension_price = 570;
+//       }
+//     } else if ( $dimension <= 260 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 410;
+//       } else {
+//         $dimension_price = 585;
+//       }
+//     } else if ( $dimension <= 265 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 420;
+//       } else {
+//         $dimension_price = 600;
+//       }
+//     } else if ( $dimension <= 270 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 430;
+//       } else {
+//         $dimension_price = 615;
+//       }
+//     } else if ( $dimension <= 275 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 440;
+//       } else {
+//         $dimension_price = 630;
+//       }
+//     } else if ( $dimension <= 280 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 450;
+//       } else {
+//         $dimension_price = 645;
+//       }
+//     }
 
-    $final_price = $final_price;
+//     if ( $weight <= 1000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 25;
+//       } else {
+//         $weight_price = 35;
+//       }
+//     } else if ( $weight <= 2000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 30;
+//       } else {
+//         $weight_price = 40;
+//       }
+//     } else if ( $weight <= 3000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 35;
+//       } else {
+//         $weight_price = 45;
+//       }
+//     } else if ( $weight <= 4000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 40;
+//       } else {
+//         $weight_price = 50;
+//       }
+//     } else if ( $weight <= 5000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 45;
+//       } else {
+//         $weight_price = 55;
+//       }
+//     } else if ( $weight <= 6000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 60;
+//       } else {
+//         $weight_price = 60;
+//       }
+//     } else if ( $weight <= 7000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 70;
+//       } else {
+//         $weight_price = 75;
+//       }
+//     } else if ( $weight <= 8000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 80;
+//       } else {
+//         $weight_price = 90;
+//       }
+//     } else if ( $weight <= 9000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 95;
+//       } else {
+//         $weight_price = 105;
+//       }
+//     } else if ( $weight <= 10000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 100;
+//       } else {
+//         $weight_price = 120;
+//       }
+//     } else if ( $weight <= 11000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 110;
+//       } else {
+//         $weight_price = 135;
+//       }
+//     } else if ( $weight <= 12000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 120;
+//       } else {
+//         $weight_price = 150;
+//       }
+//     } else if ( $weight <= 13000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 130;
+//       } else {
+//         $weight_price = 165;
+//       }
+//     } else if ( $weight <= 14000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 140;
+//       } else {
+//         $weight_price = 180;
+//       }
+//     } else if ( $weight <= 15000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 150;
+//       } else {
+//         $weight_price = 195;
+//       }
+//     } else if ( $weight <= 16000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 160;
+//       } else {
+//         $weight_price = 210;
+//       }
+//     } else if ( $weight <= 17000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 170;
+//       } else {
+//         $weight_price = 225;
+//       }
+//     } else if ( $weight <= 18000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 180;
+//       } else {
+//         $weight_price = 240;
+//       }
+//     } else if ( $weight <= 19000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 190;
+//       } else {
+//         $weight_price = 255;
+//       }
+//     } else if ( $weight <= 20000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 200;
+//       } else {
+//         $weight_price = 270;
+//       }
+//     } else if ( $weight <= 21000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 210;
+//       } else {
+//         $weight_price = 285;
+//       }
+//     } else if ( $weight <= 22000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 220;
+//       } else {
+//         $weight_price = 300;
+//       }
+//     } else if ( $weight <= 23000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 230;
+//       } else {
+//         $weight_price = 315;
+//       }
+//     } else if ( $weight <= 24000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 240;
+//       } else {
+//         $weight_price = 330;
+//       }
+//     } else if ( $weight <= 25000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 250;
+//       } else {
+//         $weight_price = 345;
+//       }
+//     } else if ( $weight <= 26000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 260;
+//       } else {
+//         $weight_price = 360;
+//       }
+//     } else if ( $weight <= 27000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 270;
+//       } else {
+//         $weight_price = 375;
+//       }
+//     } else if ( $weight <= 28000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 280;
+//       } else {
+//         $weight_price = 390;
+//       }
+//     } else if ( $weight <= 29000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 290;
+//       } else {
+//         $weight_price = 405;
+//       }
+//     } else if ( $weight <= 30000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 300;
+//       } else {
+//         $weight_price = 420;
+//       }
+//     } else if ( $weight <= 31000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 310;
+//       } else {
+//         $weight_price = 435;
+//       }
+//     } else if ( $weight <= 32000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 320;
+//       } else {
+//         $weight_price = 250;
+//       }
+//     } else if ( $weight <= 33000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 330;
+//       } else {
+//         $weight_price = 465;
+//       }
+//     } else if ( $weight <= 34000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 340;
+//       } else {
+//         $weight_price = 480;
+//       }
+//     } else if ( $weight <= 35000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 350;
+//       } else {
+//         $weight_price = 495;
+//       }
+//     } else if ( $weight <= 36000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 360;
+//       } else {
+//         $weight_price = 510;
+//       }
+//     } else if ( $weight <= 37000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 370;
+//       } else {
+//         $weight_price = 525;
+//       }
+//     } else if ( $weight <= 38000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 380;
+//       } else {
+//         $weight_price = 540;
+//       }
+//     } else if ( $weight <= 39000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 390;
+//       } else {
+//         $weight_price = 555;
+//       }
+//     } else if ( $weight <= 40000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 400;
+//       } else {
+//         $weight_price = 570;
+//       }
+//     } else if ( $weight <= 41000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 410;
+//       } else {
+//         $weight_price = 585;
+//       }
+//     } else if ( $weight <= 42000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 420;
+//       } else {
+//         $weight_price = 600;
+//       }
+//     } else if ( $weight <= 43000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 430;
+//       } else {
+//         $weight_price = 615;
+//       }
+//     } else if ( $weight <= 44000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 440;
+//       } else {
+//         $weight_price = 630;
+//       }
+//     } else if ( $weight <= 45000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 450;
+//       } else {
+//         $weight_price = 645;
+//       }
+//     } else if ( $weight <= 46000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 460;
+//       } else {
+//         $weight_price = 660;
+//       }
+//     } else if ( $weight <= 47000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 470;
+//       } else {
+//         $weight_price = 675;
+//       }
+//     } else if ( $weight <= 48000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 480;
+//       } else {
+//         $weight_price = 690;
+//       }
+//     } else if ( $weight <= 49000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 490;
+//       } else {
+//         $weight_price = 705;
+//       }
+//     } else if ( $weight <= 50000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 500;
+//       } else {
+//         $weight_price = 720;
+//       }
+//     }
 
-    if ( $bin_id == '0,0' ) {
-      $final_price += 1.45;
-    } else if ( $bin_id == '0+4' ) {
-      $final_price += 2.4;
-    } else if ( $bin_id == 'A' ) {
-      $final_price += 2.8;
-    } else if ( $bin_id == '2A' ) {
-      $final_price += 3.6;
-    } else if ( $bin_id == 'B' ) {
-      $final_price += 4.6;
-    } else if ( $bin_id == '2B' ) {
-      $final_price += 5.9;
-    } else if ( $bin_id == 'C' ) {
-      $final_price += 6.2;
-    } 
-  
+//     if ( $weight_price >= $dimension_price ) {
+//       $final_price = $weight_price;
+//     } else if ( $weight_price < $dimension_price ) {
+//       $final_price = $dimension_price;
+//     }
 
-    return $final_price;
+//     $final_price = $final_price * 0.95;
 
-  }
+//     if ( $bin_id == 'A' ) {
+//       $final_price += 5.1;
+//     } else if ( $bin_id == '2A' ) {
+//       $final_price += 5.9;
+//     } else if ( $bin_id == 'B' ) {
+//       $final_price += 6.2;
+//     } else if ( $bin_id == 'C' ) {
+//       $final_price += 7.7;
+//     } else if ( $bin_id == '2C' ) {
+//       $final_price += 11.5;
+//     } else if ( $bin_id == 'D' ) {
+//       $final_price += 10.4;
+//     } else if ( $bin_id == 'E' ) {
+//       $final_price += 11.4;
+//     } else if ( $bin_id == 'I' ) {
+//       $final_price += 15.6;
+//     } else if ( $bin_id == 'S' ) {
+//       $final_price += 4.7;
+//     }
 
-  public function calculate_T_price_Kerry( $dimension, $weight, $bin_id, $address ) {
-    if ( $dimension <= 40 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 35;
-      } else {
-        $dimension_price = 55;
-      }
-    } else if ( $dimension <= 60 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 65;
-      } else {
-        $dimension_price = 80;
-      }
-    } else if ( $dimension <= 75 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 80;
-      } else {
-        $dimension_price = 90;
-      }
-    } else if ( $dimension <= 90 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 90;
-      } else {
-        $dimension_price = 100;
-      }
-    } else if ( $dimension <= 105 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 130;
-      } else {
-        $dimension_price = 145;
-      }
-    } else if ( $dimension <= 120 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 185;
-      } else {
-        $dimension_price = 205;
-      }
-    } else if ( $dimension <= 150 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 290;
-      } else {
-        $dimension_price = 330;
-      }
-    } else if ( $dimension <= 200 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $dimension_price = 380;
-      } else {
-        $dimension_price = 420;
-      }
-    } 
+//     return $final_price;
 
-    if ( $weight <= 2000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 35;
-      } else {
-        $weight_price = 55;
-      }
-    } else if ( $weight <= 6000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 65;
-      } else {
-        $weight_price = 80;
-      }
-    } else if ( $weight <= 7000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 80;
-      } else {
-        $weight_price = 90;
-      }
-    } else if ( $weight <= 10000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 90;
-      } else {
-        $weight_price = 100;
-      }
-    } else if ( $weight <= 15000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 130;
-      } else {
-        $weight_price = 145;
-      }
-    } else if ( $weight <= 20000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 290;
-      } else {
-        $weight_price = 330;
-      }
-    } else if ( $weight <= 25000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $weight_price = 380;
-      } else {
-        $weight_price = 420;
-      }
-    } 
+//   }
 
-    if ( $weight_price >= $dimension_price ) {
-      $final_price = $weight_price;
-    } else if ( $weight_price < $dimension_price ) {
-      $final_price = $dimension_price;
-    }
+//   public function calculate_T_price_Kerry( $dimension, $weight, $bin_id, $address ) {
+//     if ( $dimension <= 40 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 35;
+//       } else {
+//         $dimension_price = 55;
+//       }
+//     } else if ( $dimension <= 60 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 65;
+//       } else {
+//         $dimension_price = 80;
+//       }
+//     } else if ( $dimension <= 75 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 80;
+//       } else {
+//         $dimension_price = 90;
+//       }
+//     } else if ( $dimension <= 90 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 90;
+//       } else {
+//         $dimension_price = 100;
+//       }
+//     } else if ( $dimension <= 105 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 130;
+//       } else {
+//         $dimension_price = 145;
+//       }
+//     } else if ( $dimension <= 120 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 185;
+//       } else {
+//         $dimension_price = 205;
+//       }
+//     } else if ( $dimension <= 150 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 290;
+//       } else {
+//         $dimension_price = 330;
+//       }
+//     } else if ( $dimension <= 200 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $dimension_price = 380;
+//       } else {
+//         $dimension_price = 420;
+//       }
+//     } 
 
-    if ( $bin_id == 'A' ) {
-      $final_price += 5.1;
-    } else if ( $bin_id == '2A' ) {
-      $final_price += 5.9;
-    } else if ( $bin_id == 'B' ) {
-      $final_price += 6.2;
-    } else if ( $bin_id == 'C' ) {
-      $final_price += 7.7;
-    } else if ( $bin_id == '2C' ) {
-      $final_price += 11.5;
-    } else if ( $bin_id == 'D' ) {
-      $final_price += 10.4;
-    } else if ( $bin_id == 'E' ) {
-      $final_price += 11.4;
-    } else if ( $bin_id == 'I' ) {
-      $final_price += 15.6;
-    } else if ( $bin_id == 'S' ) {
-      $final_price += 4.7;
-    }
+//     if ( $weight <= 2000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 35;
+//       } else {
+//         $weight_price = 55;
+//       }
+//     } else if ( $weight <= 6000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 65;
+//       } else {
+//         $weight_price = 80;
+//       }
+//     } else if ( $weight <= 7000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 80;
+//       } else {
+//         $weight_price = 90;
+//       }
+//     } else if ( $weight <= 10000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 90;
+//       } else {
+//         $weight_price = 100;
+//       }
+//     } else if ( $weight <= 15000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 130;
+//       } else {
+//         $weight_price = 145;
+//       }
+//     } else if ( $weight <= 20000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 290;
+//       } else {
+//         $weight_price = 330;
+//       }
+//     } else if ( $weight <= 25000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $weight_price = 380;
+//       } else {
+//         $weight_price = 420;
+//       }
+//     } 
 
-    return $final_price;
+//     if ( $weight_price >= $dimension_price ) {
+//       $final_price = $weight_price;
+//     } else if ( $weight_price < $dimension_price ) {
+//       $final_price = $dimension_price;
+//     }
 
-  }
+//     if ( $bin_id == 'A' ) {
+//       $final_price += 5.1;
+//     } else if ( $bin_id == '2A' ) {
+//       $final_price += 5.9;
+//     } else if ( $bin_id == 'B' ) {
+//       $final_price += 6.2;
+//     } else if ( $bin_id == 'C' ) {
+//       $final_price += 7.7;
+//     } else if ( $bin_id == '2C' ) {
+//       $final_price += 11.5;
+//     } else if ( $bin_id == 'D' ) {
+//       $final_price += 10.4;
+//     } else if ( $bin_id == 'E' ) {
+//       $final_price += 11.4;
+//     } else if ( $bin_id == 'I' ) {
+//       $final_price += 15.6;
+//     } else if ( $bin_id == 'S' ) {
+//       $final_price += 4.7;
+//     }
+
+//     return $final_price;
+
+//   }
 	
-  public function calculate_T_price_JT( $x_d, $weight, $bin_id, $address ) {
-	if ($weight>$x_d) {
-		$m_weight=$weight;
-	} else if ($x_d>$weight){
-		$m_weight=$x_d;
-	}
-    if ( $m_weight <= 1000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 23;
-      } else {
-        $m_weight_price = 30;
-      }
-    } else if ( $m_weight <= 2000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 39;
-      } else {
-        $m_weight_price = 49;
-      }
-    } else if ( $m_weight <= 3000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 49;
-      } else {
-        $m_weight_price = 49;
-      }
-    } else if ( $m_weight <= 4000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 60;
-      } else {
-        $m_weight_price = 60;
-      }
-    } else if ( $m_weight <= 5000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 65;
-      } else {
-        $m_weight_price = 65;
-      }
-    } else if ( $m_weight <= 6000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 70;
-      } else {
-        $m_weight_price = 70;
-      }
-    } else if ( $m_weight <= 7000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 85;
-      } else {
-        $m_weight_price = 85;
-      }
-    } else if ( $m_weight <= 8000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 90;
-      } else {
-        $m_weight_price = 90;
-      }
-    } else if ( $m_weight <= 9000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 95;
-      } else {
-        $m_weight_price = 95;
-      }
-    } else if ( $m_weight <= 10000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 100;
-      } else {
-        $m_weight_price = 100;
-      }
-    } else if ( $m_weight <= 11000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 130;
-      } else {
-        $m_weight_price = 130;
-      }
-    } else if ( $m_weight <= 12000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 145;
-      } else {
-        $m_weight_price = 145;
-      }
-    } else if ( $m_weight <= 13000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 160;
-      } else {
-        $m_weight_price = 160;
-      }
-    } else if ( $m_weight <= 14000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 175;
-      } else {
-        $m_weight_price = 175;
-      }
-    } else if ( $m_weight <= 15000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 185;
-      } else {
-        $m_weight_price = 185;
-      }
-    } else if ( $m_weight <= 16000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 270;
-      } else {
-        $m_weight_price = 270;
-      }
-    } else if ( $m_weight <= 17000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 275;
-      } else {
-        $m_weight_price = 275;
-      }
-    } else if ( $m_weight <= 18000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 280;
-      } else {
-        $m_weight_price = 280;
-      }
-    } else if ( $m_weight <= 19000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 285;
-      } else {
-        $m_weight_price = 285;
-      }
-    } else if ( $m_weight <= 20000 ) {
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 290;
-      } else {
-        $m_weight_price = 290;
-      }
-    } else if ( $m_weight > 20000 ) {
-      $r_w=$m_weight-20000;
-      $add_price=($r_w/1000)*10;
-      if ( $this->isBangkok( $address ) ) {
-        $m_weight_price = 290+$add_price;
-      } else {
-        $m_weight_price = 290+$add_price;
-      }
-    } 
+//   public function calculate_T_price_JT( $x_d, $weight, $bin_id, $address ) {
+// 	if ($weight>$x_d) {
+// 		$m_weight=$weight;
+// 	} else if ($x_d>$weight){
+// 		$m_weight=$x_d;
+// 	}
+//     if ( $m_weight <= 1000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 23;
+//       } else {
+//         $m_weight_price = 30;
+//       }
+//     } else if ( $m_weight <= 2000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 39;
+//       } else {
+//         $m_weight_price = 49;
+//       }
+//     } else if ( $m_weight <= 3000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 49;
+//       } else {
+//         $m_weight_price = 49;
+//       }
+//     } else if ( $m_weight <= 4000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 60;
+//       } else {
+//         $m_weight_price = 60;
+//       }
+//     } else if ( $m_weight <= 5000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 65;
+//       } else {
+//         $m_weight_price = 65;
+//       }
+//     } else if ( $m_weight <= 6000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 70;
+//       } else {
+//         $m_weight_price = 70;
+//       }
+//     } else if ( $m_weight <= 7000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 85;
+//       } else {
+//         $m_weight_price = 85;
+//       }
+//     } else if ( $m_weight <= 8000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 90;
+//       } else {
+//         $m_weight_price = 90;
+//       }
+//     } else if ( $m_weight <= 9000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 95;
+//       } else {
+//         $m_weight_price = 95;
+//       }
+//     } else if ( $m_weight <= 10000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 100;
+//       } else {
+//         $m_weight_price = 100;
+//       }
+//     } else if ( $m_weight <= 11000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 130;
+//       } else {
+//         $m_weight_price = 130;
+//       }
+//     } else if ( $m_weight <= 12000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 145;
+//       } else {
+//         $m_weight_price = 145;
+//       }
+//     } else if ( $m_weight <= 13000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 160;
+//       } else {
+//         $m_weight_price = 160;
+//       }
+//     } else if ( $m_weight <= 14000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 175;
+//       } else {
+//         $m_weight_price = 175;
+//       }
+//     } else if ( $m_weight <= 15000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 185;
+//       } else {
+//         $m_weight_price = 185;
+//       }
+//     } else if ( $m_weight <= 16000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 270;
+//       } else {
+//         $m_weight_price = 270;
+//       }
+//     } else if ( $m_weight <= 17000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 275;
+//       } else {
+//         $m_weight_price = 275;
+//       }
+//     } else if ( $m_weight <= 18000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 280;
+//       } else {
+//         $m_weight_price = 280;
+//       }
+//     } else if ( $m_weight <= 19000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 285;
+//       } else {
+//         $m_weight_price = 285;
+//       }
+//     } else if ( $m_weight <= 20000 ) {
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 290;
+//       } else {
+//         $m_weight_price = 290;
+//       }
+//     } else if ( $m_weight > 20000 ) {
+//       $r_w=$m_weight-20000;
+//       $add_price=($r_w/1000)*10;
+//       if ( $this->isBangkok( $address ) ) {
+//         $m_weight_price = 290+$add_price;
+//       } else {
+//         $m_weight_price = 290+$add_price;
+//       }
+//     } 
 
-    $final_price=$m_weight_price;
+//     $final_price=$m_weight_price;
 
-    if ( $bin_id == 'A' ) {
-      $final_price += 5.1;
-    } else if ( $bin_id == '2A' ) {
-      $final_price += 5.9;
-    } else if ( $bin_id == 'B' ) {
-      $final_price += 6.2;
-    } else if ( $bin_id == 'C' ) {
-      $final_price += 7.7;
-    } else if ( $bin_id == '2C' ) {
-      $final_price += 11.5;
-    } else if ( $bin_id == 'D' ) {
-      $final_price += 10.4;
-    } else if ( $bin_id == 'E' ) {
-      $final_price += 11.4;
-    } else if ( $bin_id == 'I' ) {
-      $final_price += 15.6;
-    } else if ( $bin_id == 'S' ) {
-      $final_price += 4.7;
-    }
+//     if ( $bin_id == 'A' ) {
+//       $final_price += 5.1;
+//     } else if ( $bin_id == '2A' ) {
+//       $final_price += 5.9;
+//     } else if ( $bin_id == 'B' ) {
+//       $final_price += 6.2;
+//     } else if ( $bin_id == 'C' ) {
+//       $final_price += 7.7;
+//     } else if ( $bin_id == '2C' ) {
+//       $final_price += 11.5;
+//     } else if ( $bin_id == 'D' ) {
+//       $final_price += 10.4;
+//     } else if ( $bin_id == 'E' ) {
+//       $final_price += 11.4;
+//     } else if ( $bin_id == 'I' ) {
+//       $final_price += 15.6;
+//     } else if ( $bin_id == 'S' ) {
+//       $final_price += 4.7;
+//     }
 
-    return $final_price;
+//     return $final_price;
 
-  }
+//   }
 	
   public function calculateTransportationPrice() {
 
@@ -982,7 +1005,7 @@ class mktModel extends model {
       ];
       if ( $data[ 'w' ] <= 14 && $data[ 'h' ] <= 6 && $data[ 'd' ] <= 20 ) {
         $bin_id = 'A';
-        $weight += 80;
+        $weight = $this->calculate_total_weight($sos, 'A');
         $dimension = 14 + 6 + 20;
 		$x_d=(((14*20*6)/6000)*1000);
         //} else if($data['w']<=14 && $data['h']<=12 && $data['d']<=20) {
@@ -1017,33 +1040,35 @@ class mktModel extends model {
         $dimension = $data[ 'w' ] + $data[ 'h' ] + $data[ 'd' ];
 		$x_d=((($data[ 'w' ]*$data[ 'd' ]*$data[ 'h' ])/6000)*1000);
         $bin_id = 'NONE';
+        $weight = $this->calculate_total_weight($sos, '');
       }
-      $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-      $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
-      $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-      $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
-      $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
-      $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
-      if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
-		  $flash_price +=10;
-		  $flash_oprice +=10;
-		  $kerry_price +=10;
-		  $kerry_oprice +=10;
-		  $jt_price +=10;
-		  $jt_oprice +=10;
-	  }
-      return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
+    //   $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+    //   $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
+    //   $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+    //   $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
+    //   $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
+    //   $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
+        $prices = $this->calculate_thai_post_price($weight);
+    //   if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
+	// 	  $flash_price +=10;
+	// 	  $flash_oprice +=10;
+	// 	  $kerry_price +=10;
+	// 	  $kerry_oprice +=10;
+	// 	  $jt_price +=10;
+	// 	  $jt_oprice +=10;
+	//   }
+    //   return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
     } else {
       $data = [ 'username' => '6241153926@student.chula.ac.th',
         'api_key' => '9df6d9456992fede5095c28587c8ab32',
         'bins' => [
-          ["w"=> 8.5, "h"=> 9, "d"=> 13, "id"=> "0,0"],
-          ["w"=> 11, "h"=> 10, "d"=> 17, "id"=> "0+4"],
-          ["w"=> 14, "h"=> 6, "d"=> 20, "id"=> "A"],
-          ["w"=> 14, "h"=> 12, "d"=> 20, "id"=> "2A"],
-          ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
-          ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
-          ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
+            ["w"=> 8.5, "h"=> 9, "d"=> 13, "id"=> "0,0"],
+            ["w"=> 11, "h"=> 10, "d"=> 17, "id"=> "0+4"],
+            ["w"=> 14, "h"=> 6, "d"=> 20, "id"=> "A"],
+            ["w"=> 14, "h"=> 12, "d"=> 20, "id"=> "2A"],
+            ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
+            ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
+            ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
         ]
       ];
 
@@ -1066,7 +1091,7 @@ class mktModel extends model {
 	  	}
       }
       if ( count( $item_list ) == 0 ) {
-        return [ 'flash_price' => 0,'kerry_price'=>0, 'jt_price'=>0 ,'bin_id' => 'NONE', 'errer' => 'ถ้าสินค้าไม่ใช่บัตรเงินสดติดต่อ IS' ];
+        return [ 'prices' => 0,'bin_id' => 'NONE', 'errer' => 'ถ้าสินค้าไม่ใช่บัตรเงินสดติดต่อ IS' ];
       }
       if ( count( $item_list ) == 1 and $item_list[ 0 ][ 'q' ]== 1) {
         $data = [ 'w' => $item_list[ 0 ][ 'w' ],
@@ -1075,29 +1100,31 @@ class mktModel extends model {
 		  ];
 		  if ( $data[ 'w' ] <= 14 && $data[ 'h' ] <= 6 && $data[ 'd' ] <= 20 ) {
 			$bin_id = 'A';
-			$weight += 80;
+			$weight = $this->calculate_total_weight($sos, 'A');
 			$dimension = 14 + 6 + 20;
 			$x_d=(((14*20*6)/6000)*1000);
 		  } else {
 			$dimension = $data[ 'w' ] + $data[ 'h' ] + $data[ 'd' ];
+            $weight = $this->calculate_total_weight($sos, '');
 			$x_d=((($data[ 'w' ]*$data[ 'd' ]*$data[ 'h' ])/6000)*1000);
 			$bin_id = 'NONE';
 		  }
-		  $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-		  $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
-		  $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-		  $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
-		  $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
-		  $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
-		  if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
-			  $flash_price +=10;
-			  $flash_oprice +=10;
-			  $kerry_price +=10;
-			  $kerry_oprice +=10;
-			  $jt_price +=10;
-			  $jt_oprice +=10;
-		  }
-		  return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
+		//   $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
+		//   $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
+		//   $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
+        $prices = $this->calculate_thai_post_price($weight);
+		//   if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
+		// 	  $flash_price +=10;
+		// 	  $flash_oprice +=10;
+		// 	  $kerry_price +=10;
+		// 	  $kerry_oprice +=10;
+		// 	  $jt_price +=10;
+		// 	  $jt_oprice +=10;
+		//   }
+		//   return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
       }
       $data[ 'items' ] = $item_list;
       $query = json_encode( $data );
@@ -1128,48 +1155,89 @@ class mktModel extends model {
           $dimension = $bin[ 'bin_data' ][ 'h' ] + $bin[ 'bin_data' ][ 'w' ] + $bin[ 'bin_data' ][ 'd' ];
           $x_d=((($bin[ 'bin_data' ][ 'w' ]*$bin[ 'bin_data' ][ 'd' ]*$bin[ 'bin_data' ][ 'h' ])/6000)*1000);
         }
-        $bins = $data[ 'bins' ];
-        foreach ( $bins as $bin ) {
-          $latest = $bin[ 'id' ];
-          if ( $bin[ 'id' ] == $bin_id ) {
-            if ( $bin_id == '0,0' ) {
-              $weight += 50;
-            } else if ( $bin_id == '0+4' ) {
-              $weight += 50;
-            } else if ( $bin_id == 'A' ) {
-              $weight += 80;
-            } else if ( $bin_id == '2A' ) {
-              $weight += 90;
-            } else if ( $bin_id == 'B' ) {
-              $weight += 130;
-            } else if ( $bin_id == '2B' ) {
-              $weight += 130;
-            } else if ( $bin_id == 'C' ) {
-              $weight += 190;
-            } 
-          }
-        }
-		  $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-		  $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
-		  $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
-		  $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
-		  $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
-		  $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
-		  if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
-			  $flash_price +=10;
-			  $flash_oprice +=10;
-			  $kerry_price +=10;
-			  $kerry_oprice +=10;
-			  $jt_price +=10;
-			  $jt_oprice +=10;
-		  }
-		  return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
+        // $bins = $data[ 'bins' ];
+        // foreach ( $bins as $bin ) {
+        //   $latest = $bin[ 'id' ];
+        //   if ( $bin[ 'id' ] == $bin_id ) {
+        //     if ( $bin_id == 'A' ) {
+        //       $weight += 80;
+        //     } else if ( $bin_id == '2A' ) {
+        //       $weight += 90;
+        //     } else if ( $bin_id == 'B' ) {
+        //       $weight += 130;
+        //     } else if ( $bin_id == 'C' ) {
+        //       $weight += 190;
+        //     } else if ( $bin_id == '2C' ) {
+        //       $weight += 200;
+        //     } else if ( $bin_id == 'D' ) {
+        //       $weight += 250;
+        //     } else if ( $bin_id == 'E' ) {
+        //       $weight += 310;
+        //     } else if ( $bin_id == 'I' ) {
+        //       $weight += 360;
+        //     }
+        //   }
+          $bins = $data['bins'];
+                    foreach ($bins as $bin){
+                        $latest = $bin['id'];
+                        if ($bin['id'] == $bin_id){
+							$weight = $this->calculate_total_weight($sos, $bin_id);
+                        } 
+                    }
+        
+		//   $flash_price = $this->calculate_T_price( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $flash_oprice = $this->calculate_T_price( $dimension, $weight, $bin_id, 'หี' );
+		//   $kerry_price = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $kerry_oprice = $this->calculate_T_price_Kerry( $dimension, $weight, $bin_id, 'หี' );
+		//   $jt_price = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, ' กรุงเทพ ' );
+		//   $jt_oprice = $this->calculate_T_price_JT( $x_d, $weight, $bin_id, 'หี' );
+            $prices = $this->calculate_thai_post_price($weight);
+		//   if ($sos[ 0 ][ 'product_line' ] != 0 && $sos[ 0 ][ 'product_line' ] != 1) {
+		// 	  $flash_price +=10;
+		// 	  $flash_oprice +=10;
+		// 	  $kerry_price +=10;
+		// 	  $kerry_oprice +=10;
+		// 	  $jt_price +=10;
+		// 	  $jt_oprice +=10;
+		//   }
+		//   return [ 'flash_price' => $flash_price, 'flash_oprice' => $flash_oprice,'kerry_price' => $kerry_price, 'kerry_oprice' => $kerry_oprice,'jt_price' => $jt_price, 'jt_oprice' => $jt_oprice, 'bin_id' => $bin_id, 'dimension' => $dimension, 'weight' => $weight ];
       } else {
         return [ 'error' => 'ของเยอะเกินจ้า มาคุยกับ IS', 'bin_id' => 'X', 'flash_price' => '99999999', 'flash_oprice' => '99999999','kerry_price' => '99999999', 'kerry_oprice' => '99999999','jt_price' => '99999999', 'jt_oprice' => '99999999' ];
       }
     }
 
   }
+
+  public function calculate_thai_post_price($weight) {
+
+    $price_reg = 0;
+		$price_ems = 0;
+
+		if($weight <= 500) {
+			$price_reg = 30;
+			$price_ems = 40;
+		} else if($weight <= 2500) {
+			$price_reg = 40;
+			$price_ems = 50;
+		} else if($weight <= 5000) {
+			$price_reg = 40;
+			$price_ems = 60;
+		} else if($weight <= 8000) {
+			$price_reg = 60;
+			$price_ems = 80;
+		} else {
+			$price_reg = 90;
+			$price_ems = 110;
+		}
+
+		return [
+			'reg' => $price_reg,
+			'ems' => $price_ems
+		];
+
+
+    } 
+  
 
   public function addCommart() {
 
@@ -1721,31 +1789,42 @@ class mktModel extends model {
   }
   // Change_Cancel SOX Module
   public function ChangeCancelSOX() {
-    $sql = $this->prepare( "UPDATE SOX 
-    LEFT JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
-    LEFT JOIN SO ON SOXPrinting.so_no = SO.so_no
-    LEFT JOIN SOPrinting on SO.so_no = SOPrinting.so_no
-    LEFT JOIN PointLog on SOXPrinting.so_no = PointLog.note
-    SET
-    SOX.cancelled = 1,
-    SO.cancelled = 1,
-    SOPrinting.cancelled = 1,
-    PointLog.note = 1
-    WHERE SOX.sox_no = ? and SOX.done = -1 and SOX.slip_uploaded = 0;
+    $soxItemsArray = json_decode(input::post('soxItems'), true); 
+    $soxItemsArray = json_decode($soxItemsArray, true);
     
-    DELETE FROM StockOut
-    WHERE file_no in (select so_no from SO WHERE cancelled = 1)
+    $soxList = array();
     
-     " );
-    $sql->execute( [ input::post( 'sox' ) ] );
-    if ( $sql->rowCount() > 0 ) {
-      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    foreach($soxItemsArray as $soxItem) {
+        
+        if (!in_array($soxItem['sox_no'], $soxList)) {
+              
+            $soxList += [$soxItem['sox_no']];
+            
+            
+            // update cancel in SOX SO SOPrinting PointLog
+            $sql = $this->prepare("UPDATE SOX 
+            LEFT JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
+            LEFT JOIN SO ON SOXPrinting.so_no = SO.so_no
+            LEFT JOIN SOPrinting on SO.so_no = SOPrinting.so_no
+            LEFT JOIN PointLog on SOXPrinting.so_no = PointLog.note
+            SET
+            SOX.cancelled = 1,
+            SO.cancelled = 1,
+            SOPrinting.cancelled = 1,
+            PointLog.cancelled = 1
+            WHERE SOX.sox_no = ? and SOX.done = -1 and SOX.slip_uploaded = 0;
+            
+            DELETE FROM StockOut
+            WHERE file_no in (select so_no from SO WHERE cancelled = 1)");                                             
+            $sql->execute([$soxItem['sox_no']]);
+            
+        }
+        
     }
-    return json_encode( [] );
   }
   //cancel_Sox Select
   public function getsoxs(){
-    $sql = $this->prepare("SELECT SOX.sox_no, SOPrinting.so_no, SOPrinting.product_no, Product.product_name,SOPrinting.total_sales,SOX.done, SOX.slip_uploaded,SOX.cancelled
+    $sql = $this->prepare("SELECT SOX.sox_no, SOX.employee_id, SOPrinting.so_no, SOPrinting.product_no,SOPrinting.quantity, Product.product_name,SOPrinting.total_sales,SOX.done, SOX.slip_uploaded,SOX.cancelled
     FROM SOX
     INNER JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
     INNER JOIN SOPrinting ON SOXPrinting.so_no = SOPrinting.so_no
@@ -1761,11 +1840,11 @@ class mktModel extends model {
 
   //cancel_onlyso Select
   public function getso(){
-    $sql = $this->prepare("SELECT  SOPrinting.so_no, SOPrinting.product_no, Product.product_name,SOPrinting.total_sales,SO.done
+    $sql = $this->prepare("SELECT  SO.so_no, SO.employee_id, Product.product_no,Product.product_name,SOPrinting.quantity,SOPrinting.total_sales,SO.done
     FROM  SO
     INNER JOIN SOPrinting ON SO.so_no = SOPrinting.so_no
     INNER JOIN Product ON SOPrinting.product_no = Product.product_no
-    WHERE SO.done = 0
+    WHERE SO.done = 0 and SO.cancelled = 0
     ");
     $sql->execute();
     if ($sql->rowCount() > 0) {
@@ -1775,22 +1854,34 @@ class mktModel extends model {
   }
   // Change_Cancel SO Module
   public function ChangeCancelSO() {
-    $sql = $this->prepare( "update SO
-    left join SOPrinting on SO.so_no = SOPrinting.so_no
-    left join PointLog on SO.so_no = PointLog.note
-    set SO.cancelled = 1,
-    SOPrinting.cancelled = 1,
-    PointLog.cancelled = 1
-    where SO.so_no = ? and SO.done = 0;
+    $soItemsArray = json_decode(input::post('soItems'), true); 
+    $soItemsArray = json_decode($soItemsArray, true);
     
-    DELETE FROM StockOut
-    WHERE file_no in (select so_no from SO WHERE cancelled = 1)
-     " );
-    $sql->execute( [ input::post( 'so' ) ] );
-    if ( $sql->rowCount() > 0 ) {
-      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    $soList = array();
+    
+    foreach($soItemsArray as $soItem) {
+        
+        if (!in_array($soItem['so_no'], $soList)) {
+              
+            $soList += [$soItem['so_no']];
+            
+            
+            // update cancel in SOX SO SOPrinting PointLog
+            $sql = $this->prepare("update SO
+            left join SOPrinting on SO.so_no = SOPrinting.so_no
+            left join PointLog on SO.so_no = PointLog.note
+            set SO.cancelled = 1,
+            SOPrinting.cancelled = 1,
+            PointLog.cancelled = 1
+            where SO.so_no = ? and SO.done = 0;
+            
+            DELETE FROM StockOut
+            WHERE file_no in (select so_no from SO WHERE cancelled = 1)");                                             
+            $sql->execute([$soItem['so_no']]);
+            
+        }
+        
     }
-    return json_encode( [] );
   }
   // =====================================================================================================================================================================================
   // =====================================================================================================================================================================================
@@ -4742,7 +4833,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     
     $sql = $this->prepare("update Reimbursement_Request SET withdraw_date=?, withdraw_name=?, employee_id=?, 
     line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? ,authorizer_name=?, 
-    details=? WHERE re_req_no  = ?");
+    details=?,due_date=? WHERE re_req_no  = ?");
     $success = $sql->execute([
       
       input::post( 'withdrawDate' ),
@@ -4755,6 +4846,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       input::post( 'bankBookNumber' ),
       input::post( 'authorizerName' ),
       input::post( 'table' ),
+      input::post( 'dueDate' ),
       input::post( 're_req_no' )
       
       
