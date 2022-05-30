@@ -326,20 +326,20 @@
 						<tr ng-show="selectedProductType == 'Install'">
 							
 							<th style="text-align: right;" colspan="6">
-								<div class="custom-control custom-checkbox">
-									<input type="checkbox" class="custom-control-input" id="payment0" name="payment0" value="0" ng-click="getFee()">
+								<div class="custom-control">
+									<input type="radio" class="custom-control-input" id="payment0" name="payment" value="0" ng-click="getFee()">
 									<label class="custom-control-label" for="payment0">ชำระผ่าน Mobile Banking</label>
 								</div>
 							
                             
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="payment1" name="payment1" value="0" ng-click="getFee()">
+                                <div class="custom-control ">
+                                    <input type="radio" class="custom-control-input" id="payment1" name="payment" value="0" ng-click="getFee()">
 									<label class="custom-control-label" for="payment1">ชำระผ่าน K+shop (Credit Card)</label>
 								</div>
                             
                             
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="payment2" name="payment2" value="0" ng-click="getFee()">
+                            <div class="custom-control">
+                                <input type="radio" class="custom-control-input" id="payment2" name="payment" value="0" ng-click="getFee()">
 								<label class="custom-control-label" for="payment2">ชำระผ่าน Facebook Pay</label>
 							</div>
 
@@ -461,7 +461,14 @@
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
         $scope.fee=0;
-        $scope.selected = false;
+        if($scope.selectedProductType==='Install'){
+            $scope.selected = false;
+        }
+        else{
+            $scope.selected = true;
+        }
+
+        
 		
 		// $scope.payment_check = function() {
         //     if (document.getElementById('payment').checked==true){
@@ -480,9 +487,7 @@
 
        
         $scope.getFee = function(){
-            $('input[type="checkbox"]').click(function() {
-                $('input[type="checkbox"]').not(this).prop("checked", false);
-            });
+          
           
             if($("#payment0").prop('checked')==true)
             {
