@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController" ng-init="onload()">
 
-        <h2 class="mt-3">ยืนยันการจัดเตรียม / Confirm Preparation</h2>
+        <h2 class="mt-3">สร้างใบจัดเตรียมสินค้า</h2>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING CI/RR -->
@@ -219,6 +219,7 @@
             } else{
 				$('#confirmModal').modal('hide');
             $.post("/scm/confirm_prepare/update_ird_items", {
+                box_count : $scope.count,
                 post : true,
                 irdItems : JSON.stringify(angular.toJson($scope.irdItems))
             }, function(data) { 

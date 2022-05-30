@@ -215,6 +215,7 @@
             } else{
 				$('#confirmModal').modal('hide');
             $.post("/scm/ird/post_ird_items", {
+                box_count : $scope.count,
                 post : true,
                 irdItems : JSON.stringify(angular.toJson($scope.irdItems))
             }, function(data) {

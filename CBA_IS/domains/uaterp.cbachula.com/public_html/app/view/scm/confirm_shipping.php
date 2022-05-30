@@ -61,6 +61,11 @@
 								<a target="_blank" href="https://jtexpress.co.th/index/query/gzquery.html?bills={{sox.tracking_number}}">คลิก!!</a></td>
 							<td style="text-align: right;" ng-show="sox.note == 'Kerry'">{{sox.status}} 
 								<a target="_blank" href="https://th.kerryexpress.com/th/track/v2/?track={{sox.tracking_number}}">คลิก!!</a></td>
+                            <td style="text-align: right;" ng-show="sox.note == 'Thai Post (REG)'">{{sox.status}} 
+                                <a target="_blank" href="https://track.thailandpost.co.th/?trackNumber={{sox.tracking_number}}">คลิก!!</a></td>
+                            <td style="text-align: right;" ng-show="sox.note == 'Thai Post (EMS)'">{{sox.status}} 
+                                <a target="_blank" href="https://track.thailandpost.co.th/?trackNumber={{sox.tracking_number}}">คลิก!!</a></td>
+
                         </tr>
                     </table>
                 </div>

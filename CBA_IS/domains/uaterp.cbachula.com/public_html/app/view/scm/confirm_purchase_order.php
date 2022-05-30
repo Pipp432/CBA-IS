@@ -30,16 +30,18 @@
                         <tr>
                             <th>เลข PO</th>
                             <th>วันที่</th>
+                            <th>Product line</th>
                             <th>รายการสินค้า</th>
                             <th>ราคาซื้อ</th>
                         </tr>
                         <tr ng-repeat="po in pos | unique:'po_no' | filter:{po_no:filterPo}" ng-click="addCpoItem(po)">
-                            <td>{{po.po_no}}</td>
-                            <td>{{po.po_date}}</td>
+                            <td style="text-align: center;">{{po.po_no}}</td>
+                            <td style="text-align: center;">{{po.po_date}}</td>
+                            <td style="text-align: center;">{{po.product_line}}</td>
                             <td><ul class="my-0">
                                 <li ng-repeat="po_item in pos" ng-show="po_item.po_no===po.po_no">{{po_item.product_name}} (x{{po_item.quantity}})</li>
                             </ul></td>
-                            <td style="text-align: right;">{{po.po_total_purchase_price | number:2}}</td>
+                            <td style="text-align: center;">{{po.po_total_purchase_price | number:2}}</td>
                         </tr>
                     </table>
                 </div>
