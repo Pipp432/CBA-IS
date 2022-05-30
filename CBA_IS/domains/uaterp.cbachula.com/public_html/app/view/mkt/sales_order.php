@@ -139,21 +139,7 @@
                     </div>
 
                   
-                    <div ng-show="selectedProductType == 'Install'">
-                    <label for="dropdownPaymentTyper">Payment Method</label>
-                        <select class="form-control" ng-model="selectedPaymentType" id="dropdownPaymentType">
-
-                            <option value="">เลือกวิธีจ่าย</option>
-
-                            <option value="CC">Credit Card</option>
-
-                            <option value="KS">K+ Shop</option>
-
-                            <option value="FB">FaceBook Pay</option>
-
-                        </select>
-
-                    </div>
+                    
                     <br>
                     <div class="col-md-2">
 
@@ -341,20 +327,20 @@
 							
 							<th style="text-align: right;" colspan="6">
 								<div class="custom-control custom-checkbox">
-									<input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
-									<label class="custom-control-label" for="payment">ชำระผ่าน Mobile Banking</label>
+									<input type="checkbox" class="custom-control-input" id="payment0" name="payment0" value="0" ng-click="getFee()">
+									<label class="custom-control-label" for="payment0">ชำระผ่าน Mobile Banking</label>
 								</div>
 							
                             
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
-									<label class="custom-control-label" for="payment">ชำระผ่าน K+shop</label>
+                                    <input type="checkbox" class="custom-control-input" id="payment1" name="payment1" value="0" ng-click="getFee()">
+									<label class="custom-control-label" for="payment1">ชำระผ่าน K+shop (Credit Card)</label>
 								</div>
                             
                             
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
-								<label class="custom-control-label" for="payment">ชำระผ่าน Facebook Pay</label>
+                                <input type="checkbox" class="custom-control-input" id="payment2" name="payment2" value="0" ng-click="getFee()">
+								<label class="custom-control-label" for="payment2">ชำระผ่าน Facebook Pay</label>
 							</div>
 
                             </th>
@@ -368,7 +354,7 @@
 
                             <th style="text-align: right;" colspan="5">ราคารวม</th>
 
-                            <th style="text-align: right;">{{totalPrice | number:2}}</th>
+                            <th style="text-align: right;">{{totalPrice + fee | number:2}}</th>
 
                         </tr>
 
@@ -469,18 +455,54 @@
 
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
+        $scope.fee=0;
 		
-		$scope.payment_check = function() {
-            if (document.getElementById('payment').checked==true){
-					document.getElementById('payment').value = '1';
-			}else if(document.getElementById('payment').checked==false){
-					document.getElementById('payment').value = '0';
-			}
-            //if (document.getElementById('payment_K').checked==true){
-			//		document.getElementById('payment_K').value = '1';
-			//}else if(document.getElementById('payment_K').checked==false){
-			//		document.getElementById('payment_K').value = '0';
-			//}
+		// $scope.payment_check = function() {
+        //     if (document.getElementById('payment').checked==true){
+		// 			document.getElementById('payment').value = '1';
+		// 	}else if(document.getElementById('payment').checked==false){
+		// 			document.getElementById('payment').value = '0';
+		// 	}
+        //     //if (document.getElementById('payment_K').checked==true){
+		// 	//		document.getElementById('payment_K').value = '1';
+		// 	//}else if(document.getElementById('payment_K').checked==false){
+		// 	//		document.getElementById('payment_K').value = '0';
+		// 	//}
+        // }
+        $scope.getFee = function(){
+            $('input[type="checkbox"]').click(function() {
+                $('input[type="checkbox"]').not(this).prop("checked", false);
+            });
+          
+            if($("#payment0").prop('checked')==true)
+            {
+                $scope.fee=0
+                $scope.selectedPaymentType = 'MB'
+
+               
+            }
+            else if($("#payment1").prop('checked')==true)
+            {
+                $scope.fee=$scope.totalPrice*(2.45/100)
+                $scope.selectedPaymentType = 'CC'
+               
+                
+            }
+            else if($("#payment2").prop('checked')==true)
+            {
+                $scope.fee=$scope.totalPrice*(2.75/100)
+                $scope.selectedPaymentType = 'FB'
+             
+              
+            }else{
+                $scope.fee=0;
+                $scope.selectedPaymentType = ''
+            }
+        
+
+            
+           
+            console.log($scope.fee)
         }
 
 
@@ -549,9 +571,7 @@
                 });
 
             } else {
-
                 $scope.seller_employee_name = '';
-
             }
 
         }
@@ -896,7 +916,7 @@
 
                 productType : $scope.selectedProductType,
 				
-				payment : document.getElementById("payment").value,
+				payment : 0 ,
 
                 vatType : $scope.vatType,
 

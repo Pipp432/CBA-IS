@@ -105,7 +105,8 @@ class fileModel extends model {
                                     Invoice.total_sales_no_vat as invoice_total_purchase_no_vat,
                                     Invoice.total_sales_vat as invoice_total_sales_vat,
                                     Invoice.total_sales_price as invoice_total_sales_price,
-                                    Invoice.sales_price_thai
+                                    Invoice.sales_price_thai,
+                                    Invoice.payment_type
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no

@@ -408,11 +408,27 @@ class finModel extends model {
                     $total_sales_price = (double) $value['so_total_sales_price2'];
                 }
 
+                $soxslip = explode(' ', $value['slip_datetime']);
+                $soxslips = strtotime($soxslip[0]);
+                $soxdate = explode(' ', $value['sox_datetime']);
+                $soxdates = strtotime($soxdate[0]);
+                $diff = $soxslips- $soxdates;
+                $range = abs($diff/(60*60*24));
+                if($range <= 2.0){
+                    $commission = (double) $value['so_commission'];
+                } elseif($range <= 4.0){
+                    $commission = ((double) $value['so_commission']) / 2;
+                } else{
+                    $commission = 0;
+                }
+
+
+        
                 
                 // insert IV
                 $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
-                                        file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note)
-                                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");  
+                                        file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note,payment_type)
+                                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?,?)");  
                 $sql->execute([
                     $iv_no,
                     $value['employee_id'],
@@ -430,7 +446,8 @@ class finModel extends model {
                     (double) $value['so_commission'],
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     $cr_no,
-                    input::post('noted')
+                    input::post('noted'),
+                    input::post('payment_type')
                 ]); 
                 $check = $sql->errorInfo()[0];
 
@@ -461,7 +478,7 @@ class finModel extends model {
                 $sql->execute([
                     $cr_no,
                     $value['employee_id'],
-                    (double) $value['so_commission']
+                    (double)$commission
                 ]);
 					
 				//echo 'before';
@@ -1835,7 +1852,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     //real pva now
 
     public function GetPVAforWS() {
-        $sql = $this->prepare("SELECT pv_no,product_names,total_paid from PVA_bundle where pv_status = 3 ORDER BY pv_no ASC");
+        $sql = $this->prepare("SELECT pv_no,product_names,(total_paid + additional_cash) from PVA_bundle where pv_status = 3 ORDER BY pv_no ASC");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

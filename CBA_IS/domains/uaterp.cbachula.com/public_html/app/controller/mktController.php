@@ -42,33 +42,33 @@ class mktController extends controller {
         
         // $sos = json_decode(input::post('sos'), true);
         
-		$priceList = $this->model->calculateTransportationPrice();
-		$jprice=json_encode($priceList);
+		$priceList = $this->model->calculate(input::post('sos'));
+        $priceList = json_decode($priceList, true);
+        // print_r($priceList);
+        // echo $priceList['shippings'][0]['price'];
+        // echo $priceList['shippings'][1]['price'];
+		// $jprice=json_encode($priceList);
 		if (isset($pricelist['error'])){
 			echo 'error';
 		} else{
-			//echo $jprice.'<br>';
+		// 	//echo $jprice.'<br>';
 			echo '<div class="form-check" style="margin-bottom:1rem;">';
 			
-			echo '<input class="form-check-input" type="radio" name="transportRadio" id="Flash" value="'.$priceList['flash_price'].'" checked>';
-			echo '<lable>Courier : <b>Flash</b> </lable> </br>';
+			echo '<input class="form-check-input" type="radio" name="transportRadio" id="ThaiPost" value="'.$priceList['price'].'" checked>';
+			echo '<lable>Courier : <b>Thailand Post</b> </lable> </br>';
 			echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
-			echo '<lable>กรุงเทพและปริมณฑล : <b>'.$priceList['flash_price'].'</b> บาท</lable> </br>';
-			echo '<lable>อื่นๆ : <b>'.$priceList['flash_oprice'].'</b> บาท</lable><br>';
+			echo '<lable>ลงทะเบียน : <b>'.$priceList['shippings'][0]['price'].'</b> บาท</lable> </br>';
+			echo '<lable>EMS : <b>'.$priceList['shippings'][1]['price'].'</b> บาท</lable><br>';
 			
-			echo '<input class="form-check-input" type="radio" name="transportRadio" id="Kerry" value="'.$priceList['kerry_price'].'" checked>';
-			echo '<lable>Courier : <b>Kerry</b> </lable> </br>';
-			echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
-			echo '<lable>กรุงเทพและปริมณฑล : <b>'.$priceList['kerry_price'].'</b> บาท</lable> </br>';
-			echo '<lable>อื่นๆ : <b>'.$priceList['kerry_oprice'].'</b> บาท</lable><br>';
+		// 	echo '<input class="form-check-input" type="radio" name="transportRadio" id="ThaiPost(EMS)" value="'.$priceList['price'].'" checked>';
+		// 	echo '<lable>Courier : <b>Kerry</b> </lable> </br>';
+		// 	echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
+		// 	echo '<lable>กรุงเทพและปริมณฑล : <b>'.$priceList['kerry_price'].'</b> บาท</lable> </br>';
+		// 	echo '<lable>อื่นๆ : <b>'.$priceList['kerry_oprice'].'</b> บาท</lable><br>';
 			
-			echo '<input class="form-check-input" type="radio" name="transportRadio" id="JT" value="'.$priceList['jt_price'].'" checked>';
-			echo '<lable>Courier : <b>JT</b> </lable> </br>';
-			echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
-			echo '<lable>กรุงเทพและปริมณฑล : <b>'.$priceList['jt_price'].'</b> บาท</lable> </br>';
-			echo '<lable>อื่นๆ : <b>'.$priceList['jt_oprice'].'</b> บาท</lable>';
+	
 			
-			/*echo '</div><br>ทุกคนอย่าสนสิ่งนี้ สำหรับ IS ดู อย่าแพนิคเมื่อเห็นสิ่งนี้ ปล่อยมันขึ้นได้เลยค่า <br>'.$priceList['response'].'<br> ';*/
+		// 	/*echo '</div><br>ทุกคนอย่าสนสิ่งนี้ สำหรับ IS ดู อย่าแพนิคเมื่อเห็นสิ่งนี้ ปล่อยมันขึ้นได้เลยค่า <br>'.$priceList['response'].'<br> ';*/
 		}
 		
     }

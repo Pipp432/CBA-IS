@@ -311,7 +311,7 @@ class accModel extends model {
             input::post("sox_no"),
             input::post("invoice_no"),
             input::post("note"),
-            input::post("wsd_no"),
+            input::post("exd_no"),
         ]);
         if($success) echo 'success';
         else echo print_r($statement->errorInfo());
@@ -380,7 +380,7 @@ class accModel extends model {
         $success = $sql->execute([
             $cn_no,  
             json_decode(session::get('employee_detail'), true)['employee_id'],
-            input::post('wsd_no'),
+            input::post('exd_no'),
             input::post('company'),
             input::post('total_commission')
             // input::post('diff_total_sales_price'),
@@ -414,7 +414,7 @@ class accModel extends model {
             $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, new_total_sales_price, diff_total_sales_price, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
                                           values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
             $sql->execute( [
-                input::post('wsd_no'),
+                input::post('exd_no'),
                 $value[ 'product_no' ],
                 input::post('new_total_sales_price'),
                 input::post('diff_total_sales_price'),
@@ -430,7 +430,7 @@ class accModel extends model {
         $sql = $this->prepare("UPDATE WSD set wsd_status=1
                                 where WSD.wsd_no = ?");
         $sql->execute([
-            input::post('wsd_no')
+            input::post('exd_no')
         ]);
 
         $invoice_no = input::post('invoice_no');
@@ -607,7 +607,7 @@ class accModel extends model {
             input::post("bank"),
             input::post("bank_no"),
             input::post("recipient_address"),
-            input::post("wsd_no"),
+            input::post("exd_no"),
         ]);
     }
     
@@ -649,7 +649,7 @@ class accModel extends model {
         $sql = $this->prepare("UPDATE WSD set wsd_status=2
                                 where WSD.wsd_no = ?");
         $sql->execute([
-            input::post('wsd_no')
+            input::post('exd_no')
         ]);
 
 
@@ -827,34 +827,34 @@ class accModel extends model {
                                 inner join Supplier on Supplier.supplier_no = View_CIRR_NOIV.supplier_no
                                 union
                                 select
-                                	RE.re_no,
-                                    RE.re_date,
-                                    RE.approved_employee,
-                                    RE.supplier_no,
+                                	RI.ri_no,
+                                    RI.ri_date,
+                                    RI.approved_employee,
+                                    RI.supplier_no,
                                     '-',
-                                    RE.total_return_no_vat * -1,
-                                    RE.total_return_vat * -1,
-                                    RE.total_return_price * -1,
-                                    RE.cancelled,
-                                    RE.note,
+                                    RI.total_return_no_vat * -1,
+                                    RI.total_return_vat * -1,
+                                    RI.total_return_price * -1,
+                                    RI.cancelled,
+                                    RI.note,
                                     PO.po_no,
                                     PO.product_type,
                                     Supplier.supplier_name,
-                                    REPrinting.product_no,
+                                    RIPrinting.product_no,
                                     Product.product_name,
                                     '-',
-                                    REPrinting.purchase_no_vat * -1,
-                                    REPrinting.purchase_vat * -1,
-                                    REPrinting.purchase_price * -1,
-                                    REPrinting.quantity,
+                                    RIPrinting.purchase_no_vat * -1,
+                                    RIPrinting.purchase_vat * -1,
+                                    RIPrinting.purchase_price * -1,
+                                    RIPrinting.quantity,
                                     Product.unit,
-                                    REPrinting.total_purchase_price * -1,
-                                    'RE'
-                                from RE
-                                join REPrinting on REPrinting.re_no = RE.re_no
-                                left join RR on REPrinting.rr_no = RR.rr_no
+                                    RIPrinting.total_purchase_price * -1,
+                                    'RI'
+                                from RI
+                                join RIPrinting on RIPrinting.ri_no = RI.ri_no
+                                left join RR on RIPrinting.rr_no = RR.rr_no
                                 left join PO on PO.po_no = RR.po_no
-                                left join Product on Product.product_no = REPrinting.product_no
+                                left join Product on Product.product_no = RIPrinting.product_no
                                 left join Supplier on Supplier.supplier_no = Product.supplier_no
                                 where RR.invoice_no = '-'");
         $sql->execute();
@@ -976,7 +976,7 @@ class accModel extends model {
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                     $sql->execute([$value['ci_no'], '11', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
                 
-                } else if ($value['type'] == 'RE') {
+                } else if ($value['type'] == 'RI') {
                     
                     // insert AccountDetail sequence 8
                     // Dr เจ้าหนี้การค้า - Supplier XXX
@@ -1386,29 +1386,29 @@ class accModel extends model {
                                 left join Product on Product.product_no = RRPrinting.product_no
                                 union
                                 select
-                                	RE.re_no,
-                                    RE.re_date,
-                                    RE.approved_employee,
-                                    RE.supplier_no,
+                                	RI.ri_no,
+                                    RI.ri_date,
+                                    RI.approved_employee,
+                                    RI.supplier_no,
                                     RR.invoice_no,
-                                    RE.total_return_no_vat * -1,
-                                    RE.total_return_vat * -1,
-                                    RE.total_return_price * -1,
+                                    RI.total_return_no_vat * -1,
+                                    RI.total_return_vat * -1,
+                                    RI.total_return_price * -1,
                                     PO.po_no,
                                     Supplier.vat_type,
-                                    REPrinting.product_no,
+                                    RIPrinting.product_no,
                                     Product.product_name,
-                                    REPrinting.purchase_no_vat * -1,
-                                    REPrinting.purchase_vat * -1,
-                                    REPrinting.purchase_price * -1,
-                                    REPrinting.quantity,
+                                    RIPrinting.purchase_no_vat * -1,
+                                    RIPrinting.purchase_vat * -1,
+                                    RIPrinting.purchase_price * -1,
+                                    RIPrinting.quantity,
                                     Product.unit,
-                                    'RE'
-                                from RE
-                                join REPrinting on REPrinting.re_no = RE.re_no
-                                left join RR on REPrinting.rr_no = RR.rr_no
+                                    'RI'
+                                from RI
+                                join RIPrinting on RIPrinting.ri_no = RI.ri_no
+                                left join RR on RIPrinting.rr_no = RR.rr_no
                                 left join PO on PO.po_no = RR.po_no
-                                left join Product on Product.product_no = REPrinting.product_no
+                                left join Product on Product.product_no = RIPrinting.product_no
                                 left join Supplier on Supplier.supplier_no = Product.supplier_no
                                 where RR.invoice_no <> '-') as cirr_no_pv
                                 inner join Supplier on Supplier.supplier_no = cirr_no_pv.supplier_no
@@ -1491,12 +1491,12 @@ class accModel extends model {
             // // Dr เจ้าหนี้การค้า - Supplier XXX
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$value['ci_no'], 1 , $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'],0, 'PVB']);
+            $sql->execute([$value['ci_no'], '1' , $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'],0, 'PVB']);
 
             // Cr เงินฝากออมทรัพย์ - โครงการ X
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                  values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$iv_no, 2 , '12-1'.$iv_no[0].'00', 0, (double) $value['confirm_total'], 'PVB']);
+            $sql->execute([$iv_no, '2' , '12-1'.$iv_no[0].'00', 0, (double) $value['confirm_total'], 'PVB']);
 
             // insert AccountDetail sequence 12
             // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
@@ -1773,11 +1773,27 @@ class accModel extends model {
     }
 
     public function getPVAConfirmPV() {
-        $sql = $this->prepare("select
+        $sql = $this->prepare("SELECT
                                 	pv_no,
                                     pv_time,
                                     pv_date,
-                                    total_paid,
+                                    (total_paid + additional_cash) as total_paid,
+                                    product_names
+                                from PVA_bundle
+                                where pv_status = 4");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getPVAChildConfirmPV() {
+        $sql = $this->prepare("SELECT
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    (total_paid + additional_cash) as total_paid,
                                     product_names
                                 from PVA_bundle
                                 where pv_status = 4");
@@ -2028,11 +2044,11 @@ class accModel extends model {
                 //dr เงินรองจ่าย
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['pv_no'], 4, '11-1'.$pvno[0].'10', (double) $tot, 0, 'PV']);
+                $sql->execute([$value['pv_no'], '4', '11-1'.$pvno[0].'10', (double) $total_paid, 0, 'PVA']);
                 //cr เงินฝากออมทรัพย์
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value['pv_no'], 5, '12-1300', 0, (double) $tot, 'PV']);
+                $sql->execute([$value['pv_no'], '5', '12-1300', 0, (double) $total_paid, 'PVA']);
 
 
                 $sql = $this->prepare("UPDATE PVA SET pv_status = 5 WHERE pv_no = ?");
@@ -2644,7 +2660,7 @@ class accModel extends model {
     
     
     //RE Product
-    public function getREProduct() {
+    public function getRIProduct() {
         $sql=$this->prepare("select
 									Product.product_no,
 									Product.product_name,
@@ -2674,7 +2690,7 @@ class accModel extends model {
         return json_encode([]);
        }
        
-     public function addRE() {
+     public function addRI() {
 
         
         $productline = input::post('productLine');
@@ -2692,10 +2708,10 @@ class accModel extends model {
             $company = '3';
         }
         
-        $reno = $this->assignRE($company);
+        $reno = $this->assignRI($company);
 
 
-        $sql = $this->prepare("insert into RE (re_no, re_date, supplier_no,  total_return_no_vat, total_return_vat, total_return_price,total_return_price_thai, approved_employee, cancelled)
+        $sql = $this->prepare("insert into RE (ri_no, ri_date, supplier_no,  total_return_no_vat, total_return_vat, total_return_price,total_return_price_thai, approved_employee, cancelled)
                                 values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 0)");
         $sql->execute([
             $reno,
@@ -2707,7 +2723,7 @@ class accModel extends model {
             session::get('employee_id'),
         ]);
 
-        $reItemsArray = json_decode(input::post('reItems'), true); 
+        $reItemsArray = json_decode(input::post('riItems'), true); 
         $reItemsArray = json_decode($reItemsArray, true); 
 
         foreach($reItemsArray as $value) {
@@ -2728,7 +2744,7 @@ class accModel extends model {
                 }
                 else $cutStock = $accumStock;
 
-                $sql = $this->prepare("insert into REPrinting (re_no, product_no,  purchase_no_vat, purchase_vat, purchase_price, quantity, total_purchase_price,  cancelled, rr_no)
+                $sql = $this->prepare("insert into RIPrinting (ri_no, product_no,  purchase_no_vat, purchase_vat, purchase_price, quantity, total_purchase_price,  cancelled, rr_no)
                 values (?, ?, ?, ?, ?, ?, ?, 0 ,?)");
                 $sql->execute([
                 $reno,
@@ -2743,7 +2759,7 @@ class accModel extends model {
                 
         
                 $sql = $this->prepare("insert into StockOut (product_no, file_no,  file_type, date, time, quantity_out, lot,rr_no)
-                values (?, ?,'RE',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, ?,'0' ,?)");
+                values (?, ?,'RI',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, ?,'0' ,?)");
                 $sql->execute([
                 $value['product_no'],
                 $reno,
@@ -2756,16 +2772,16 @@ class accModel extends model {
             
             
             }
-            $debitRE = '21-2'.(input::post('supplierNo'));
-            $creditRE = '51-1'.$company.'10';
+            $debitRI = '21-2'.(input::post('supplierNo'));
+            $creditRI = '51-1'.$company.'10';
             //RE Account1
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '1', $debitRE, (double) input::post('totalNoVat'), 0 , 'RE']);
+            $sql->execute([$reno, '1', $debitRI, (double) input::post('totalNoVat'), 0 , 'RI']);
             //RE Account2
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '2', $creditRE, 0 , (double) input::post('totalNoVat') , 'RE']);
+            $sql->execute([$reno, '2', $creditRI, 0 , (double) input::post('totalNoVat') , 'RI']);
             
             
         
@@ -2776,22 +2792,22 @@ class accModel extends model {
         echo $reno;
         
     }
-    private function assignRE($company) {
+    private function assignRI($company) {
         
         if($company == '1')
         {
-            $rePrefix = '1RE-';
+            $rePrefix = '1RI-';
         }
         else if($company == '2' )
         {
-            $rePrefix = '2RE-';
+            $rePrefix = '2RI-';
         }
         else{
-            $rePrefix = '3RE-';
+            $rePrefix = '3RI-';
         }
 
         
-        $sql=$this->prepare("select ifnull(max(re_no),0) as max from RE where re_no like ?");
+        $sql=$this->prepare("select ifnull(max(ri_no),0) as max from RI where ri_no like ?");
         $sql->execute([$rePrefix.'%']);
         $maxReNo = $sql->fetchAll()[0]['max'];
         $runningNo = '';
@@ -2810,10 +2826,10 @@ class accModel extends model {
         }
         return $rePrefix.$runningNo;
     }
-    public function getREreport() {
-        $sql = $this->prepare("SELECT RE.`re_no`,RE.`re_date`,concat(Supplier.supplier_no,' : ',Supplier.supplier_name) as re_supplier ,RE.total_return_price as re_total 
+    public function getRIreport() {
+        $sql = $this->prepare("SELECT RI.`ri_no`,RI.`ri_date`,concat(Supplier.supplier_no,' : ',Supplier.supplier_name) as ri_supplier ,RE.total_return_price as ri_total 
 FROM RE 
-join Supplier on Supplier.supplier_no = RE.supplier_no");
+join Supplier on Supplier.supplier_no = RI.supplier_no");
         $sql->execute();
         return $sql->fetchAll();
     }   

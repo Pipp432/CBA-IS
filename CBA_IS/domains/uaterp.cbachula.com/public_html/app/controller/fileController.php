@@ -263,7 +263,7 @@ class fileController extends controller {
             if ($this->getPosition() == "ce" || $this->getPosition() == "cm" || $this->getPosition() == "smd" || $this->getPosition() == "scm" || $this->getPosition() == "is" || $this->getPosition() == "acc") {
                 $this->view->setTitle("ใบคืนสินค้า #".uri::get(2));
                 $this->view->re = $this->model->getRE(uri::get(2));
-                $this->view->render("file/re");
+                $this->view->render("file/ri");
             } else {
                 $this->err404();
             }

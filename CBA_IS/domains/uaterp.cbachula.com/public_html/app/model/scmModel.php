@@ -259,7 +259,7 @@ class scmModel extends model {
                                 inner join PO on PO.po_no = POPrinting.po_no
                                 inner join Product on Product.product_no = POPrinting.product_no
                                 inner join Supplier on Supplier.supplier_no = PO.supplier_no and Supplier.product_line = PO.product_line
-                                where POPrinting.received = 0 and POPrinting.cancelled = 0 and not PO.product_type = 'Install'
+                                where POPrinting.received = 0 and POPrinting.cancelled = 0 and PO.product_type in ('Stock','Order')
                                 order by PO.po_no");
         $sql->execute();
         if ($sql->rowCount() > 0) {
@@ -857,7 +857,7 @@ class scmModel extends model {
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
         INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
-        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0 AND SO.po_no is not null");
+        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -890,7 +890,7 @@ class scmModel extends model {
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
         INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
-        WHERE SO.product_type IN ('Stock','Order') AND SO.done=1 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1");
+        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

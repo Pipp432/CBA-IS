@@ -138,8 +138,12 @@
                     <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_vat | number:2}}</th>
                 </tr>
                 <tr>
-                    <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
+                    <th colspan="2" style="text-align: right;">ภาษีบัตรเครดิต</th>
+                    <th colspan="1" style="text-align: right;">{{creditFee | number:2}}</th>
+                </tr>
+                <tr>
+                    <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
+                    <th colspan="2" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 
@@ -240,6 +244,15 @@
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
 			$scope.day = $scope.detail[0].invoice_date.substring(8,10);
+            $scope.creditFee=getCreditCardTax();
+            function getCreditCardTax(){
+                let tax = 0;
+                if(tax=='KS'){tax = (parseFloat($scope.detail[0].invoice_total_purchase_no_vat)*2.45)/100 ;
+
+                }
+                if(tax=='FB')tax = (parseFloat($scope.detail[0].invoice_total_purchase_no_vat)*2.75)/100 ;
+                return tax
+            }
             switch($scope.company) {
                 case '1': $scope.company_id = '0-9920-04240-21-2'; break;
                 case '2': $scope.company_id = '0-9920-04240-22-1'; break;

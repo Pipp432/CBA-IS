@@ -112,8 +112,17 @@
                             <td style="text-align: center;">{{soPrinting.sales_price * soPrinting.quantity | number:2}}</td>
                         </tr>
                         <tr>
+                            <th style="text-align: right;" colspan="4">ราคารวมก่อนภาษี</th>
+                            <th id="totalPrice" style="text-align: right;">{{new_total_price-card_fee-crItems[0].so_total_sales_vat| number:2}}</th>
+                            <!--ผิด table-->
+                        </tr>
+                        <tr>
                             <th style="text-align: right;" colspan="4">ส่วนลด</th>
                             <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_discount | number:2}}</th>
+                        </tr>  
+                        <tr>
+                            <th style="text-align: right;" colspan="4">ภาษี 7%</th>
+                            <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_sales_vat | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
@@ -432,7 +441,8 @@
                 // transferDate : transferDateStr,
                 // transferTime : transferTimeStr,
                 sox_number : $scope.sox.sox_no,
-                crItems : JSON.stringify(angular.toJson($scope.crItems))
+                crItems : JSON.stringify(angular.toJson($scope.crItems)),
+                payment_type:$scope.crItems[0].payment_type
             }, function(data) {
                 console.log(`Return statement: ${data}`);
                 addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);

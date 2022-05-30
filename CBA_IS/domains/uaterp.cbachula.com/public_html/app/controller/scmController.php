@@ -360,7 +360,7 @@ class scmController extends controller {
 	public function confirm_prepare() {
         if(empty(uri::get(2))) {
             $this->requirePostition("scm");
-            $this->view->setTitle("สร้างใบจัดเตรียมสินค้า");
+            $this->view->setTitle("ยืนยันการจัดเตรียม");
             $this->view->render("scm/confirm_prepare", "navbar");
         } else if (uri::get(2)==='update_ird_items') {
             $this->positionEcho('scm', $this->model->updateIRD());

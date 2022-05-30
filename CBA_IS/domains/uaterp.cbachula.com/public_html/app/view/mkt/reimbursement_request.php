@@ -140,7 +140,7 @@
 <script>
     
     function checkBank(bank){
-        const element = document.getElementById("otherBank");
+        const element = $("#otherBank");
         if(bank=='others'){
             element.style.display='block';
         }
@@ -151,7 +151,7 @@
     
     let num = 1;
     function addRows(){
-        const element = document.getElementById(`row${num}`);
+        const element = $(`#row${num}`);
         num++;
         element.insertAdjacentHTML('afterend',`<tr id ="row${num}">
                             <td style ="border: 3px solid #dddddd;">
@@ -177,7 +177,7 @@
          addModal('formValidate5', 'ใบชำระ supplier/PV-C', 'กรุณาเลือกธนาคาร');
          addModal('formValidate6', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ชื่อบัญชีธนาคารที่รับโอน');
          addModal('formValidate7', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ชื่อผู้ร้บรอง');
-         addModal('formValidate8', 'ใบชำระ supplier/PV-C', 'วันที่ผิด');
+         
 </script>
 <script>
     app.controller('moduleAppController', function($scope, $http, $compile) {
@@ -202,10 +202,10 @@
             day = ("0" + date.getDate()).slice(-2);
             return [date.getFullYear(), mnth, day].join("-");
         }
+        // Process datetime object helper function
         function processDate (date){
             let currentDate = new Date();
             if(currentDate.getTime()<date.getTime()) {
-                console.log("Error wrong time");
                 $('#formValidate8').modal('toggle');
                 return;
             }
@@ -220,17 +220,17 @@
             let detailsArray =[];
             let moneyArray =[];
             for (let index = 1; index <= number; index++) {
-                const date = document.getElementById(`dateBox${index}`).value;
+                const date = $(`#dateBox${index}`).value;
                 dateArray.push(date);
             }
            
             for (let index = 1; index <= number; index++) {
-                const details= document.getElementById(`detailsTextbox${index}`).value;
+                const details= $(`#detailsTextbox${index}`).value;
                 detailsArray.push(details);
             }
           
             for (let index = 1; index <= number; index++) {
-                const money = document.getElementById(`moneyTextbox${index}`).value;
+                const money = $(`#moneyTextbox${index}`).value;
                 moneyArray.push(money);
             }
            
@@ -246,6 +246,8 @@
             }
             return JSON.stringify(resultObjectArray);           
         }
+
+
         $scope.getWithdrawDate = function(){
             return processDate($scope.withdrawDate);
         }
@@ -334,7 +336,6 @@
            
             var formData = new FormData(form);
            
-                    
     
             $.ajax({
                 url: "reimbursement_request/post_quotation",
@@ -423,9 +424,7 @@
 		// 			// });
 		// 		}
 		// 	});
-                
-            
-            
+
         // }
         
     });
