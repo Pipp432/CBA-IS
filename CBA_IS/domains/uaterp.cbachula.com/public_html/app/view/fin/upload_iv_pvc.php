@@ -10,7 +10,7 @@
             
                     <table class="table table-hover my-1" ng-show="pvcs.length == 0">
                         <tr ng-show="!isLoad">
-                            <th>ไม่มีใบเบิกค่าใช้จ่าย ที่ยังไม่ได้ออก PV</th>
+                            <th>Nothing to see!</th>
                         </tr>
                         <tr ng-show="isLoad">
                             <th>
@@ -29,10 +29,10 @@
                         </tr>
                         
                         <tr ng-repeat="pvc in pvcs track by $index">
-                            <td style="text-align: center;">{{pvc.pv_no}}</td>
-                            <td style="text-align: center;">{{pvc.pv_date}}</td>
-                            <td style="text-align: center;">{{pvc.total_paid}}</td>
-                            <td style="text-align: center;">
+                            <td>{{pvc.pv_no}}</td>
+                            <td>{{pvc.pv_date}}</td>
+                            <td>{{pvc.total_paid}}</td>
+                            <td>
                                 <form id = "form {{pvc.pv_no}}">
                                 <input type="file" name= "file" id ="file">
                                 </form>
@@ -78,7 +78,7 @@
 </html>
 
 <style>
-    td { border-bottom: 1px solid lightgray; }
+    td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
 </style>
 
@@ -109,12 +109,12 @@
         }).fail(function(response){
             console.log(response)
         }).done(function(d){
-              $scope.goToMainMenu();
+              $scope.reload();
         })
          
       }
-      $scope.goToMainMenu = function(){
-          window.location.assign("https://uaterp.cbachula.com/");
+      $scope.reload = function(){
+         location.reload()
       }
   	});
 

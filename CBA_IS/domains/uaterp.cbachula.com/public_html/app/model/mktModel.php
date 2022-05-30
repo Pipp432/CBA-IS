@@ -1180,73 +1180,6 @@ class mktModel extends model {
     $remark = '';
     $error = '';
 
-    $is_ems_30 = true;
-		$is_reg_35_ems_55 = true;
-		$is_reg_55_ems_65 = true;
-
-		foreach($sos as $so) {
-			$is_ems_30 = $is_ems_30 && in_array($so['supplier_no'], ['822']);
-			$is_reg_35_ems_55 = $is_reg_35_ems_55 && in_array($so['supplier_no'], ['822', '811']);
-			$is_reg_55_ems_65 = $is_reg_55_ems_65 && in_array($so['supplier_no'], ['822', '811', '805', '806', '807', '808', '817']);
-		}
-
-		if($is_ems_30) {
-			return json_encode([
-				"shippings" => [
-					[
-						"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-						"name" => 'Thai Post (EMS)',
-						"price" => 30,
-						"bin_id" => '-',
-						"remark" => $remark
-					]
-				],
-				"error" => $error
-			]);
-		} else if($is_reg_35_ems_55) {
-			return json_encode([
-				"shippings" => [
-					[
-						"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-						"name" => 'Thai Post (REG)',
-						"price" => 35,
-						"bin_id" => '-',
-						"remark" => $remark
-					],
-					[
-						"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-						"name" => 'Thai Post (EMS)',
-						"price" => 55,
-						"bin_id" => '-',
-						"remark" => $remark
-					]
-				],
-				"error" => $error
-			]);
-		} else if($is_reg_55_ems_65) {
-			return json_encode([
-				"shippings" => [
-					[
-						"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-						"name" => 'Thai Post (REG)',
-						"price" => 55,
-						"bin_id" => '-',
-						"remark" => $remark
-					],
-					[
-						"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-						"name" => 'Thai Post (EMS)',
-						"price" => 65,
-						"bin_id" => '-',
-						"remark" => $remark
-					]
-				],
-				"error" => $error
-			]);
-		}
-
-
-
 #1 Only 1 product and 1 EA (without API)
     if (count($sos) == 1 && $sos[0]['quantity'] == 1) {
 
@@ -1474,7 +1407,7 @@ if($weight <= 500) {
   $price_reg = 40;
   $price_ems = 50;
 } else if($weight <= 5000) {
-  $price_reg = 50;
+  $price_reg = 40;
   $price_ems = 60;
 } else if($weight <= 8000) {
   $price_reg = 60;

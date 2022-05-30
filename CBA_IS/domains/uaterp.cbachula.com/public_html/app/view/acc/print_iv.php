@@ -68,7 +68,7 @@
             }, function(data) {
                 addModal('successModal', 'Print IV', 'Print IV succesful');
                 $('#successModal').modal('toggle');
-                $('#successModal').on('hide.bs.modal', function (e) { location.assign('/acc/dashboard') });  
+                $('#successModal').on('hide.bs.modal', function (e) { location.reload() });  
             });
         }
      

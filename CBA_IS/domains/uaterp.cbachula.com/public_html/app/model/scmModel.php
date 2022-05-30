@@ -47,11 +47,10 @@ class scmModel extends model {
                                 where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null
 								ORDER BY SOX.ird_no, SOX.sox_no ASC");
         $sql->execute();
-       
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return $sql->rowCount();
+        return json_encode([]);
     }
     
     // CS Module
@@ -75,8 +74,7 @@ class scmModel extends model {
                 
                 // update SOX 
                 $sql = $this->prepare("update SOX set done = 1 where sox_no = ?");
-                $sql->execute([$value['sox_no']]);
-                echo $sql->errorInfo()[0];
+                $sql->execute([$value['sox_no']]); 
                 
                 // insert IRforACC
                 //$sql = $this->prepare("insert into IRforACC (ir_no, ir_date, approved_employee, invoice_no, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, note)
@@ -95,28 +93,28 @@ class scmModel extends model {
               $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
               $sql->execute([$value['invoice_no'], '4', '24-1'.$value['invoice_no'][0].'00', (double) $value['total_sales_no_vat'], 0, 'IV']);
-              echo $sql->errorInfo()[0];
+              
 				
               // insert AccountDetail sequence 2
               // Cr ขาย - โครงการ X
               $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
               $sql->execute([$value['invoice_no'], '5', '41-1'.$value['invoice_no'][0].'00', 0, (double) $value['total_sales_no_vat'], 'IV']);
-              echo $sql->errorInfo()[0];
+              
 				
               // insert AccountDetail sequence 3
               // Dr ค่า Commission
               $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
               $sql->execute([$value['invoice_no'], '6', '52-1000', (double) $value['commission'], 0, 'IV']);
-              echo $sql->errorInfo()[0];
+              
 				
               // insert AccountDetail sequence 4
               // Cr ค่า Commission ค้างจ่าย
               $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
               $sql->execute([$value['invoice_no'], '7', '22-0000', 0, (double) $value['commission'], 'IV']);
-              echo $sql->errorInfo()[0];
+
           }
           
           if ($value['product_no'] != 'X') {
@@ -125,7 +123,7 @@ class scmModel extends model {
               $sql = $this->prepare("insert into IRPrinting (ir_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, note)
                                       values (?, ?, ?, ?, ?, ?, ?, 0, null)");
               $sql->execute([$value['ird_no'], $value['product_no'], $value['sales_no_vat'], $value['sales_vat'], $value['sales_price'], $value['quantity'], $value['total_sales']]); 
-              echo $sql->errorInfo()[0];
+              
               // insert StockOut
               //$sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, rr_no)
               //                        values (?, ?, 'IRD2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, '-')");
@@ -759,7 +757,6 @@ class scmModel extends model {
 								order by sox_date ASC, sox_no ASC;");
 		
 		$sql->execute();
-       
 		if ($sql->rowCount()>0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
@@ -928,11 +925,10 @@ class scmModel extends model {
 	public function getIrdForUpload(){
 		$sql = $this->prepare("select * from IRD where file_uploaded = 0 and cancelled  = 0");
 		$sql->execute();
-		echo $sql->errorInfo()[0];
+		
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        
         return json_encode([]);
 	}
 	
@@ -1027,7 +1023,7 @@ class scmModel extends model {
     }
 
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SOX.sox_no, Invoice.invoice_no, GROUP_CONCAT(Product.product_no) product_no, GROUP_CONCAT(Product.product_name) product_name, SUM(SOPrinting.quantity) quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 GROUP BY sox_no,invoice_no");
+        $sql=$this->prepare("SELECT SOX.sox_no, Invoice.invoice_no, GROUP_CONCAT(Product.product_no) product_no, GROUP_CONCAT(Product.product_name) product_name, SUM(SOPrinting.quantity) quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 AND SOX.done=0 GROUP BY sox_no,invoice_no");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

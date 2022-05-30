@@ -447,6 +447,11 @@
     th { border-bottom: 1px solid lightgray; text-align: center; }
 
 </style>
+<script>
+         addModal('installValidate', 'Sales Order', 'Please select a payment method');
+        
+         
+</script>
 
 
 
@@ -456,6 +461,7 @@
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
         $scope.fee=0;
+        $scope.selected = false;
 		
 		// $scope.payment_check = function() {
         //     if (document.getElementById('payment').checked==true){
@@ -469,6 +475,10 @@
 		// 	//		document.getElementById('payment_K').value = '0';
 		// 	//}
         // }
+       
+            
+
+       
         $scope.getFee = function(){
             $('input[type="checkbox"]').click(function() {
                 $('input[type="checkbox"]').not(this).prop("checked", false);
@@ -478,6 +488,7 @@
             {
                 $scope.fee=0
                 $scope.selectedPaymentType = 'MB'
+                $scope.selected = true;
 
                
             }
@@ -485,6 +496,7 @@
             {
                 $scope.fee=$scope.totalPrice*(2.45/100)
                 $scope.selectedPaymentType = 'CC'
+                $scope.selected = true;
                
                 
             }
@@ -492,11 +504,13 @@
             {
                 $scope.fee=$scope.totalPrice*(2.75/100)
                 $scope.selectedPaymentType = 'FB'
+                $scope.selected = true;
              
               
             }else{
                 $scope.fee=0;
                 $scope.selectedPaymentType = ''
+                $scope.selected = false;
             }
         
 
@@ -886,7 +900,10 @@
 
                 $scope.finishEdit();
 
-            } else {
+            }else if(!$scope.selected){
+             $('#installValidate').modal('toggle');
+
+            }else {
 
                 console.log($scope.soItems);
 

@@ -139,8 +139,12 @@
                     <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_vat | number:2}}</th>
                 </tr>
                 <tr>
-                    <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
+                    <th colspan="2" style="text-align: right;">ภาษีบัตรเครดิต</th>
+                    <th colspan="1" style="text-align: right;">{{creditCardFee| number:2}}</th>
+                </tr>
+                <tr>
+                    <th colspan="4" style="text-align: right;">จำนวนเงินรวม</th>
+                    <th colspan="3" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 
@@ -213,7 +217,7 @@
 		<div class="row" style="height: 12px"></div>
 		<div class="row" style="width: 100%">
 			<div class="col-10"></div>
-			<div class="col" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</div>
+			<div class="col" style="text-align: right;">{{totalPrice | number:2}}</div>
 		</div>
 
       
@@ -247,6 +251,21 @@
                 case '2': $scope.company_id = '0-9920-04240-22-1'; break;
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
+            }
+            $scope.creditCardFee =0;
+            $scope.totalPrice =0;
+            $scope.calculateCreditCardFee = function(){
+                if($scope.detail[0].paymentType ==='CC'){
+                    $scope.creditCardFee = detail[0].invoice_total_purchase_no_vat*(2.45/100);
+                    $scope.totalPrice =detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                }
+                if($scope.detail[0].paymentType ==='FB'){
+                    $scope.creditCardFee = detail[0].invoice_total_purchase_no_vat*(2.75/100);
+                    $scope.totalPrice =detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                }else{
+                    $scope.creditCardFee =0;
+                    $scope.totalPrice =detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                }
             }
            
         }

@@ -16,7 +16,7 @@
                     </div>
                     <div class = "col-md-6">
                         <label for="dateTextbox">วันครบกำหนดชำระเงิน</label>
-                        <input type="date" class="form-control" id="dateTextbox" ng-model="dueDate">
+                        <input type="date" class="form-control" id="dateTextbox" ng-model="dueDate" ng-change = "dueDateValid()">
                         
                     </div>
                     <div class = "col-md-8">
@@ -114,9 +114,7 @@
                 </form>
                     
                     <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" ng-click="submit()">ยืนยัน</button>
-                     
-           
-           
+                    
                 </div>
            
             
@@ -140,7 +138,7 @@
 <script>
     
     function checkBank(bank){
-        const element = $("#otherBank");
+        const element = document.getElementById("otherBank");
         if(bank=='others'){
             element.style.display='block';
         }
@@ -151,7 +149,7 @@
     
     let num = 1;
     function addRows(){
-        const element = $(`#row${num}`);
+        const element = document.getElementById(`row${num}`);
         num++;
         element.insertAdjacentHTML('afterend',`<tr id ="row${num}">
                             <td style ="border: 3px solid #dddddd;">
@@ -169,14 +167,16 @@
     }
 </script>
 <script>
-         addModal('formValidate0', 'ใบชำระ supplier/PV-C', 'กรุณาใส่วันที่เบิก');
-         addModal('formValidate1', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ชื่อผู้เบิกเงิน');
-         addModal('formValidate2', 'ใบชำระ supplier/PV-C', 'กรุณาใส่รหัสพนักงาน');
-         addModal('formValidate3', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ LINE ID พนักงาน')
-         addModal('formValidate4', 'ใบชำระ supplier/PV-C', 'กรุณาใส่เลขที่ผู้เสียภาษีอากร');
-         addModal('formValidate5', 'ใบชำระ supplier/PV-C', 'กรุณาเลือกธนาคาร');
-         addModal('formValidate6', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ชื่อบัญชีธนาคารที่รับโอน');
-         addModal('formValidate7', 'ใบชำระ supplier/PV-C', 'กรุณาใส่ชื่อผู้ร้บรอง');
+         addModal('formValidate0', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่วันที่เบิก');
+         addModal('formValidate1', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อผู้เบิกเงิน');
+         addModal('formValidate2', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่รหัสพนักงาน');
+         addModal('formValidate3', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ LINE ID พนักงาน')
+         addModal('formValidate4', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่เลขที่ผู้เสียภาษีอากร');
+         addModal('formValidate5', 'ใบเบิกค่าใช้จ่าย', 'กรุณาเลือกธนาคาร');
+         addModal('formValidate6', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อบัญชีธนาคารที่รับโอน');
+         addModal('formValidate7', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อผู้ร้บรอง');
+         addModal('formValidate8', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่วันครบกำหนดชำระเงิน');
+         addModal('formValidate9', 'ใบเบิกค่าใช้จ่าย', 'Invalid due date');
          
 </script>
 <script>
@@ -193,7 +193,7 @@
         $scope.bankBookName='';
         $scope.authorizerName=''; 
         $scope.createdDate= new Date();
-       
+        $scope.valid = false;
 
         // Date utility functions
         function convertDate(str) {
@@ -205,13 +205,9 @@
         // Process datetime object helper function
         function processDate (date){
             let currentDate = new Date();
-            if(currentDate.getTime()<date.getTime()) {
-                $('#formValidate8').modal('toggle');
-                return;
-            }
-            else {
+           
                 return convertDate(date);
-            }
+            
          }
         // Data processing function
         function processTable(){
@@ -220,17 +216,17 @@
             let detailsArray =[];
             let moneyArray =[];
             for (let index = 1; index <= number; index++) {
-                const date = $(`#dateBox${index}`).value;
+                const date = document.getElementById(`dateBox${index}`).value;
                 dateArray.push(date);
             }
            
             for (let index = 1; index <= number; index++) {
-                const details= $(`#detailsTextbox${index}`).value;
+                const details= document.getElementById(`detailsTextbox${index}`).value;
                 detailsArray.push(details);
             }
           
             for (let index = 1; index <= number; index++) {
-                const money = $(`#moneyTextbox${index}`).value;
+                const money = document.getElementById(`moneyTextbox${index}`).value;
                 moneyArray.push(money);
             }
            
@@ -244,6 +240,7 @@
                 resultObjectArray.push(entry);
                 
             }
+
             return JSON.stringify(resultObjectArray);           
         }
 
@@ -284,59 +281,39 @@
         $scope.getTableData=function(){
             return processTable();
         }; 
+
+        $scope.dueDateValid = function(){
+            if($scope.dueDate.getTime()<$scope.createdDate.getTime())$('#formValidate9').modal('toggle');
+        }
         
     
-       
-
-        
-       
-
-    
-        $scope.submit = function(){
+        $scope.validateInput = function(){
             if($scope.withdrawDate ==='') $('#formValidate0').modal('toggle');
             else if($scope.withdrawName==='') $('#formValidate1').modal('toggle');
             else if($scope.employeeId ==='') $('#formValidate2').modal('toggle');
             else if($scope.employeeLine==='') $('#formValidate3').modal('toggle');
             else if($scope.bankName ==='')$('#formValidate4').modal('toggle');
             else if($scope.taxNumber ===''&& typeof $scope.taxNumber != Number)$('#formValidate5').modal('toggle');
-            else if( $scope.bankBookName==='')$('#formValidate6').modal('toggle');
+            else if($scope.bankBookName==='')$('#formValidate6').modal('toggle');
             else if($scope.authorizerName ==='')$('#formValidate7').modal('toggle');
-            else{ 
+            else if($scope.dueDate ==='')$('#formValidate8').modal('toggle');
+            else if($scope.dueDate.getTime()<$scope.createdDate.getTime())$('#formValidate9').modal('toggle');
+            else $scope.valid = true;
+        }
+
+        $scope.submit = function(){
+                $scope.validateInput();
+                if($scope.valid === true){       
                 var confirmModal = addConfirmModal('confirmModal', 'Confirm',"ยืนยันข้อมูล","postQuote()"); 
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
-                
-                // window.open("https://uaterp.cbachula.com/acc/confirm_payment_voucher");
-                
-                
             }
-            
-          
         }
-        // $scope.postQuotationFile = function(){
-        //    var data = new FormData();
-        //     data.append('quotationFile', $('#quotationFile')[0].files[0]);
-        //     $.ajax({
-		// 		url: '/mkt/upload_quotation_file/post_quotation_file',
-		// 		data: data,
-		// 		cache: false,
-		// 		contentType: false,
-		// 		processData: false,
-		// 		method: 'POST',
-		// 		type: 'POST',
-		// 		success: function () {
-		// 			// addModal('successModal', 'Upload Quotation', 'อัพโหลดไฟล์ ใบเสนอราคา เรียบร้อยแล้ว');
-		// 			// $('#successModal').modal('toggle');
-					
-		// 		}
-		// 	});
-        // }
+       
         $scope.postQuote = function(){
             $('#confirmModal').modal('hide');
-           
-            var formData = new FormData(form);
-           
-    
+                var formData = new FormData(form);
+   
             $.ajax({
                 url: "reimbursement_request/post_quotation",
                 type: "POST",
@@ -354,21 +331,25 @@
                     $scope.rq_no = data['rq_no'];
                     $scope.postReReq();
                 } else {
-                    addModal('uploadFailModal', 'upload image', ' 1 fail');
+                    addModal('uploadFailModal', 'upload image');
                     $('#uploadFailModal').modal('toggle');
                 }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
                 console.log(textStatus);
                 console.log(errorThrown);
-                addModal('uploadFailModal', 'upload image', '2 fail');
+                addModal('uploadFailModal', 'upload image');
                 $('#uploadFailModal').modal('toggle');
             });    
-        }
+                
+            }
+            
+        
     
         $scope.postReReq = function(){
             $('#confirmModal').modal('hide');
-            $.post("reimbursement_request/post_reimbursement_Request",{
+           
+                $.post("reimbursement_request/post_reimbursement_Request",{
                 post:true,
                 re_req_no : $scope.rq_no,
                 withdrawDate :$scope.getWithdrawDate(),
@@ -384,48 +365,22 @@
                 createdDate: $scope.getCreatedDate(),
                 table : $scope.getTableData(),
                 
-            },function(data,status){
-                console.log(data,status);
-               
-               
-                
             }).done(function(done){ 
+
                 addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
                  $scope.toMainMenu();
             })
+
         }
+            
+        
        
         
         $scope.toMainMenu = function(){
             const url = "https://uaterp.cbachula.com/home";
             window.location.assign(url);
         }
-        // $scope.postQuotationItems = function() {
-            
-           
-		// 		var data = new FormData();
-        //         data.append('quotationFile', $('#quotationFile')[0].files[0]);
-        //         data.append('PVC_No', $scope.quotationFile);
-                
-		// 	$.ajax({
-		// 		url: '/mkt/pvc/post_quotation_file',
-		// 		data: data,
-		// 		cache: false,
-		// 		contentType: false,
-		// 		processData: false,
-		// 		method: 'POST',
-		// 		type: 'POST',
-		// 		success: function () {
-		// 			// addModal('successModal', 'Upload IRD', 'อัพโหลดไฟล์ IRD เรียบร้อยแล้ว');
-		// 			// $('#successModal').modal('toggle');
-		// 			// $('#successModal').on('hide.bs.modal', function (e) {
-		// 			// 	window.location.assign('/scm/upload_ird');
-		// 			// });
-		// 		}
-		// 	});
-
-        // }
         
     });
     </script>

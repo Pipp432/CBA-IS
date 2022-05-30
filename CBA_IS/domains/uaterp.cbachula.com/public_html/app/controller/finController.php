@@ -420,7 +420,7 @@ foreach ($list as $value) {
             $this->requirePostition("fin");
             $this->view->pvcs = $this->model->getPVCStatus();
             $this->view->reReqs = $this->model->getReReqStatus();
-            $this->view->render("fin/pvc_status"); 
+            $this->view->render("fin/pvc_status","navbar"); 
     }
     }
     public function pvc_process(){

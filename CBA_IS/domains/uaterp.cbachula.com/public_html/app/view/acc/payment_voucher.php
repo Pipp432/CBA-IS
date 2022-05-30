@@ -99,11 +99,11 @@
                         <label for="pvAddress">ที่อยู่</label>
                         <input type="text" class="form-control" id="pvAddress" ng-model="pvAddress">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" ng-show = "selectedPaymentType!='PB'">
                         <label for="pvPayto">สั่งจ่าย</label>
                         <input type="text" class="form-control" id="pvPayto" ng-model="pvPayto">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" ng-show = "selectedPaymentType!='PB'">
                         <label for="pvPayout">จ่ายออกจาก</label>
                         <input type="text" class="form-control" id="pvPayout" ng-model="pvPayout">
                     </div>
@@ -117,7 +117,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="addPvItemButton" style="color:white;">.</label>
-                        <button type="button" class="btn btn-default btn-block my-0" ng-click="addPvItem()">ยืนยันรายการ</button>
+                        <button type="button" class="btn btn-default btn-block my-0" id=addPvItemButton ng-click="addPvItem()">ยืนยันรายการ</button>
                     </div>
                     
                     
@@ -244,11 +244,11 @@
         </div>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-        <!-- SHOWING PV ITEMS -->
+        <!-- SHOWING PV C ITEMS -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <?php print_r($pvItems) ?>
 		<?php echo $pvItems ?>
-        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!=''">
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType!= 'PA' && selectedPaymentType!= 'PD' && selectedPaymentType!= 'PB' &&selectedPaymentType!=''">
             <div class="card-body">
                 
                 <div class="row mx-0">
@@ -314,6 +314,72 @@
             </div>
         </div>
 
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- SHOWING PVB ITEMS -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+
+        <div class="card shadow p-1 mt-3 mb-3" style="border:none; border-radius:10px;" ng-show="selectedPaymentType=='PB'">
+            <div class="card-body">
+                
+                <div class="row mx-0">
+                    <h4 class="my-1">รายละเอียดใบสำคัญสั่งจ่าย</h4>
+                    <table class="table table-hover my-1" ng-show="pvItems.length == 0">
+                        <tr>
+                            <th>ยังไม่ได้เพิ่มรายการสั่งจ่าย</th>
+                        </tr>
+                    </table>
+                    <table class="table table-hover my-1" ng-show="pvItems.length != 0">
+                        <tr>
+                            <th colspan="2">วันที่</th>
+                            <th>เดบิต</th>
+                            <th>เลขที่ใบกำกับภาษี</th>
+                            <th>รายละเอียด</th>
+                            <th ng-show="selectedPaymentType=='PB'">เลขที่ RR/CI</th>
+                            <th ng-show="selectedPaymentType=='PA' || selectedPaymentType=='PC'">เลขที่ใบเบิกค่าใช้จ่าย</th>
+                            <th>ภาษี</th>
+                            <th>จำนวนเงิน</th>
+                        </tr>
+                        <tr ng-repeat="pvItem in pvItems">
+                            <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
+                            <td>{{pvItem.date}}</td>
+                            <td>{{pvItem.debit}}</td>
+                            <td>{{pvItem.iv_no}}</td>
+                            <td>{{pvItem.detail}}</td>
+                            <td>{{pvItem.rr_no}}</td>
+                            <td style="text-align: right;">{{pvItem.vat | number:2}}</td>
+                            <td style="text-align: right;">{{pvItem.total_paid | number:2}}</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right;" colspan="7">ภาษีสุทธิ</th>
+                            <th style="text-align: right;">{{totalVat | number:2}}</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right;" colspan="7">รวมสุทธิ</th>
+                            <th style="text-align: right;">{{totalPaid | number:2}}</th>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="row mx-0 mt-2">       
+                    <div class="col-md-4">
+                        <label for="datetime-input">วันครบกำหนดชำระเงิน</label>
+                        <input class="form-control" type="date" id="datetime-input" ng-model="dueDate">
+                    </div>
+                    <div class="col-md-8">
+                        <label for="textBoxBank">ธนาคาร</label>
+                        <input type="text" class="form-control" id="textBoxBank" ng-model="bank" placeholder="ธนาคาร">
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postPvItems()">บันทึก PV</button>
+                </div>
+                
+            </div>
+        </div>
 
         <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------ -->
         <!-- ADDING PV-D  -->
@@ -434,7 +500,7 @@
                         <input class="form-control" type="date" id="pvaItemDate" ng-model="pvaItemDate">
                     </div>
                     <div class="col-md-3">
-                        <label for="pvaItemNo">เลขที่ใบเติมเงิรรองจ่าย</label>
+                        <label for="pvaItemNo">เลขที่ใบเติมเงินรองจ่าย</label>
                         <input type="text" class="form-control" id="pvaItemNo" ng-model="selected_PVA.internal_bundle_no" ng-disabled="true">
                     </div>
                 </div>
@@ -561,15 +627,15 @@
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
         <script>
-            // addModal('formValidate1', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้กรอกวันที่');
-            // addModal('formValidate2', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Supplier นี้สามารถขอภาษีซื้อได้');
-            // addModal('formValidate3', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'เลือก Supplier ก่อนครับผม');
-            // addModal('formValidate4', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกประเภทการสั่งจ่าย');
-            // addModal('formValidate5', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มรายละเอียดสำหรับออกใบสำคัญสั่งจ่าย');
-            // // addModal('formValidate6', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มว่าสั่งจ่ายใคร');
-            // addModal('formValidate7', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มเลขที่ใบสำคัญ');
-            // addModal('formValidate8', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้ใส่จำนวนเงินสั่งจ่าย');
-            // addModal('formValidate9', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกว่าสั่งจ่ายในนามอะไร');
+            addModal('formValidate1', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้กรอกวันที่');
+            addModal('formValidate2', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Supplier นี้สามารถขอภาษีซื้อได้');
+            addModal('formValidate3', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'เลือก Supplier ก่อนครับผม');
+            addModal('formValidate4', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกประเภทการสั่งจ่าย');
+            addModal('formValidate5', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มรายละเอียดสำหรับออกใบสำคัญสั่งจ่าย');
+            // addModal('formValidate6', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มว่าสั่งจ่ายใคร');
+            addModal('formValidate7', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เพิ่มเลขที่ใบสำคัญ');
+            addModal('formValidate8', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้ใส่จำนวนเงินสั่งจ่าย');
+            addModal('formValidate9', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'ยังไม่ได้เลือกว่าสั่งจ่ายในนามอะไร');
         </script>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -883,7 +949,7 @@
                     }).done(function(data,status){
                         console.log(data)
                         console.log(status)
-                        window.location.assign("https://uaterp.cbachula.com/")
+                        window.location.reload();
 
                         
                     }).fail(function(e){

@@ -1947,15 +1947,17 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+        
+        return 0;
     }
     public function getReReqStatus(){
-        $sql = $this->prepare("SELECT * FROM Reimbursement_Request WHERE 1");
+        $sql = $this->prepare("SELECT ex_no,re_req_no ,withdraw_date,details,authorize_date, withdraw_name,employee_id,authorizer_name,confirmed FROM Reimbursement_Request WHERE 1");
         $sql-> execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+        echo $sql->errorInfo()[2];
+       
     }
     public function addSlipToPVC($pv_no){
         $slip_name = $_FILES['file']['name'];

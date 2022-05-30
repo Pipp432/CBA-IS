@@ -112,7 +112,7 @@
                         <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> กำลังโหลด ...</h6>
                     </th>
                 </tr>
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards | orderBy:'file_no':false:[orderByPO,orderByCompany]" ng-click="viewFile(dashboard)">
                     <td>{{dashboard.file_no}} 
                         <span ng-show="doc == 'PO'">({{dashboard.rr}}{{dashboard.ci}})</span>
                         <span ng-show="doc == 'IV' && dashboard.invoice_type == 'CN'">(ลดหนี้)</span>
@@ -132,9 +132,9 @@
                         <span ng-show="dashboard.cr_name == null">ไม่มีใบ CR </span>
                         <a ng-show="dashboard.cr_name != null" href="/acc/dashboard/get_PVB_CR/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">ดูใบ CR</a> </span>
 
-                        <!-- <span ng-show="pvType == 'Supplier'"> <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
+                        <span ng-show="pvType == 'Supplier'"> <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
                         <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบกำกับภาษี </a>
-                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> </span> -->
+                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> </span>
                         
                     </td>
                 </tr>
@@ -287,6 +287,7 @@
                     <td>{{dashboard.withdraw_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>{{dashboard.employee_id}} {{dashboard.employee_nickname_thai}}</td>
+                    <td>{{dashboard.authorizer_name}}</td>
                 </tr>
             </table>
             
@@ -356,7 +357,7 @@
         $scope.doc = '';
         $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
 		$scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
-        console.log($scope.dashboardsIv)
+        
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
@@ -457,6 +458,27 @@
         $scope.viewFilePVA = function($dashboard) {
             window.open('/file/pva/' + $dashboard.pv_no);
         }
+        $scope.orderByPO = function(p1,p2)
+        {
+            first = p1.value.substring(4)
+            second = p2.value.substring(4);
+            console.log( p1);
+            console.log(parseInt(first)<parseInt(second) ? -1:1);
+            return parseInt(first)<parseInt(second) ? -1:1;
+        }
+        $scope.orderByCompany = function(p1,p2)
+        {
+            first = p1.value[0];
+            second = p2.value[0];
+            console.log( p1);
+            console.log(parseInt(first)<parseInt(second) ? -1:1);
+            return parseInt(first)<parseInt(second) ? -1:1;
+        }
+         
+
+
+    
+        
         
     });
 
