@@ -138,13 +138,12 @@
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_vat | number:2}}</th>
                 </tr>
+                
+              
+                
                 <tr>
-                    <th colspan="2" style="text-align: right;">ภาษีบัตรเครดิต</th>
-                    <th colspan="1" style="text-align: right;">{{creditCardFee| number:2}}</th>
-                </tr>
-                <tr>
-                    <th colspan="4" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="3" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
+                    <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 
@@ -241,7 +240,7 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
-             console.log( $scope.detail)
+             
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
@@ -252,6 +251,9 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
+            if($scope.detail[0].customer_name.substring(0,5)==='บริษัท') $scope.detail[0].customer_title = null;
+            console.log( $scope.detail[0].customer_name)
+            console.log( $scope.detail[0].customer_title)
             $scope.creditCardFee =0;
             $scope.totalPrice =0;
             $scope.calculateCreditCardFee = function(){

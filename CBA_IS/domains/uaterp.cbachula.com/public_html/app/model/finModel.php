@@ -368,7 +368,7 @@ class finModel extends model {
         input::post('re_req_number')
       
     ]);
-    return $sql->errorInfo()[0];
+    return $ex_no;
     }
     
     // CR Module
@@ -1852,7 +1852,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
     //real pva now
 
     public function GetPVAforWS() {
-        $sql = $this->prepare("SELECT pv_no,product_names,(total_paid + additional_cash) from PVA_bundle where pv_status = 3 ORDER BY pv_no ASC");
+        $sql = $this->prepare("SELECT pv_no,product_names,(total_paid + additional_cash) as total_paid from PVA_bundle where pv_status = 3 ORDER BY pv_no ASC");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

@@ -21,7 +21,7 @@
             <div class="col">
                 
                     <div class="button" ng-click="selectReReq()">
-                        <h5 class="card-title my-0">ใบขอเบิกค่าใช้จ่าย (Re-Req)</h5>
+                        <h5 class="card-title my-0">ใบเบิกค่าใช้จ่าย (EXC)</h5>
                     </div>
                 
             </div>

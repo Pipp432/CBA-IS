@@ -19,32 +19,29 @@
                         <input type="date" class="form-control" id="dateTextbox" ng-model="dueDate" ng-change = "dueDateValid()">
                         
                     </div>
-                    <div class = "col-md-8">
-                        <br><label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
-                        <input type="text" class="form-control" id="withdrawNameTextbox" ng-change="addWithdrawName()" ng-model="withdrawName" >
-                        <br>
-                    </div>
+                    
                 </div>
+                
                 <div class = "row mx-0">
+                    <div class = "col-md-6">
+                            <label for="withdrawNameTextbox">ผู้เบิกเงิน</label>
+                            <input type="text" class="form-control" id="withdrawNameTextbox" ng-change="addWithdrawName()" ng-model="withdrawName" >
+                            
+                    </div>
                     <div class = "col-md-6">
                         <label for="iDTextbox">รหัสพนักงาน</label>
                         <input type="text" class="form-control" id="iDTextbox" ng-blur ="getEmployeeId()" ng-model="employeeId">
                     </div>
+                   
+                </div>
+                <div class = "row mx-0"> 
                     <div class = "col-md-4">
-
-                    
                         <label for="lineIdTextbox">LINE ID พนักงาน</label>
                         <input type="text" class="form-control" id="lineIdTextbox"  ng-model="employeeLine">
                         <br>
                     </div>
-                </div>
-                <div class = "row mx-0">
-                    <div class = "col-md-6">
-                        <label for="taxIDTextbox">เลขที่ผู้เสียภาษีอากร</label>
-                        <input type="text" class="form-control" id="taxIDTextbox" ng-model="taxNumber">
-                        <br>
-                    </div>
-                    <div class = "col-md-2">
+                   
+                    <div class = "col-md-4">
                         <label for="BankDropdown">ธนาคาร</label>
                         <select class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="bankName" id="bankDropdown" onchange="checkBank(this.value)"; ng-change = "addBankName()">
                                     <option value="" selected="selected">เลือกธนาคาร</option>
@@ -65,8 +62,12 @@
                                 <br>
                                 <input type="text" class="form-control" ng-model="otherBankName"/>
                             </div>
-                    </div>
+                        </div>
                         <br>
+                        <div class = "col-md-4">
+                        <label for="branchTextbox">สาขา</label>
+                        <input type="text" class="form-control" id="branchTextBox" ng-model="bankBranch">
+                    </div>
                 </div>
                 <div class="row mx-0">
                     <div class = "col-md-6">
@@ -82,9 +83,7 @@
                         <br>
                     </div>
                   </div>    
-                        <label>ผู้ร้บรอง</label>
-                        <input type="text" class="form-control" id="authorizerNameTextbox" ng-model="authorizerName" >
-                        <br> 
+                        
              
                 <div class="card-body">
                     <table id ="inputTable">
@@ -171,10 +170,10 @@
          addModal('formValidate1', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อผู้เบิกเงิน');
          addModal('formValidate2', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่รหัสพนักงาน');
          addModal('formValidate3', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ LINE ID พนักงาน')
-         addModal('formValidate4', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่เลขที่ผู้เสียภาษีอากร');
+         
          addModal('formValidate5', 'ใบเบิกค่าใช้จ่าย', 'กรุณาเลือกธนาคาร');
          addModal('formValidate6', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อบัญชีธนาคารที่รับโอน');
-         addModal('formValidate7', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่ชื่อผู้ร้บรอง');
+         
          addModal('formValidate8', 'ใบเบิกค่าใช้จ่าย', 'กรุณาใส่วันครบกำหนดชำระเงิน');
          addModal('formValidate9', 'ใบเบิกค่าใช้จ่าย', 'Invalid due date');
          
@@ -194,6 +193,7 @@
         $scope.authorizerName=''; 
         $scope.createdDate= new Date();
         $scope.valid = false;
+        $scope.bankBranch =''
 
         // Date utility functions
         function convertDate(str) {
@@ -264,16 +264,13 @@
             return  $scope.employeeLine;
         }
         $scope.getBankName =function(){
-            return $scope.bankName;
+            return `${$scope.bankName} ${$scope.bankBranch}`;
         };
         $scope.getTaxNumber=function(){
             return $scope.taxNumber;
         };
         $scope.getBankBookName=function(){
             return $scope.bankBookName;
-        };
-        $scope.getAuthorizerName=function(){
-            return $scope.authorizerName
         }; 
         $scope.getBankBookNumber=function(){
             return $scope.bankBookNumber;
@@ -292,10 +289,8 @@
             else if($scope.withdrawName==='') $('#formValidate1').modal('toggle');
             else if($scope.employeeId ==='') $('#formValidate2').modal('toggle');
             else if($scope.employeeLine==='') $('#formValidate3').modal('toggle');
-            else if($scope.bankName ==='')$('#formValidate4').modal('toggle');
-            else if($scope.taxNumber ===''&& typeof $scope.taxNumber != Number)$('#formValidate5').modal('toggle');
             else if($scope.bankBookName==='')$('#formValidate6').modal('toggle');
-            else if($scope.authorizerName ==='')$('#formValidate7').modal('toggle');
+      
             else if($scope.dueDate ==='')$('#formValidate8').modal('toggle');
             else if($scope.dueDate.getTime()<$scope.createdDate.getTime())$('#formValidate9').modal('toggle');
             else $scope.valid = true;
@@ -348,7 +343,6 @@
     
         $scope.postReReq = function(){
             $('#confirmModal').modal('hide');
-           
                 $.post("reimbursement_request/post_reimbursement_Request",{
                 post:true,
                 re_req_no : $scope.rq_no,
@@ -360,17 +354,17 @@
                 taxNumber: $scope.getTaxNumber(),
                 bankBookName: $scope.getBankBookName(),
                 bankBookNumber: $scope.getBankBookNumber(),
-                authorizerName: $scope.getAuthorizerName() ,
                 dueDate:$scope.getDueDate(),
                 createdDate: $scope.getCreatedDate(),
                 table : $scope.getTableData(),
-                
+                company_code:"3"                
             }).done(function(done){ 
 
                 addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
-                 $scope.toMainMenu();
+                 
             })
+            $scope.toMainMenu();
 
         }
             

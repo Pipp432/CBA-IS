@@ -265,11 +265,11 @@ class scmController extends controller {
             echo '<tr>';
                 echo '<th>sox_no</th>';
                 echo '<th>iv_no</th>';
-                echo '<th>ลบท/EMS</th>';
+                echo '<th>ลทบ/EMS</th>';
                 echo '<th>ชื่อ</th>';
                 echo '<th>ที่อยู่</th>';
                 echo '<th>โทร</th>';
-                echo '<th>print</th>';
+                // echo '<th>print</th>';
             echo '</tr>';
             
             foreach($data as $value) {

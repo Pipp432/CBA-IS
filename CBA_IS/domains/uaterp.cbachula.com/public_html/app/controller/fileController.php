@@ -228,6 +228,24 @@ class fileController extends controller {
             }
         }
     }
+    public function exc() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else if(uri::get(2)==="get_re_req"){
+            $this->positionEcho('file', $this->model->getReReq(Uri::get(3)));
+            $this->view->render("file/exc");
+           
+        }
+        else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
+                $this->view->re_req = $this->model->getEXC(uri::get(2));
+                $this->view->render("file/exc");
+            } else {
+                $this->err404();
+            }
+        }
+    }
    
     public function pva() { 
 

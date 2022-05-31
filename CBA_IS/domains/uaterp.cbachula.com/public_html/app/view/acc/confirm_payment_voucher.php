@@ -61,7 +61,7 @@
                             <td style="text-align: right;">
                                 {{pv.total_paid | number:2}}<br>
                                 <a ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" href="/acc/confirm_payment_voucher/get_receipt/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
-                                <a ng-show = "pv.pv_type == 'Supplier' && pv.receipt_name === null" href="/acc/dashboard/get_PVB_CR/{{pv.pv_no}}" target="_blank">{{pv.cr_name}}</a>
+                                <a ng-show = "pv.pv_type == 'Supplier'" href="/acc/dashboard/get_PVB_CR/{{pv.pv_no}}" target="_blank">{{pv.cr_name}}</a>
                                 <a ng-show = "pv.pv_type == 'pvd'" href="/acc/confirm_payment_voucher/get_pvdslip/{{pv.pv_no}}" target="_blank">Slip</a>
                                 &ensp;
                                 <a ng-show = "pv.pv_type == 'pvd'" href="https://uaterp.cbachula.com/file/pvd/{{pv.cn_no}}" target="_blank">PV-D</a> 
@@ -131,7 +131,7 @@
 </html>
 
 <style>
-    td { border-bottom: 1px solid lightgray; }
+    td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
 </style>
 
@@ -292,7 +292,7 @@
                     respond_count++;
 
                     if(respond_count == 4) {
-                        addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายเลขที่ ' + respond + 'สำเร็จ');
+                        addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายสำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
                             location.reload();

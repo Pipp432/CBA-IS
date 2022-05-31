@@ -41,7 +41,8 @@ class fileModel extends model {
                                 left join SOX on SOX.sox_no = SOXPrinting.sox_no
                                 left join CustomerTransaction on CustomerTransaction.so_no = SO.so_no
                                 left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel
-    							where PO.po_no = ?");
+    							where PO.po_no = ?
+                                GROUP BY PO.po_no , Product.product_no");
         $sql->execute([$po_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -256,9 +257,13 @@ class fileModel extends model {
                                     PV.thai_text,
                                     PV.total_paid,
                                     PV.due_date,
-                                    PV.bank
+                                    PV.bank,
+                                    IVPC_Files.bill_no,
+                                    IVPC_Files.tax_no,
+                                    IVPC_Files.debt_reduce_no
     							from PVPrinting
     							inner join PV on PV.pv_no = PVPrinting.pv_no
+                                left JOIN IVPC_Files on BINARY IVPC_Files.rrci_no = BINARY PVPrinting.rr_no
     							where PV.pv_no = ?");
         $sql->execute([$pv_no]);
         if ($sql->rowCount() > 0) {
@@ -277,6 +282,14 @@ class fileModel extends model {
     public function getReReq($re_req_no) {
 		$sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE re_req_no = ? ");
         $sql->execute([$re_req_no]);
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+	}
+    public function getEXC($ex_no) {
+		$sql = $this->prepare("SELECT * FROM `Reimbursement_Request` WHERE ex_no = ? ");
+        $sql->execute([$ex_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }

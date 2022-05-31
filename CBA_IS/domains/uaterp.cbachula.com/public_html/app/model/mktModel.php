@@ -1218,6 +1218,13 @@ class mktModel extends model {
                 ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
                 ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
                 ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
+                ["w"=> 20, "h"=> 22, "d"=> 30, "id"=> "2C"],
+                ["w"=> 22, "h"=> 14, "d"=> 35, "id"=> "D"],
+                ["w"=> 24, "h"=> 17, "d"=> 40, "id"=> "E"],
+                ["w"=> 31, "h"=> 13, "d"=> 36, "id"=> "F"],
+                ["w"=> 30, "h"=> 22, "d"=> 45, "id"=> "ฉ"],
+                ["w"=> 14, "h"=> 0, "d"=> 17, "id"=> "ซองกันกระแทก"],
+                ["w"=> 25, "h"=> 0, "d"=> 35, "id"=> "ซอง"],
             ]
         ];
 
@@ -1381,12 +1388,20 @@ private function calculate_total_weight($sos, $bin_id) {
 $weight = 0;
 
 switch ($bin_id) {
-        case '0,0':     $weight += 25; break;
-        case '0+4':     $weight += 41; break;
-        case 'A':       $weight += 46; break;
-        case '2A':      $weight += 67; break;
-        case 'B':       $weight += 77; break;
-        case '2B':      $weight += 108; break;
+        case 'ซองกันกระแทก':     $weight += 8; break;
+        case 'ซอง':     $weight += 11; break;
+        case '0,0':     $weight += 26; break;
+        case '0+4':     $weight += 43; break;
+        case 'A':       $weight += 51; break;
+        case '2A':      $weight += 64; break;
+        case 'B':       $weight += 81; break;
+        case '2B':      $weight += 112; break;
+        case 'C':      $weight += 109; break;
+        case '2C':      $weight += 153; break;
+        case 'D':      $weight += 153; break;
+        case 'E':      $weight += 200; break;
+        case 'F':      $weight += 221; break;
+        case 'ฉ':      $weight += 295; break;
         default:
     }
 
@@ -1619,15 +1634,15 @@ return [
 	}*/
 
     // insert SO
-    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type, payment_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
-                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?, ?,?, ?, ?, ?, ?, 0, ?, 1)" );
+    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
+                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?,?, ?, ?, ?, ?, 0, ?, 1)" );
     $sql->execute( [
       $sono,
       input::post( 'sellerNo' ),
       json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
       json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ],
       input::post( 'productType' ), 
-      input::post('paymentType'),
+      // input::post('paymentType'),
       input::post( 'payment' ),
      
       input::post( 'vatType' ),
@@ -5021,7 +5036,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
   public function addReReqDetails(){
     
     $sql = $this->prepare("update Reimbursement_Request SET withdraw_date=?, withdraw_name=?, employee_id=?, 
-    line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? ,authorizer_name=?, 
+    line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? , 
     details=?,due_date=? WHERE re_req_no  = ?");
     $success = $sql->execute([
       
@@ -5033,21 +5048,14 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       input::post( 'taxNumber' ),
       input::post( 'bankBookName' ),
       input::post( 'bankBookNumber' ),
-      input::post( 'authorizerName' ),
       input::post( 'table' ),
       input::post( 'dueDate' ),
       input::post( 're_req_no' )
       
       
     ]);
-    if ($success){ echo ' help สำเร็จ';
-    echo input::post( 're_req_no ' ).'<br>';
-      print_r($sql->errorInfo());}
-    else {
-     
-      echo input::post( 're_req_no ' ).'<br>';
-      print_r($sql->errorInfo());
-    }
+    
+    echo $sql->errorInfo()[0];
     
     
   }
@@ -5260,6 +5268,19 @@ public function requestWSD(){
     $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no']; 
   }
 
+  $sql = $this->prepare("SELECT
+                          Invoice.id_no
+                          FROM
+                              SOX
+                          LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
+                          LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
+                          where SOX.sox_no = ?
+                        ");
+  $sql->execute([input::post('sox_no')]);
+  if ($sql->rowCount() > 0) {             
+    $vat_id = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['id_no']; 
+  }
+
   $wsdno = $this->assignWSD( ); 
   $sql = $this->prepare("INSERT into WSD(wsd_no, wsd_date, wsd_time, employee_id, total_amount, vat_id, sox_no, invoice_no, note, bank, bank_no, recipient, recipient_address, wsd_status)
                         values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)");
@@ -5267,7 +5288,7 @@ public function requestWSD(){
     $wsdno,  
     json_decode(session::get('employee_detail'), true)['employee_id'],
     input::post('totalAmount'),
-    input::post('vatID'),
+    $vat_id,
     input::post('sox_no'),  
     $iv_no,
     input::post('note'),
@@ -5275,6 +5296,8 @@ public function requestWSD(){
     input::post('bank_no'),
     input::post('recipient')
   ]);
+
+
 }
 
 /////////pvd/////////
@@ -5299,6 +5322,7 @@ private function assignWSD() {
   }
   return $wsdPrefix . $runningNo;
 }
+
 
   
 

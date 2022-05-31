@@ -128,13 +128,18 @@
                         <span ng-show="dashboard.slip_name == null && dashboard.receipt_name == null">รอโอนเงิน</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name == null">โอนเงินแล้ว</span>
                         <span ng-show="dashboard.slip_name != null && dashboard.receipt_name != null">ได้ใบเสร็จแล้ว</span>
-                        <span ng-show="dashboard.slip_name != null"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
+                        <span ng-show="dashboard.slip_name != null && temp != 'PV-B'"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
+                        <span ng-show="dashboard.slip_name != null && temp == 'PV-B'"> <a href="/acc/dashboard/pvb_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
                         <span ng-show="dashboard.cr_name == null">ไม่มีใบ CR </span>
                         <a ng-show="dashboard.cr_name != null" href="/acc/dashboard/get_PVB_CR/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">ดูใบ CR</a> </span>
 
-                        <span ng-show="pvType == 'Supplier'"> <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
-                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบกำกับภาษี </a>
-                        <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> </span>
+                        
+                        <span ng-show="pvType == 'Supplier'"> 
+                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
+                            <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบแจ้งหนี้</a>
+                            <a href="/acc/payment_voucher/get_invoice/{{dashboard.rrci_no}}" target="_blank">ดูใบกำกับภาษี</a>
+                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> 
+                        </span>
                         
                     </td>
                 </tr>
@@ -306,7 +311,7 @@
                     <th>จำนวนเงิน</th>
                     <th>Slip</th>
                     <th>เอกสาร IV</th>
-                    <th>เอกสาร PVC</th>
+                    <th>เอกสาร EXC</th>
                     <th>ผู้ออกใบ PVC</th>
                     <th>ผู้กดยืนยัน</th>
                 </tr>
@@ -316,21 +321,24 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards">
+                <tr ng-repeat="dashboard in dashboards" ng-click = "openPVC(dashboard.pv_no)">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}}</td>
                     <td>{{dashboard.total_paid}}</td>
                     <td>
-                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">slip</a>
+                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">Slip</a>
 
                     </td>
-                    <td>
-                        <a href="https://uaterp.cbachula.com/file/re_req/{{dashboard.re_req_no}}">{{dashboard.ex_no}}</a>
+                    <td style="text-align: center ;">
+                        <a href="/acc/dashboard_acc/pv_iv/{{dashboard.pv_no}}">IV</a>
+
                     </td>
-                    <td>
-                        <a href="https://uaterp.cbachula.com/file/pvc/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a>
+                    <td style="text-align: center ;">
+                        <a href="https://uaterp.cbachula.com/file/exc/{{dashboard.ex_no}}">{{dashboard.ex_no}}</a>
                     </td>
+                    
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
+                    <td>{{dashboard.confirmed_employee}} </td>
                 </tr>
             </table>
             
@@ -343,8 +351,8 @@
 </html>
 
 <style>
-    td { border-bottom: 1px solid lightgray; }
-    th { border-bottom: 1px solid lightgray; text-align: left; }
+    td { border-bottom: 1px solid lightgray; text-align: center;}
+    th { border-bottom: 1px solid lightgray; text-align: center; }
     .card:hover { transform: translate(0,-4px); box-shadow: 0 4px 8px lightgrey; }
 </style>
 
@@ -360,6 +368,21 @@
         
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
+        
+        convert_pva_status = {
+            '-1':"ยกเลิก",
+            0:"รอ finance โอนให้พนักงาน",
+            1:"รอ finance รวมใบขอ pva",
+            2:"รอ account สร้าง pva",
+            3:"รอ finance โอนเงินเข้าบัญชีเงินรองจ่าย",
+            4:"รอ account confirm pva", 
+            5:"เรียบร้อย",
+        }
+        angular.forEach($scope.dashboardsPva, function(value, key) {
+            value["pv_status"] = convert_pva_status[value["pv_status"]];
+        });
+
+
         $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
         $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
         $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
@@ -367,7 +390,7 @@
         $scope.dashboardsPrePvd = <?php echo $this->dashboardPrePvd; ?>;
         $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
         $scope.pvType = '';
-        
+        console.log($scope.dashboardsPvc_confirm)
 		$scope.getDashboardIVCR = function() {
             $scope.dashboards = $scope.dashboardsIv;
             $scope.doc = 'IV_CR';
@@ -424,6 +447,7 @@
 
         $scope.getDashboardPVC = function(){
             $scope.dashboards = $scope.dashboardsPvc; 
+            console.log($scope.dashboards)
             $scope.doc = 'PV';
             $scope.pvType = 'pvc';
             $scope.temp = 'PPV-C';
@@ -475,7 +499,9 @@
             return parseInt(first)<parseInt(second) ? -1:1;
         }
          
-
+        $scope.openPVC = (pv_no)=>{
+            window.open(`https://uaterp.cbachula.com/file/pvc/${pv_no}`)
+        }
 
     
         

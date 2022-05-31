@@ -99,6 +99,7 @@
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->pvc; ?>;
             $scope.company = $scope.detail[0].pv_no.substring(0,1);
+            console.log($scope.company)
         }
     });
     

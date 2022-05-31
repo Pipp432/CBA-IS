@@ -1014,7 +1014,7 @@ class scmModel extends model {
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no 
         INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no 
-        WHERE sox_status=9 AND SOX.done=0");
+        WHERE sox_status=1 AND SOX.done=0");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

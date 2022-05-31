@@ -241,6 +241,20 @@ class accController extends controller {
             } else {
                 $this->err404();
             }
+            
+        } else if (uri::get(2)==='pv_iv') {
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getIVData(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        }
+        else if (uri::get(2)==='pvb_slip') {
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getSlipPVB(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
         } else if (uri::get(2)==='get_IVPC_Files_dashboard') {
             if (!empty(Uri::get(4))) {
                 $this->positionEcho('acc', $this->model->getIVPCFilesDashboard(Uri::get(3),Uri::get(4)));

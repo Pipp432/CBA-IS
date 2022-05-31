@@ -105,6 +105,8 @@
         
         <script>
             addModal('formValidate1', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Please Select a document');
+            addModal('formValidate2', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'Please Select all prompts');
+           
         </script>
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -146,16 +148,18 @@
             if(re_req_no=="") {
                 $('#formValidate1').modal('toggle');
             }
+            const detail={};
             const options = document.querySelectorAll("input[type='checkbox']:checked")
-          
-            const details = {"proof":options[0].value,"project":options[1].value};
-            console.log(details);
+            if( !options[1]) $('#formValidate2').modal('toggle')
+            else if (!options)  $('#formValidate2').modal('toggle')
+            else  details = {"proof":options[0].value,"project":options[1].value};
+         
             var date = new Date();
             var dd = String(date.getDate()).padStart(2, '0');
             var mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
             var yyyy = date.getFullYear();
             date = yyyy + '-' + mm + '-' + dd ;
-            console.log(date);
+          
             
            $.post(`/fin/reimbursement_request/post_additional_data`,{
                proof: details["proof"], 
@@ -163,15 +167,11 @@
                re_req_number: $scope.currentNo,
                authorize_date: date
            },function(data){
-               console.log(data)
-           }).fail(function(jqXHR){console.log(jqXHR)}).done(function(){
-                addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
+            addModal('successModal', 'เบิกเงินรองจ่าย',`ออกใบ ${data} สำเร็จ`);
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hidden.bs.modal', function (e) {
                     $scope.toMainMenu();
                 })
-                
-            
            })
           
         }
