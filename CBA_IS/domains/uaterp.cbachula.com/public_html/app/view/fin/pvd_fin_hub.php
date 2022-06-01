@@ -27,13 +27,18 @@
     </nav>
 
     
-    <div class="container mt-3" ng-controller="pvaHeadController">
+    <div class="container mt-3" ng-controller="pvdHeadController">
         <select class="form-control" ng-model="page" ng-change = "goto(page)">
-            <option value='pva_fin_hub'>เลือกหน้า PV-A</option>
-            <option value='validate_petty_cash_request'>confirm เบิกเงินรองจ่าย</option>
-            <option value='create_pva'>รวมใบเบิกเงินรองจ่ายเพื่อขอ PV-A</option>
-            <option value='top_up_pva'>โอนเงินเข้าบัญชี PV-A</option>
-            <option value='pva_status'>ประวัติ PV-A</option>
+            <option value='pvd_fin_hub'>เลือกหน้า PV-D</option>
+            <!-- <option value='pre_pvd'>1. Request PV-D</option> -->
+            <!-- <option value='credit_note'>2. Edit Credit Note</option>
+            <option value='payment_voucher'>3. Generate PV-D (PV)</option> -->
+            <option value='upslip_pvd'>Upload Slip</option>
+            <!-- <option value='confirm_payment_voucher'>5. Confirm PV</option> -->
+
+            <!-- <option value='create_pva'>รวมใบเบิกเงินรองจ่ายเพื่อขอ PV-A</option>
+            <option value='top_up_pva'>โอนเงินเข้าบัญชี PV-A</option> -->
+            <option value='pvd_status'>ประวัติ PV-D</option>
         </select>
     </div>
 
@@ -51,10 +56,10 @@
 <script>
 
 
-    app.controller('pvaHeadController', function($scope, $http, $compile) {
-        $scope.page = 'pva_fin_hub';
+    app.controller('pvdHeadController', function($scope, $http, $compile) {
+        $scope.page = 'pvd_fin_hub';
         $scope.goto = function(link){
-            if($scope.page != 'pva_fin_hub') window.location.assign(link);
+            if($scope.page != 'pvd_fin_hub') window.location.assign(link);
         }
     });
 

@@ -10,12 +10,12 @@
                 <img src="/public/img/cba-logo.png" alt="cba-logo" style="width: 60%;">
             </div>
             <div class="col-4 px-0">
-                <h3 style="text-align: center;"><b>ใบส่งสินค้า<br>Inventory Report (Delivery)</b></h3>
+                <h3 style="text-align: center;"><b>ใบคืนสินค้า<br>Return Inventory</b></h3>
             </div>
             <div class="col-4 px-0">
                 <h5 style="text-align: right;">ต้นฉบับ</h5>
-                <h5 style="text-align: right;"><b>เลขที่ {{detail[0].ird_no}}</b></h5>
-                <h6 style="text-align: right;">วันที่ {{detail[0].ird_date}}</h6>
+                <h5 style="text-align: right;"><b>เลขที่ {{detail[0].ri_no}}</b></h5>
+                <h6 style="text-align: right;">วันที่ {{detail[0].ri_date}}</h6>
             </div>
         </div>
         
@@ -31,7 +31,7 @@
         
         <hr>
 
-        <!--<div class="row px-2 mt-2">
+        <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
@@ -43,27 +43,25 @@
                     </tr>
                 </table>
             </div>
-        </div>  -->
+        </div>  
 
         <div class="row px-2 mt-2">
             <table style="border-collapse: collapse; width: 100%;">
                 <tr>
-					<th>เลขที่ SOX</th>
-					<th>เลขที่ SO</th>
-					<th>รหัสสินค้า</th>
+                    <th>รหัสสินค้า</th>
                     <th>รายการ</th>
                     <th>จำนวน</th>
                     <th>หน่วย</th>
-                    <!--<th>มูลค่าสินค้า</th>-->
+                    <th>ราคา/หน่วย</th>
+                    <th>จำนวนเงิน</th>
                 </tr>
-                <tr ng-repeat="item in detail">
-					<td style="text-align: center;">{{item.sox_no}}</td>
-					<td style="text-align: center;">{{item.so_no}}</td>
+                <tr ng-repeat="item in detail" ng-show="item.total_purchase_price != 0">
                     <td style="text-align: center;">{{item.product_no}}</td>
-					<td style="text-align: left;">{{item.product_name}}</td>
+                    <td style="text-align: left;">{{item.product_description}}</td>
                     <td style="text-align: right;">{{item.quantity}}</td>
                     <td style="text-align: left;">{{item.unit}}</td>
-                    <!--<td style="text-align: right;">{{item.total_sales | number:2}}</td> -->
+                    <td style="text-align: right;">{{item.purchase_price | number:2}}</td>
+                    <td style="text-align: right;">{{item.total_purchase_price | number:2}}</td>
                 </tr>
                 <tr>
                     <th colspan="3" rowspan="3">
@@ -84,18 +82,22 @@
                                 </div>
                             </div>
                         <div class="col-4">
-                        <br> __________________________<br>ขนส่ง<br>วันที่ _____/_____/_____ 
+                        <br> __________________________<br>ผู้รับสินค้า<br>วันที่ _____/_____/_____ 
                         </div>
                     </div>
                 
                     </th>
-                    <th colspan="2" rowspan = "3" style="text-align: center;">จำนวนกล่องทั้งหมด</th>
-                    <th colspan="1" rowspan = "3" style="text-align: center;">{{detail[0].box_count}}</th>
+                    <th colspan="2" style="text-align: right;">ราคาสินค้า</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].total_return_no_vat | number:2}}</th>
                 </tr>
-                <!--<tr>
-                    <th colspan="2" rowspan = "2" style="text-align: right;">มูลค่าสินค้า</th>
-                    <th colspan="1" rowspan = "2" style="text-align: right;">{{total | number:2}}</th>
-                </tr>-->
+                <tr>
+                    <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].total_return_vat | number:2}}</th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: right;">ราคารวมทั้งสิ้น</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].total_return_price | number:2}}</th>
+                </tr>
             </table>
         </div> 
         
@@ -119,23 +121,18 @@
     
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
-            $scope.detail = <?php echo $this->ird; ?>;
-            $scope.company = $scope.detail[0].ird_no.substring(0,1);
-            $scope.year = $scope.detail[0].ird_date.substring(0,4);
-			$scope.month = $scope.detail[0].ird_date.substring(5,7);
-			$scope.day = $scope.detail[0].ird_date.substring(8,10);
+            $scope.detail = <?php echo $this->ri; ?>;
+            $scope.company = $scope.detail[0].ri_no.substring(0,1);
+            $scope.year = $scope.detail[0].ri_date.substring(0,4);
+			$scope.month = $scope.detail[0].ri_date.substring(5,7);
+			$scope.day = $scope.detail[0].ri_date.substring(8,10);
             switch($scope.company) {
                 case '1': $scope.company_id = '0-9920-04240-25-5'; break;
                 case '2': $scope.company_id = '0-9920-04240-26-3'; break;
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
-            }	
+            }
         }
-		
-		$scope.total = 0;
-		angular.forEach($scope.detail, function (value, key) {
-			$scope.total += value.total_sales;
-		});
     });
     
 </script>

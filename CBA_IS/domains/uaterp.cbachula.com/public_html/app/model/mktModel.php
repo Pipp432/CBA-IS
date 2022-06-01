@@ -1386,8 +1386,7 @@ private function calculate_total_weight($sos, $bin_id) {
 $weight = 0;
 
 switch ($bin_id) {
-        case 'ซองกันกระแทก':     $weight += 8; break;
-        case 'ซอง':     $weight += 11; break;
+        
         case '0,0':     $weight += 26; break;
         case '0+4':     $weight += 43; break;
         case 'A':       $weight += 51; break;

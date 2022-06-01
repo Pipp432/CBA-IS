@@ -241,8 +241,8 @@
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
 			$scope.day = $scope.detail[0].invoice_date.substring(8,10);
             switch($scope.company) {
-                case '1': $scope.company_id = '0-9920-04240-21-2'; break;
-                case '2': $scope.company_id = '0-9920-04240-22-1'; break;
+                case '1': $scope.company_id = '0-9920-04240-25-5'; break;
+                case '2': $scope.company_id = '0-9920-04240-26-3'; break;
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }

@@ -11,11 +11,10 @@
             <table class="table table-hover my-1">
 					<tr>
 						<th style="text-align: center;">เลขที่ IV</th>
-						<th style="text-align: center;">วันที่ที่ออก iv</th>
+						<th style="text-align: center;">วันที่ออก IV</th>
                         <th style="text-align: center;">ผู้ออกเอกสาร</th>
                         <th style="text-align: center;">ประเภท</th>
-                        <th style="text-align: center;">ชื่อลูกค้า</th>
-                        <th style="text-align: center;">address</th>
+                        <th style="text-align: center;">ชื่อ-ที่อยู่ลูกค้า</th>
                         <th style="text-align: center;">contact</th>
                         <th style="text-align: center;">e-mail</th>
                         <th style="text-align: center;">ลูกค้าขอ IV</th>
@@ -24,15 +23,21 @@
 					</tr>
 					<tr ng-repeat="inv in invoicess | unique:'invoice_no'">
 						<td style="text-align: center;">{{inv.invoice_no}}</td>
-						<td style="text-align: center;">{{inv.invoice_date}} {{inv.invoice_time}}</td>
+						<td style="text-align: center;">{{inv.invoice_date}} </td>
                         <td style="text-align: center;">{{inv.approved_employee}}</td>
                         <td style="text-align: center;">{{inv.product_type}}</td>
-                        <td style="text-align: center;">{{inv.customer_name}}</td>
-                        <td style="text-align: center;">{{inv.customer_address}}</td> 
+                        <td style="text-align: center;">{{inv.customer_name}} <br> {{inv.customer_address}}</td> 
                         <td style="text-align: center;">{{inv.customer_tel}}</td> 
                         <td style="text-align: center;">{{inv.email}}</td> 
-                        <td style="text-align: center;">{{inv.fin_form}}</td> 
-                        <td style="text-align: center;"><button type="button" class="btn btn-info" target="_blank" ng-click = "seeIV(inv)">IVCR</button></td>
+                        <td style="text-align: center;">
+                            <span ng-show="inv.fin_form == 0">ไม่</span>
+                            <span ng-show="inv.fin_form == 1">ต้องการ</span>
+                        </td>
+                        <!-- <td style="text-align: center;">{{inv.fin_form}}</td>  -->
+                        <td style="text-align: center;"><button type="button" class="btn btn-info" target="_blank" ng-click = "seeIV(inv)">IVCR</button> <br>
+                        <br>
+                        
+                        <button type="button" class="btn btn-info" target="_blank" ng-click = "seeIV2(inv)">IVCR2</button></td>
                         <td style="text-align: center;"><button type="button" class="btn btn-info" id="checkPrintIVbox" ng-click = "printivItems(inv.invoice_no)">Check </button></td>
 					</tr>				
 			</table>
@@ -68,12 +73,15 @@
             }, function(data) {
                 addModal('successModal', 'Print IV', 'Print IV succesful');
                 $('#successModal').modal('toggle');
-                $('#successModal').on('hide.bs.modal', function (e) { location.reload() });  
+                $('#successModal').on('hide.bs.modal', function (e) { location.assign('/acc/dashboard') });  
             });
         }
      
         $scope.seeIV = function(file) {
 			window.open('/file/iv_cr/' + file.invoice_no);
+		}
+        $scope.seeIV2 = function(file) {
+			window.open('/file/iv_cr2/' + file.invoice_no);
 		}
 
     });

@@ -188,9 +188,9 @@
                         <tr ng-repeat="rrcinopv in rrcinopvs | unique:'ci_no' | filter:{supplier_no:supplierNoForFilter, ci_no:pvItemRR}" ng-click="getrrcinopvDetail(rrcinopv)">
                             <td>
                                 {{rrcinopv.ci_no}}<br>
-                                <a href="/acc/payment_voucher/get_invoice/{{rrcinopv.ci_no}}" target="_blank">ดูใบวางบิล</a>
-                                <a href="/acc/payment_voucher/get_IVPC_Files/bill/{{rrcinopv.ci_no}}" target="_blank">ดูใบแจ้งหนี้</a>
-                                <a href="/acc/payment_voucher/get_IVPC_Files/tax/{{rrcinopv.ci_no}}" target="_blank">ดูใบกำกับภาษี</a>
+                                <a href="/acc/payment_voucher/get_IVPC_Files/bill/{{rrcinopv.ci_no}}" target="_blank">ดูใบวางบิล</a>
+                                <a href="/acc/payment_voucher/get_IVPC_Files/tax/{{rrcinopv.ci_no}}" target="_blank">ดูใบแจ้งหนี้</a>
+                                <a href="/acc/payment_voucher/get_invoice/{{rrcinopv.ci_no}}" target="_blank">ดูใบกำกับภาษี</a>
                                 <a href="/acc/payment_voucher/get_IVPC_Files/debt/{{rrcinopv.ci_no}}" target="_blank">ดูใบลดหนี้</a>
                             </td>
                             <td>{{rrcinopv.po_no}}</td>

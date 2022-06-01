@@ -86,7 +86,7 @@
                         </div>
                     </div>
                 
-                    </th>
+                <!--    </th>
                     <th colspan="2" style="text-align: right;">ราคาสินค้า</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].total_purchase_no_vat | number:2}}</th>
                 </tr>
@@ -97,7 +97,7 @@
                 <tr>
                     <th colspan="2" style="text-align: right;">ราคารวมทั้งสิ้น</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].total_price | number:2}}</th>
-                </tr>
+                </tr> -->
             </table>
         </div> 
         

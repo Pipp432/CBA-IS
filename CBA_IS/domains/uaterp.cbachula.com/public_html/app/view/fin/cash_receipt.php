@@ -375,7 +375,7 @@
             $scope.new_total_price = '';
             if($scope.crItems.length != 0) {
                 $scope.card_fee = 0;
-                if($scope.crItems[0].payment_type == 'KS'){
+                if($scope.crItems[0].payment_type == 'CC'){
                     card_fee = (parseFloat(sox.sox_sales_price)*2.45)/100 ;
                 } else if($scope.crItems[0].payment_type == 'FB'){
                     card_fee = (parseFloat(sox.sox_sales_price)*2.75)/100 ;

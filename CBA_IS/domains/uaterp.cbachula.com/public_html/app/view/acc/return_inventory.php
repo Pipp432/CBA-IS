@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ใบคืนสินค้า / Return Inventory (RE)</h2>
+        <h2 class="mt-3">ใบคืนสินค้า / Return Inventory (RI)</h2>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING SUPPLIER AND PRODUCT TYPE -->
@@ -88,7 +88,7 @@
                             <th>หมวดหมู่</th>
                             <th>ราคาซื้อ</th>
                         </tr>
-                        <tr ng-repeat="product in products | filter:{supplier_no:selectedSupplierNo, category_name:selectedCategory, product_type:selectedProductType}  | filter:filterProduct " ng-click="addREItemStock(product)">
+                        <tr ng-repeat="product in products | filter:{supplier_no:selectedSupplierNo, category_name:selectedCategory, product_type:selectedProductType}  | filter:filterProduct " ng-click="addRIItemStock(product)">
                             <td>{{product.product_no}}</td>
                             <td>{{product.product_name}}
                                 <span class="badge badge-pill badge-danger" ng-show="product.stock == 0 && (selectedProductType == 'Stock' || product.product_line == 'X')">สินค้าหมด</span>
@@ -117,12 +117,12 @@
             <div class="card-body">
                 <div class="row mx-0">
                     <h4 class="my-1">รายละเอียดใบคืนสินค้า</h4>
-                    <table class="table table-hover my-1" ng-show="reItems.length == 0">
+                    <table class="table table-hover my-1" ng-show="riItems.length == 0">
                         <tr>
                             <th>ยังไม่ได้เพิ่มสินค้า</th>
                         </tr>
                     </table>
-                    <table class="table table-hover my-1" ng-show="reItems.length != 0">
+                    <table class="table table-hover my-1" ng-show="riItems.length != 0">
                         <tr>
                             <th colspan="2">รหัสสินค้า</th>
                             <th ng-show="showIfOrderInstall">เลข SO</th>
@@ -135,10 +135,10 @@
                             </th>
                             <th>ราคาซื้อรวม</th>
                         </tr>
-                        <tr ng-repeat="product in reItems | orderBy:'product_no'">
+                        <tr ng-repeat="product in riItems | orderBy:'product_no'">
                             <td>
-                                <i class="fa fa-times-circle" aria-hidden="true" ng-show="showIfStock" ng-click="dropREItemStock(product)"></i>
-                                <i class="fa fa-times-circle" aria-hidden="true" ng-show="showIfOrderInstall" ng-click="dropREItemOrderInstall(product)"></i>
+                                <i class="fa fa-times-circle" aria-hidden="true" ng-show="showIfStock" ng-click="dropRIItemStock(product)"></i>
+                                <i class="fa fa-times-circle" aria-hidden="true" ng-show="showIfOrderInstall" ng-click="dropRIItemOrderInstall(product)"></i>
                             </td>
                             <td>{{product.product_no}}</td>
                             <td ng-show="showIfOrderInstall">{{product.so_no}}</td>
@@ -159,7 +159,7 @@
                             <th style="text-align: right;">{{totalPrice | number:2}}</th>
                         </tr>
                     </table>
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">บันทึก RE</button>
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">บันทึก RI</button>
                 </div>
             </div>
         </div>
@@ -169,11 +169,11 @@
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
         <script>
-            addModal('formValidate1', 'ใบคืนสินค้า / Return Inventory (RE)', 'เลือก Supplier ก่อนนะครับผม');
-            addModal('formValidate2', 'ใบคืนสินค้า / Return Inventory (RE)', 'เลือกประเภทสินค้าก่อนนะครับผม');
-            addModal('formValidate3', 'ใบคืนสินค้า / Return Inventory (RE)', 'ยังไม่ได้เพิ่มสินค้าเข้าใบคืนสินค้า');
-            addModal('noProductInStock', 'ใบคืนสินค้า / Return Inventory (RE)', 'ไม่มีสินค้านี้เหลือในระบบนะครับ');
-            addModal('notEnoughProductInStock', 'ใบคืนสินค้า / Return Inventory (RE)', 'จำนวนที่จะคืนเยอะกว่าที่เหลือในคลังครับ');
+            addModal('formValidate1', 'ใบคืนสินค้า / Return Inventory (RI)', 'เลือก Supplier ก่อนนะครับผม');
+            addModal('formValidate2', 'ใบคืนสินค้า / Return Inventory (RI)', 'เลือกประเภทสินค้าก่อนนะครับผม');
+            addModal('formValidate3', 'ใบคืนสินค้า / Return Inventory (RI)', 'ยังไม่ได้เพิ่มสินค้าเข้าใบคืนสินค้า');
+            addModal('noProductInStock', 'ใบคืนสินค้า / Return Inventory (RI)', 'ไม่มีสินค้านี้เหลือในระบบนะครับ');
+            addModal('notEnoughProductInStock', 'ใบคืนสินค้า / Return Inventory (RI)', 'จำนวนที่จะคืนเยอะกว่าที่เหลือในคลังครับ');
         </script>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -194,12 +194,12 @@
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
 
-        $scope.reItems = [];
+        $scope.riItems = [];
         $scope.selectedSupplier='';
         $scope.selectedProductLine='';
         $scope.selectedProductType='';
         $scope.suppliers = <?php echo $this->suppliers; ?>;
-        $scope.allProducts = <?php echo $this->REproducts; ?>;
+        $scope.allProducts = <?php echo $this->Riproducts; ?>;
        
         
         $scope.showIfOrderInstall = false;
@@ -231,32 +231,32 @@
             }
         }
 
-        $scope.addREItemStock = function(product) {
+        $scope.addRIItemStock = function(product) {
             var newProduct = true;
 
             if($scope.selectedProductType == 'Stock' && product.stock == 0) {
                 $('#noProductInStock').modal('toggle');
             } else
             {
-                angular.forEach($scope.reItems, function (value, key) {
+                angular.forEach($scope.riItems, function (value, key) {
                 if(value.product_no == product.product_no) {
                     newProduct = false;
                 }
             });
             if(newProduct) {
-                $scope.reItems.push(product);
-                Object.assign($scope.reItems[$scope.reItems.length - 1], {quantity: 1});
-                Object.assign($scope.reItems[$scope.reItems.length - 1], {so_no: '-'});
+                $scope.riItems.push(product);
+                Object.assign($scope.riItems[$scope.riItems.length - 1], {quantity: 1});
+                Object.assign($scope.riItems[$scope.riItems.length - 1], {so_no: '-'});
             }
             $scope.calculateTotalPrice();
             }
             
         }
 
-        $scope.dropREItemStock = function(product) {
-            angular.forEach($scope.reItems, function (value, key) {
+        $scope.dropRIItemStock = function(product) {
+            angular.forEach($scope.riItems, function (value, key) {
                 if(value.product_no == product.product_no) {
-                    $scope.reItems.splice($scope.reItems.indexOf(value), 1);
+                    $scope.riItems.splice($scope.riItems.indexOf(value), 1);
                 }
             });
             $scope.calculateTotalPrice();
@@ -294,7 +294,7 @@
             $scope.totalNoVat = 0;
             $scope.totalVat = 0;
             $scope.totalPrice = 0;
-            angular.forEach($scope.reItems, function(value, key) {
+            angular.forEach($scope.riItems, function(value, key) {
                 $scope.totalNoVat += (value.quantity * value.purchase_no_vat);
                 $scope.totalVat += (value.quantity * value.purchase_vat);
                 $scope.totalPrice += (value.quantity * value.purchase_price);
@@ -304,7 +304,7 @@
         $scope.edit = function() {
             $scope.isEdit = false;
             $scope.isFinishEdit = true;
-            angular.forEach($scope.reItems, function(value, key) {
+            angular.forEach($scope.riItems, function(value, key) {
                 $('#textboxQuantity'+value.product_no).prop('disabled', false);
             });
         }
@@ -313,7 +313,7 @@
             $scope.isEdit = true;
             $scope.isFinishEdit = false;
             var isNotEnough = false;
-            angular.forEach($scope.reItems, function(value, key) {
+            angular.forEach($scope.riItems, function(value, key) {
                 if ($scope.selectedProductType == 'Stock' && parseInt($('#textboxQuantity' + value.product_no).val()) > parseInt(value.stock)) {
                     value.quantity = value.stock;
                     $('#textboxQuantity' + value.product_no).val(value.stock);
@@ -332,12 +332,12 @@
         }
         
         $scope.formValidate = function() {
-            if($scope.reItems.length===0) {
+            if($scope.riItems.length===0) {
                 $('#formValidate3').modal('toggle');
             } else if($scope.isFinishEdit) {
                 $scope.finishEdit();
             } else {
-                var confirmModal = addConfirmModal('confirmModal', 'ใบคืนสินค้า / Return Inventory (RE)', 'ยืนยันการออกใบคืนสินค้า', 'postREItems()');
+                var confirmModal = addConfirmModal('confirmModal', 'ใบคืนสินค้า / Return Inventory (RI)', 'ยืนยันการออกใบคืนสินค้า', 'postRIItems()');
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
             }
@@ -345,7 +345,7 @@
 
         $scope.postREItems = function() {
             $('#confirmModal').modal('hide');
-            $.post("return_inventory/post_re_items", {
+            $.post("return_inventory/post_ri_items", {
                 post : true,
                 supplierNo : $scope.selectedSupplier,
                 productType : $scope.selectedProductType,
@@ -354,9 +354,9 @@
                 totalVat : $scope.totalVat,
                 totalPrice : $scope.totalPrice,
                 ThaiPrice : NumToThai($scope.totalPrice),
-                reItems : JSON.stringify(angular.toJson($scope.reItems))
+                riItems : JSON.stringify(angular.toJson($scope.riItems))
             }, function(data) {
-                addModal('successModal', 'ใบคืนสินค้า / Return Inventory (RE)', 'บันทึก ' + data + ' สำเร็จ');
+                addModal('successModal', 'ใบคืนสินค้า / Return Inventory (RI)', 'บันทึก ' + data + ' สำเร็จ');
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
                     window.location.assign('/');

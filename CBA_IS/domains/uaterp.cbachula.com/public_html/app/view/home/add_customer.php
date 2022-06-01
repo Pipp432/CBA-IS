@@ -187,7 +187,7 @@
                 addModal('successModal', 'เพิ่มข้อมูลลูกค้า / Add Customer', 'บันทึกข้อมูลลูกค้าสำเร็จ');
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
-                    window.location.replace('https://erp.cbachula.com/home/add_customer');
+                    window.location.replace('https://uaterp.cbachula.com/home/add_customer');
                 });
             });
             

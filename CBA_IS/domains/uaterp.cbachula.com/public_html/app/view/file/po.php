@@ -13,7 +13,7 @@
                 <h3 style="text-align: center;"><b>ใบสั่งซื้อ<br>Purchase Order</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">สำเนา</h5>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].po_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].po_date}}</h6>
             </div>
@@ -84,8 +84,8 @@
         <br>
         
         <!-- Customer Detail -->
-        <hr style="border-top: 1px dashed;" ng-show="detail[0].product_type == 'Install' && !( detail[0].supplier_no == 'B02' || detail[0].supplier_no == 'B04')">
-        <div class="row px-2 mt-2"  ng-show="detail[0].product_type == 'Install' && !( detail[0].supplier_no == 'B02' || detail[0].supplier_no == 'B04')">
+        <hr style="border-top: 1px dashed;" ng-show="detail[0].product_type == 'Install' ">
+        <div class="row px-2 mt-2"  ng-show="detail[0].product_type == 'Install' ">
             <div class="col-12 px-0">
                 <h4><b>ข้อมูลลูกค้า</b></h4>
                 <div class="p-3" style="border:1px solid black;">

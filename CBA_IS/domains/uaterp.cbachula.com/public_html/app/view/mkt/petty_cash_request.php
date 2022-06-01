@@ -89,7 +89,7 @@
 
                     <div class="col-md-4">
 
-                        <label for="bank">ธนาคาร</label>
+                        <label for="bank">ธนาคารและสาขา</label>
 
                         <input type="text" class="form-control" id="bank" ng-model="bank_name">
 
@@ -126,7 +126,6 @@
 
                     </div>
                 </form>
-                <hr>
 
 
 
@@ -162,7 +161,9 @@
 
             addModal('formValidate2', 'เบิกเงินรองจ่าย', 'เพิ่ม line ID ก่อนนะครับ');
 
-            addModal('formValidate5', 'เบิกเงินรองจ่าย', 'กรอกข้อมูลไม่ครบ');
+            addModal('formValidate5', 'เบิกเงินรองจ่าย', 'กรอกข้อมูลไม่ครบครับ');
+
+            addModal('formValidate6', 'เบิกเงินรองจ่าย', 'อัปไฟลไม่ครบครับ');
         </script>
 
 
@@ -256,6 +257,10 @@
             } else if ($scope.price === '' || $scope.bank_name === '' || $scope.bank_no === '') {
 
                 $('#formValidate5').modal('toggle');
+
+            } else if (document.getElementById("ivrc").files.length == 0 || document.getElementById("bankSlip").files.length == 0) {
+
+                $('#formValidate6').modal('toggle');
 
             } else {
 

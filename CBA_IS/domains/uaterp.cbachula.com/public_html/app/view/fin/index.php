@@ -22,7 +22,9 @@
         <!-- <script>addModuleLink('finRow', '/fin/upload_iv_pvc', 'cloud-download', 'อัปโหลด IV Sub สำหรับ ใบขอเบิกค่าใช้จ่าย');</script> -->
 		<!-- <script>addModuleLink('finRow', '/is/thelastday', 'heart', 'The Last Day');</script> -->
         <script>addModuleLink('finRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>
+        <script>addModuleLink('finRow', '/mkt/pre_pvd', 'desktop', 'คำร้องขอใบลดหนี้ (PV-D)');</script>
         <script>addModuleLink('finRow', '/fin/pvc_process', 'desktop', 'Process PV-C');</script>
+        
     </div>
     
 </body>

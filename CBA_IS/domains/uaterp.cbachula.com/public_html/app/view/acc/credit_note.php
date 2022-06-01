@@ -50,10 +50,9 @@
                     <table class="table table-hover my-1" ng-show="WSDs.length != 0">
                         <tr>
                             <th colspan="2">edit</th>
-                            <th>wsd no</th>
+                            <th>EXD no</th>
                             <th>employee id</th>
-                            <th>employee line</th>
-                            <th>total_amount</th>
+                            <th>total amount</th>
                             <th>vat id</th>
                             <th>sox no</th>
                             <th>invoice id</th>
@@ -66,16 +65,14 @@
                             <td>{{WSD.wsd_no}}</td>
                             <!-- <td ><input type="text" ng-model=WSD.employee_id ng-disabled="!WSD.editing"></td> -->
                             <td>{{WSD.employee_id}}</td>
-                            <!-- <td ><input class = "short_input" type="text" ng-model=WSD.employee_line ng-disabled="!WSD.editing"></td> -->
-                            <td>{{WSD.employee_line}}</td>
                             <td ><input class = "short_input" type="text" ng-model=WSD.total_amount ng-disabled="!WSD.editing"></td>
                             <!-- <td>{{WSD.total_amount}}</td> -->
-                            <td ><input class = "short_input" type="text" ng-model=WSD.vat_id ng-disabled="!WSD.editing"></td>
-                            <!-- <td>{{WSD.vat_id}}</td> -->
-                            <td ><input class = "short_input" type="text" ng-model=WSD.sox_no ng-disabled="!WSD.editing"></td>
-                            <!-- <td>{{WSD.sox_no}}</td> -->
-                            <td ><input class = "short_input" type="text" ng-model=WSD.invoice_no ng-disabled="!WSD.editing"></td>
-                            <!-- <td>{{WSD.invoice_no}}</td> -->
+                            <!-- <td ><input class = "short_input" type="text" ng-model=WSD.vat_id ng-disabled="!WSD.editing"></td> -->
+                            <td>{{WSD.vat_id}}</td>
+                            <!-- <td ><input class = "short_input" type="text" ng-model=WSD.sox_no ng-disabled="!WSD.editing"></td> -->
+                            <td>{{WSD.sox_no}}</td>
+                            <!-- <td ><input class = "short_input" type="text" ng-model=WSD.invoice_no ng-disabled="!WSD.editing"></td> -->
+                            <td>{{WSD.invoice_no}}</td>
                             <td ><input type="text" ng-model=WSD.note ng-disabled="!WSD.editing" onkeypress="this.style.width = ((this.value.length + 1)) + 'ch';"></td>
                         </tr>
                     </table>
@@ -120,43 +117,34 @@
                             <!-- ng-disabled="pvd_selected" -->
                             <td><input class = "short_input" type="text" ng-model=cnItem.quantity ng-disabled="!cnItem.editing"></td>
 
-                            <td style="text-align: right;">{{(cnItem.sales_price*cnItem.quantity) | number:2}}</td>
+                            <td style="text-align: right;">{{(cnItem.sales_price)*(cnItem.quantity) | number:2}}</td>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="6">มูลค่าตามเอกสารเดิม</th>
-                            <th id="ivtotalPrice" style="text-align: right;">{{cnTotalPrice | number:2}}</th>
+                            <th id="ivtotalPrice" style="text-align: right;">{{diff_total_sales_price2 | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="6">มูลค่าที่ถูกต้อง</th>
                             <th id="newtotalPrice" style="text-align: right;">{{new_total_sales_price | number:2}}</th>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="6">ผลต่าง</th>
-                            <th id="difftotalPrice" style="text-align: right;">{{diff_total_sales_price | number:2}}</th>
+                            <th style="text-align: right;" colspan="6">ผลต่าง</th> 
+                            <th id="difftotalPrice" style="text-align: right;">{{diff_total_sales_vat2 | number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="6">จำนวนภาษีมูลค่าเพิ่ม 7%</th>
-                            <th id="cattotalPrice" style="text-align: right;">{{vat_total_sales_no_vat | number:2}}</th>
+                            <th id="cattotalPrice" style="text-align: right;">{{vat_total_sales_no_vat2 | number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="6">จำนวนเงินรวมทั้งสิ้น</th>
-                            <th id="sumtotalPrice" style="text-align: right;">{{sum_total_sales_no_vat | number:2}}</th>
+                            <th id="sumtotalPrice" style="text-align: right;">{{sum_total_sales_no_vat2 | number:2}}</th>
                         </tr>
+                        <!-- <tr>
+                            <th style="text-align: right;" colspan="6">ค่าคอมมิชชั่น</th>
+                            <th id="totalcommission" style="text-align: right;">{{total_commission | number:2}}</th>
+                        </tr> -->
                     </table>
                 </div>
-                <hr>
-                <!-- <div class="row mx-0 mt-2">
-                    <div class="col-md-6 mx-0 mt-2" >
-                        <label for="textBoxDebit">Debit</label>
-                        <input type="text" class="form-control" id="textBoxDebit" ng-model="debit" placeholder="Debit" >
-                    </div>
-                </div>
-                <div class="row mx-0 mt-2">
-                    <div class="col-md-6 mx-0 mt-2" >
-                        <label for="textBoxCredit">Credit</label>
-                        <input type="text" class="form-control" id="textBoxCredit" ng-model="credit" placeholder="Credit" >
-                    </div>
-                </div> -->
                 <hr>
                 <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postCnItems()">บันทึกใบลดหนี้</button>
@@ -205,8 +193,6 @@
         
         $scope.invoice_no = '';
         $scope.cnDetail = '';
-        $scope.debit = '';
-        $scope.credit = '';
         $scope.cnTotalPrice = '';
         $scope.cnItemPrice = '';
 		$scope.cnItems = [];
@@ -218,23 +204,16 @@
         $scope.vat_total_sales_no_vat = '';
         $scope.diff_total_sales_price = '';
         $scope.sum_total_sales_no_vat = '';
+        $scope.total_commission = '';
+
+        $scope.diff_total_sales_vat2 = '';
+        $scope.vat_total_sales_no_vat2 = '';
+        $scope.sum_total_sales_no_vat2 = '';
+
 
         $scope.isEdit = true;
         $scope.isFinishEdit = false;
-        
-        // old ver 
-        // $scope.dropCnItem = function(cnItem) {
-        //     var temp = [];
-        //     angular.forEach($scope.cnItems, function (value, key) {
-        //         if(!(value.product_no.substring(0,15) === cnItem.product_no.substring(0,15))) {
-        //             temp.push(value);
-        //         }
-        //     });
-        //     $scope.cnItems = temp;
-        //     $scope.calculateCn();
-
-        // }
-
+    
         
         $scope.dropCnItem = function(product) {
             angular.forEach($scope.cnItems, function (value, key) {
@@ -245,15 +224,6 @@
             $scope.calculateCn();
         }
 
-        // oldver
-        // $scope.edit = function() {
-        //     $scope.isEdit = false;
-        //     $scope.isFinishEdit = true;
-        //     angular.forEach($scope.cnItems, function(value, key) {
-        //         $('#textboxQuantity' + value.product_no.substring(0,15)).prop('disabled', false);
-        //     });
-        // }
-
         $scope.edit = function() {
             $scope.isEdit = false;
             $scope.isFinishEdit = true;
@@ -261,27 +231,6 @@
                 $('#textboxQuantity'+value.product_no).prop('disabled', false);
             });
         }
-
-        // oldver
-        // $scope.finishEdit = function() {
-        //     $scope.isEdit = true;
-        //     $scope.isFinishEdit = false;
-        //     var isNotEnough = false;
-        //     // angular.forEach($scope.cnItems, function(value, key) {
-        //     //     if ($scope.hasDeposit) {
-        //     //         value.quantity = $('#textboxQuantity' + value.product_no.substring(0,15)).val();
-        //     //     } else if ($scope.selectedProductType == 'Stock' && parseInt($('#textboxQuantity' + value.product_no).val()) > parseInt(value.stock)) {
-        //     //         value.quantity = value.stock;
-        //     //         $('#textboxQuantity' + value.product_no).val(value.stock);
-        //     //         isNotEnough = true;
-        //     //     } else {
-        //     //         value.quantity = $('#textboxQuantity' + value.product_no).val();
-        //     //     }
-        //     //     $('#textboxQuantity' + value.product_no).prop('disabled', true);
-        //     // });
-        //     // if(isNotEnough) $('#notEnoughProductInStock').modal('toggle');
-        //     $scope.calculateCn();
-        // }
 
         $scope.finishEdit = function() {
             $scope.isEdit = true;
@@ -304,22 +253,37 @@
             $scope.sum_total_sales_no_vat = 0;
             $scope.totalPurchasePrice = 0;
             $scope.totalSalesPrice = 0;
+
+            $scope.diff_total_sales_vat2 = 0;
+            $scope.sum_total_sales_no_vat2 = 0;
+            $scope.vat_total_sales_no_vat2 = 0;
+            $scope.diff_total_sales_price2 = 0;
+
+            $scope.total_commission = 0;
             /////////////
             //$scope.new_total_purchase_price = 0;
             
             if($scope.cnItems.length != 0) {
                 $scope.iv_total_sales_price = $scope.cnItems[0].iv_total_sales_price;
+                $scope.total_amount2 = $scope.WSDs[0].total_amount;
+
                 angular.forEach($scope.cnItems, function(value, key) {
                     $scope.diff_total_sales_vat += (parseFloat(value.sales_vat) * parseFloat(value.quantity));
-                    $scope.diff_total_sales_price += (parseFloat(value.sales_price) * parseFloat(value.quantity));
+                    $scope.diff_total_sales_price += (parseFloat(value.sales_price) * parseFloat(value.quantity)); //old ver of ผลต่าง
+                    $scope.total_commission += (parseFloat(value.commission) * parseFloat(value.quantity));
                     $scope.totalPurchasePrice += (value.quantity * value.purchase_price);
                     $scope.totalSalesPrice += (value.quantity * value.sales_price);
                 });
                 $scope.diff_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) / 1.07;
                 $scope.diff_total_sales_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : (parseFloat($scope.diff_total_sales_price) / 107) * 7;
-                $scope.new_total_sales_price = parseFloat($scope.iv_total_sales_price) - parseFloat($scope.diff_total_sales_price);
+                $scope.new_total_sales_price = (parseFloat($scope.diff_total_sales_price) - $scope.total_amount2)*100/107 ;                            //////
                 $scope.sum_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) * 1.07;
-                $scope.vat_total_sales_no_vat = Math.abs(parseFloat($scope.diff_total_sales_price) - parseFloat($scope.sum_total_sales_no_vat));
+                $scope.vat_total_sales_no_vat = Math.abs(parseFloat($scope.diff_total_sales_price) - parseFloat($scope.sum_total_sales_no_vat));                //old ver of จำนวนภาษีมูลค่าเพิ่ม
+
+                $scope.diff_total_sales_vat2 =  parseFloat($scope.total_amount2)*100/107;                       //ผลต่าง new ver
+                $scope.vat_total_sales_no_vat2 = parseFloat($scope.total_amount2)*7/107;
+                $scope.sum_total_sales_no_vat2 = parseFloat($scope.total_amount2);
+                $scope.diff_total_sales_price2 = parseFloat($scope.diff_total_sales_price)*(100/107);
             }
         }
 
@@ -341,6 +305,7 @@
                 $scope.cnDetail = $WSD.note;
                 $scope.wsd_no = $WSD.wsd_no;
                 $scope.wsdNo = $WSD.wsd_no;
+                $scope.vat_id = $WSD.vat_id;
                 $scope.formValidate1();
                 if($scope.cnItems.length > 0) {
                     $scope.pvd_selected = true;
@@ -405,15 +370,17 @@
 
         $scope.postCnItems = function() {
             $scope.company = $scope.WSDs[0].invoice_no.substring(0,1);
-            $scope.product_no = $scope
             $('#confirmModal').modal('hide');
             $.post("/acc/credit_note/post_cn", { 
                 post : true,
+                diff_total_sales_price : $scope.diff_total_sales_price2,
                 new_total_sales_price : $scope.new_total_sales_price,
-                diff_total_sales_price : $scope.diff_total_sales_price,
-                vat_total_sales_no_vat : $scope.vat_total_sales_no_vat,
-                sum_total_sales_no_vat : $scope.sum_total_sales_no_vat,
+                diff_total_sales_vat : $scope.diff_total_sales_vat2,
+                vat_total_sales_no_vat : $scope.vat_total_sales_no_vat2,
+                sum_total_sales_no_vat : $scope.sum_total_sales_no_vat2,
+
                 new_sales_price_thai : NumToThai(parseFloat($scope.sum_total_sales_no_vat)),
+                total_commission : $scope.total_commission,
 
                 totalPurchasePrice : $scope.totalPurchasePrice,
                 totalSalesPrice : $scope.totalSalesPrice,

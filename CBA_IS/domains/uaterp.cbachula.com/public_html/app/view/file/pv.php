@@ -62,7 +62,7 @@
                 </tr>
                 <tr ng-repeat="item in detail">
                     <td style="text-align: left;">{{item.file_date}}</td>
-                    <td style="text-align: left;">{{item.iv_no}}</td>
+                    <td style="text-align: left;">{{item.iv_no}} &ensp;/&ensp; {{item.bill_no}} &ensp;/&ensp; {{item.tax_no}} &ensp;/&ensp; {{item.debt_reduce_no}}</td>
                     <td style="text-align: left;">{{item.detail}}</td>
                     <td style="text-align: left;">{{item.rr_no}}</td>
                     <td style="text-align: right;">{{item.paid_total | number:2}}</td>

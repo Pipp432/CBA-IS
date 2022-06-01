@@ -65,7 +65,7 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <td><b>ชื่อลูกค้า</b> {{detail[0].customer_name}}</td>
+                        <td><b>ชื่อลูกค้า</b> {{ detail[0].customer_title === null ? detail[0].customer_name : detail[0].customer_title + detail[0].customer_name}}</td>
                         <td><b>รหัสพนักงาน</b> {{detail[0].employee_id}}</td>
                     </tr>
                     <tr>
@@ -93,9 +93,9 @@
                 <tr ng-repeat="item in detail">
                     <td style="text-align: center;">{{$index+1}}</td>
                     <td style="text-align: center;">{{item.product_no}}</td>
-                    <td style="text-align: left;">{{item.product_name}}</td>
+                    <td style="text-align: left;">{{item.product_name==null? 'ค่าขนส่ง' : item.product_name}}</td>
                     <td style="text-align: right;">{{item.quantity}}</td>
-                    <td style="text-align: left;">{{item.unit}}</td>
+                    <td style="text-align: left;">{{item.unit==null? 'รายการ' : item.unit}}</td>
                     <td style="text-align: right;">{{item.sales_price | number:2}}</td>
                     <td style="text-align: right;">{{item.total_sales_price | number:2}}</td>
                 </tr>
@@ -103,10 +103,10 @@
                     <th colspan="2">
                         จำนวนเงิน (ตัวอักษร)
                     </th>
-                    <th colspan="2" style="text-align: left;">
+                    <th colspan="5" style="text-align: left;">
                         {{detail[0].sales_price_thai}}
                     </th>
-    
+                    
                 </tr>
                 <tr>
                     <th colspan="4" rowspan="3">
@@ -183,9 +183,9 @@
 			<div class="row" ng-repeat="item in detail" style="width: 100%">
 				<div class="col" style="text-align: center;">{{$index+1}}</div>
 				<div class="col-2" style="text-align: center;">{{item.product_no}}</div>
-				<div class="col-5" style="text-align: left;">{{item.product_name}}</div>
+				<div class="col-5" style="text-align: left;">{{item.product_name==null? 'ค่าขนส่ง' : item.product_name}}</div>
 				<div class="col" style="text-align: right;">{{item.quantity}}</div>
-				<div class="col" style="text-align: left;">{{item.unit}}</div>
+				<div class="col" style="text-align: left;">{{item.unit==null? 'รายการ' : item.unit}}</div>
 				<div class="col" style="text-align: right;"><div style="margin-right:-50px">{{item.sales_price | number:2}}</div></div>
 				<div class="col-2" style="text-align: right;">{{item.total_sales_price | number:2}}</div>
 			</div>
@@ -237,6 +237,7 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
+             console.log( $scope.detail)
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
@@ -247,7 +248,10 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
+           
         }
+      
+        
     });
     
 </script>

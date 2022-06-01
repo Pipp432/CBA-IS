@@ -120,7 +120,22 @@
         $scope.pvas = <?php echo $this->pvas; ?>;
         $scope.prePvas = <?php echo $this->prePvas; ?>;
         $scope.pvType = '';
-        
+        convert_pva_status = {
+            '-1':"ยกเลิก",
+            0:"รอ finance โอนให้พนักงาน",
+            1:"รอ finance รวมใบขอ pva",
+            2:"รอ account สร้าง pva",
+            3:"รอ finance โอนเงินเข้าบัญชีเงินรองจ่าย",
+            4:"รอ account confirm pva", 
+            5:"เรียบร้อย",
+        }
+        angular.forEach($scope.pvas, function(value, key) {
+            value["pv_status"] = convert_pva_status[value["pv_status"]];
+        });
+
+        angular.forEach($scope.prePvas, function(value, key) {
+            value["pv_status"] = convert_pva_status[value["pv_status"]];
+        });
 
 
         $scope.getDashboardPVA = function() {

@@ -73,7 +73,7 @@
 					<select  class="btn btn-light btn-md dropdown-toggle col-3"  ng-model="selectedWeekMargin"  id="dropdownWeek" ng-change="render_margin()">
 
 						<option value="">Choose Week</option>
-		<!--
+		
 						<option value="1">Week 1</option>
 						<option value="2">Week 2</option>
 						<option value="3">Week 3</option>
@@ -81,7 +81,7 @@
 						<option value="5">Week 5</option>
 						<option value="6">Week 6</option>
 						<option value="7">Week 7</option>
-		-->
+		
 						<option value="8">Week 8</option>
 						<option value="9">Week 9</option>
 						<option value="10">Week 10</option>
