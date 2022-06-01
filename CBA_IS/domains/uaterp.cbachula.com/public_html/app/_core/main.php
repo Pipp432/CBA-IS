@@ -64,5 +64,8 @@ class main {
     public function file() {
         return new controller\fileController();
     }
+    public function os() {
+        return new controller\osController();
+    }
     
 }

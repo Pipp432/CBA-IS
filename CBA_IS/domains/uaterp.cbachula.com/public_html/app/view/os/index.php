@@ -11,7 +11,7 @@ $dt = new DateTime("now", new DateTimeZone($tz));
 $dt=$dt->setTimestamp($timestamp); 
 $dt=$dt -> format('Hi');
 		
-    echo "<script>addModuleLink('osRow', '/mkt/sales_order', 'shopping-bag', 'Sales Order (SO)');</script>";
+    echo "<script>addModuleLink('osRow', '/os/sales_order', 'shopping-bag', 'Sales Order (SO)');</script>";
     echo "<script>addModuleLink('osRow', '/home/add_customer', 'user-plus', 'Add Customer');</script>";
 	echo "<script>addModuleLink('osRow', '/mkt/purchase_order', 'shopping-cart', 'Purchase Order (PO)');</script>";
 	echo "<script>addModuleLink('osRow', '/mkt/confirm_install', 'truck', 'Confirm Install (CI)');</script>";
