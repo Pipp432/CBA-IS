@@ -104,7 +104,7 @@
                     <td style= "text-align:center">{{(JSONConverter(reReq.details))[0].money| number : 2}}</td>
                     
                   
-                    <td style= "text-align:center">{{reReq.confirmed}}</td>
+                    <td style= "text-align:center">{{reReq.confirmed==0 ? "awaiting confirmation": "confirmed"}}</td>
                 </tr>
             </table>
             

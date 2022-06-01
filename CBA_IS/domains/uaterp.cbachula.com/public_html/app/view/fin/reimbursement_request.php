@@ -86,7 +86,7 @@
                             <tr ng-repeat = "item in tableDetails">
                                 <td><b> {{item.date}}</b> </td>
                                 <td><b> {{item.details}}</b> </td>
-                                <td><b> {{item.money}}</b></td>
+                                <td><b> {{item.money | number:2}}</b></td>
                             </tr>
                         
                         </table>

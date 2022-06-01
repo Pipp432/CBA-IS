@@ -58,9 +58,9 @@
                                 <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc' && pv_item.pv_no===pv.pv_no" ng-repeat="pv_item in pvs track by $index">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
                                 <li ng-show = "pv.pv_type == 'pvd'">-</li>
                                 <pre ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</pre>
-                                <li ng-show = "pv.pv_type == 'pvc'">{{}} {{pv.pv_details}}</li>
+                                <li ng-show = "pv.pv_type == 'pvc'"> {{pv.pv_details}}</li>
                             </ul></td>
-                            <td style="text-align: right;">
+                            <td style="text-align: center;">
                                 {{pv.total_paid | number:2}}<br>
                                 <a ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva'" href="/acc/confirm_payment_voucher/get_receipt/{{pv.pv_no}}" target="_blank">{{pv.receipt_name}}</a>
                                 <a ng-show = "pv.pv_type == 'Supplier'" href="/acc/dashboard/get_PVB_CR/{{pv.pv_no}}" target="_blank">{{pv.cr_name}}</a>
@@ -146,6 +146,7 @@
         $scope.filterPVNo = '';
         $scope.filterPVType = '';
         $scope.pvs = [];
+        $scope.filesUploaded = true;
         
         $http.get('/acc/confirm_payment_voucher/get_rr_ci_pv').then(function(response){
             $scope.pvs = $scope.pvs.concat(response.data);
@@ -168,6 +169,7 @@
             angular.forEach(response['data'], function (value) {
                 value.pv_type = "pvc";
                 $scope.pvs.push(value);
+                console.log($scope.pvs)
             });
         });
         
@@ -228,9 +230,10 @@
                     cpvcs.push(value.pv_no);
                 } else cpvs.push(value);
             });
-
-
+            console.log(cpvcs)
+           
             if(cpvs.length != 0) {
+                
                 $.post("/acc/confirm_payment_voucher/post_cpv_items", {
                     post : true,
                     cpvItems : JSON.stringify(angular.toJson(cpvs))
@@ -285,7 +288,25 @@
                     }
                 });
             } else respond_count++;
-            if(cpvcs.length != 0) {
+            $scope.cpvItems=$scope.cpvItems.filter(entries=>entries.pv_no===cpvcs[0]);
+            if($scope.cpvItems[0].iv_name==null && $scope.cpvItems[0].slip_name==null){
+                addModal('IVAndSlipErrorModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', "IV and Slip are missing");
+                $('#IVAndSlipErrorModal').modal('toggle');
+              
+               
+            }
+            else if($scope.cpvItems[0].iv_name==null) {
+                addModal('IVErrorModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', "IV is missing");
+                $('#IVErrorModal').modal('toggle');
+                
+            }
+            else if($scope.cpvItems[0].slip_name==null) {
+                addModal('SlipErrorModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', "Slip is missing");
+                $('#SlipErrorModal').modal('toggle');
+                
+
+            }
+            else if(cpvcs.length != 0) {
                 $.post("/acc/confirm_payment_voucher/post_cpvc_items", {
                     post : true,
                    
@@ -298,7 +319,7 @@
                         addModal('successModal', 'ยืนยันการชำระเงินตามใบสั่งจ่าย / Confirm Payment Voucher', 'ยืนยันการชำระเงินตามใบสั่งจ่ายสำเร็จ');
                         $('#successModal').modal('toggle');
                         $('#successModal').on('hide.bs.modal', function (e) {
-                            location.reload();
+                            // location.reload();
                         });
                     }
                 });
