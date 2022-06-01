@@ -411,28 +411,32 @@ class accModel extends model {
   
         foreach ( $items as $value ) {
   
-          // insert SOPrinting
-            $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, new_total_sales_price, diff_total_sales_price, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
-                                          values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
-            $sql->execute( [
-                input::post('wsd_no'),
-                $value[ 'product_no' ],
-                input::post('new_total_sales_price'),
-                input::post('diff_total_sales_price'),
-                input::post('vat_total_sales_no_vat'),
-                input::post('sum_total_sales_no_vat'),
-                input::post('new_sales_price_thai'),
-                ( double )$value[ 'sales_price' ],
-                ( double )$value[ 'quantity' ],
-                ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
-            ] );
-        }
+            // insert SOPrinting
+              $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, diff_total_sales_price, new_total_sales_price, diff_total_sales_vat, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
+                                            values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+              $sql->execute( [
+                  input::post('wsd_no'),
+                  $value[ 'product_no' ],
+                  input::post('diff_total_sales_price'),
+                  input::post('new_total_sales_price'),
+                  input::post('diff_total_sales_vat'),
+                  input::post('vat_total_sales_no_vat'),
+                  input::post('sum_total_sales_no_vat'),
+                  input::post('new_sales_price_thai'),
+                  ( double )$value[ 'sales_price' ],
+                  ( double )$value[ 'quantity' ],
+                  ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
+              ] );
+          }
+    
   
         $sql = $this->prepare("UPDATE WSD set wsd_status=1,
-                                              vat_id = ?
+                                              vat_id = ?,
+                                              total_amount = ?
                                 where WSD.wsd_no = ?");
         $sql->execute([
             input::post("vat_id"),
+            input::post("sum_total_sales_no_vat"),
             input::post('wsd_no')
         ]);
 
@@ -649,12 +653,36 @@ class accModel extends model {
             echo')';
         }
 
-        $sql = $this->prepare("UPDATE WSD set wsd_status=2
-                                where WSD.wsd_no = ?");
-        $sql->execute([
-            input::post('wsd_no')
+        // $sql = $this->prepare("UPDATE WSD set wsd_status=2
+        //                         where WSD.wsd_no = ?");
+        // $sql->execute([
+        //     input::post('wsd_no')
+        // ]);
+
+        $sql = "UPDATE WSD SET  
+            recipient = ?, bank = ?, bank_no = ?, recipient_address = ?, wsd_status=2
+            WHERE wsd_no = ?";
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("recipient"),
+            input::post("bank"),
+            input::post("bank_no"),
+            input::post("recipient_address"),
+            input::post("wsd_no"),
         ]);
 
+        $sql = "UPDATE CN SET  
+            company_code = ?, recipient = ?, bank = ?, bank_no = ?, recipient_address = ?
+            WHERE cn_no = ?";
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("company_code"),
+            input::post("recipient"),
+            input::post("bank"),
+            input::post("bank_no"),
+            input::post("recipient_address"),
+            input::post("cn_no"),
+        ]);
 
     }
 

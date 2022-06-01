@@ -55,7 +55,7 @@
                             <td  style="text-align: center;"><ul class="my-0">
                                 <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc' && pv_item.pv_no===pv.pv_no" ng-repeat="pv_item in pvs track by $index">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
                                 <li ng-show = "pv.pv_type == 'pvd'">-</li>
-                                <li ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</li>
+                                <pre ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</pre>
                                 <li ng-show = "pv.pv_type == 'pvc'">{{pv.pv_details}}</li>
                             </ul></td>
                             <td style="text-align: right;">
@@ -100,8 +100,9 @@
                             <td style="text-align: center;">{{cpvItem.pv_date}}</td>
                             <td style="text-align: center;">{{cpvItem.pv_type}}</td>
                             <td style="text-align: center;"><ul class="my-0">
-                                <li ng-repeat="cpv_item in cpvItems" ng-show="cpv_item.pv_no===cpvItem.pv_no && cpvItem.pv_type != 'pvc'">{{cpv_item.detail}} ({{cpv_item.paid_total | number:2}})</li>
+                                <li ng-repeat="cpv_item in cpvItems" ng-show="cpv_item.pv_no===cpvItem.pv_no && cpvItem.pv_type != 'pvc' && cpvItem.pv_type != 'pva'">{{cpv_item.detail}} ({{cpv_item.paid_total | number:2}})</li>
                                 <li ng-show = "cpvItem.pv_type == 'pvc'">{{cpvItem.pv_details}}</li>
+                                <pre ng-show = "cpvItem.pv_type == 'pva'">{{cpvItem.product_names}}</pre>
                             </ul></td>
                             <td style="text-align: right;">{{cpvItem.total_paid | number:2}}</td>
                         </tr>

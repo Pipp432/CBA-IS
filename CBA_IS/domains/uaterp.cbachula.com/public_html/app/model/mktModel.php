@@ -1222,9 +1222,7 @@ class mktModel extends model {
                 ["w"=> 22, "h"=> 14, "d"=> 35, "id"=> "D"],
                 ["w"=> 24, "h"=> 17, "d"=> 40, "id"=> "E"],
                 ["w"=> 31, "h"=> 13, "d"=> 36, "id"=> "F"],
-                ["w"=> 30, "h"=> 22, "d"=> 45, "id"=> "ฉ"],
-                ["w"=> 14, "h"=> 0, "d"=> 17, "id"=> "ซองกันกระแทก"],
-                ["w"=> 25, "h"=> 0, "d"=> 35, "id"=> "ซอง"],
+                ["w"=> 30, "h"=> 22, "d"=> 45, "id"=> "ฉ"]
             ]
         ];
 
@@ -2138,6 +2136,7 @@ return [
                                 left join SOX on SOX.sox_no = SOXPrinting.sox_no
                                 inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
                                 where SOPrinting.cancelled = 0 and not Product.product_type = 'Stock' and SO.po_no is null and ((SOX.done = 0 and SO.payment is null) or (SOX.done = -1 and SO.payment=1)) and Product.product_line = ? and SO.note is null
+                                GROUP BY SO.so_no, Product.product_no
                                 order by SOPrinting.so_no desc" );
     $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] ] );
     if ( $sql->rowCount() > 0 ) {

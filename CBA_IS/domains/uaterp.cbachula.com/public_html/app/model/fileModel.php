@@ -132,8 +132,9 @@ class fileModel extends model {
                                     CNPrinting.sales_price,
                                     CNPrinting.new_total_sales,
                                     Invoice.total_sales_price as cn_total_sales_price,
-                                    CNPrinting.new_total_sales_price,
                                     CNPrinting.diff_total_sales_price,
+                                    CNPrinting.new_total_sales_price,
+                                    CNPrinting.diff_total_sales_vat,
                                     CNPrinting.vat_total_sales_no_vat,
                                     CNPrinting.sum_total_sales_no_vat,
                                     CNPrinting.new_sales_price_thai,
@@ -148,14 +149,6 @@ class fileModel extends model {
                                 left join Invoice on WSD.invoice_no = Invoice.invoice_no
                                 left join Product on CNPrinting.product_no = Product.product_no
                                 left join CN on CN.wsd_no = WSD.wsd_no
-
-
-                                -- inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
-                                -- left join Invoice as exInvoice on exInvoice.invoice_no = Invoice.file_no
-                                -- left join Product on Product.product_no = InvoicePrinting.product_no
-                                -- left join WSD on WSD.invoice_no = Invoice.invoice_no
-                                -- left join CN on CN.wsd_no = WSD.wsd_no
-                                -- left join CNPrinting on CN.wsd_no = CNPrinting.wsd_no
     							where WSD.invoice_no = ?");
         $sql->execute([$iv_no]);
         if ($sql->rowCount() > 0) {
@@ -177,8 +170,9 @@ class fileModel extends model {
                                     CNPrinting.sales_price,
                                     CNPrinting.new_total_sales,
                                     Invoice.total_sales_price as cn_total_sales_price,
-                                    CNPrinting.new_total_sales_price,
                                     CNPrinting.diff_total_sales_price,
+                                    CNPrinting.new_total_sales_price,
+                                    CNPrinting.diff_total_sales_vat,
                                     CNPrinting.vat_total_sales_no_vat,
                                     CNPrinting.sum_total_sales_no_vat,
                                     CNPrinting.new_sales_price_thai,

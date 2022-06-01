@@ -321,16 +321,33 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards" ng-click = "openPVC(dashboard.pv_no)">
-                    <td>{{dashboard.pv_no}}</td>
+                <tr ng-repeat="dashboard in dashboards">
+                    <td> <a href="/file/pvc/{{dashboard.pv_no}}">{{dashboard.pv_no}}</a></td>
                     <td>{{dashboard.pv_date}}</td>
-                    <td>{{dashboard.total_paid}}</td>
+                    <td>{{dashboard.total_paid|number:2}}</td>
                     <td>
-                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">Slip</a>
+                        <div ng-show="dashboard.slip_name===null">
+                            <p>Not Uploaded</p>
+
+                        </div>
+                        <div ng-show="dashboard.slip_name!==null">
+                        <a href="/acc/dashboard_acc/pv_slip/{{dashboard.pv_no}}">{{dashboard.slip_name}}</a>
+                        
+                        </div>
+                        
+                       
 
                     </td>
                     <td style="text-align: center ;">
-                        <a href="/acc/dashboard_acc/pv_iv/{{dashboard.pv_no}}">IV</a>
+                    <div ng-show="dashboard.iv_name===null">
+                            <p>Not Uploaded</p>
+
+                        </div>
+                        <div ng-show="dashboard.iv_name!==null">
+                        <a href="/acc/dashboard_acc/pv_iv/{{dashboard.pv_no}}">{{dashboard.iv_name}}</a>
+                        
+                        </div>
+                     
 
                     </td>
                     <td style="text-align: center ;">
@@ -338,7 +355,19 @@
                     </td>
                     
                     <td>{{dashboard.approved_employee}} {{dashboard.employee_nickname_thai}}</td>
-                    <td>{{dashboard.confirmed_employee}} </td>
+
+                    
+
+                        </div>
+
+                    <td> <div ng-show="dashboard.confirmed_employee===null">
+                            <p>Not Confirmed</p>
+
+                        </div>
+                        <div ng-show="dashboard.confirmed_employee!==null">
+                            <p>{{dashboard.confirmed_employee}}</p>
+                        </td>
+
                 </tr>
             </table>
             
@@ -499,9 +528,7 @@
             return parseInt(first)<parseInt(second) ? -1:1;
         }
          
-        $scope.openPVC = (pv_no)=>{
-            window.open(`https://uaterp.cbachula.com/file/pvc/${pv_no}`)
-        }
+        
 
     
         

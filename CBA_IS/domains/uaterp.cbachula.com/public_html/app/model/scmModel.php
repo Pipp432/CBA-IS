@@ -855,8 +855,8 @@ class scmModel extends model {
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
-        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
-        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
+        inner join Invoice on Invoice.file_no = SO.so_no
+        inner join InvoicePrinting on InvoicePrinting.invoice_no = Invoice.invoice_no and InvoicePrinting.product_no = SOPrinting.product_no
         WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {

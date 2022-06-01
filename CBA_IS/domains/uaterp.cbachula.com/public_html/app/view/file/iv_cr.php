@@ -65,7 +65,7 @@
             <div class="col-12 px-0">
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
-                        <td><b>ชื่อลูกค้า</b> {{ detail[0].customer_title === null ? detail[0].customer_name : detail[0].customer_title + detail[0].customer_name}}</td>
+                        <td><b>ชื่อลูกค้า</b> {{ customer_title + detail[0].customer_name}}</td>
                         <td><b>รหัสพนักงาน</b> {{detail[0].employee_id}}</td>
                     </tr>
                     <tr>
@@ -240,6 +240,7 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
+            $scope.customer_title = $scope.detail[0].customer_title;
              
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
@@ -251,9 +252,9 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
-            if($scope.detail[0].customer_name.substring(0,5)==='บริษัท') $scope.detail[0].customer_title = null;
-            console.log( $scope.detail[0].customer_name)
-            console.log( $scope.detail[0].customer_title)
+            if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
+            // console.log( $scope.detail[0].customer_name.substring(0,6))
+            // console.log( $scope.customer_title)
             $scope.creditCardFee =0;
             $scope.totalPrice =0;
             $scope.calculateCreditCardFee = function(){
