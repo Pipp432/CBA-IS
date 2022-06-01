@@ -77,8 +77,8 @@ class osController extends controller {
         if(empty(uri::get(2))) {
             $this->requirePostition("os");
             $this->view->setTitle("Sales Order (SO)");
-            $this->view->suppliers = $this->model->getSuppliers();
-            $this->view->products = $this->model->getProducts();
+            // $this->view->suppliers = $this->model->getSuppliers();
+            // $this->view->products = $this->model->getProducts();
             $this->view->render("os/sales_order", "navbar");
         } else if (uri::get(2)==='get_customer_name') {
             $this->positionEcho('os', $this->model->getCustomerName());
