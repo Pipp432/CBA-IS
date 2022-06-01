@@ -5102,7 +5102,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       $re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
       echo json_encode($re);
     }
-   
+  
   }
 
 public function getStockPo() {

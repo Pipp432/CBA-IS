@@ -359,10 +359,12 @@
                 table : $scope.getTableData(),
                 company_code:"3"                
             }).done(function(done){ 
-
+                console.log(done)
                 addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
                 $('#successModal').modal('toggle');
                  
+            }).fail(function(a,b,c){
+                console.log(a,b,c)
             })
             $scope.toMainMenu();
 
