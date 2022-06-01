@@ -123,6 +123,9 @@
                 } if ($this->getPosition=='hr' || $this->getPosition=='is') {
                     if($this->getPosition=='is') echo '<h4 class="my-2">Human Resources</h4>';
                     require 'app/view/hr/index.php';
+                } if ($this->getPosition=='os' || $this->getPosition=='is') {
+                    if($this->getPosition=='is') echo '<h4 class="my-2">Online Sales</h4>';
+                    require 'app/view/os/index.php';
                 } 
 				if($this->getPosition=='is') echo '<h4 class="my-2">Everyone</h4>';
 				echo '<div class="row row-cols-2 row-cols-md-5 mt-2" style="padding: 0;" id="ERow">';
