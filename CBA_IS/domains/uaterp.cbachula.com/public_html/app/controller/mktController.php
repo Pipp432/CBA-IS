@@ -206,8 +206,6 @@ class mktController extends controller {
            
            
             $this->view->render("os/dashboard", "navbar");
-        } else if (uri::get(2)==='get_dashboard') {
-            echo $this->model->getDashborad();
         }else if (uri::get(2)==='get_soxs') {
             echo $this->model->getOSDashboardSox(uri::get(3));
         }

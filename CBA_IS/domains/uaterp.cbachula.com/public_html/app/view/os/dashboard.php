@@ -6,7 +6,7 @@
     <div class="container mt-3" ng-controller="moduleAppController">
 
         <h2 class="mt-3">Dashboard SOX</h2>
-        <select id ="filter" name = "filter" ng-model="filter" ng-change = "debug()">
+        <select id ="filter" name = "filter" ng-model="filter" ng-change = "getData()">
             <option value="Line 1">1</option>
             <option value="Line 2">2</option>
             <option value="Line 3">3</option>
@@ -17,7 +17,7 @@
             <option value="Line 8">8</option>
             <option value="Line 9">9</option>
             <option value="Line 10">10</option>
-            <option value="All">All</option>
+            <option value="All Lines">All</option>
             
         </select>
         <br>
@@ -30,19 +30,14 @@
                     <th> SOX No. </th>
                     <th> SO No. </th>
                     <th> Product Line </th>
-                    
                 </tr>
                 <tr ng-repeat = "sox in soxs track by $index">
                     <td> {{sox.sox_no}}</td>
                     <td> {{sox.so_no}}</td>
                     <td> {{sox.product_line}}</td>
-                    
                 </tr>
-                <tr>
-                    
-                </tr>
+               
             </table>
-
         </div>
          <div ng-show="filter && !soxs">
 
@@ -88,25 +83,16 @@
             "All" : "."
         }
         $scope.filter = ''
-        // $scope.debug = function(){
-        //     console.log($scope.filter)
-        // }
-
-        $scope.debug = function(){
+        $scope.getData = function(){
             let line = $scope.filter;
-            console.log(($scope.lineDictionary)[line]);
-            if(line!=="All"){
-                $http.get(`/mkt/os_dashboard/get_soxs/${($scope.lineDictionary)[line]}`).then((response)=>{$scope.soxs = response["data"]; console.log($scope.soxs)})
+            if(line!=="All Lines"){
+                $http.get(`/mkt/os_dashboard/get_soxs/${($scope.lineDictionary)[line]}`).then((response)=>{$scope.soxs = response["data"];})
             }else{
                 $http.get(`/mkt/os_dashboard/get_all_soxs`).then((response)=>{$scope.soxs = response["data"]; console.log($scope.soxs)})
             }
            
-           
         }
-        
-      
-      
-
+        $scope.getData();
     });
 
 </script>

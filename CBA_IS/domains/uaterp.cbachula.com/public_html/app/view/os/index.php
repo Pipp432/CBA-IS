@@ -14,7 +14,7 @@
 	 <!-- <script>addModuleLink('osRow', '/mkt/t_price', 'truck', 'คำนวณค่าส่ง');</script> -->
 	 <!-- <script>addModuleLink('osRow', 'https://docs.google.com/spreadsheets/d/1-lnIdt3ccJ7f6eBWI56mnuVq-yX1xU95VDu-eIJkSJI/edit?usp=sharing', 'truck', 'Supplier Delivery Time Slot');</script> -->
 	 <!-- <script>addModuleLink('osRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script> -->
-	 <script>addModuleLink('osRow', '/mkt/sales_and_margin', 'bar-chart', 'Actual vs Forecast Sales/Margin');</script>
+	 <script>addModuleLink('osRow', '/mkt/os_sales_and_margin/s', 'bar-chart', 'Actual vs Forecast Sales/Margin');</script>
 	 <!-- <script>addModuleLink('osRow', '/mkt/sp_tracking', 'table', 'SP Tracking');</script>
 	 <script>addModuleLink('osRow', '/is/thelastday', 'heart', 'The Last Day');</script>
 	 <script>addModuleLink('osRow', '/mkt/Cancel_Sox', 'shopping-bag', 'Cancel Sox');</script> -->

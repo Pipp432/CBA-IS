@@ -252,10 +252,8 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
-            if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
-            if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
-            if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
-            if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
+            $scope.correctName()
+            
             
             // console.log( $scope.detail[0].customer_name.substring(0,6))
             // console.log( $scope.customer_title)
@@ -273,6 +271,13 @@
                     $scope.creditCardFee =0;
                     $scope.totalPrice =detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                 }
+            }
+            $scope.correctName = function(){
+                if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
+
             }
            
         }
