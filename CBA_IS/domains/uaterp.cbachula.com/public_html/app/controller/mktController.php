@@ -75,7 +75,7 @@ class mktController extends controller {
 
     public function sales_order() {
         if(empty(uri::get(2))) {
-            $this->requirePostition("mkt");
+            
             $this->view->setTitle("Sales Order (SO)");
             $this->view->suppliers = $this->model->getSuppliers();
             $this->view->products = $this->model->getProducts();
@@ -84,6 +84,18 @@ class mktController extends controller {
             $this->positionEcho('mkt', $this->model->getCustomerName());
         } else if (uri::get(2)==='post_so_items') {
             $this->positionEcho('mkt', $this->model->addSo());
+        }
+    }
+    public function os_sales_order() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("Sales Order (SO)");
+            $this->view->suppliers = $this->model->getSuppliers();
+            $this->view->products = $this->model->osGetProducts();
+            $this->view->render("mkt/sales_order", "navbar");
+        } else if (uri::get(2)==='get_customer_name') {
+           echo $this->model->getCustomerName();
+        } else if (uri::get(2)==='post_so_items') {
+           echo $this->model->addSo();
         }
     }
 	
@@ -402,6 +414,28 @@ class mktController extends controller {
 		$this->view->cat_for_stack = $this->model->get_cat_for_stack();
 		$this->view->render("mkt/sales_and_margin", "navbar");
 	}
+
+    public function os_sales_and_margin(){	
+        $this->view->setTitle("sales_and_margin"); 
+
+        if(!empty(uri::get(2))) {
+		    $this->view->top10_so_data = $this->model->os_get_top10_so(uri::get(2));
+		    $this->view->top10_margin_data = $this->model->os_get_top10_margin(uri::get(2));
+		    $this->view->fa_sales_total = $this->model->os_get_fa_sales_total(uri::get(2));
+		    $this->view->fa_margin_total = $this->model->os_get_fa_margin_total(uri::get(2));
+		    $this->view->fa_sales_weeks = $this->model->os_get_fa_sales_weeks(uri::get(2));
+		    $this->view->fa_margin_weeks = $this->model->os_get_fa_margin_weeks(uri::get(2));
+		    $this->view->fa_sales_cat = $this->model->os_get_fa_sales_cat(uri::get(2));
+		    $this->view->fa_margin_cat = $this->model->os_get_fa_margin_cat(uri::get(2));
+		    $this->view->fa_sales_cat_all = $this->model->os_get_fa_sales_cat_all(uri::get(2));
+		    $this->view->fa_margin_cat_all = $this->model->os_get_fa_margin_cat_all(uri::get(2));
+		    $this->view->stack_data = $this->model->os_get_stack(uri::get(2));
+		    $this->view->cat_for_stack = $this->model->os_get_cat_for_stack(uri::get(2));
+            $this->view->render("mkt/sales_and_margin","mkt/os_sales_and_marginHub");
+        } else $this->view->render("mkt/sales_and_margin", "mkt/os_sales_and_marginHub");
+		
+	}
+    
 	public function sp_tracking(){
         $this->view->setTitle("sp_tracking"); 
 		$this->requirePostition("mkt");

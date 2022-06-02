@@ -4,8 +4,8 @@
 <body>
 
     <div class="row row-cols-2 row-cols-md-5 mt-2" style="padding: 0;" id="osRow">
-	<script>addModuleLink('osRow', '/mkt/os_sales_order', 'pencil-square-o', 'Sales Order');</script>
-     <script>addModuleLink('osRow', '/home/add_customer', 'user-plus', 'Add Customer');</script>
+	<script>addModuleLink('osRow', '/is/sales_order', 'pencil-square-o', 'bruh');</script>
+     <!-- <script>addModuleLink('osRow', '/home/add_customer', 'user-plus', 'Add Customer');</script>
 	 <script>addModuleLink('osRow', '/mkt/purchase_order', 'shopping-cart', 'Purchase Order (PO)');</script>
 	 <script>addModuleLink('osRow', '/mkt/confirm_install', 'truck', 'Confirm Install (CI)');</script>
 	 <script>addModuleLink('osRow', '/mkt/request_counter_sales', 'map-o', 'Request Counter Sales (RCS)');</script>
@@ -17,7 +17,7 @@
 	 <script>addModuleLink('osRow', '/mkt/sales_and_margin', 'bar-chart', 'Actual vs Forecast Sales/Margin');</script>
 	 <script>addModuleLink('osRow', '/mkt/sp_tracking', 'table', 'SP Tracking');</script>
 	 <script>addModuleLink('osRow', '/is/thelastday', 'heart', 'The Last Day');</script>
-	 <script>addModuleLink('osRow', '/mkt/Cancel_Sox', 'shopping-bag', 'Cancel Sox');</script>
+	 <script>addModuleLink('osRow', '/mkt/Cancel_Sox', 'shopping-bag', 'Cancel Sox');</script> -->
         
         
         

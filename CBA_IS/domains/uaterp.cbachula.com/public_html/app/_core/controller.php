@@ -40,7 +40,7 @@ abstract class controller {
     protected function requirePostition($position) {
         $this->requireSignIn();
         $getPosition = $this->getPosition();
-        if ($position == "mkt") {
+        if ($position == "mkt"|| $position=="os") {
             if (!($getPosition == "ce" || $getPosition == "cm" || $getPosition == "smd" || $getPosition == "is")) {
                 $this->err404();
             }

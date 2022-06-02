@@ -120,6 +120,19 @@ class isController extends controller {
             echo '</table>';
         }
     }
+    public function sales_order() {
+        if(empty(uri::get(2))) {
+           
+            $this->view->setTitle("Sales Order (SO)");
+            // $this->view->suppliers = $this->model->getSuppliers();
+            // $this->view->products = $this->model->getProducts();
+            $this->view->render("is/sales_order", "navbar");
+        } else if (uri::get(2)==='get_customer_name') {
+            $this->positionEcho('mkt', $this->model->getCustomerName());
+        } else if (uri::get(2)==='post_so_items') {
+            $this->positionEcho('mkt', $this->model->addSo());
+        }
+    }
 
 }
  

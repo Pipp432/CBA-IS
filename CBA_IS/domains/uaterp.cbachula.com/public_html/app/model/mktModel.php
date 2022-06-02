@@ -1612,6 +1612,48 @@ return [
     return json_encode( [] );
   }
 
+  public function osGetProducts() {
+    $sql = $this->prepare( "select
+                                	Product.product_no,
+                                    Product.product_name,
+                                    Product.product_type,
+                                    Product.product_line,
+                                    Product.supplier_no,
+                                    Supplier.supplier_name,
+                                    ProductCategory.category_name,
+                                    Product.category_no,
+                                    Product.sub_category,
+                                    Product.unit,
+                                    Product.sales_no_vat,
+                                    Product.sales_vat,
+                                    Product.sales_price,
+                                    Product.point,
+                                    Product.commission,
+                                    Product.margin,
+                                    Product.vat_type,
+                                    Product.weight,
+									Product.width,
+									Product.height,
+									Product.length,
+                                    ifnull(View_SOStock.stock, ifnull(stockXiaomi.stockXiaomi,0)) as stock,
+                                    ifnull(ProductDeposit.sales_no_vat, 0) as sd_sales_no_vat,
+                                    ifnull(ProductDeposit.sales_vat, 0) as sd_sales_vat,
+                                    ifnull(ProductDeposit.sales_price, 0) as sd_sales_price
+                                from Product
+                                left join ProductCategory on (ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line)
+                                inner join Supplier on (Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line)
+                                left join View_SOStock on View_SOStock.stock_product_no = Product.product_no
+                                left join ProductDeposit on ProductDeposit.product_no = Product.product_no
+                                left join (select Product.product_no, StockInXiaomi.quantity_in - ifnull(outt.quan_out,0) as stockXiaomi from StockInXiaomi 
+                                            left join Product on Product.product_description = StockInXiaomi.product_description
+                                            left join (select StockOutXiaomi.product_no, sum(StockOutXiaomi.quantity_out) as quan_out from StockOutXiaomi where done = 0 group by StockOutXiaomi.product_no) outt on outt.product_no = Product.product_no) stockXiaomi on stockXiaomi.product_no = Product.product_no
+                                where Product.status = '1'" );
+    $sql->execute( );
+    if ( $sql->rowCount() > 0 ) {
+      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    }
+    return json_encode( [] );
+  }
   // SO Module
   public function addSo() {
 
@@ -1823,7 +1865,7 @@ return [
             $sdxno,
             input::post( 'sellerNo' ),
             input::post( 'customerTel' ),
-            $customerAddress,
+            input::post('address'),
             ( double )$value[ 'sales_no_vat' ] * $value[ 'quantity' ],
             ( double )$value[ 'sales_vat' ] * $value[ 'quantity' ],
             ( double )$value[ 'sales_price' ] * $value[ 'quantity' ],
@@ -4653,6 +4695,438 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
 					AND t1.category_no = t2.category_no 
 		WHERE t1.product_line=? ORDER BY `t1`.`week`  ASC, t1.product_line asc, t1.category_no asc;");
 		$sql->execute([json_decode(session::get('employee_detail'), true)['product_line']]);
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+
+	}
+
+  public function os_get_top10_so($productLine){
+    if($productLine == 'a') {
+      $sql = $this->prepare("SELECT count(so_no) AS count, Product.product_name AS product_name FROM SOPrinting
+      LEFT JOIN Product ON Product.product_no=SOPrinting.product_no
+      AND Product.product_name NOT LIKE '%ค่าส่ง%'
+                      AND Product.product_name NOT LIKE '%ค่าจัดส่ง%'
+                      AND Product.product_name NOT LIKE '%ค่าติดตั้ง%'
+                      AND Product.product_name NOT LIKE '%ค่าขนส่ง%'
+      AND Product.product_name NOT LIKE '%ส่วนลด%'
+      GROUP BY Product.product_name
+      ORDER BY count(so_no) DESC
+      LIMIT 10;");
+    $sql->execute();
+  } else {
+		$sql = $this->prepare("SELECT count(so_no) AS count, Product.product_name AS product_name FROM SOPrinting
+								LEFT JOIN Product ON Product.product_no=SOPrinting.product_no
+								WHERE substring(SOPrinting.product_no,1,1)=? 
+								AND Product.product_name NOT LIKE '%ค่าส่ง%'
+                                AND Product.product_name NOT LIKE '%ค่าจัดส่ง%'
+                                AND Product.product_name NOT LIKE '%ค่าติดตั้ง%'
+                                AND Product.product_name NOT LIKE '%ค่าขนส่ง%'
+								AND Product.product_name NOT LIKE '%ส่วนลด%'
+								GROUP BY Product.product_name
+								ORDER BY count(so_no) DESC
+								LIMIT 10;");
+		$sql->execute([$productLine]);
+  }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	
+	public function os_get_top10_margin($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT sum(SOPrinting.margin) AS sum_margin, Product.product_name AS product_name FROM 	SOPrinting
+								LEFT JOIN Product ON Product.product_no=SOPrinting.product_no
+								AND Product.product_name NOT LIKE '%ค่าส่ง%'
+                                AND Product.product_name NOT LIKE '%ค่าจัดส่ง%'
+                                AND Product.product_name NOT LIKE '%ค่าติดตั้ง%'
+                                AND Product.product_name NOT LIKE '%ค่าขนส่ง%'
+								AND Product.product_name NOT LIKE '%ส่วนลด%'
+								GROUP BY Product.product_name
+								ORDER BY sum_margin DESC
+								LIMIT 10;");
+		$sql->execute();
+    } else { 		$sql = $this->prepare("SELECT sum(SOPrinting.margin) AS sum_margin, Product.product_name AS product_name FROM 	SOPrinting
+      LEFT JOIN Product ON Product.product_no=SOPrinting.product_no
+      WHERE substring(SOPrinting.product_no,1,1)=? 
+      AND Product.product_name NOT LIKE '%ค่าส่ง%'
+                      AND Product.product_name NOT LIKE '%ค่าจัดส่ง%'
+                      AND Product.product_name NOT LIKE '%ค่าติดตั้ง%'
+                      AND Product.product_name NOT LIKE '%ค่าขนส่ง%'
+      AND Product.product_name NOT LIKE '%ส่วนลด%'
+      GROUP BY Product.product_name
+      ORDER BY sum_margin DESC
+      LIMIT 10;");
+$sql->execute([$productLine]);}
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_fa_sales_total($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT t1.*,SUM(Forecast.sales_forecast) AS forecast_sales, 		actual_sales/(SUM(Forecast.sales_forecast))*100 AS percent_sales
+						FROM Forecast RIGHT JOIN (select SO.product_line, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+					  from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+							inner join Employee on Employee.employee_id = SO.employee_id 
+							left join Product on Product.product_no = SOPrinting.product_no 
+							left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+                                                  INNER JOIN Week ON SO.so_date = Week.date
+							
+
+							WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+
+							GROUP BY SO.product_line) as t1 ON Forecast.product_line =  t1.product_line 
+
+						group BY t1.product_line 
+						ORDER BY t1.product_line;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT t1.*,SUM(Forecast.sales_forecast) AS forecast_sales, 		actual_sales/(SUM(Forecast.sales_forecast))*100 AS percent_sales
+      FROM Forecast RIGHT JOIN (select SO.product_line, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+      from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+        inner join Employee on Employee.employee_id = SO.employee_id 
+        left join Product on Product.product_no = SOPrinting.product_no 
+        left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+                                            INNER JOIN Week ON SO.so_date = Week.date
+        
+
+        WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND SO.product_line =? AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+
+        GROUP BY SO.product_line) as t1 ON Forecast.product_line =  t1.product_line 
+
+      group BY t1.product_line 
+      ORDER BY t1.product_line;");
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_fa_margin_total($productLine){
+    if($productLine == 'a') {
+		$sql =$this->prepare("SELECT t1.*,SUM(Forecast.margin_forecast) AS forecast_margin, (actual_margin/SUM(Forecast.margin_forecast))*100 AS percent_margin
+			 FROM Forecast RIGHT JOIN (select SO.product_line, sum(SOPrinting.margin) AS actual_margin
+			  from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+					inner join Employee on Employee.employee_id = SO.employee_id 
+					left join Product on Product.product_no = SOPrinting.product_no 
+					inner join Week on Week.date = SO.so_date
+
+					 WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND Week.week > 0 AND Week.week IN ('1','2','3','4','5','6','7','8','9','10')
+
+					GROUP BY SO.product_line) as t1 ON Forecast.product_line =  t1.product_line 
+
+				group BY t1.product_line 
+				ORDER BY t1.product_line;");
+		$sql->execute([$productLine]);
+    } else {
+      $sql =$this->prepare("SELECT t1.*,SUM(Forecast.margin_forecast) AS forecast_margin, (actual_margin/SUM(Forecast.margin_forecast))*100 AS percent_margin
+      FROM Forecast RIGHT JOIN (select SO.product_line, sum(SOPrinting.margin) AS actual_margin
+       from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+         inner join Employee on Employee.employee_id = SO.employee_id 
+         left join Product on Product.product_no = SOPrinting.product_no 
+         inner join Week on Week.date = SO.so_date
+
+          WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND Week.week > 0 AND SO.product_line=? AND Week.week IN ('1','2','3','4','5','6','7','8','9','10')
+
+         GROUP BY SO.product_line) as t1 ON Forecast.product_line =  t1.product_line 
+
+       group BY t1.product_line 
+       ORDER BY t1.product_line;");
+   $sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	
+	public function os_get_fa_sales_weeks($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT  t1.*,Forecast.sales_forecast AS forecast_sales
+					FROM Forecast RIGHT JOIN (select SO.product_line, Week.week, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+						from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+        				inner join Employee on Employee.employee_id = SO.employee_id 
+        				left join Product on Product.product_no = SOPrinting.product_no 
+        				left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+    
+        				inner join Week on Week.date = SO.so_date 
+        				WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%'
+        				AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+        				GROUP BY SO.product_line, Week.week) as t1 ON Forecast.product_line = 	t1.product_line AND Forecast.week = t1.week
+    				group BY t1.product_line, t1.week
+    				ORDER BY t1.product_line ASC, t1.week;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT  t1.*,Forecast.sales_forecast AS forecast_sales
+      FROM Forecast RIGHT JOIN (select SO.product_line, Week.week, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+        from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+            inner join Employee on Employee.employee_id = SO.employee_id 
+            left join Product on Product.product_no = SOPrinting.product_no 
+            left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+
+            inner join Week on Week.date = SO.so_date 
+            WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%'
+            AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+            GROUP BY SO.product_line, Week.week) as t1 ON Forecast.product_line = 	t1.product_line AND Forecast.week = t1.week
+      WHERE t1.product_line = ?
+        group BY t1.product_line, t1.week
+        ORDER BY t1.product_line ASC, t1.week;");
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_fa_margin_weeks($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT  t1.*,Forecast.margin_forecast AS forecast_margin
+					FROM Forecast RIGHT JOIN (select SO.product_line, Week.week, sum(SOPrinting.margin ) AS actual_margin 
+						from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+        				inner join Employee on Employee.employee_id = SO.employee_id 
+        				left join Product on Product.product_no = SOPrinting.product_no 
+        				left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+        				inner join Supplier on Supplier.supplier_no = Product.supplier_no AND 	Supplier.product_line = Product.product_line 
+        				inner join Week on Week.date = SO.so_date 
+        				WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%'
+        				AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+        				GROUP BY SO.product_line, Week.week) as t1 ON Forecast.product_line = 	t1.product_line AND Forecast.week = t1.week
+    				group BY t1.product_line, t1.week
+    				ORDER BY t1.product_line ASC, t1.week;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT  t1.*,Forecast.margin_forecast AS forecast_margin
+      FROM Forecast RIGHT JOIN (select SO.product_line, Week.week, sum(SOPrinting.margin ) AS actual_margin 
+        from SOPrinting inner join SO on SO.so_no = SOPrinting.so_no 
+            inner join Employee on Employee.employee_id = SO.employee_id 
+            left join Product on Product.product_no = SOPrinting.product_no 
+            left join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+            inner join Supplier on Supplier.supplier_no = Product.supplier_no AND 	Supplier.product_line = Product.product_line 
+            inner join Week on Week.date = SO.so_date 
+            WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%'
+            AND Week.week IN ('1','2','3','4','5','6','7','8','9','10') 
+            GROUP BY SO.product_line, Week.week) as t1 ON Forecast.product_line = 	t1.product_line AND Forecast.week = t1.week
+      WHERE t1.product_line = ?
+        group BY t1.product_line, t1.week
+        ORDER BY t1.product_line ASC, t1.week;");
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_fa_sales_cat($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT  t1.*,forecast_category.sales_forecast AS forecast_sales
+							 FROM forecast_category LEFT JOIN (select ProductCategory.category_name,SO.product_line, Week.week, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+							  from SOPrinting INNER join SO on SO.so_no = SOPrinting.so_no 
+									LEFT join Employee on Employee.employee_id = SO.employee_id 
+									left join Product on Product.product_no = SOPrinting.product_no 
+									RIGHT join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+									inner join Week on Week.date = SO.so_date 
+									WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND not ProductCategory.category_name like '%ส่วนลด%'
+									AND Week.week IN ('8','9','10') 
+									GROUP BY SO.product_line, Week.week, ProductCategory.category_name  
+						ORDER BY `Week`.`week`  DESC ) as t1 ON forecast_category.product_line = t1.product_line AND forecast_category.week = t1.week AND forecast_category.category_name =  t1.category_name
+								ORDER BY t1.product_line ASC, t1.week;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT  t1.*,forecast_category.sales_forecast AS forecast_sales
+      FROM forecast_category LEFT JOIN (select ProductCategory.category_name,SO.product_line, Week.week, sum(SOPrinting.sales_no_vat *SOPrinting.quantity) AS actual_sales 
+       from SOPrinting INNER join SO on SO.so_no = SOPrinting.so_no 
+         LEFT join Employee on Employee.employee_id = SO.employee_id 
+         left join Product on Product.product_no = SOPrinting.product_no 
+         RIGHT join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+         inner join Week on Week.date = SO.so_date 
+         WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' AND not ProductCategory.category_name like '%ส่วนลด%'
+         AND Week.week IN ('8','9','10') 
+         GROUP BY SO.product_line, Week.week, ProductCategory.category_name  
+   ORDER BY `Week`.`week`  DESC ) as t1 ON forecast_category.product_line = t1.product_line AND forecast_category.week = t1.week AND forecast_category.category_name =  t1.category_name
+      WHERE t1.product_line = ?
+       ORDER BY t1.product_line ASC, t1.week;");
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_fa_margin_cat($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT  t1.*,forecast_category.margin_forecast AS forecast_margin
+							 FROM forecast_category LEFT JOIN (select ProductCategory.category_name,SO.product_line, Week.week, sum(SOPrinting.margin) AS actual_margin 
+							  from SOPrinting INNER join SO on SO.so_no = SOPrinting.so_no 
+									LEFT join Employee on Employee.employee_id = SO.employee_id 
+									left join Product on Product.product_no = SOPrinting.product_no 
+									RIGHT join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+
+									inner join Week on Week.date = SO.so_date 
+									WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' 
+									AND Week.week IN ('8','9','10') 
+									GROUP BY SO.product_line, Week.week, ProductCategory.category_name  
+						ORDER BY `Week`.`week`  DESC ) as t1 ON forecast_category.product_line = t1.product_line AND forecast_category.week = t1.week AND forecast_category.category_name =  t1.category_name
+
+								ORDER BY t1.product_line ASC, t1.week;");
+		$sql->execute();
+    } else { 		$sql = $this->prepare("SELECT  t1.*,forecast_category.margin_forecast AS forecast_margin
+      FROM forecast_category LEFT JOIN (select ProductCategory.category_name,SO.product_line, Week.week, sum(SOPrinting.margin) AS actual_margin 
+       from SOPrinting INNER join SO on SO.so_no = SOPrinting.so_no 
+         LEFT join Employee on Employee.employee_id = SO.employee_id 
+         left join Product on Product.product_no = SOPrinting.product_no 
+         RIGHT join ProductCategory on ProductCategory.category_no = Product.category_no And ProductCategory.product_line = Product.product_line 
+
+         inner join Week on Week.date = SO.so_date 
+         WHERE SOPrinting.cancelled = 0 AND SO.cancelled = 0 AND not Product.product_name like '%ค่า%ส่ง%' and not Product.product_name like '%ติดตั้ง%' 
+         AND Week.week IN ('8','9','10') 
+         GROUP BY SO.product_line, Week.week, ProductCategory.category_name  
+   ORDER BY `Week`.`week`  DESC ) as t1 ON forecast_category.product_line = t1.product_line AND forecast_category.week = t1.week AND forecast_category.category_name =  t1.category_name
+      WHERE t1.product_line = ?
+
+       ORDER BY t1.product_line ASC, t1.week;");
+$sql->execute([$productLine]);
+}
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+		
+	} 
+	
+	public function os_get_fa_sales_cat_all($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT t3.*,forecast_category_all.sales_forecast AS forecast_sales
+        					 FROM forecast_category_all LEFT JOIN (SELECT  t1.product_line, t1.category_no, t1.category_name, ifnull((t2.actual_sales),0) as actual_sales
+							 		FROM (SELECT DISTINCT  ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+               						FROM ProductCategory, Week
+    								WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง') as t1
+							 LEFT JOIN (SELECT Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+           							FROM SOPrinting
+									INNER JOIN SO on SO.so_no = SOPrinting.so_no
+            						INNER JOIN Product on Product.product_no = SOPrinting.product_no
+            						RIGHT JOIN Week on Week.date = SO.so_date
+									WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+              						GROUP BY  product_line, category_no) AS t2 ON  t1.product_line = t2.product_line AND t1.category_no = t2.category_no  
+           							ORDER BY  t1.product_line asc, t1.category_no asc) as t3 
+							ON forecast_category_all.product_line = t3.product_line AND  forecast_category_all.category_name =  t3.category_name
+      						GROUP BY category_name  
+							ORDER BY t3.product_line ASC;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT t3.*,forecast_category_all.sales_forecast AS forecast_sales
+      FROM forecast_category_all LEFT JOIN (SELECT  t1.product_line, t1.category_no, t1.category_name, ifnull((t2.actual_sales),0) as actual_sales
+      FROM (SELECT DISTINCT  ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+              FROM ProductCategory, Week
+       WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง') as t1
+  LEFT JOIN (SELECT Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+            FROM SOPrinting
+     INNER JOIN SO on SO.so_no = SOPrinting.so_no
+           INNER JOIN Product on Product.product_no = SOPrinting.product_no
+           RIGHT JOIN Week on Week.date = SO.so_date
+     WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+             GROUP BY  product_line, category_no) AS t2 ON  t1.product_line = t2.product_line AND t1.category_no = t2.category_no  
+            ORDER BY  t1.product_line asc, t1.category_no asc) as t3 
+ ON forecast_category_all.product_line = t3.product_line AND  forecast_category_all.category_name =  t3.category_name
+ WHERE t3.product_line = ?
+     GROUP BY category_name  
+ ORDER BY t3.product_line ASC;");
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+		
+	} 
+	public function os_get_fa_margin_cat_all($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT t3.*,forecast_category_all.margin_forecast AS forecast_margin
+        					 FROM forecast_category_all LEFT JOIN (SELECT  t1.product_line, t1.category_no, t1.category_name, ifnull((t2.actual_margin),0) as actual_margin
+							 		FROM (SELECT DISTINCT  ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+               						FROM ProductCategory, Week
+    								WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง') as t1
+							 LEFT JOIN (SELECT Product.product_line, Product.category_no, sum(SOPrinting.margin) as actual_margin 
+           							FROM SOPrinting
+									INNER JOIN SO on SO.so_no = SOPrinting.so_no
+            						INNER JOIN Product on Product.product_no = SOPrinting.product_no
+            						RIGHT JOIN Week on Week.date = SO.so_date
+									WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+              						GROUP BY  product_line, category_no) AS t2 ON  t1.product_line = t2.product_line AND t1.category_no = t2.category_no  
+           							ORDER BY  t1.product_line asc, t1.category_no asc) as t3 
+							ON forecast_category_all.product_line = t3.product_line AND  forecast_category_all.category_name =  t3.category_name
+      						GROUP BY category_name  
+                            
+							ORDER BY t3.product_line ASC;");	
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT t3.*,forecast_category_all.margin_forecast AS forecast_margin
+      FROM forecast_category_all LEFT JOIN (SELECT  t1.product_line, t1.category_no, t1.category_name, ifnull((t2.actual_margin),0) as actual_margin
+      FROM (SELECT DISTINCT  ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+              FROM ProductCategory, Week
+       WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง') as t1
+  LEFT JOIN (SELECT Product.product_line, Product.category_no, sum(SOPrinting.margin) as actual_margin 
+            FROM SOPrinting
+     INNER JOIN SO on SO.so_no = SOPrinting.so_no
+           INNER JOIN Product on Product.product_no = SOPrinting.product_no
+           RIGHT JOIN Week on Week.date = SO.so_date
+     WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+             GROUP BY  product_line, category_no) AS t2 ON  t1.product_line = t2.product_line AND t1.category_no = t2.category_no  
+            ORDER BY  t1.product_line asc, t1.category_no asc) as t3 
+ ON forecast_category_all.product_line = t3.product_line AND  forecast_category_all.category_name =  t3.category_name
+               WHERE t3.product_line = ?
+     GROUP BY category_name  
+               
+ ORDER BY t3.product_line ASC;");	
+$sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+		
+	}
+	
+	public function os_get_stack($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT t1.week, t1.product_line, t1.category_no, t1.category_name, ifnull(t2.actual_sales,0) as actual_sales
+				FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+							   FROM ProductCategory, Week
+					WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง'and not  ProductCategory.category_name like 'ส่วนลด') as t1
+				LEFT JOIN (SELECT Week.week, Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+						   FROM SOPrinting
+							INNER JOIN SO on SO.so_no = SOPrinting.so_no
+							INNER JOIN Product on Product.product_no = SOPrinting.product_no
+							RIGHT JOIN Week on Week.date = SO.so_date
+							WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+							  AND (Product.product_name not LIKE '%ค่า%ส่ง%' OR Product.product_name not LIKE '%ติดตั้ง%')
+							GROUP BY week, product_line, category_no) as t2 on t1.week = t2.week AND t1.product_line = t2.product_line 
+							AND t1.category_no = t2.category_no  
+				 ORDER BY `t1`.`week`  ASC, t1.product_line asc, t1.category_no asc;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT t1.week, t1.product_line, t1.category_no, t1.category_name, ifnull(t2.actual_sales,0) as actual_sales
+      FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+               FROM ProductCategory, Week
+        WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง'and not  ProductCategory.category_name like 'ส่วนลด') as t1
+      LEFT JOIN (SELECT Week.week, Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+             FROM SOPrinting
+            INNER JOIN SO on SO.so_no = SOPrinting.so_no
+            INNER JOIN Product on Product.product_no = SOPrinting.product_no
+            RIGHT JOIN Week on Week.date = SO.so_date
+            WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+              AND (Product.product_name not LIKE '%ค่า%ส่ง%' OR Product.product_name not LIKE '%ติดตั้ง%')
+            GROUP BY week, product_line, category_no) as t2 on t1.week = t2.week AND t1.product_line = t2.product_line 
+            AND t1.category_no = t2.category_no  
+      WHERE t1.product_line = ? ORDER BY `t1`.`week`  ASC, t1.product_line asc, t1.category_no asc;");
+  $sql->execute([$productLine]);
+    }
+		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+	}
+	public function os_get_cat_for_stack($productLine){
+    if($productLine == 'a') {
+		$sql = $this->prepare("SELECT DISTINCT(category_name)
+FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+					   FROM ProductCategory, Week
+			WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง' and not  ProductCategory.category_name like 'ส่วนลด') as t1
+		LEFT JOIN (SELECT Week.week, Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+				   FROM SOPrinting
+					INNER JOIN SO on SO.so_no = SOPrinting.so_no
+					INNER JOIN Product on Product.product_no = SOPrinting.product_no
+					RIGHT JOIN Week on Week.date = SO.so_date
+					WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+					  AND (Product.product_name not LIKE '%ค่า%ส่ง%' OR Product.product_name not LIKE '%ติดตั้ง%' OR Product.product_name not LIKE '%ส่วนลด%')
+					GROUP BY week, product_line, category_no) as t2 on t1.week = t2.week AND t1.product_line = t2.product_line 
+					AND t1.category_no = t2.category_no 
+		 ORDER BY `t1`.`week`  ASC, t1.product_line asc, t1.category_no asc;");
+		$sql->execute();
+    } else {
+      $sql = $this->prepare("SELECT DISTINCT(category_name)
+      FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.category_no, ProductCategory.category_name
+                   FROM ProductCategory, Week
+            WHERE Week BETWEEN 1 AND 10 AND NOT ProductCategory.category_name like '%ค่า%ส่ง%' and not  ProductCategory.category_name like 'ค่าติดตั้ง' and not  ProductCategory.category_name like 'ส่วนลด') as t1
+          LEFT JOIN (SELECT Week.week, Product.product_line, Product.category_no, sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as actual_sales 
+                 FROM SOPrinting
+                INNER JOIN SO on SO.so_no = SOPrinting.so_no
+                INNER JOIN Product on Product.product_no = SOPrinting.product_no
+                RIGHT JOIN Week on Week.date = SO.so_date
+                WHERE SO.cancelled = 0 AND Week.week between 1 AND 10 
+                  AND (Product.product_name not LIKE '%ค่า%ส่ง%' OR Product.product_name not LIKE '%ติดตั้ง%' OR Product.product_name not LIKE '%ส่วนลด%')
+                GROUP BY week, product_line, category_no) as t2 on t1.week = t2.week AND t1.product_line = t2.product_line 
+                AND t1.category_no = t2.category_no 
+          WHERE t1.product_line=? ORDER BY `t1`.`week`  ASC, t1.product_line asc, t1.category_no asc;");
+          $sql->execute([$productLine]);
+    }
 		return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
 
 	}

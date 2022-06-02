@@ -52,11 +52,11 @@
                     <label><h3>หลักฐานในการขอเบิกเงิน</h3></label><br>
                     <form id="checkBox">
                         <div>
-                            <input type="checkbox"   value="tax">
+                            <input type="checkbox"   value="tax" disabled>
                             <label for="option1"> ใบกำกับภาษี</label><br>
-                            <input type="checkbox"  value ="billAndID">
+                            <input type="checkbox"  value ="billAndID "disabled>
                             <label for="option2"> บิลเงินสด + นามบัตรหริอสำเนาบัตรประชาชนเจ้าของร้าน</label><br>
-                            <input type="checkbox"   value ="quotation">
+                            <input type="checkbox"   value ="quotation" checked disabled >
                             <label for="option3"> ใบเสนอราคา</label><br>
                         </div>
                         <div>
@@ -65,7 +65,7 @@
                             <label for="option1"> โครงการ 1 </label><br>
                             <input type="checkbox"  value="project2">
                             <label for="option2"> โครงการ 2</label><br>
-                            <input type="checkbox" value="project3">
+                            <input type="checkbox" value="project3" checked>
                             <label for="option3"> โครงการ 3</label><br>
                             <input type="checkbox"  value="SPJ1">
                             <label for="option3"> SPJ 1</label><br>
@@ -152,7 +152,7 @@
             const options = document.querySelectorAll("input[type='checkbox']:checked")
             if( !options[1]) $('#formValidate2').modal('toggle')
             else if (!options)  $('#formValidate2').modal('toggle')
-            else  details = {"proof":options[0].value,"project":options[1].value};
+            else  details = {"proof":"quotation","project":options[1].value};
          
             var date = new Date();
             var dd = String(date.getDate()).padStart(2, '0');
@@ -170,9 +170,10 @@
             addModal('successModal', 'เบิกเงินรองจ่าย',`ออกใบ ${data} สำเร็จ`);
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hidden.bs.modal', function (e) {
-                    $scope.toMainMenu();
+                    
                 })
            })
+           $scope.toMainMenu();
           
         }
        

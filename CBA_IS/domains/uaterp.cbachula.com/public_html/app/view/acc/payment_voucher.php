@@ -80,10 +80,7 @@
                         <label for="pvItemRR" ng-show="selectedPaymentType=='PA' || selectedPaymentType=='PC'">เลขที่ใบเบิกค่าใช้จ่าย</label>
                         <input type="text" class="form-control" id="pvItemRR" ng-model="pvItemRR">
                     </div>
-                    <div class="col-md-3">
-                        <label for="pvItemIV">เลขที่ใบกำกับภาษี</label>
-                        <input type="text" class="form-control" id="pvItemIV" ng-model="tax_number">
-                    </div>
+                   
                     <div class="col-md-3">
                         <label for="pvItemPaidTotal">จำนวนเงิน</label>
                         <input type="text" class="form-control" id="pvItemPaidTotal" ng-model="pvItemPaidTotal">
@@ -264,39 +261,40 @@
                             <th colspan="2">เลข EXC</th>
                             <th>วันที่อนุมัติ</th>
                             <th>เดบิต</th>
-                            <th>เลขที่ใบกำกับภาษี</th>
                             <th>รายละเอียด</th>
                             <th ng-show="selectedPaymentType=='PB'">เลขที่ RR/CI</th>
                             <th ng-show="selectedPaymentType=='PA' || selectedPaymentType=='PC'">เลขที่ใบเบิกค่าใช้จ่าย</th>
-                            <th>ภาษี</th>
-                            <th>จำนวนเงิน</th>
+                           
+                            
                         </tr>
                         <tr ng-repeat="pvItem in pvDetails track by $index">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
                             <td style="text-align: center;">{{pvItem.ex_no}}</td>
                             <td style="text-align: center;">{{pvItem.authorize_date}}</td>
                             <td style="text-align: center;">{{pvItemDebit}}</td>
-                            <td style="text-align: center;">{{pvItem.tax_number}}</td>
+                           
                             <td style="text-align: center;">
                                 <ul ng-repeat="entries in JSONdetails track by $index ">
-                                    <p style="text-align:left">{{entries.date}}</p>
+                                    <p style="text-align:left">วันที่: {{entries.date}}</p>
                                     <li style="text-align:left">{{entries.details}}</li>
+                                    <li style="text-align:left">จำนวนเงิน: {{entries.money}}</li>
+                                    <li style="text-align:left">ภาษี: {{(entries.money*7)/107 | number:2}}</li>
                                   
                                     
                                
                                 </ul>
                             </td>
                             <td style="text-align: center;">{{pvItem.re_req_no}}</td>
-                            <td style="text-align: center;">{{(pvItemPaidTotal)*7/107| number:2}}</td>
-                            <td style="text-align: center;">{{pvItemPaidTotal | number:2}}</td>
+                            
+                            
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="8">ภาษีสุทธิ</th>
-                            <th style="text-align: right;">{{(pvItemPaidTotal)*7/107 | number:2}}</th>
+                            <th style="text-align: right;" colspan="5">ภาษีสุทธิ</th>
+                            <th style="text-align: right;">{{total_tax | number:2}}</th>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="8">รวมสุทธิ</th>
-                            <th style="text-align: right;">{{pvItemPaidTotal| number:2}}</th>
+                            <th style="text-align: right;" colspan="5">รวมสุทธิ</th>
+                            <th style="text-align: right;">{{total_money| number:2}}</th>
                         </tr>
                     </table>
                 </div>
@@ -699,9 +697,12 @@
         $scope.pvPayTo = '';
         $scope.bank='';
         $scope.dueDate='';
-        $scope.tax_number
+        $scope.tax_number = '';
         $scope.JSONdetails = ''
+        $scope.total_money = 0;
+        $scope.total_tax = 0;
 
+        
 
         
         $scope.selectPaymentType = function() {
@@ -1087,7 +1088,7 @@
                         re_req_no:$scope.pvItems["re_req_no"],
                         company_code : $scope.company_code,
                         pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
-                        totalPaid : $scope.pvItemPaidTotal,
+                        totalPaid : $scope.total_money,
                         totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
@@ -1140,7 +1141,7 @@
             $scope.bank = $scope.pvItems["bank_name"]
             $scope.pvAddress = $scope.pvItems["pv_address"];
             $scope.pvName = $scope.pvPayto
-            $scope.tax_number = $scope.pvItems["tax_number"]
+            // $scope.tax_number = $scope.pvItems["tax_number"]
            
             $scope.dueDate = new Date($scope.pvItems["due_date"]);
             $scope.JSONdetails =JSON.parse($scope.pvItems['details'])
@@ -1162,10 +1163,16 @@
             $scope.pvAddress = $scope.pvDetails[0].pv_address
             
             
-        })
-        $scope.totalPaid = Number($scope.pvDetails[0].total_paid);
-            $scope.totalVat = Number($scope.pvDetails[0].total_paid)*7/107;
-            console.log($scope.totalPaid)
+        });
+        ($scope.JSONdetails).forEach(entry=>{
+            $scope.total_money += Number(entry.money);
+            $scope.total_tax += Number(entry.money*7/107);
+        });
+        $scope.totalPaid =$scope.total_money
+            $scope.totalVat =$scope.total_tax
+            console.log($scope.totalPaid);
+
+            
          
             
         }

@@ -54,7 +54,7 @@ class model extends database {
         if ($sql->rowCount()>0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return null;
+       echo "Hello";
     }
 
 }

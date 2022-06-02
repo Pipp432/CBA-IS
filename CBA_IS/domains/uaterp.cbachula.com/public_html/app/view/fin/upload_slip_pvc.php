@@ -106,12 +106,16 @@
             cache: false,
             processData: false,
             contentType: false,
-        }).fail(function(response){
+        }).fail(function(response,a,b){
             console.log(response)
+            console.log(a);
+            console.log(b);
+
         }).done(function(){
-             $scope.goToMainMenu();
+           
               
         });
+        $scope.goToMainMenu();
            
       }
       $scope.goToMainMenu = function(){

@@ -84,10 +84,10 @@
 					<div class="col-md-12" style = "margin-top: 10px;">
 
                         <label for="dropdownAddress">ที่อยู่ลูกค้า</label>
-                        <select class="form-control" ng-model="address" id="dropdownAddress" ng-change = "debug()">
+                        <select class="form-control" ng-model="address" id="dropdownAddress">
 
                             
-                            <option ng-repeat ="num in numbers" value ={{num.address}}>{{num.address}}</option>
+                            <option ng-repeat ="num in numbers" value = num.address>{{num.address}}</option>
 
                             
                         </select>
@@ -484,7 +484,6 @@
 		// 	//}
         // }
        
-       
             
 
        
@@ -560,9 +559,7 @@
         $scope.allProducts = <?php echo $this->products; ?>;
 
 
-        $scope.debug = function(){
-            console.log($scope.address)
-        }
+
         $scope.addSeller = function() {
 
             if($scope.seller_employee_id.length === 5) {
@@ -605,7 +602,7 @@
 
             if($scope.customer_tel.length === 10) {
 
-                $http.post('/mkt/os_sales_order/get_customer_name', 
+                $http.post('/mkt/sales_order/get_customer_name', 
 
                     JSON.stringify({customerTel : $scope.customer_tel})
 
@@ -621,7 +618,6 @@
                         console.log(response.data)
                         $scope.customer_name = response.data[0].customer_name + ' ' + response.data[0].customer_surname + ' (' + response.data[0].customer_nickname + ')';
 						$scope.address = response.data[0].address;
-                        console.log($scope.address)
 
                     }
 
@@ -940,8 +936,6 @@
                 sellerNo : $scope.seller_employee_id.toUpperCase(),
 
                 customerTel : $scope.customer_tel,
-                
-                address: $scope.address,
 
                 productType : $scope.selectedProductType,
 				

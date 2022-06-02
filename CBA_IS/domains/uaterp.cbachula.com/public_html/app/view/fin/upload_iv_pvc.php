@@ -109,8 +109,9 @@
         }).fail(function(response){
             console.log(response)
         }).done(function(d){
-              $scope.reload();
+             
         })
+        $scope.reload();
          
       }
       $scope.reload = function(){

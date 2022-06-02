@@ -253,6 +253,10 @@
                 default: $scope.company_id = 'XXX'; break;
             }
             if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
+            
             // console.log( $scope.detail[0].customer_name.substring(0,6))
             // console.log( $scope.customer_title)
             $scope.creditCardFee =0;
