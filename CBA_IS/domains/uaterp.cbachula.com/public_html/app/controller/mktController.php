@@ -201,10 +201,7 @@ class mktController extends controller {
     public function os_dashboard() {
         if(empty(uri::get(2))) {
             // $this->requirePostition("mkt");
-            $this->view->setTitle("Dashboard");
-
-           
-           
+            $this->view->setTitle("OS Dashboard");
             $this->view->render("os/dashboard", "navbar");
         }else if (uri::get(2)==='get_soxs') {
             echo $this->model->getOSDashboardSox(uri::get(3));

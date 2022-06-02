@@ -6,7 +6,9 @@
     <div class="container mt-3" ng-controller="moduleAppController">
 
         <h2 class="mt-3">Dashboard SOX</h2>
+        
         <select id ="filter" name = "filter" ng-model="filter" ng-change = "getData()">
+
             <option value="Line 1">1</option>
             <option value="Line 2">2</option>
             <option value="Line 3">3</option>
@@ -25,25 +27,32 @@
         <div ng-show="filter && soxs">
 
             <h3>Viewing: {{filter}}</h3>
+
             <table class="table table-hover my-1">
+
                 <tr>
+
                     <th> SOX No. </th>
                     <th> SO No. </th>
                     <th> Product Line </th>
+
                 </tr>
+
                 <tr ng-repeat = "sox in soxs track by $index">
+
                     <td> {{sox.sox_no}}</td>
                     <td> {{sox.so_no}}</td>
                     <td> {{sox.product_line}}</td>
+
                 </tr>
-               
+
             </table>
         </div>
+
          <div ng-show="filter && !soxs">
 
             <h3>Viewing: {{filter}}</h3>
             <h3 style="text-align: center ;">No SOXs in {{filter}}</h3>
-            
 
         </div>
 
