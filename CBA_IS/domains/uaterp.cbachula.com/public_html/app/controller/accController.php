@@ -154,7 +154,16 @@ class accController extends controller {
             } else {
                 $this->err404();
             }
-        } else if (uri::get(2)==='get_pvdslip') {
+        } 
+        else if (uri::get(2)==='get_pvciv') {
+            $this->requirePostition("acc");
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('acc', $this->model->getPVCReceiptIVData(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        } 
+        else if (uri::get(2)==='get_pvdslip') {
             $this->requirePostition("acc");
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('acc', $this->model->getPVDReceiptData(Uri::get(3)));

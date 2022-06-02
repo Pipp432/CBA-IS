@@ -296,6 +296,7 @@ class scmController extends controller {
         echo '<table style="width:100%">';
         
             echo '<tr>';
+                echo '<th>so_no</th>';
                 echo '<th>sox_no</th>';
                 echo '<th>iv_no</th>';
                 echo '<th>Product No.</th>';
@@ -305,6 +306,7 @@ class scmController extends controller {
             
             foreach($data as $value) {
                 echo '<tr>';
+                    echo '<td>'.$value['so_no'].'</td>';
                     echo '<td>'.$value['sox_no'].'</td>';
                     echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['product_no'].'</td>';

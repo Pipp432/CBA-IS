@@ -32,6 +32,7 @@ class scmModel extends model {
                                     Product.product_no,
                                 	Product.product_name,
                                     Product.product_type,
+                                    SO.so_no,
                                     SOPrinting.sales_no_vat,
                                     SOPrinting.sales_vat,
                                     SOPrinting.sales_price,
@@ -88,34 +89,114 @@ class scmModel extends model {
                 //    $value['total_sales_price']
                 //]);
                 
-              // insert AccountDetail sequence 1
-              // Dr รายได้รับล่วงหน้า - โครงการ X
-              $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                // insert AccountDetail sequence 1
+                // Dr รายได้รับล่วงหน้า - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '4', '24-1'.$value['invoice_no'][0].'00', (double) $value['total_sales_no_vat'], 0, 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 2
+                // Cr ขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '5', '41-1'.$value['invoice_no'][0].'00', 0, (double) $value['total_sales_no_vat'], 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 3
+                // Dr ค่า Commission
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '6', '52-1000', (double) $value['commission'], 0, 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 4
+                // Cr ค่า Commission ค้างจ่าย
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-              $sql->execute([$value['invoice_no'], '4', '24-1'.$value['invoice_no'][0].'00', (double) $value['total_sales_no_vat'], 0, 'IV']);
-              
-				
-              // insert AccountDetail sequence 2
-              // Cr ขาย - โครงการ X
-              $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                      values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-              $sql->execute([$value['invoice_no'], '5', '41-1'.$value['invoice_no'][0].'00', 0, (double) $value['total_sales_no_vat'], 'IV']);
-              
-				
-              // insert AccountDetail sequence 3
-              // Dr ค่า Commission
-              $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                      values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-              $sql->execute([$value['invoice_no'], '6', '52-1000', (double) $value['commission'], 0, 'IV']);
-              
-				
-              // insert AccountDetail sequence 4
-              // Cr ค่า Commission ค้างจ่าย
-              $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                      values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-              $sql->execute([$value['invoice_no'], '7', '22-0000', 0, (double) $value['commission'], 'IV']);
+                $sql->execute([$value['invoice_no'], '7', '22-0000', 0, (double) $value['commission'], 'IV']);
 
-          }
+            
+                // //13.2
+                // $sql = $this->prepare("SELECT
+                //                         SO.vat_type
+                //                     from Invoice
+                //                     left join SO on Invoice.file_no = SO.so_no
+                //                     where Invoice.invoice_no = ?");
+                // $sql->execute([$value['invoice_no']]);
+                // $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+                // $vat_type = intval($temp[0]["vat_type"]);
+
+                // $sql = $this->prepare("SELECT
+                //                         Invoice.payment_type
+                //                     from Invoice
+                //                     where Invoice.invoice_no = ?");
+                // $sql->execute([$value['$iv_no']]);
+                // $tempp = $sql->fetchAll(PDO::FETCH_ASSOC);
+                // $payment_type = $tempp[0]["payment_type"];
+
+                // if($payment_type == 'CC'){
+
+                //     if($vat_type < 3) { //vat type = 1 , 2
+                //         $acc_13_2 = (((double) $value['total_sales_price'])*102.45/100) *100/107;
+                //         $acc_13_2_3 = ((double) $value['total_sales_price'])*102.45/100;
+                //         //dr รายได้รับล่วงหน้า 24-1x00 seq 6 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'6','24-1'.$value['invoice_no'][0].'00',(double) $acc_13_2,0,'IV']);
+                //         //cr ขาย 41-1x00 seq 7 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'7','41-1'.$value['invoice_no'][0].'00',0,(double) $acc_13_2,'IV']);
+
+                //     } else  { //vat type = 3
+                //         //dr รายได้รับล่วงหน้า 24-1x00 seq 6 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'6','24-1'.$value['invoice_no'][0].'00',(double) $acc_13_2_3,0,'IV']);
+                //         //cr ขาย 41-1x00 seq 7 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'7','41-1'.$value['invoice_no'][0].'00',0,(double) $acc_13_2_3,'IV']);
+                //     }
+                // }
+
+                // if($payment_type == 'FB'){
+                //     if($vat_type < 3) { //vat type = 1 , 2
+                //         $acc_15_2 = (((double) $value['total_sales_price'])*102.75/100) *100/107;
+                //         $acc_15_2_3 = ((double) $value['total_sales_price'])*102.75/100;
+                //         //dr รายได้รับล่วงหน้า 24-1x00 seq 6 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'6','24-1'.$value['invoice_no'][0].'00',(double) $acc_15_2,0,'IV']);
+                //         //cr ขาย 41-1x00 seq 7 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'7','41-1'.$value['invoice_no'][0].'00',0,(double) $acc_15_2,'IV']);
+
+                //     } else  { //vat type = 3
+                //         //dr รายได้รับล่วงหน้า 24-1x00 seq 6 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'6','24-1'.$value['invoice_no'][0].'00',(double) $acc_15_2_3,0,'IV']);
+                //         //cr ขาย 41-1x00 seq 7 iv
+                //         $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //         $sql->execute([$value['invoice_no'],'7','41-1'.$value['invoice_no'][0].'00',0,(double) $acc_15_2_3,'IV']);
+                //     }
+                // }
+
+                // //dr commission 52-0x00 seq 8 iv
+                // $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                // $sql->execute([$value['invoice_no'] , '8' , '52-0'.$value['invoice_no'][0].'00' , (double) $value['commission'] , 0 , 'IV']);
+                // //cr commission ค้างจ่าย 22-1x00 seq 9 iv
+                // $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                // $sql->execute([$value['invoice_no'] , '9' , '22-1'.$value['invoice_no'][0].'00' , 0 , (double) $value['commission'] , 'IV']);
+
+
+            }
           
           if ($value['product_no'] != 'X') {
               
@@ -855,8 +936,8 @@ class scmModel extends model {
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
-        inner join Invoice on Invoice.file_no = SO.so_no
-        inner join InvoicePrinting on InvoicePrinting.invoice_no = Invoice.invoice_no and InvoicePrinting.product_no = SOPrinting.product_no
+        INNER join Invoice ON Invoice.file_no = SO.so_no
+        INNER join InvoicePrinting ON InvoicePrinting.invoice_no = Invoice.invoice_no and InvoicePrinting.product_no = SOPrinting.product_no
         WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
@@ -1023,7 +1104,7 @@ class scmModel extends model {
     }
 
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SOX.sox_no, Invoice.invoice_no, GROUP_CONCAT(Product.product_no) product_no, GROUP_CONCAT(Product.product_name) product_name, SUM(SOPrinting.quantity) quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 AND SOX.done=0 GROUP BY sox_no,invoice_no");
+        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no, Invoice.invoice_no, Product.product_no,Product.product_name , SOPrinting.quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 AND SOX.done=0");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

@@ -49,8 +49,8 @@
                         <h6 class="my-0" style="text-align:center;"> no PV-C to show</h6>
                     </th>
                 </tr>
-                <tr ng-repeat="pvc in pvcs" ng-click="viewFilePVC(pvc.pv_no)">
-                    <td style= "text-align:center">{{pvc.pv_no}}</td>
+                <tr ng-repeat="pvc in pvcs">
+                    <td style= "text-align:center"><a href ="https://uaterp.cbachula.com/file/pvc/{{pvc.pv_no}}">{{pvc.pv_no}}</a></td>
                     <td style= "text-align:center">{{pvc.pv_date}} {{pvc.pv_time}}</td>
                     <td style= "text-align:center">{{pvc.pv_due_date}}</td>
                     <td style= "text-align:center">{{pvc.pv_details}}</td>
@@ -62,7 +62,7 @@
                     </td>
                     <td style= "text-align:center">
                         <span ng-show="pvc.iv_name == null">fin ยังไม่ upload ใบ iv</span>
-                        <a ng-show = "pvc.iv_name!= null" href="/acc/confirm_payment_voucher/get_pvcslip/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">IV</a> 
+                        <a ng-show = "pvc.iv_name!= null" href="/acc/confirm_payment_voucher/get_pvciv/{{pvc.pv_no}}" target="_blank" ng-click="stopEvent($event)">IV</a> 
 
                     </td>
                   

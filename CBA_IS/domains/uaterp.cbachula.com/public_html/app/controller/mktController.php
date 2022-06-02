@@ -198,6 +198,23 @@ class mktController extends controller {
             $this->positionEcho('mkt', $this->model->getDashborad());
         }
     }
+    public function os_dashboard() {
+        if(empty(uri::get(2))) {
+            // $this->requirePostition("mkt");
+            $this->view->setTitle("Dashboard");
+
+           
+           
+            $this->view->render("os/dashboard", "navbar");
+        } else if (uri::get(2)==='get_dashboard') {
+            echo $this->model->getDashborad();
+        }else if (uri::get(2)==='get_soxs') {
+            echo $this->model->getOSDashboardSox(uri::get(3));
+        }
+        else if (uri::get(2)==='get_all_soxs') {
+            echo $this->model->getAllOSDashboardSox();
+        }
+    }
     
     public function sales_report() {
         
@@ -418,7 +435,7 @@ class mktController extends controller {
     public function os_sales_and_margin(){	
         $this->view->setTitle("sales_and_margin"); 
 
-        if(!empty(uri::get(2))) {
+        if(uri::get(2) != 's') {
 		    $this->view->top10_so_data = $this->model->os_get_top10_so(uri::get(2));
 		    $this->view->top10_margin_data = $this->model->os_get_top10_margin(uri::get(2));
 		    $this->view->fa_sales_total = $this->model->os_get_fa_sales_total(uri::get(2));
@@ -432,7 +449,7 @@ class mktController extends controller {
 		    $this->view->stack_data = $this->model->os_get_stack(uri::get(2));
 		    $this->view->cat_for_stack = $this->model->os_get_cat_for_stack(uri::get(2));
             $this->view->render("mkt/sales_and_margin","mkt/os_sales_and_marginHub");
-        } else $this->view->render("mkt/sales_and_margin", "mkt/os_sales_and_marginHub");
+        } else $this->view->render( "mkt/os_sales_and_marginHub");
 		
 	}
     

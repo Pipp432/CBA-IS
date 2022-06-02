@@ -908,6 +908,7 @@ class accModel extends model {
         
         foreach($ivrcItemsArray as $value) {
             if (!in_array($value['ci_no'], $rrciList)) {
+                echo $value['ci_no'];
                 array_push($rrciList, $value['ci_no']);
                 
                 // update invoice in RR/CI
@@ -2859,11 +2860,11 @@ class accModel extends model {
             //RE Account1
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '1', $debitRI, (double) input::post('totalNoVat'), 0 , 'RI']);
+            $sql->execute([$reno, '8', $debitRI, (double) input::post('totalNoVat'), 0 , 'RI']);
             //RE Account2
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '2', $creditRI, 0 , (double) input::post('totalNoVat') , 'RI']);
+            $sql->execute([$reno, '9', $creditRI, 0 , (double) input::post('totalNoVat') , 'RI']);
             
             
         
@@ -3187,6 +3188,19 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
             $data = $sql->fetchAll()[0];
     		header('Content-type: '.$data['slip_type']);
             echo base64_decode($data['slip_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
+        }
+    }
+   
+    public function  getPVCReceiptIVData($pv_no){
+        $sql = $this->prepare("SELECT iv_type,iv_data from PVC where pv_no = ?");
+        $sql->execute([$pv_no]);
+        
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['iv_type']);
+            echo base64_decode($data['iv_data']);
         } else {
             echo 'ไม่มีสลิปโอนเงินของ PV นี้'; 
         }

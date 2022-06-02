@@ -58,7 +58,8 @@
                                 <li ng-show = "pv.pv_type != 'pvd' && pv.pv_type != 'pva' && pv.pv_type != 'pvc' && pv_item.pv_no===pv.pv_no" ng-repeat="pv_item in pvs track by $index">{{pv_item.detail}} ({{pv_item.paid_total | number:2}})</li>
                                 <li ng-show = "pv.pv_type == 'pvd'">-</li>
                                 <pre ng-show = "pv.pv_type == 'pva'">{{pv.product_names}}</pre>
-                                <li ng-show = "pv.pv_type == 'pvc'"> {{pv.pv_details}}</li>
+                                <li ng-show = "pv.pv_type == 'pvc'"><a href = "/acc/confirm_payment_voucher/get_pvcslip/{{pv.pv_no}}"> Slip</a></li>
+                                <li ng-show = "pv.pv_type == 'pvc'"><a href = "/acc/confirm_payment_voucher/get_pvciv/{{pv.pv_no}}"> IV</a></li>
                             </ul></td>
                             <td style="text-align: center;">
                                 {{pv.total_paid | number:2}}<br>

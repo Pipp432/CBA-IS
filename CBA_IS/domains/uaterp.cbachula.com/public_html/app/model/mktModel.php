@@ -1658,7 +1658,6 @@ return [
   public function addSo() {
 
     $sono = $this->assignSo( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
-    $customerAddress = '';
     $depositSox = '';
 	
 	  
@@ -1702,8 +1701,8 @@ return [
       echo 'บันทึก ';
 
       // insert CustomerTransaction
-      $sql = $this->prepare( "insert into CustomerTransaction (so_no, customer_tel) values (?, ?)" );
-      $sql->execute( [ $sono, input::post( 'customerTel' ) ] );
+      $sql = $this->prepare( "insert into CustomerTransaction (so_no, customer_tel,address) values (?, ?, ?)" );
+      $sql->execute( [ $sono, input::post( 'customerTel' ) , $_POST["address"]] );
 
       // insert PointLog
       $sql = $this->prepare( "insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, 'SO', ?,'Sales', 0)" );
@@ -1731,9 +1730,6 @@ return [
         while ( $check2 != '00000' ) {
           $soxno = $this->assignSox();
 
-          $sql = $this->prepare( "select address from Customer where customer_tel = ?" );
-          $sql->execute( [ input::post( 'customerTel' ) ] );
-          $customerAddress = $sql->fetchAll()[ 0 ][ 'address' ];
 
           $sql = $this->prepare( "insert into SOX (sox_no, sox_datetime, employee_id, customer_tel, address, so_sales_no_vat, so_sales_vat, so_sales_price, so_total_discount,
 											transportation_no_vat, transportation_vat, transportation_price, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, slip_uploaded, done, ird_no) 
@@ -1742,7 +1738,7 @@ return [
             $soxno,
             input::post( 'sellerNo' ),
             input::post( 'customerTel' ),
-            $customerAddress,
+            $_POST["address"],
             ( double )input::post( 'totalNoVat' ),
             ( double )input::post( 'totalVat' ),
             ( double )input::post( 'totalPrice' ),
@@ -2663,7 +2659,7 @@ return [
   // Dashboard Module
   public function getDashboradSo() {
     $sql = $this->prepare( "select 
-                                	SO.so_no,
+                                	  SO.so_no,
                                     SO.so_date,
                                     SO.so_time,
                                     SO.cancelled,
@@ -5794,6 +5790,29 @@ private function assignWSD() {
   }
   return $wsdPrefix . $runningNo;
 }
+public function getOSDashboardSox($line){
+  $sql = $this->prepare("SELECT SOXPrinting.sox_no,SO.so_no,SO.product_line,SOX.employee_id
+  FROM SOXPrinting 
+  INNER JOIN SO ON SOXPrinting.so_no = SO.so_no 
+  INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+  WHERE SO.product_line=$line AND SOX.employee_id=?;");
+  $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
+   if ($sql->rowCount() > 0) {             
+    return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+  }
+}
+public function getAllOSDashboardSox(){
+  $sql = $this->prepare("SELECT SOXPrinting.sox_no,SO.so_no,SO.product_line,SOX.employee_id
+  FROM SOXPrinting 
+  INNER JOIN SO ON SOXPrinting.so_no = SO.so_no 
+  INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+  WHERE SOX.employee_id=?;");
+  $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
+   if ($sql->rowCount() > 0) {             
+    return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+  }
+}
+
 
 
   
