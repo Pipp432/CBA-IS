@@ -1180,261 +1180,283 @@ class mktModel extends model {
     $remark = '';
     $error = '';
 
-#1 Only 1 product and 1 EA (without API)
-    if (count($sos) == 1 && $sos[0]['quantity'] == 1) {
+		$item_list = [];
+		$not_free_pk = false;
 
-  $data = [
-            'w' => $sos[0]['width'],
-            'h' => $sos[0]['height'],
-            'd' => $sos[0]['length']
-        ];
+		foreach($sos as $so) {
 
-  if ($data['w'] <= 14 && $data['h'] <= 6 && $data['d'] <= 20) {
-    $bin_id = 'A';
-    $weight = $this->calculate_total_weight($sos, 'A');
-    $dimension = 14 + 6 + 20;
-    $x_d = (((14 * 20 * 6) / 6000) * 1000);
-  } else {
-    $bin_id = 'NONE';
-    $weight = $this->calculate_total_weight($sos, '');
-    $dimension = $data['w'] + $data['h'] + $data['d'];
-    $x_d = ((($data['w'] * $data['d'] * $data['h']) / 6000) * 1000);
-  }
-        
-  $prices = $this->calculate_thai_post_price($weight);
-  // $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
-        // $price = $flash_price + ($sos[0]['product_line'] != 0 && $sos[0]['product_line'] != 1 && $flash_price > 0 ? 10 : 0);
+			if ($so['width'] > 0 && $so['height'] > 0 && $so['length'] > 0) { 
+				$item = [
+					'w' => $so['width'],
+					'h' => $so['height'],
+					'd' => $so['length'],
+					'q' => $so['quantity'],
+					'vr' => '1',
+					'id' => $so['product_no']
+				];
+				array_push($item_list, $item);
+			}
 
-} else {
+			if ($so['product_line'] != 0 && $so['product_line'] != 1) {
+				$not_free_pk = true;
+			}
 
-  $data = [
-            'username' => '6241153926@student.chula.ac.th', 
-            'api_key' => '9df6d9456992fede5095c28587c8ab32',
-            'bins' => [
-                ["w"=> 8.5, "h"=> 9, "d"=> 13, "id"=> "0,0"],
-                ["w"=> 11, "h"=> 10, "d"=> 17, "id"=> "0+4"],
-                ["w"=> 14, "h"=> 6, "d"=> 20, "id"=> "A"],
-                ["w"=> 14, "h"=> 12, "d"=> 20, "id"=> "2A"],
-                ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
-                ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
-                ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
-                ["w"=> 20, "h"=> 22, "d"=> 30, "id"=> "2C"],
-                ["w"=> 22, "h"=> 14, "d"=> 35, "id"=> "D"],
-                ["w"=> 24, "h"=> 17, "d"=> 40, "id"=> "E"],
-                ["w"=> 31, "h"=> 13, "d"=> 36, "id"=> "F"],
-                ["w"=> 30, "h"=> 22, "d"=> 45, "id"=> "ฉ"]
-            ]
-        ];
+		}
 
-  $item_list = [];
-  $not_free_pk = false;
+		#1 Only 1 product and 1 EA (without API)
+        if (count($sos) == 1 && $sos[0]['quantity'] == 1 && count($item_list) != 0) {
 
-  foreach($sos as $so) {
-
-    if ($so['width'] > 0 && $so['height'] > 0 && $so['length'] > 0) { 
-                $item = [
-                    'w' => $so['width'],
-                    'h' => $so['height'],
-                    'd' => $so['length'],
-                    'q' => $so['quantity'],
-                    'vr' => '1',
-                    'id' => $so['product_no']
-                ];
-        array_push($item_list, $item);
-    }
-
-    if ($so['product_line'] != 0 && $so['product_line'] != 1) {
-      $not_free_pk = true;
-    }
-
-  }
-
-  if (count($item_list) == 0) {
-
-            // $price = 0;
-            // $bin_id = 'NONE';
-            // $remark = 'ถ้าสินค้าไม่ใช่บัตรเงินสด ติดต่อฝ่าย IS';
-    return json_encode([
-      "shippings" => [
-        [
-          "url" => "http://cdn.onlinewebfonts.com/svg/img_290643.png",
-          "name" => '',
-          "price" => 0,
-          "bin_id" => 'NONE',
-          "remark" => 'ถ้าสินค้าไม่ใช่บัตรเงินสด ติดต่อฝ่าย IS'
-        ]
-      ],
-      "error" => $error
-    ]);
-
-  } else if (count($item_list) == 1 && $item_list[0]['q'] == 1 ) {
-
-    $data = [
+			$data = [
                 'w' => $sos[0]['width'],
                 'h' => $sos[0]['height'],
                 'd' => $sos[0]['length']
             ];
 
-    if ($data['w'] <= 14 && $data['h'] <= 6 && $data['d'] <= 20) {
-      $bin_id = 'A';
-      $weight = $this->calculate_total_weight($sos, 'A');
-      $dimension = 14 + 6 + 20;
-      $x_d = (((14 * 20 * 6) / 6000) * 1000);
-    } else{
-      $bin_id = 'NONE';
-      $weight = $this->calculate_total_weight($sos, '');
-      $dimension = $data['w'] + $data['h'] + $data['d'];
-      $x_d = ((($data['w'] * $data['d'] * $data['h']) / 6000) * 1000);
-    }
+			if ($data['w'] <= 14 && $data['h'] <= 6 && $data['d'] <= 20) {
+				$bin_id = 'A';
+				$weight = $this->calculate_total_weight($sos, 'A');
+				$dimension = 14 + 6 + 20;
+				$x_d = (((14 * 20 * 6) / 6000) * 1000);
+			} else {
+				$bin_id = 'NONE';
+				$weight = $this->calculate_total_weight($sos, '');
+				$dimension = $data['w'] + $data['h'] + $data['d'];
+				$x_d = ((($data['w'] * $data['d'] * $data['h']) / 6000) * 1000);
+			}
+            
+			$prices = $this->calculate_thai_post_price($weight);
+			// $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
+            // $price = $flash_price + ($sos[0]['product_line'] != 0 && $sos[0]['product_line'] != 1 && $flash_price > 0 ? 10 : 0);
 
-    $prices = $this->calculate_thai_post_price($weight);
-    // $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
-            // $price = $flash_price + ($not_free_pk && $flash_price > 0 ? 10 : 0);
+		} else {
 
-  } else {
+			$data = [
+                'username' => '6241153926@student.chula.ac.th', 
+                'api_key' => '9df6d9456992fede5095c28587c8ab32',
+                'bins' => [
+                    ["w"=> 8.5, "h"=> 9, "d"=> 13, "id"=> "0,0"],
+                    ["w"=> 11, "h"=> 10, "d"=> 17, "id"=> "0+4"],
+                    ["w"=> 14, "h"=> 6, "d"=> 20, "id"=> "A"],
+                    ["w"=> 14, "h"=> 12, "d"=> 20, "id"=> "2A"],
+                    ["w"=> 17, "h"=> 9, "d"=> 25, "id"=> "B"],
+                    ["w"=> 17, "h"=> 18, "d"=> 25, "id"=> "2B"],
+                    ["w"=> 20, "h"=> 11, "d"=> 30, "id"=> "C"],
+					          ["w"=> 20, "h"=> 22, "d"=> 30, "id"=> "2C"],
+					          ["w"=> 22, "h"=> 14, "d"=> 35, "id"=> "D"],
+					          ["w"=> 24, "h"=> 17, "d"=> 40, "id"=> "E"],
+					          ["w"=> 31, "h"=> 13, "d"=> 36, "id"=> "F"],
+					          ["w"=> 30, "h"=> 22, "d"=> 45, "id"=> "ฉ"]
+                ]
+            ];
 
-            $data['items'] = $item_list;
-            $query = json_encode($data);
-            $url = "http://asia1.api.3dbinpacking.com/packer/packIntoMany";
-            $prepared_query = 'query='.$query;
-            $ch = curl_init($url);
-            curl_setopt( $ch, CURLOPT_POST, true );
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $prepared_query );
-            curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-            curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
-            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-            $resp = curl_exec($ch);
-            if (curl_errno($ch)) {
-                return ['error'=>'Error #' . curl_errno($ch) . ': ' . curl_error($ch).'<br>'];
-            }
-            curl_close($ch);
+			$item_list = [];
+			$not_free_pk = false;
 
-            $response = json_decode($resp,true);
-            if(isset($response['response']['errors'])){
-                if(count($response['response']['errors'])>0){
-                    $response=json_encode($data);
-                    // return ['error'=> 'รายงานIS'];
-                    return json_encode([
-                        "shippings" => [],
-                        "error" => 'สินค้าเยอะเกินหรือเกิดข้อผิดพลาด กรุณาติดต่อฝ่าย IS'
-                    ]);
-                }
-            }
+			foreach($sos as $so) {
 
-            $b_packed= $response['response']['bins_packed'];
+				if ($so['width'] > 0 && $so['height'] > 0 && $so['length'] > 0) { 
+                    $item = [
+                        'w' => $so['width'],
+                        'h' => $so['height'],
+                        'd' => $so['length'],
+                        'q' => $so['quantity'],
+                        'vr' => '1',
+                        'id' => $so['product_no']
+                    ];
+				    array_push($item_list, $item);
+				}
 
-            if (count($b_packed) == 1){
+				if ($so['product_line'] != 0 && $so['product_line'] != 1) {
+					$not_free_pk = true;
+				}
 
-                foreach ($b_packed as $bin){
-                    $bin_id = $bin['bin_data']['id'];
-                    $dimension = $bin['bin_data']['h'] + $bin['bin_data']['w'] + $bin['bin_data']['d'];
-                    $x_d = ((($bin['bin_data']['w'] * $bin['bin_data']['d'] * $bin['bin_data']['h']) / 6000) * 1000);
-                }
+			}
 
-                $bins = $data['bins'];
-                foreach ($bins as $bin){
-                    $latest = $bin['id'];
-                    if ($bin['id'] == $bin_id){
-          $weight = $this->calculate_total_weight($sos, $bin_id);
-                    } 
-                }
+			if (count($item_list) == 0) {
 
-      $prices = $this->calculate_thai_post_price($weight);
-                // $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
+				return json_encode([
+					"shippings" => [
+						[
+							"url" => "http://cdn.onlinewebfonts.com/svg/img_290643.png",
+							"name" => '',
+							"price" => 0,
+							"bin_id" => 'NONE',
+							"remark" => 'ถ้าสินค้าไม่ใช่บัตรเงินสด ติดต่อฝ่าย IS'
+						]
+					],
+					"error" => $error
+				]);
+
+			} else if (count($item_list) == 1 && $item_list[0]['q'] == 1 ) {
+
+				$data = [
+                    'w' => $sos[0]['width'],
+                    'h' => $sos[0]['height'],
+                    'd' => $sos[0]['length']
+                ];
+
+				if ($data['w'] <= 14 && $data['h'] <= 6 && $data['d'] <= 20) {
+					$bin_id = 'A';
+					$weight = $this->calculate_total_weight($sos, 'A');
+					$dimension = 14 + 6 + 20;
+					$x_d = (((14 * 20 * 6) / 6000) * 1000);
+				} else{
+					$bin_id = 'NONE';
+					$weight = $this->calculate_total_weight($sos, '');
+					$dimension = $data['w'] + $data['h'] + $data['d'];
+					$x_d = ((($data['w'] * $data['d'] * $data['h']) / 6000) * 1000);
+				}
+
+				$prices = $this->calculate_thai_post_price($weight);
+				// $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
                 // $price = $flash_price + ($not_free_pk && $flash_price > 0 ? 10 : 0);
 
-            } else {
+			} else {
 
-                $error = 'สินค้าเยอะเกินหรือเกิดข้อผิดพลาด กรุณาติดต่อฝ่าย IS';
+                $data['items'] = $item_list;
+                $query = json_encode($data);
+                $url = "http://asia1.api.3dbinpacking.com/packer/packIntoMany";
+                $prepared_query = 'query='.$query;
+                $ch = curl_init($url);
+                curl_setopt( $ch, CURLOPT_POST, true );
+                curl_setopt( $ch, CURLOPT_POSTFIELDS, $prepared_query );
+                curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+                curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
+                curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+                $resp = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    return ['error'=>'Error #' . curl_errno($ch) . ': ' . curl_error($ch).'<br>'];
+                }
+                curl_close($ch);
+
+                $response = json_decode($resp,true);
+                if(isset($response['response']['errors'])){
+                    if(count($response['response']['errors'])>0){
+                        // $response=json_encode($data);
+                        // return ['error'=> 'รายงานIS'];
+                        return json_encode([
+                            "shippings" => [],
+                            "error" => json_encode($response['response']['errors'])
+                        ]);
+                    }
+                }
+
+                $b_packed= $response['response']['bins_packed'];
+
+                if (count($b_packed) == 1){
+
+                    foreach ($b_packed as $bin){
+                        $bin_id = $bin['bin_data']['id'];
+                        $dimension = $bin['bin_data']['h'] + $bin['bin_data']['w'] + $bin['bin_data']['d'];
+                        $x_d = ((($bin['bin_data']['w'] * $bin['bin_data']['d'] * $bin['bin_data']['h']) / 6000) * 1000);
+                    }
+
+                    $bins = $data['bins'];
+                    foreach ($bins as $bin){
+                        $latest = $bin['id'];
+                        if ($bin['id'] == $bin_id){
+							$weight = $this->calculate_total_weight($sos, $bin_id);
+                        } 
+                    }
+
+					$prices = $this->calculate_thai_post_price($weight);
+                    // $flash_price = $this->calculate_T_price($dimension, $weight, $bin_id, $sos);
+                    // $price = $flash_price + ($not_free_pk && $flash_price > 0 ? 10 : 0);
+
+                } else {
+
+                    $error = 'สินค้าเยอะเกินหรือเกิดข้อผิดพลาด กรุณาติดต่อฝ่าย IS';
+
+                }
 
             }
 
-        }
+		}
 
-}
+		return json_encode([
+			"shippings" => [
+				[
+					"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
+					"name" => 'Thai Post (REG)',
+					"price" => $prices['reg'],
+					"bin_id" => $bin_id,
+					"remark" => $remark
+				],
+				[
+					"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
+					"name" => 'Thai Post (EMS)',
+					"price" => $prices['ems'],
+					"bin_id" => $bin_id,
+					"remark" => $remark
+				]
+			],
+			"error" => $error
+		]);
 
-return json_encode([
-  "shippings" => [
-    [
-      "url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-      "name" => 'Thai Post (REG)',
-      "price" => $prices['reg'],
-      "bin_id" => $bin_id,
-      "remark" => $remark
-    ],
-    [
-      "url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
-      "name" => 'Thai Post (EMS)',
-      "price" => $prices['ems'],
-      "bin_id" => $bin_id,
-      "remark" => $remark
-    ]
-  ],
-  "error" => $error
-]);
+    }
 
-}
+    private function calculate_total_weight2($sos, $box_weight) {
+        $weight = $box_weight;
+        foreach($sos as $so) { $weight += $so['weight'] * $so['quantity']; }
+        return $weight;
+    }
 
-private function calculate_total_weight2($sos, $box_weight) {
-    $weight = $box_weight;
-    foreach($sos as $so) { $weight += $so['weight'] * $so['quantity']; }
-    return $weight;
-}
+    private function calculate_total_weight($sos, $bin_id) {
 
-private function calculate_total_weight($sos, $bin_id) {
+		$weight = 0;
 
-$weight = 0;
-
-switch ($bin_id) {
-        
+		switch ($bin_id) {
         case '0,0':     $weight += 26; break;
         case '0+4':     $weight += 43; break;
         case 'A':       $weight += 51; break;
         case '2A':      $weight += 64; break;
         case 'B':       $weight += 81; break;
         case '2B':      $weight += 112; break;
-        case 'C':      $weight += 109; break;
-        case '2C':      $weight += 153; break;
-        case 'D':      $weight += 153; break;
-        case 'E':      $weight += 200; break;
-        case 'F':      $weight += 221; break;
-        case 'ฉ':      $weight += 295; break;
-        default:
+			  case 'C':      $weight += 109; break;
+			  case '2C':      $weight += 153; break;
+			  case 'D':      $weight += 153; break;
+			  case 'E':      $weight += 200; break;
+			  case 'F':      $weight += 221; break;
+			  case 'ฉ':      $weight += 295; break;
+			
+			
+            default:
+        }
+
+        foreach($sos as $so) { $weight += $so['weight'] * $so['quantity']; }
+        return $weight;
+
     }
 
-    foreach($sos as $so) { $weight += $so['weight'] * $so['quantity']; }
-    return $weight;
+	private function calculate_thai_post_price($weight) {
 
-}
+		$price_reg = 0;
+		$price_ems = 0;
 
-private function calculate_thai_post_price($weight) {
+		if($weight <= 500) {
+			$price_reg = 30;
+			$price_ems = 40;
+		} else if($weight <= 2500) {
+			$price_reg = 40;
+			$price_ems = 50;
+		} else if($weight <= 5000) {
+			$price_reg = 50;
+			$price_ems = 60;
+		} else if($weight <= 8000) {
+			$price_reg = 60;
+			$price_ems = 80;
+		} else {
+			$price_reg = 90;
+			$price_ems = 110;
+		}
 
-$price_reg = 0;
-$price_ems = 0;
+		return [
+			'reg' => $price_reg,
+			'ems' => $price_ems
+		];
 
-if($weight <= 500) {
-  $price_reg = 30;
-  $price_ems = 40;
-} else if($weight <= 2500) {
-  $price_reg = 40;
-  $price_ems = 50;
-} else if($weight <= 5000) {
-  $price_reg = 40;
-  $price_ems = 60;
-} else if($weight <= 8000) {
-  $price_reg = 60;
-  $price_ems = 80;
-} else {
-  $price_reg = 90;
-  $price_ems = 110;
-}
+	}
 
-return [
-  'reg' => $price_reg,
-  'ems' => $price_ems
-];
-
-}
 
   public function addCommart() {
 
@@ -1672,15 +1694,15 @@ return [
 	}*/
 
     // insert SO
-    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
-                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?,?, ?, ?, ?, ?, 0, ?, 1)" );
+    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type,payment_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, discountso, done)
+                                values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?,?, ?,?, ?, ?, ?, 0, ?, 1)" );
     $sql->execute( [
       $sono,
       input::post( 'sellerNo' ),
       json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
       json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ],
       input::post( 'productType' ), 
-      // input::post('paymentType'),
+      input::post('paymentType'),
       input::post( 'payment' ),
      
       input::post( 'vatType' ),
@@ -2675,7 +2697,8 @@ return [
                                     SO.discountso,
                                     SOXPrinting.sox_no,
                                     SOX.tracking_number,
-                                    SOX.note                                    
+                                    SOX.note,
+                                    SOX.slip_name                                
                                 from SOPrinting
                                 inner join SO on SO.so_no = SOPrinting.so_no
                                 inner join Product on Product.product_no = SOPrinting.product_no
@@ -2785,7 +2808,41 @@ return [
                                 left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
                                 inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
                                 inner join Week on Week.date = SO.so_date
-                                where SOPrinting.cancelled = 0 and not Product.product_name like '%ค่าส่ง%' and not Product.product_name like '%ติดตั้ง%'" );
+                                where SOPrinting.cancelled = 0" );
+    $sql->execute();
+    if ( $sql->rowCount() > 0 ) {
+      return $sql->fetchAll();
+    }
+    return [];
+  }
+  public function getOSSalesReport() {
+    $sql = $this->prepare( "select
+                                    SO.so_no,
+                                    Week.week as so_week,
+                                    SO.so_date,
+                                    SO.so_time,
+                                    Product.product_line,
+                                    Product.product_no,
+                                    Product.product_name,
+                                    ProductCategory.category_name,
+                                    Product.sub_category,
+                                    Supplier.supplier_name,
+                                    SOPrinting.quantity,
+                                    SOPrinting.sales_no_vat * SOPrinting.quantity as total_no_vat,
+                                    SOPrinting.total_sales,
+                                    SOPrinting.total_point,
+                                    SOPrinting.total_commission,
+                                    SOPrinting.margin,
+                                    concat(Employee.employee_id, ' ', Employee.employee_nickname_thai) as sp,
+                                    Employee.ce_id as ce
+                                from SOPrinting
+                                inner join SO on SO.so_no = SOPrinting.so_no
+                                inner join Employee on Employee.employee_id = SO.employee_id
+                                left join Product on Product.product_no = SOPrinting.product_no
+                                left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+                                inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
+                                inner join Week on Week.date = SO.so_date
+                                where SOPrinting.cancelled = 0 and SO.employee_id REGEXP 'OS...'" );
     $sql->execute();
     if ( $sql->rowCount() > 0 ) {
       return $sql->fetchAll();
@@ -2817,7 +2874,30 @@ return [
     }
     return [];
   }
-
+  public function OSGetPointReport() {
+    $sql = $this->prepare( "select
+                                	PointLog.date,
+                                    concat(sp.employee_id, ' ', sp.employee_nickname_thai) as sp,
+                                    sp.product_line,
+                                    concat(ce.employee_id, ' ', ce.employee_nickname_thai) as ce,
+                                    PointLog.point,
+                                    PointLog.remark,
+                                    PointLog.note,
+									PointLog.type,
+									SO.total_sales_no_vat,
+									SO.total_sales_vat,
+                                    SO.total_sales_price
+                                from PointLog 
+                                inner join Employee as sp on sp.employee_id = PointLog.employee_id
+                                inner join Employee as ce on ce.employee_id = sp.ce_id
+                                left join SO on SO.so_no = PointLog.note
+                                where PointLog.employee_id > 0 and PointLog.cancelled = 0 and PointLog.employee_id REGEXP 'OS...'" );
+    $sql->execute();
+    if ( $sql->rowCount() > 0 ) {
+      return $sql->fetchAll();
+    }
+    return [];
+  }
   	public function getTournament() {
     $sql = $this->prepare("select substring(Teams_2.team_id,2,1) as product_line, Teams_2.team_name, Teams_2.team_ce, Teams_2.team_sales from Teams_2" );
     $sql->execute();
@@ -2827,7 +2907,337 @@ return [
     return [];
   }
 	
-	
+  private function promotionWeek2($sono) {
+        
+    $sql = $this->prepare("select * from 
+                            	(select count(*) as countProLine from PointLog where employee_id = ? and remark = ?) as countProLine,
+                                (select count(*) as countEasySell from PointLog where employee_id = ? and remark = 'Week 1-2 - Easy Sell') as countEasySell,
+                                (select sum(total_sales_price) as totalSold from SO where employee_id = ?) as sumTotalSold");
+    
+        $sql->execute([input::post('sellerNo'), input::post('sellerNo')]);
+        $temp1 = $sql->fetchAll()[0];
+        
+        $temp = $sql->fetchAll()[0];
+        
+        $achieved = $temp['countProLine'];
+        $achieved2 = $temp['countEasySell'];
+        $totalSold2 = $temp['totalSold'];
+        
+        if ($achieved == 0) {
+            
+            $soItemsArray = json_decode(input::post('soItems'), true); 
+            $soItemsArray = json_decode($soItemsArray, true); 
+            $soTotalSales = 0;
+            $extraPoint = 0;
+            $count = 0;
+            $extraPoint = 0;
+            
+            switch (json_decode(session::get('employee_detail'), true)['product_line']) {
+				
+					
+				case '1': # Promotion Week 2 ขายกล้องฟิล์มตัวแรก /2020 Line 1 ขายทีวี 1 เครื่อง หรือ เครื่องเล่น Nintendo Switch 1 เครื่อง				
+                
+                    $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+                                            inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                            left join Product on Product.product_no = SOPrinting.product_no
+                                            left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+                                            where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+											and Product.product_line = 1 and (Product.sub_category = 'Film Camera')");
+                    $temp = $sql->fetchAll()[0];
+                    
+                    if($temp['count'] > 0) {
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                      values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 20, 'Week 2 - Line 1.1', $sono]);
+                      //print_r($sql->errorInfo());
+                      echo ' (ผ่านโปรสาย 1 ได้รับ 20 พ้อยท์!!!) ';
+                    }   
+                    break;
+
+				case '2': # Promotion Week 2 ขายสินค้าสาย 1 ครบ 1000 บาท// - Line 2 ขายเครื่องฟอกอากาศครบทีมละ 2 เครื่อง/ทีม 						
+                
+                    $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+                                          inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                          left join Product on Product.product_no = SOPrinting.product_no
+                                          left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+                                          where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+                                          and Product.product_line = 1 ");
+                    $temp = $sql->fetchAll()[0];
+                    
+                    if($temp['sum'] >= 1000) {
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                      values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 25, 'Week 2 - Line 1.2', $sono]);
+                      //print_r($sql->errorInfo());
+                      echo ' (ผ่านโปรสาย 1 ได้รับ 25 พ้อยท์!!!) ';
+                    }   
+                    break;
+  
+				
+				case '3': # Promotion Week 2 - ขายแอร์เครื่องแรก								
+                
+                    $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+                    inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                    left join Product on Product.product_no = SOPrinting.product_no
+                    left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+                    where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+            and Product.product_line = 2 and (Product.sub_category = 'Air Conditioner')");
+            $temp = $sql->fetchAll()[0];
+
+            if($temp['count'] > 0) {
+            $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+            values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+            $sql->execute([input::post('sellerNo'), 70, 'Week 2 - Line 2.1', $sono]);
+            //print_r($sql->errorInfo());
+            echo ' (ผ่านโปรสาย 2 ได้รับ 70 พ้อยท์!!!) ';
+            }    
+            break;               
+
+					
+				case '4': # Promotion Week 2 - แอร์								
+                
+                              $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+                              inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                              left join Product on Product.product_no = SOPrinting.product_no
+                              left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+                              where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+                      and Product.product_line = 2 and (Product.sub_category = 'Air Conditioner')");
+                      $temp = $sql->fetchAll()[0];
+
+                      if($temp['count'] >= 2) {
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                      values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 90, 'Week 2 - Line 2.2', $sono]);
+                      //print_r($sql->errorInfo());
+                      echo ' (ผ่านโปรสาย 2 ได้รับ 90 พ้อยท์!!!) ';
+                      }                   
+                      break;
+					
+				case '5': # Promotion Week 8 - Line 5 ขายสินค้าMacbook Proหรืออะไรก็ได้ในcate Windows				
+						// 	ขายสินค้าในsubcate Acsyหรือcate Peripheralsครบ3000/ทีม											
+                
+            $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+            inner join SOPrinting on SOPrinting.so_no = SO.so_no
+            left join Product on Product.product_no = SOPrinting.product_no
+            left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+            where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+    and Product.product_line = 2 and (Product.sub_category = 'Air Conditioner')");
+    $temp = $sql->fetchAll()[0];
+
+    if($temp['count'] >= 3) {
+    $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+    $sql->execute([input::post('sellerNo'), 110, 'Week 2 - Line 2.3', $sono]);
+    //print_r($sql->errorInfo());
+    echo ' (ผ่านโปรสาย 2 ได้รับ 110 พ้อยท์!!!) ';
+    }                   
+    break;
+    
+					
+				case '6': # Promotion Week 2 - ขายสินค้าสาย 3 ชิ้นแรก
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 3");
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 10, 'Week 2 - Line 3.1', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 2 ได้รับ 10 พ้อยท์!!!) ';
+}                   
+break;
+					
+				case '7': # Promotion Week 2 - ทุกการขาย เตารีด/พัดลม/หม้อหุงข้าว/เครื่องดูดฝุ่น/อุปกรณ์เสริมความงามครบทุก 800 บาท													
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 3 and (Product.category_no = '04' OR Product.category_no = '08' OR Product.category_no = '09' OR Product.category_no = '10' OR Product.category_no = '11')");
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 10, 'Week 2 - Line 3.2', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 3 ได้รับ 10 พ้อยท์!!!) ';
+}                   
+break;
+				case '8': # Promotion Week 8 - Line 8 ขายสินค้าอะไรก็ได้ในสาย 8 เกิน 5,000 บาท																		
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 3 and (Product.category_no = '03' OR Product.category_no = '17' OR Product.category_no = '20')");
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 30, 'Week 2 - Line 3.3', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 3 ได้รับ 30 พ้อยท์!!!) ';
+}                   
+break;
+					
+				case '9': # Promotion Week 4 - ขาย Apple Product ชิ้นแรก 																		
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 4 and (Product.category_no = '01' OR Product.category_no = '02' OR Product.category_no = '03' OR 
+Product.category_no = '04' OR 
+Product.category_no = '09' OR Product.category_no = '12' OR Product.category_no = '14' OR 
+Product.category_no = '19' OR Product.category_no = '20' OR Product.category_no = '21')");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 5, 'Week 2 - Line 4.1', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 4 ได้รับ 5 พ้อยท์!!!) ';
+}                   
+break;
+					
+				case '0': # Promotion Week 8 - Line 10 ขายทองม้วนกล่อง 150 กรัม 6 กล่องและปั้นสิบ 8 ถุง/ทีม																		
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 4 and (Product.category_no = '05')");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['sum'] >= 2500) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 15, 'Week 2 - Line 4.2', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 4 ได้รับ 15 พ้อยท์!!!) ';
+}                   
+break;
+
+case '10': # Promotion Week 8 - Line 10 ขายทองม้วนกล่อง 150 กรัม 6 กล่องและปั้นสิบ 8 ถุง/ทีม																		
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 4 and (Product.category_no = '06')");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 20, 'Week 2 - Line 4.3', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 4 ได้รับ 20 พ้อยท์!!!) ';
+}                   
+break;
+
+case '11': # Promotion Week 2 - Line 5															
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 5 and (Product.category_no = '01' OR Product.category_no = '02')");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] > 0) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 50, 'Week 2 - Line 5.1', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 5 ได้รับ 15 พ้อยท์!!!) ';
+}                   
+break;
+
+case '12': # Promotion Week 2 - Line 5															
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 5 and (Product.category_no = '01')");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] >= 2) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 70, 'Week 2 - Line 5.2', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 5 ได้รับ 70 พ้อยท์!!!) ';
+}                   
+break;
+case '13': # Promotion Week 2 - Line 5															
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-06-05' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11')
+and Product.product_line = 5 and Product.sub_category = 'Accessories' or Product.sub_category = 'peripherals') ");
+
+$temp = $sql->fetchAll()[0];
+
+if($temp['count'] >= 3) {
+$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+$sql->execute([input::post('sellerNo'), 15, 'Week 2 - Line 5.3', $sono]);
+//print_r($sql->errorInfo());
+echo ' (ผ่านโปรสาย 5 ได้รับ 15 พ้อยท์!!!) ';
+}                   
+break;  
+case '14': # Promotion Week 2 - Pro กลาง ขายสินค้าครบ 3500 บาท												
+                
+        $sql = $this->prepare("select ifnull(sum(SOPrinting.quantity),0) as count from SO
+        inner join SOPrinting on SOPrinting.so_no = SO.so_no
+        left join Product on Product.product_no = SOPrinting.product_no
+        left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+        where SO.cancelled = 0 and ((so_date = '2022-05-30' AND so_time >= '12:00:00') OR so_date between '2022-06-05' AND '2022-06-11') ");
+
+$temp = $sql->fetchAll()[0];
+
+      if($temp['sum'] >= 3500) {
+      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+      values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+      $sql->execute([input::post('sellerNo'), 70, 'Easy sale', $sono]);
+      //print_r($sql->errorInfo());
+      echo ' (ผ่านโปรกลาง ได้รับ 70 พ้อยท์!!!) ';
+      }                   
+      break;      
+                
+                                        
+            }
+		}
+
+		  
+
+	}
+
+
 	private function promotionWeek8($sono) {
 		$soItemsArray = json_decode(input::post('soItems'), true);
 		$soItemsArray = json_decode($soItemsArray,true);
@@ -5722,51 +6132,54 @@ public function uploadImgForPVC() {
 }
 
 
-public function requestWSD(){
-  $sql = $this->prepare("SELECT
-                          Invoice.invoice_no
-                          FROM
-                              SOX
-                          LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
-                          LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
-                          where SOX.sox_no = ?
-                        ");
-  $sql->execute([input::post('sox_no')]);
-  if ($sql->rowCount() > 0) {             
-    $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['invoice_no']; 
+  public function requestWSD(){
+    $sql = $this->prepare("SELECT
+                            Invoice.invoice_no
+                            FROM
+                                SOX
+                            LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
+                            LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
+                            where SOX.sox_no = ?
+                          ");
+    $sql->execute([input::post('sox_no')]);
+    if ($sql->rowCount() > 0) {             
+      $iv_no = $sql->fetchAll(PDO::FETCH_ASSOC); 
+    }
+
+    $sql = $this->prepare("SELECT
+                            Invoice.id_no
+                            FROM
+                                SOX
+                            LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
+                            LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
+                            where SOX.sox_no = ?
+                          ");
+    $sql->execute([input::post('sox_no')]);
+    if ($sql->rowCount() > 0) {             
+      $vat_id = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['id_no']; 
+    }
+
+
+    foreach ( $iv_no as $value ) {
+      $wsdno = $this->assignWSD( ); 
+      $sql = $this->prepare("INSERT into WSD(wsd_no, wsd_date, wsd_time, employee_id, total_amount, vat_id, sox_no, invoice_no, note, bank, bank_no, recipient, recipient_address, wsd_status)
+                            values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)");
+      $sql->execute([
+        $wsdno,
+        json_decode(session::get('employee_detail'), true)['employee_id'],
+        input::post('totalAmount'),
+        $vat_id,
+        input::post('sox_no'),  
+        $value[ 'invoice_no' ],
+        input::post('note'),
+        input::post('bank'),
+        input::post('bank_no'),
+        input::post('recipient')
+      ]);
+    }
+
+
   }
-
-  $sql = $this->prepare("SELECT
-                          Invoice.id_no
-                          FROM
-                              SOX
-                          LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
-                          LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
-                          where SOX.sox_no = ?
-                        ");
-  $sql->execute([input::post('sox_no')]);
-  if ($sql->rowCount() > 0) {             
-    $vat_id = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['id_no']; 
-  }
-
-  $wsdno = $this->assignWSD( ); 
-  $sql = $this->prepare("INSERT into WSD(wsd_no, wsd_date, wsd_time, employee_id, total_amount, vat_id, sox_no, invoice_no, note, bank, bank_no, recipient, recipient_address, wsd_status)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)");
-  $sql->execute([
-    $wsdno,  
-    json_decode(session::get('employee_detail'), true)['employee_id'],
-    input::post('totalAmount'),
-    $vat_id,
-    input::post('sox_no'),  
-    $iv_no,
-    input::post('note'),
-    input::post('bank'),
-    input::post('bank_no'),
-    input::post('recipient')
-  ]);
-
-
-}
 
 /////////pvd/////////
 private function assignWSD() {
@@ -5812,8 +6225,28 @@ public function getAllOSDashboardSox(){
     return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
   }
 }
-
-
+public function getOSDashboardSoxAll($line){
+  $sql = $this->prepare("SELECT SOXPrinting.sox_no,SO.so_no,SO.product_line,SOX.employee_id
+  FROM SOXPrinting 
+  INNER JOIN SO ON SOXPrinting.so_no = SO.so_no 
+  INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+  WHERE  SO.product_line=$line;");
+  $sql->execute( );
+   if ($sql->rowCount() > 0) {             
+    return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+  }
+}
+public function getAllAllOSDashboardSox(){
+  $sql = $this->prepare("SELECT SOXPrinting.sox_no,SO.so_no,SO.product_line,SOX.employee_id
+  FROM SOXPrinting 
+  INNER JOIN SO ON SOXPrinting.so_no = SO.so_no 
+  INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+  WHERE 1;");
+  $sql->execute( );
+   if ($sql->rowCount() > 0) {             
+    return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+  }
+}
 
   
 

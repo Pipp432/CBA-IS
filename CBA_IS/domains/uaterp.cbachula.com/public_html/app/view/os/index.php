@@ -18,7 +18,9 @@
 	 <!-- <script>addModuleLink('osRow', '/mkt/sp_tracking', 'table', 'SP Tracking');</script>
 	 <script>addModuleLink('osRow', '/is/thelastday', 'heart', 'The Last Day');</script>
 	 <script>addModuleLink('osRow', '/mkt/Cancel_Sox', 'shopping-bag', 'Cancel Sox');</script> -->
-	<script>addModuleLink('osRow', '/mkt/os_sales_report', 'cloud-download', 'Sales Report');</script>
+	<script>addModuleLink('osRow', '/mkt/os_sales_report', 'cloud-download', 'OS Sales Report');</script>
+	<script>addModuleLink('osRow', '/mkt/sales_report', 'cloud-download', 'Sales Report');</script>
+	<!-- <script>addModuleLink('osRow', '/mkt/os_point_report', 'cloud-download', 'OS Point Report');</script> -->
 	 <script>addModuleLink('osRow', '/mkt/point_report', 'cloud-download', 'Point Report');</script>
         
         

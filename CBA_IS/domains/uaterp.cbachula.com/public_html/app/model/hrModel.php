@@ -11,23 +11,13 @@ use PDO;
 
 class hrModel extends model {
 
-    // Add point
-    // public function getemployeeid() {
-    //     $sql = $this->prepare("select * from Employee where employee_id = ?");
-    //     $sql->execute([input::postAngular('sp_no')]);
-    //     if ($sql->rowCount() > 0) {
-    //         return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-    //     }
-    //     return json_encode([];)
-    // }
+    public function postPoint() {
+        foreach($_POST["pointArray"] as $value) {
+            $sql = $this->prepare("insert into PointLog (date,time,employee_id,point,remark,note,type,cancelled)
+                                values (CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?,?,?,?,0)"); 
+            $sql->execute([$value[0],$value[2],$value[1],$value[4],$value[3]]);
+        }
 
-    // // Add point
-    // public function editPoint() {
-
-    //     // insert point
-    //     $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?");
-    //     $sql->execute([
-    //         json_decode()
-    //     ])
-    // }
+        echo "yes";
+    }
 }

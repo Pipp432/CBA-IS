@@ -554,7 +554,7 @@ class finModel extends model {
                     input::post('cusAddress'),
                     input::post('cusId'),
                     $value['so_no'],
-                    $total_sales_no_vat,
+                    input::post('total_sales_no_vat'),
                     $total_sales_vat,
                     $total_sales_price,
                     (double) $value['discountso'],
@@ -2009,7 +2009,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 PVD.pvd_no,
                                 PVD.pvd_time,
                                 PVD.pvd_date,
-                                PVD.diff_total_sales_price,
+                                PVD.sum_total_sales_no_vat,
                                 PVD.cn_no,
                                 CN.bank,
                                 CN.bank_no,
@@ -2160,6 +2160,15 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return json_encode([]);
+    }
+
+    public function postBankStatement() {
+        foreach($_POST["statement"] as $value) {
+            $sql = $this->prepare("insert INTO `Bank_Statement` (payment_date,payment_time,	payment_amount) value (?,?,?);"); 
+            $sql->execute([$value[0],$value[1],$value[2]]);
+        }
+
+        echo "yes";
     }
 
 }

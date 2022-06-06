@@ -323,7 +323,7 @@
 
                         </tr>
 						
-						<!-- <tr ng-show="selectedProductType == 'Install'">
+						<tr ng-show="selectedProductType == 'Install'">
 							
 							<th style="text-align: right;" colspan="6">
 								<div class="custom-control">
@@ -348,7 +348,7 @@
 							<!--<div class="custom-control custom-checkbox mt-2">
 								<input type="checkbox" class="custom-control-input" id="fin_form" name="fin_form" value="0" ng-click="fin_form_check()">
 								<label class="custom-control-label" for="fin_form">กรอกฟอร์มแล้ว</label>
-							</div>-->
+							</div>
 						
 						
                         <tr>
@@ -957,7 +957,7 @@
 
                 soItems : JSON.stringify(angular.toJson($scope.soItems)),
                 
-                // paymentType: $scope.selectedPaymentType 
+                paymentType: $scope.selectedPaymentType 
 
             }, function(data) {
 

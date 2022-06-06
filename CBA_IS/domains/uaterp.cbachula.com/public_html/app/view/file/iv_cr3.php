@@ -99,8 +99,6 @@
                     <td style="text-align: right;">{{item.sales_price | number:2}}</td>
                     <td style="text-align: right;">{{item.total_sales_price | number:2}}</td>
                 </tr>
-
-               
                 <tr>
                     <th colspan="2">
                         จำนวนเงิน (ตัวอักษร)
@@ -134,15 +132,15 @@
                         </div>
                     </th>
                     <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type == "3" ? detail[0].invoice_total_sales_price : detail[0].invoice_total_sales_price * 100/107 - creditCardFee  | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_purchase_no_vat | number:2}}</th>
                 </tr>
-                    <!-- <tr>
+                    <tr>
                         <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
-                        <th colspan="1" style="text-align: right;">{{creditCardFee | number:2}}</th>
-                    </tr> -->
+                        <th colspan="1" style="text-align: right;">{{creditCardFee + difference | number:2}}</th>
+                    </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{ detail[0].vat_type =='3'? 0:detail[0].invoice_total_sales_price * 7/107 | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_purchase_no_vat * 7/100 | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
@@ -247,8 +245,7 @@
             $scope.detail = <?php echo $this->iv; ?>;
             $scope.customer_title = $scope.detail[0].customer_title;
             console.log($scope.detail)
-            $scope.hasTransportation = false;
-            
+           
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
@@ -259,7 +256,7 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
-            if(Number($scope.detail[0]["transportation_price"])>0)  $scope.hasTransportation = true;
+         
             
             
             // console.log( $scope.detail[0].customer_name.substring(0,6))
@@ -268,12 +265,12 @@
            
                 if($scope.detail[0]["payment_type"] =="CC"){
                     
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
+                    $scope.creditCardFee = (Number($scope.detail[0].invoice_total_purchase_no_vat)+ Number($scope.detail[0].invoice_total_sales_vat)) *(2.45/100);
                     $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                    
                 }
                 else if($scope.detail[0]["payment_type"] =='FB'){
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
+                    $scope.creditCardFee = (Number($scope.detail[0].invoice_total_purchase_no_vat)+Number($scope.detail[0].invoice_total_sales_vat))*(2.75/100);
                     $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                   
                 }else{
@@ -281,7 +278,7 @@
                     $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                    
                 }
-                // console.log($scope.creditCardFee)
+                console.log($scope.creditCardFee)
             
           
                 if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
@@ -291,9 +288,8 @@
                 if($scope.customer_title === null) $scope.customer_title = "";
 
                $scope.final = Number($scope.detail[0].invoice_total_purchase_vat)+$scope.creditCardFee;
-               $scope.difference = Math.round(Number($scope.detail[0].invoice_total_sales_price)) - Number($scope.detail[0].invoice_total_sales_price);
-            //   console.log($scope.difference)
-              console.log($scope.detail[0].invoice_total_sales_price )
+               $scope.difference = detail[0].invoice_total_sales_price.round() -  detail[0].invoice_total_sales_price
+               console.log($scope.difference)
         }
       
         

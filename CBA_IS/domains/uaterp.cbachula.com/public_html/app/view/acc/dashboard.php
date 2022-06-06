@@ -72,13 +72,13 @@
                 </div>
             </div>
 
-            <div class="col">
+            <!-- <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVC()">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบเบิกค่าใช้จ่าย</h5>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVC_confirm()">
@@ -213,17 +213,24 @@
                 </tr>
                 <!-- todo view file -->
                 <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
-                    <td>{{dashboard.cn_no}}</td>
+                    <td>
+                        <span ng-show="dashboard.wsd_status < 0">-</span>
+                        <span ng-show="dashboard.wsd_status >= 1">{{dashboard.cn_no}}</span>
+                    </td>
                     <td>{{dashboard.invoice_no}}</td>
                     <td>{{dashboard.sox_no}}</td>
-                    <td>{{dashboard.cn_date}} </td>
+                    <td>
+                        <span ng-show="dashboard.wsd_status < 0">-</span>
+                        <span ng-show="dashboard.wsd_status >= 1">{{dashboard.cn_date}}</span>
+                    </td>
                     <td>
                         <span ng-show="dashboard.wsd_status < 1">ยังไม่ออกใบ CN</span>
                         <a ng-show="dashboard.wsd_status >= 1" href="https://uaterp.cbachula.com/file/cn/{{dashboard.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
                     </td>
                     <!-- todo convert status to readable -->
                     <td>
-                        <span ng-show="dashboard.wsd_status < 1">รอออกใบลดหนี้</span>
+                        <span ng-show="dashboard.wsd_status < 0">ยกเลิก</span>
+                        <span ng-show="dashboard.wsd_status == 0">รอออกใบลดหนี้</span>
                         <span ng-show="dashboard.wsd_status >= 1">ออกใบลดหนี้สำเร็จ</span>
                     </td>
                 </tr>

@@ -43,7 +43,11 @@
                         <td colspan="2"><b>ที่อยู่</b> {{detail[0].customer_address}}</td>
                     </tr>
                     <tr>
-                        <td colspan="2"><b>เลขประจำตัวผู้เสียภาษี</b> {{detail[0].id_no}}</td>
+                        <td colspan="2"><b>เลขประจำตัวผู้เสียภาษี</b> 
+                            <span ng-show="detail[0].id_no == 0">-</span>
+                            <span ng-show="detail[0].id_no == null">-</span>
+                            <span ng-show="detail[0].id_no != 0">{{detail[0].id_no}}</span>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -89,10 +93,12 @@
                     <th colspan="2" style="text-align: left;">
                         {{detail[0].new_sales_price_thai}}
                     </th>
+                    <th colspan="2" style="text-align: right;">จำนวนเงินทั้งสิ้น</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].sum_total_sales_no_vat | number:2}}</th>
                     <!-- <th colspan="2" style="text-align: right;">ส่วนลด</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].discount | number:2}}</th> -->
                 </tr>
-                <tr>
+                <!-- <tr>
                     <th colspan="4" rowspan="5">
                         <div class="row">
                             <div class="col-4">
@@ -129,11 +135,11 @@
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].vat_total_sales_no_vat | number:2}}</th>
-                </tr>
-                <tr>
+                </tr> -->
+                <!-- <tr>
                     <th colspan="2" style="text-align: right;">จำนวนเงินทั้งสิ้น</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].sum_total_sales_no_vat | number:2}}</th>
-                </tr>
+                </tr> -->
             </table>
         </div> 
         

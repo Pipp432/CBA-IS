@@ -50,7 +50,7 @@
 							<td style="text-align: center">{{sox.payment_date==null ? getDate(sox):sox.payment_date}}</td>
 							<td style="text-align: center">{{sox.payment_time==null ? getTime(sox):sox.payment_time}}</td>
                             <td style="text-align: center">{{sox.so_total_sales_vat}}</td>
-							<td style="text-align: center">{{sox.so_total_sales_price}}</td>
+							<td style="text-align: center">{{sox.sox_sales_price - sox.so_total_sales_vat | number:2}}</td>
                             
                             <td style="text-align: right;">
                                 {{sox.sox_sales_price | number:2}}<br>
@@ -85,7 +85,12 @@
                         </tr>
                     </table>
                     <div class="col-md-12 mx-0 mt-2" ng-show="crItems.length != 0">
-                        <label for="textBoxCusName">ชื่อลูกค้า / บริษัท</label>
+                        <label>ชื่อลูกค้า / บริษัท</label>
+                    </div>
+                    <div class="col-sm-2" ng-show="crItems.length != 0">
+                        <input type="text" class="form-control" id="textBoxCusTitle" ng-model="sox.customerTitle">
+                    </div>
+                    <div class="col-sm-10" ng-show="crItems.length != 0">
                         <input type="text" class="form-control" id="textBoxCusName" ng-value="sox.customer_name + ' ' + sox.customer_surname">
                     </div>
                     <div class="col-md-12 mx-0 mt-2" ng-show="crItems.length != 0">
@@ -113,7 +118,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวมก่อนภาษี</th>
-                            <th id="totalPrice" style="text-align: right;">{{new_total_price-card_fee-crItems[0].so_total_sales_vat| number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{crItems[0].sox_sales_price*100/107| number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <tr>
@@ -122,15 +127,15 @@
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ภาษี 7%</th>
-                            <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_sales_vat | number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{crItems[0].sox_sales_price *7/107 | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
-                            <th id="cardFee" style="text-align: right;">{{card_fee | number:2}}</th>
+                            <th id="cardFee" style="text-align: right;">{{card_fee  | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวม</th>
-                            <th id="totalPrice" style="text-align: right;">{{new_total_price| number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{crItems[0].sox_sales_price| number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <!--<tr>
@@ -265,15 +270,18 @@
             
             $scope.crItems = [];
             $scope.sox = sox;
-            console.log($scope.calculateVat(sox));
+            
             $scope.customer_title = '';
             
             angular.forEach($scope.soxs, function (value, key) {
                 if(value.sox_no == sox.sox_no) {
                     $scope.crItems.push(value);
+                    console.log(value)
+                    
                 }
             });
-           
+
+        //    $scope.crItems.map((x)=>console.log(x.product_name))
             $scope.calculateCrItem(sox);
             
         }
@@ -303,9 +311,9 @@
                 Object.assign(value, {so_total_sales_vat2: so_total_sales_vat2});
                 Object.assign(value, {so_total_sales_price2: so_total_sales_price2});
                 
-                console.log(value);
+               
                 $scope.customer_title=value['customerTitle'];
-                console.log($scope.customer_title);
+               
                 
                 if(key == $scope.crItems.length - 1 && value.transportation_price != 0) {
                     var transportation = {
@@ -375,12 +383,12 @@
             $scope.new_total_price = '';
             if($scope.crItems.length != 0) {
                 $scope.card_fee = 0;
-                if($scope.crItems[0].payment_type == 'CC'){
-                    card_fee = (parseFloat(sox.sox_sales_price)*2.45)/100 ;
-                } else if($scope.crItems[0].payment_type == 'FB'){
-                    card_fee = (parseFloat(sox.sox_sales_price)*2.75)/100 ;
+                if($scope.crItems[0].payment_type === 'CC'){
+                    $scope.card_fee = (parseFloat(sox.total_sales)*2.45)/100 ;
+                } else if($scope.crItems[0].payment_type === 'FB'){
+                    $scope.card_fee = (parseFloat(sox.total_sales)*2.75)/100 ;
                 }
-                $scope.new_total_price = parseFloat(sox.sox_sales_price) + $scope.card_fee;
+                $scope.new_total_price = parseFloat(sox.total_sales) + $scope.card_fee;
             }
 
             
@@ -430,7 +438,7 @@
             $.post("/fin/cash_receipt/post_ivcr", {
                 post : true,
                 cusName : $('#textBoxCusName').val(),
-                customer_title: $scope.customer_title,
+                customer_title: $scope.sox.customerTitle, 
                 cusAddress : $('#textboxCusAddress').val(),
                 cusId : $('#textboxCusId').val(),
                 // cusName : '-',
@@ -442,7 +450,8 @@
                 // transferTime : transferTimeStr,
                 sox_number : $scope.sox.sox_no,
                 crItems : JSON.stringify(angular.toJson($scope.crItems)),
-                payment_type:$scope.crItems[0].payment_type
+                payment_type:$scope.crItems[0].payment_type,
+                total_sales_no_vat:$scope.crItems[0].so_total_sales_no_vat
             }, function(data) {
                 console.log(`Return statement: ${data}`);
                 addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);

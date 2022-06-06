@@ -1,0 +1,16 @@
+public function get_status(){
+        $sql=$this->prepare("SELECT * FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no
+        INNER JOIN Invoice ON Invoice.file_no=SO.so_no
+        INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no AND InvoicePrinting.product_no = Product.product_no
+        
+        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1;");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }

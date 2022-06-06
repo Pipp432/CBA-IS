@@ -45,7 +45,12 @@
                         <td><b>ลงวันที่</b> {{detail[0].invoice_date}}</td>
                     </tr>
                     <tr>
-                        <td colspan="2"><b>เลขประจำตัวผู้เสียภาษี</b> {{detail[0].id_no}}</td>
+                        <!-- <td colspan="2"><b>เลขประจำตัวผู้เสียภาษี</b> {{detail[0].id_no}}</td> -->
+                        <td colspan="2"><b>เลขประจำตัวผู้เสียภาษี</b> 
+                            <span ng-show="detail[0].id_no == 0">-</span>
+                            <span ng-show="detail[0].id_no == null">-</span>
+                            <span ng-show="detail[0].id_no != 0">{{detail[0].id_no}}</span>
+                        </td>
                         <td><b>สาเหตุการลดหนี้</b> {{detail[0].note}}</td>
                     </tr>
                 </table>
@@ -92,36 +97,32 @@
                     <th colspan="2" style="text-align: left;">
                         {{detail[0].new_sales_price_thai}}
                     </th>
-                    <!-- <th colspan="2" style="text-align: right;">ส่วนลด</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].discount | number:2}}</th> -->
+                    <th colspan="2" style="text-align: right;">มูลค่าตามเอกสารเดิม</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].diff_total_sales_price | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="4" rowspan="5">
                         <div class="row">
                             <div class="col-4">
-                                <br>ได้รับสินค้าตามรายการ<br>ถูกต้องและเรียบร้อยแล้ว
+                                <!-- <br>ได้รับสินค้าตามรายการ<br>ถูกต้องและเรียบร้อยแล้ว -->
                             </div>
                             <div class="col-4">
                                 <div class="row">
 									<div class="col">
-										<img ng-src="/public/img/accsign.jpg" style="width: 50%; " />
+										<!-- <img ng-src="/public/img/accsign.jpg" style="width: 50%; " /> -->
 									</div>
 								</div>
                                 <div class="row" style="margin-top: -5%">
-									<div class="col">
+									<!-- <div class="col">
                                         __________________________<br>ผู้ออกเอกสาร<br> วันที่ {{day}}/{{month}}/{{year}}
-                                    </div>
+                                    </div> -->
 								</div>
                             </div>
                             <div class="col-4">
-                                __________________________<br>ผู้รับสินค้า<br>วันที่ _____/_____/_____ 
+                                <!-- __________________________<br>ผู้รับสินค้า<br>วันที่ _____/_____/_____  -->
                             </div>
                         </div>
-                        </th>
-                    <th colspan="2" style="text-align: right;">มูลค่าตามเอกสารเดิม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].diff_total_sales_price | number:2}}</th>
-                </tr>
-                <tr>
+                    </th>
                     <th colspan="2" style="text-align: right;">มูลค่าที่ถูกต้อง</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].new_total_sales_price | number:2}}</th>
                 </tr>
@@ -156,7 +157,7 @@
     
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
-            $scope.detail = <?php echo $this->cn; ?>;
+            $scope.detail = <?php echo $this->cn?>;
             $scope.company = $scope.detail[0].cn_no.substring(0,1);
             console.log();
             $scope.year = $scope.detail[0].cn_date.substring(0,4);

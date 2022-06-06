@@ -52,16 +52,16 @@
                     <th>รายการ</th>
                     <th>จำนวน</th>
                     <th>หน่วย</th>
-                    <th>ราคา/หน่วย</th>
-                    <th>จำนวนเงิน</th>
+                    <!-- <th>ราคา/หน่วย</th>
+                    <th>จำนวนเงิน</th> -->
                 </tr>
                 <tr ng-repeat="item in detail" ng-show="item.total_purchase_price != 0">
                     <td style="text-align: center;">{{item.product_no}}</td>
                     <td style="text-align: left;">{{item.product_description}}</td>
                     <td style="text-align: right;">{{item.quantity}}</td>
                     <td style="text-align: left;">{{item.unit}}</td>
-                    <td style="text-align: right;">{{item.purchase_price | number:2}}</td>
-                    <td style="text-align: right;">{{item.total_purchase_price | number:2}}</td>
+                    <!-- <td style="text-align: right;">{{item.purchase_price | number:2}}</td>
+                    <td style="text-align: right;">{{item.total_purchase_price | number:2}}</td> -->
                 </tr>
                 <tr>
                     <th colspan="3" rowspan="3">

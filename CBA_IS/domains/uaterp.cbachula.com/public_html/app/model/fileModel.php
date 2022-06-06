@@ -40,9 +40,8 @@ class fileModel extends model {
                                 left join SOXPrinting on SOXPrinting.so_no = SO.so_no
                                 left join SOX on SOX.sox_no = SOXPrinting.sox_no
                                 left join CustomerTransaction on CustomerTransaction.so_no = SO.so_no
-                                left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel
-    							where PO.po_no = ?
-                                GROUP BY PO.po_no , Product.product_no");
+                                left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel AND SOX.address = Customer.address
+    							where PO.po_no = ?");
         $sql->execute([$po_no]);
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -77,7 +76,7 @@ class fileModel extends model {
                                 left join SOXPrinting on SOXPrinting.so_no = SO.so_no
                                 left join SOX on SOX.sox_no = SOXPrinting.sox_no
                                 left join CustomerTransaction on CustomerTransaction.so_no = SO.so_no
-                                left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel
+                                left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel AND SOX.address = Customer.address
     							where PO.po_no = ?");
         $sql->execute([$po_no]);
         if ($sql->rowCount() > 0) {
@@ -107,13 +106,19 @@ class fileModel extends model {
                                     Invoice.total_sales_vat as invoice_total_sales_vat,
                                     Invoice.total_sales_price as invoice_total_sales_price,
                                     Invoice.sales_price_thai,
-                                    Invoice.payment_type
+                                    Invoice.payment_type,
+                                    SO.vat_type,
+                                    SO.total_sales_price as so_total_sales_price,
+                                    SOX.transportation_price
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no
+                                inner join  SO   on Invoice.file_no = SO.so_no
+                                inner join SOXPrinting on SO.so_no = SOXPrinting.so_no
+                                inner join SOX on SOX.sox_no  = SOXPrinting.sox_no
     							where Invoice.invoice_no = ? ");
         $sql->execute([$iv_no]);
-       
+      
         return  json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
        
 	}

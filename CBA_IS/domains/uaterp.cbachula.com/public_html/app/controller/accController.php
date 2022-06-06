@@ -193,6 +193,8 @@ class accController extends controller {
             $this->positionEcho('acc', $this->model->getIvForCn());
         } else if (uri::get(2)==='post_cn') {
             $this->positionEcho('acc', $this->model->addCn());
+        } else if (uri::get(2)==='post_cancel') {
+            $this->positionEcho('acc', $this->model->cancelEXD());
         } else if (uri::get(2)==='update_PVD') {
             $this->positionEcho('acc', $this->model->updateWSDCreditNote());
         }

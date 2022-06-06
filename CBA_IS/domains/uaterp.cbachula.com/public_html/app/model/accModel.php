@@ -296,24 +296,14 @@ class accModel extends model {
     
     public function updateWSDCreditNote() {
         $sql = "UPDATE WSD SET 
-        employee_id = ?,
-        employee_line = ?,
         total_amount = ?,
-        vat_id = ?,
-        sox_no = ?,
-        invoice_no = ?,
         note = ?
         where  wsd_status = 0 and wsd_no = ?"; 
         $statement = $this->prepare($sql);
         $success = $statement->execute([
-            input::post("employee_id"),
-            input::post("employee_line"),
             input::post("total_amount"),
-            input::post("vat_id"),
-            input::post("sox_no"),
-            input::post("invoice_no"),
             input::post("note"),
-            input::post("wsd_no"),
+            input::post("wsd_no")
         ]);
         if($success) echo 'success';
         else echo print_r($statement->errorInfo());
@@ -370,6 +360,16 @@ class accModel extends model {
         return '';   
     }
 
+    public function cancelEXD() {
+        $sql = "UPDATE WSD SET wsd_status = -1
+        where  wsd_status = 0 and wsd_no = ?"; 
+        $statement = $this->prepare($sql);
+        $success = $statement->execute([
+            input::post("wsd_no")
+        ]);
+        if($success) echo ' success';
+        else echo print_r($statement->errorInfo());
+    }
 
     // CN(PV-D) Module
     public function addCn() {
@@ -408,26 +408,42 @@ class accModel extends model {
 
         $items = json_decode( input::post( 'cnItems' ), true );
         $items = json_decode( $items, true );
+
+        $invoice_no = input::post('invoice_no');
+        $new_price = input::post('new_total_sales_price');
+        if($new_price == null){
+            $new_price =0;
+        }
   
         foreach ( $items as $value ) {
   
             // insert SOPrinting
-              $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, diff_total_sales_price, new_total_sales_price, diff_total_sales_vat, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
-                                            values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
-              $sql->execute( [
-                  input::post('wsd_no'),
-                  $value[ 'product_no' ],
-                  input::post('diff_total_sales_price'),
-                  input::post('new_total_sales_price'),
-                  input::post('diff_total_sales_vat'),
-                  input::post('vat_total_sales_no_vat'),
-                  input::post('sum_total_sales_no_vat'),
-                  input::post('new_sales_price_thai'),
-                  ( double )$value[ 'sales_price' ],
-                  ( double )$value[ 'quantity' ],
-                  ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
-              ] );
+            $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, diff_total_sales_price, new_total_sales_price, diff_total_sales_vat, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
+                                           values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+            $sql->execute([
+                input::post('wsd_no'),
+                $value[ 'product_no' ],
+                input::post('diff_total_sales_price'),
+                $new_price,
+                input::post('diff_total_sales_vat'),
+                input::post('vat_total_sales_no_vat'),
+                input::post('sum_total_sales_no_vat'),
+                input::post('new_sales_price_thai'),
+                ( double )$value[ 'sales_price' ],
+                ( double )$value[ 'quantity' ],
+                ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
+            ] );
+            print_r($sql->errorInfo());
+
           }
+    
+        $sql = $this->prepare("SELECT
+                                Invoice.id_no
+                            from Invoice
+                            where Invoice.invoice_no = ?");
+        $sql->execute([$invoice_no]);
+        $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+        $vat_id = intval($tempp[0]["id_no"]);
     
   
         $sql = $this->prepare("UPDATE WSD set wsd_status=1,
@@ -435,12 +451,12 @@ class accModel extends model {
                                               total_amount = ?
                                 where WSD.wsd_no = ?");
         $sql->execute([
-            input::post("vat_id"),
+            $vat_id,
             input::post("sum_total_sales_no_vat"),
             input::post('wsd_no')
         ]);
 
-        $invoice_no = input::post('invoice_no');
+
         //CBA2022 กระบวนการออกใบลดหนี้ เมื่อลูกค้าคืนของ (PV-D)
         //sequence 11 CN
         // Dr 11.1 สินค้ารับคืนและส่วนลด 41-1x10
@@ -600,7 +616,7 @@ class accModel extends model {
             input::post("bank"),
             input::post("bank_no"),
             input::post("recipient_address"),
-            input::post("cn_no"),
+            input::post("cn_no")
         ]);
         if($success) echo ' สำเร็จ';
         else print_r($statement->errorInfo());
@@ -614,7 +630,7 @@ class accModel extends model {
             input::post("bank"),
             input::post("bank_no"),
             input::post("recipient_address"),
-            input::post("wsd_no"),
+            input::post("wsd_no")
         ]);
     }
     
@@ -625,7 +641,7 @@ class accModel extends model {
                                                       pvd_date, 
                                                       pvd_time, 
                                                       employee_id, 
-                                                      diff_total_sales_price,
+                                                      sum_total_sales_no_vat,
                                                       vat_id, 
                                                       company_code, 
                                                       note, 
@@ -635,7 +651,7 @@ class accModel extends model {
             $pvd_no,
             input::post("cn_no"),
             json_decode(session::get('employee_detail'), true)['employee_id'],
-            input::post("diff_total_sales_price"),
+            input::post("sum_total_sales_no_vat"),
             input::post("vat_id"),
             input::post("company_code"),
             input::post("note")
@@ -659,16 +675,17 @@ class accModel extends model {
         //     input::post('wsd_no')
         // ]);
 
+
         $sql = "UPDATE WSD SET  
             recipient = ?, bank = ?, bank_no = ?, recipient_address = ?, wsd_status=2
-            WHERE wsd_no = ?";
+            WHERE WSD.wsd_no = ?";
         $statement = $this->prepare($sql);
         $success = $statement->execute([
             input::post("recipient"),
             input::post("bank"),
             input::post("bank_no"),
             input::post("recipient_address"),
-            input::post("wsd_no"),
+            input::post("wsd_no")
         ]);
 
         $sql = "UPDATE CN SET  
@@ -681,7 +698,7 @@ class accModel extends model {
             input::post("bank"),
             input::post("bank_no"),
             input::post("recipient_address"),
-            input::post("cn_no"),
+            input::post("cn_no")
         ]);
 
     }
@@ -690,7 +707,7 @@ class accModel extends model {
         $sql = $this->prepare("SELECT 
                                 pvd_no as pv_no,
                                 pvd_date as pv_date,
-                                diff_total_sales_price as total_paid,
+                                sum_total_sales_no_vat as total_paid,
                                 slipName as receipt_name,
                                 cn_no
                                 
@@ -1698,72 +1715,68 @@ class accModel extends model {
         $sql = $this->prepare("UPDATE `Reimbursement_Request` SET confirmed='1' WHERE re_req_no =?");
         $sql->execute([ input::post('re_req_no')]);
         
-        // $pvItemsArray = json_decode(input::post('pvItems'), true); 
-        // $pvItemsArray = json_decode($pvItemsArray, true); 
-        
-        // $i = 1;
-        
-        // foreach($pvItemsArray as $pvItem) {
+      
             
-        //     $sql = $this->prepare("insert into PVPrinting (pv_no, sequence, file_date, debit, iv_no, rr_no, detail, paid_total, cancelled, note, vat)
-        //                             values (?, ?, ?, ?, ?, ?, ?, ?, 0, null, ?)");  
-        //     $sql->execute([
-        //         $pvno,
-        //         $i,
-        //         $pvItem['date'],
-        //         $pvItem['debit'],
-        //         $pvItem['iv_no'],
-        //         '',
-        //         $pvItem['detail'],
-        //         (double) $pvItem['total_paid'],
-        //         (double) $pvItem['vat']
-        //     ]);
+            $sql = $this->prepare("insert into PVPrinting (pv_no, sequence, file_date, debit,  detail, paid_total, cancelled, note, vat)
+                                    values (?, ?, ?, ?, ?, ?, ?, ?, 0, null, ?)");  
+            $sql->execute([
+                $pvno,
+                $i,
+                input::post('pv_date'),
+                input::post('debit'),
+                input::post('pv_detail'),
+                (double)   input::post('totalPaid'),
+                (double)   input::post('totalVat'),
+            ]);
             
-        //     // update status in WS
-        //     $sql = $this->prepare("update WS set pv_no = ?, status = 2 where form_no = ?");  
-        //     $sql->execute([$pvno, $pvItem['rr_no']]);
+            // update status in WS
+            // $sql = $this->prepare("update WS set pv_no = ?, status = 2 where form_no = ?");  
+            // $sql->execute([$pvno, $pvItem['rr_no']]);
             
-        //     $i++;
+            $i++;
             
             // insert AccountDetail sequence 3
             // Dr ค่าใช้จ่าย 
-		if ($pvItem['debit'] != NULL && $pvItem['debit'] != '' ){
+		if (input::post('debit') != NULL && input::post('debit') != '' ){
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-			$sql->execute([$pvno, 1, $pvItem['debit'], (double) $pvItem['total_paid']/1.07, 0, 'PVC']);
-		}
+			$sql->execute([$pvno, 1, input::post('debit'), (double)  input::post('totalPaid')/1.07, 0, 'PVC']);
+		
             
         //     // insert AccountDetail sequence 4
         //     // Dr ภาษีซื้อ - โครงการ X
 		if ($pvItem["vat_check"]=='1'){
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-			$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', ((double) $pvItem['total_paid'])*7/107, 0, 'PVC']);
+			$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', ((double)  input::post('totalPaid'))*7/107, 0, 'PVC']);
 		}
 
         //     // insert AccountDetail sequence 5
         //     // Cr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
              $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$pvno, 3, '23-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PVC']);
+            $sql->execute([$pvno, 3, '23-1'.$pvno[0].'00', 0, (double)  input::post('totalPaid'), 'PVC']);
             
         // insert AccountDetail sequence 1
         //     // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-             $sql->execute([$pvno, 1, '23-1'.$pvno[0].'00', (double) $pvItem['total_paid'], 0, 'PVC']);
+             $sql->execute([$pvno, 1, '23-1'.$pvno[0].'00', (double)  input::post('totalPaid'), 0, 'PVC']);
 
         //     // insert AccountDetail sequence 2
         //     // Cr เงินฝากออมทรัพย์ - โครงการ x
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-             $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double) $pvItem['total_paid'], 'PVC']);
+             $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double)  input::post('totalPaid'), 'PVC']);
             
-        // }
+        // }x
+           
         
-         return $pvno;
-    }   
-	
+        }   
+    
+    echo $sql->errorInfo()[0];
+    return $pvno;   
+}
 	// PV Module
     private function assignPv($type, $companyNo) {
         
@@ -2071,7 +2084,7 @@ class accModel extends model {
                 $sql->execute([$value,'3','22-1'.$value[0].'00',(double) $total_commission,0,'PVD']);
 
                  //sequence 4 PD
-                //cr ค่าคอมมิชชั่น 52-1x00
+                //cr ค่าคอมมิชชั่น 52-0x00
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                 $sql->execute([$value,'4','52-1'.$value[0].'00',0,(double) $total_commission,'PVD']);
@@ -2628,7 +2641,7 @@ class accModel extends model {
                 // Dr ค่า Commission
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value,'6','52-1'.$value[0].'00',(double) $total_commission,0,'CS']);
+                $sql->execute([$value,'6','52-0'.$value[0].'00',(double) $total_commission,0,'CS']);
 
                 // Cr ค่า Commission ค้างจ่าย
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)

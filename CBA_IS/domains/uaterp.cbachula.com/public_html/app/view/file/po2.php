@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController" ng-init="getDetail()">
         
-        <div class="row px-2 mt-2">
+        <!-- <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <div class="p-3" style="border:1px solid black;">
                     <h5 class="my-0"><b>Order : </b> {{detail[0].sox_no}}</h5>
@@ -17,7 +17,7 @@
                     <h6 class="mt-1 mb-0"><b>ราคารวม </b> {{detail[0].total_sales_price}}</h6>
                 </div>
             </div>
-        </div>  
+        </div>   -->
         
         <hr style="border-top: 1px dashed;">
         
@@ -40,9 +40,10 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
                     อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
-                    โทร. 0-2218-5746-9 โทรสาร. 0-2218-5762<br>
+                    โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
+			
                 </p>
             </div>
         </div>  

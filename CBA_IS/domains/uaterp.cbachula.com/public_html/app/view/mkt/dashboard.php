@@ -96,16 +96,16 @@
         <!-- PO -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         
-        <h4 class="mt-3 mb-0" id="po">Purchase Order</h4>
+        <h4 class="mt-3 mb-0" id="po">Purchase Order</h4> 
         
         <div class="row row-cols-1 row-cols-md-3 mt-2 p-0">
-            <div class="container col bg-white mx-0 mt-2 p-0 textDarkLight" ng-repeat="po in pos">
+            <div class="container col bg-white mx-0 mt-2 p-0 textDarkLight" ng-repeat="po in posMaster">
                 <a href="/file/po/{{po.po_no}}" target="_blank">
                 <div class="m-2 p-2" style="border:1px solid lightgray">
                     <h6 class="textLight" style="text-align:right;" ng-show="po.cancelled == 1"><span class="text-danger"><i class="fa fa-square" aria-hidden="true"></i></span> ยกเลิก</h6>
                     <h6 class="textLight" style="text-align:right;" ng-show="po.received == 0 && po.cancelled == 0"><span class="text-dark"><i class="fa fa-square" aria-hidden="true"></i></span> ยังไม่ได้รับของ ({{po.so_no}})</h6>
                     <h6 class="textLight" style="text-align:right;" ng-show="po.received == 1 && po.cancelled == 0"><span class="text-primary">
-                        <i class="fa fa-square" aria-hidden="true"></i></span> ได้รับของแล้ว ({{po.ci_no}}{{po.rr_no}} : {{po.so_no}})
+                        <i class="fa fa-square" aria-hidden="true"></i></span> ได้รับของแล้ว ({{po.ci_no}}{{po.rr_no}} : <div ng-repeat="poChild in pos | filter:{ po_no: po.po_no }">{{poChild.so_no}} &nbsp;</div>)
                     </h6>
                     <h4 class="my-0 blue"><b>{{po.po_no}}</b></h4>
                     <p class="my-0 textLight"><b>สร้างเมื่อ</b> {{po.po_date}}</p>
@@ -155,6 +155,15 @@
         
         $scope.pos = <?php echo $this->pos; ?>;
         $scope.css = <?php echo $this->css; ?>;
+
+        $scope.posMaster = [];
+        $scope.posMasterMaster = [];
+        angular.forEach( <?php echo $this->pos; ?>, function (value, key) { 
+            if(!$scope.posMasterMaster.includes(value.po_no)) {
+                $scope.posMasterMaster.push(value.po_no); 
+                $scope.posMaster.push(value); 
+            }
+        });
 
         $http.get('/mkt/dashboard/get_dashboard').then(function(response) {
             $scope.dashboards = response.data;

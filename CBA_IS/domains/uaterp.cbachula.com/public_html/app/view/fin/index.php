@@ -24,6 +24,7 @@
         <script>addModuleLink('finRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>
         <script>addModuleLink('finRow', '/mkt/pre_pvd', 'desktop', 'คำร้องขอใบลดหนี้ (PV-D)');</script>
         <script>addModuleLink('finRow', '/fin/pvc_process', 'desktop', 'Process PV-C');</script>
+        <script>addModuleLink('finRow', '/fin/bank_statement', 'cloud-upload', 'bank statement');</script>
         
     </div>
     

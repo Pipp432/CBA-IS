@@ -19,8 +19,8 @@ class hrController extends controller {
             $this->requirePostition("hr");
             $this->view->setTitle("Add Learning Point");
             $this->view->render("hr/add_point", "navbar"); 
-        } else if (uri::get(2) === 'get_employee_id') {
-            $this->positionEcho('hr', $this->model->getemployeeid());
+        } else if (uri::get(2) === 'post_point') {
+            $this->positionEcho('hr', $this->model->postPoint());
         } else if (uri::get(2) === 'post_edit_point') {
             $this->positionEcho('hr', $this->model->editPoint());
         }

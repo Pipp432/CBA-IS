@@ -13,6 +13,8 @@ class scmController extends controller {
         $this->requirePostition("scm");
         $this->err404();
     }
+
+    
     
     public function confirm_shipping() {
         if(empty(uri::get(2))) {
@@ -298,6 +300,7 @@ class scmController extends controller {
             echo '<tr>';
                 echo '<th>so_no</th>';
                 echo '<th>sox_no</th>';
+                echo '<th>box_size</th>';
                 echo '<th>iv_no</th>';
                 echo '<th>Product No.</th>';
                 echo '<th>Product Name.</th>';
@@ -308,6 +311,7 @@ class scmController extends controller {
                 echo '<tr>';
                     echo '<td>'.$value['so_no'].'</td>';
                     echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['box_size'].'</td>';
                     echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['product_no'].'</td>';
                     echo '<td>'.$value['product_name'].'</td>';
@@ -393,6 +397,47 @@ class scmController extends controller {
         }
     }
 
+    public function tracking_sheet() {
+        //$this->err404();
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("Tracking No. Update");
+            $this->view->render("scm/tracking_sheet", "navbar");
+        } else if (uri::get(2) == 'update_tracking_no') { 
+           $this->positionEcho('scm', $this->model->updateTrackingNo());
+        }
+    }
 
+    public function get_IRD_Load() {
+        
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=SOX no IRD.xls");
+        $data = $this->model->getIRDLoad();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>ird_no</th>';
+                echo '<th>sox_no</th>';
+                echo '<th>so_no</th>';
+                echo '<th>Product No.</th>';
+                echo '<th>Product Name.</th>';
+                echo '<th>Quantity</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['ird_no'].'</td>';
+                    echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['so_no'].'</td>';
+                    echo '<td>'.$value['product_no'].'</td>';
+                    echo '<td>'.$value['product_name'].'</td>';
+                    echo '<td>'.$value['quantity'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
 
 }

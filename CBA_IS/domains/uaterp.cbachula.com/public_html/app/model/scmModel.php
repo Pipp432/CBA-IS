@@ -969,9 +969,10 @@ class scmModel extends model {
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no
-        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no
-        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no
-        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1");
+        INNER JOIN Invoice ON Invoice.file_no=SO.so_no
+        INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no AND InvoicePrinting.product_no = Product.product_no
+        
+        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1;");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1093,9 +1094,9 @@ class scmModel extends model {
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
+		INNER JOIN Invoice ON Invoice.file_no=SO.so_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no 
-        INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no 
-        WHERE sox_status=1 AND SOX.done=0");
+        WHERE sox_status=1 AND SOX.done=0;");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();
@@ -1104,7 +1105,16 @@ class scmModel extends model {
     }
 
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no, Invoice.invoice_no, Product.product_no,Product.product_name , SOPrinting.quantity FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no INNER JOIN SO ON SOXPrinting.so_no=SO.so_no INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no INNER JOIN Product ON Product.product_no=SOPrinting.product_no INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no INNER JOIN Invoice ON Invoice.invoice_no=InvoicePrinting.invoice_no WHERE sox_status=1 AND SOX.done=0");
+        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no,SOX.box_size, Invoice.invoice_no, Product.product_no,Product.product_name , SOPrinting.quantity 
+        FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
+        INNER JOIN Invoice ON Invoice.file_no = SO.so_no
+        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no AND Invoice.invoice_no = InvoicePrinting.invoice_no
+        
+        WHERE sox_status=1 AND SOX.done=0;");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();
@@ -1227,5 +1237,27 @@ class scmModel extends model {
                echo "Hello";
            }
         }
+    
+    public function getIRDLoad(){
+        $sql=$this->prepare("SELECT IRDPrinting.ird_no, IRDPrinting.sox_no , IRDPrinting.so_no, Product.product_no, Product.product_name, SOPrinting.quantity 
+        FROM IRDPrinting 
+        INNER JOIN SO ON IRDPrinting.so_no = SO.so_no  
+        INNER JOIN SOPrinting ON SO.so_no = SOPrinting.so_no
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no;");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
+
+    public function updateTrackingNo() {
+        foreach($_POST["trackingNumArray"] as $value) {
+            $sql = $this->prepare("UPDATE SOX set tracking_number = ? WHERE sox_no = ?"); 
+            $sql->execute([$value[1],$value[0]]);
+        }
+
+        echo "yes";
+    }
 	
 }

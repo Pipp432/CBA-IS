@@ -102,7 +102,7 @@
 
                 <div class="row mx-0">
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label for="dropdownSupplier">Supplier</label>
 
@@ -138,9 +138,6 @@
 
                     </div>
 
-                  
-                    
-                    <br>
                     <div class="col-md-2">
 
                         <label for="buttonConfirmDetail" style="color:white;">.</label>
@@ -326,36 +323,35 @@
 						<tr ng-show="selectedProductType == 'Install'">
 							
 							<th style="text-align: right;" colspan="6">
-								<div class="custom-control">
-									<input type="radio" class="custom-control-input" id="payment0" name="payment" value="0" ng-click="getFee()">
-									<label class="custom-control-label" for="payment0">ชำระผ่าน Mobile Banking</label>
+								<div class="custom-control custom-checkbox">
+									<input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
+									<label class="custom-control-label" for="payment">ชำระผ่าน Mobile Banking</label>
 								</div>
 							
                             
-                                <div class="custom-control ">
-                                    <input type="radio" class="custom-control-input" id="payment1" name="payment" value="0" ng-click="getFee()">
-									<label class="custom-control-label" for="payment1">ชำระผ่าน Credit Card</label>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
+									<label class="custom-control-label" for="payment">ชำระผ่าน K+shop</label>
 								</div>
                             
                             
-                            <div class="custom-control">
-                                <input type="radio" class="custom-control-input" id="payment2" name="payment" value="0" ng-click="getFee()">
-								<label class="custom-control-label" for="payment2">ชำระผ่าน Facebook Pay</label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="payment" name="payment" value="0" ng-click="payment_check()">
+								<label class="custom-control-label" for="payment">ชำระผ่าน Facebook Pay</label>
 							</div>
 
                             </th>
-                        </tr>
-							<!-- <div class="custom-control custom-checkbox mt-2">
+							<!--<div class="custom-control custom-checkbox mt-2">
 								<input type="checkbox" class="custom-control-input" id="fin_form" name="fin_form" value="0" ng-click="fin_form_check()">
 								<label class="custom-control-label" for="fin_form">กรอกฟอร์มแล้ว</label>
-							</div> -->
-						
+							</div>-->
+						</tr>
 						
                         <tr>
 
                             <th style="text-align: right;" colspan="5">ราคารวม</th>
 
-                            <th style="text-align: right;">{{totalPrice + fee | number:2}}</th>
+                            <th style="text-align: right;">{{totalPrice | number:2}}</th>
 
                         </tr>
 
@@ -448,11 +444,6 @@
     th { border-bottom: 1px solid lightgray; text-align: center; }
 
 </style>
-<script>
-         addModal('installValidate', 'Sales Order', 'Please select a payment method');
-        
-         
-</script>
 
 
 
@@ -461,68 +452,18 @@
 
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
-        $scope.fee=0;
-        if($scope.selectedProductType==='Install'){
-            $scope.selected = false;
-        }
-        else{
-            $scope.selected = true;
-        }
-
-        
 		
-		// $scope.payment_check = function() {
-        //     if (document.getElementById('payment').checked==true){
-		// 			document.getElementById('payment').value = '1';
-		// 	}else if(document.getElementById('payment').checked==false){
-		// 			document.getElementById('payment').value = '0';
-		// 	}
-        //     //if (document.getElementById('payment_K').checked==true){
-		// 	//		document.getElementById('payment_K').value = '1';
-		// 	//}else if(document.getElementById('payment_K').checked==false){
-		// 	//		document.getElementById('payment_K').value = '0';
-		// 	//}
-        // }
-       
-       
-            
-
-        $scope.getFee = function(){
-          
-          
-            if($("#payment0").prop('checked')==true)
-            {
-                $scope.fee=0
-                $scope.selectedPaymentType = 'MB'
-                $scope.selected = true;
-
-               
-            }
-            else if($("#payment1").prop('checked')==true)
-            {
-                $scope.fee=$scope.totalPrice*(2.45/100)
-                $scope.selectedPaymentType = 'CC'
-                $scope.selected = true;
-               
-                
-            }
-            else if($("#payment2").prop('checked')==true)
-            {
-                $scope.fee=$scope.totalPrice*(2.75/100)
-                $scope.selectedPaymentType = 'FB'
-                $scope.selected = true;
-             
-              
-            }else{
-                $scope.fee=0;
-                $scope.selectedPaymentType = ''
-                $scope.selected = false;
-            }
-        
-
-            
-           
-            console.log($scope.fee)
+		$scope.payment_check = function() {
+            if (document.getElementById('payment').checked==true){
+					document.getElementById('payment').value = '1';
+			}else if(document.getElementById('payment').checked==false){
+					document.getElementById('payment').value = '0';
+			}
+            //if (document.getElementById('payment_K').checked==true){
+			//		document.getElementById('payment_K').value = '1';
+			//}else if(document.getElementById('payment_K').checked==false){
+			//		document.getElementById('payment_K').value = '0';
+			//}
         }
 
 
@@ -542,7 +483,7 @@
 
         $scope.showAfterSubmit = false;
 
-        $scope.selectedPaymentType='';
+        
 
         $scope.isEdit = true;
 
@@ -557,7 +498,7 @@
         
 
         $scope.allProducts = <?php echo $this->products; ?>;
-        
+
 
 
         $scope.addSeller = function() {
@@ -591,7 +532,9 @@
                 });
 
             } else {
+
                 $scope.seller_employee_name = '';
+
             }
 
         }
@@ -602,7 +545,7 @@
 
             if($scope.customer_tel.length === 10) {
 
-                $http.post('/mkt/os_sales_order/get_customer_name', 
+                $http.post('/mkt/sales_order/get_customer_name', 
 
                     JSON.stringify({customerTel : $scope.customer_tel})
 
@@ -906,10 +849,7 @@
 
                 $scope.finishEdit();
 
-            }else if(!$scope.selected){
-             $('#installValidate').modal('toggle');
-
-            }else {
+            } else {
 
                 console.log($scope.soItems);
 
@@ -936,12 +876,10 @@
                 sellerNo : $scope.seller_employee_id.toUpperCase(),
 
                 customerTel : $scope.customer_tel,
-                
-                address: $scope.address,
 
                 productType : $scope.selectedProductType,
 				
-				payment : 0 ,
+				payment : document.getElementById("payment").value,
 
                 vatType : $scope.vatType,
 
@@ -949,7 +887,7 @@
 
                 totalVat : $scope.totalVat,
 
-                totalPrice : ($scope.totalPrice+$scope.fee).round(),
+                totalPrice : $scope.totalPrice,
 
                 totalPoint : $scope.totalPoint,
 
@@ -957,9 +895,7 @@
 
                 discount : $scope.discount,
 
-                soItems : JSON.stringify(angular.toJson($scope.soItems)),
-                
-                paymentType: $scope.selectedPaymentType 
+                soItems : JSON.stringify(angular.toJson($scope.soItems))
 
             }, function(data) {
 

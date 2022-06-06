@@ -24,10 +24,10 @@
                                 </tr>
                                 <tr ng-repeat="pva in pvas | unique:'pv_no' | orderBy:'pv_no'"
                                     ng-show="pvas.length > 0">
-                                    <td>{{pva.pv_no}}</td>
-                                    <td>{{pva.total_paid | number:2}}</td>
-                                    <td>
-                                        <input id='{{pva.pv_no}}' type="file" class="form-control-file"
+                                    <td  ng-click="viewFilePVA(pva)">{{pva.pv_no}}</td>
+                                    <td  ng-click="viewFilePVA(pva)">{{pva.total_paid | number:2}}</td>
+                                    <td  ng-click="viewFilePVA(pva)">
+                                        <input id='{{pva.pv_no}}' type="file" class="form-control-file" ng-click="stopEvent($event)"
                                             name={{pva.pv_no}}>
                                     </td>
                                     <td style="text-align: right;">
@@ -43,7 +43,7 @@
 
 
 
-
+ 
 
 
 
@@ -63,6 +63,14 @@
         angular.forEach(<?php echo ($this -> pvas);?>, function (value, key) { 
             $scope.pvas.push(value); 
         });
+
+        $scope.stopEvent = function(e){
+            e.stopPropagation();
+        }
+        
+        $scope.viewFilePVA = function($dashboard) {
+            window.open('/file/pva/' + $dashboard.pv_no);
+        }
 
 
         $scope.upload_slip_pva = function ($pva) {

@@ -98,7 +98,16 @@ class mktController extends controller {
            echo $this->model->addSo();
         }
     }
-	
+	// public function os_sales_report() {
+    //     if(empty(uri::get(2))) {
+    //         $this->view->setTitle("Sales Report ");
+    //         $this->view->render("os/os_sales_report", "navbar");
+    //     } else if (uri::get(2)==='get_customer_name') {
+    //        echo $this->model->getCustomerName();
+    //     } else if (uri::get(2)==='post_so_items') {
+    //        echo $this->model->addSo();
+    //     }
+    // }
     
     public function commart() {
         if(empty(uri::get(2))) {
@@ -209,6 +218,12 @@ class mktController extends controller {
         else if (uri::get(2)==='get_all_soxs') {
             echo $this->model->getAllOSDashboardSox();
         }
+        else if (uri::get(2)==='get_os_soxs') {
+            echo $this->model->getOSDashboardSoxAll(uri::get(3));
+        }
+        else if (uri::get(2)==='get_all_os_soxs') {
+            echo $this->model->getAllAllOSDashboardSox();
+        }
     }
     
     public function sales_report() {
@@ -216,6 +231,61 @@ class mktController extends controller {
         header("Content-type: application/vnd.ms-excel; charset=UTF-8");
         header("Content-Disposition: attachment; filename=sales_report.xls");
         $data = $this->model->getSalesReport();
+        echo "\xEF\xBB\xBF";
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>so_no</th>';
+                echo '<th>so_week</th>';
+                echo '<th>so_date</th>';
+                echo '<th>so_time</th>';
+                echo '<th>product_line</th>';
+                echo '<th>product_no</th>';
+                echo '<th>product_name</th>';
+                echo '<th>category_name</th>';
+                echo '<th>sub_category</th>';
+                echo '<th>supplier_name</th>';
+                echo '<th>quantity</th>';
+                echo '<th>total_no_vat</th>';
+                echo '<th>total_sales</th>';
+                echo '<th>total_point</th>';
+                echo '<th>total_commission</th>';
+                echo '<th>margin</th>';
+                echo '<th>sp</th>';
+                echo '<th>ce</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['so_no'].'</td>';
+                    echo '<td>'.$value['so_week'].'</td>';
+                    echo '<td>'.$value['so_date'].'</td>';
+                    echo '<td>'.$value['so_time'].'</td>';
+                    echo '<td>'.$value['product_line'].'</td>';
+                    echo '<td>'.$value['product_no'].'</td>';
+                    echo '<td>'.$value['product_name'].'</td>';
+                    echo '<td>'.$value['category_name'].'</td>';
+                    echo '<td>'.$value['sub_category'].'</td>';
+                    echo '<td>'.$value['supplier_name'].'</td>';
+                    echo '<td>'.$value['quantity'].'</td>';
+                    echo '<td>'.$value['total_no_vat'].'</td>';
+                    echo '<td>'.$value['total_sales'].'</td>';
+                    echo '<td>'.$value['total_point'].'</td>';
+                    echo '<td>'.$value['total_commission'].'</td>';
+                    echo '<td>'.$value['margin'].'</td>';
+                    echo '<td>'.$value['sp'].'</td>';
+                    echo '<td>'.$value['ce'].'</td>';
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
+    public function os_sales_report() {
+        
+        header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=os_sales_report.xls");
+        $data = $this->model->getOSSalesReport();
         echo "\xEF\xBB\xBF";
         echo '<table style="width:100%">';
         
@@ -308,7 +378,47 @@ class mktController extends controller {
         echo '</table>';
         
     }
-    
+    public function os_point_report() {
+        
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filenameos_point_report.xls");
+        $data = $this->model->OSGetPointReport();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>date</th>';
+                echo '<th>sp</th>';
+                echo '<th>product_line</th>';
+                echo '<th>ce</th>';
+                echo '<th>point</th>';
+                echo '<th>remark</th>';
+                echo '<th>note</th>';
+				echo '<th>type</th>';
+				echo '<th>total_sales_no_vat</th>';
+				echo '<th>total_sales_vat</th>';
+                echo '<th>total_sales_price</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['date'].'</td>';
+                    echo '<td>'.$value['sp'].'</td>';
+                    echo '<td>'.$value['product_line'].'</td>';
+                    echo '<td>'.$value['ce'].'</td>';
+                    echo '<td>'.$value['point'].'</td>';
+                    echo '<td>'.$value['remark'].'</td>';
+                    echo '<td>'.$value['note'].'</td>';
+					echo '<td>'.$value['type'].'</td>';
+					echo '<td>'.$value['total_sales_no_vat'].'</td>';
+					echo '<td>'.$value['total_sales_vat'].'</td>';
+                    echo '<td>'.$value['total_sales_price'].'</td>';
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
     
     
     // public function championLeague_report() {

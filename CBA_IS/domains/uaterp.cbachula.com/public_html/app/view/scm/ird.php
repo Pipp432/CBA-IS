@@ -35,9 +35,9 @@
                         </tr>
     
                         <tr ng-repeat="sr in soxx | unique: 'sox_no'" ng-click="addIrdItem(sr)">
-                            <td >{{sr.sox_date}}</td>
+                            <td >{{sr.sox_datetime}}</td>
                             <td>{{sr.sox_no}}</td>
-							<td>{{sr.sox_type}}</td>
+							<td>{{sr.product_type}}</td>
 							<td>
 								<i class="fa fa-exclamation-circle" aria-hidden="true" ng-show="sr.special != null" style="color: red"></i>
 							</td>

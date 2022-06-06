@@ -80,6 +80,9 @@
             </div>
             <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="test()">test</button> -->
         </div>
+        <div class="row mx-0 mt-2">
+            <button type="button" class="btn btn-default btn-block my-1" ng-click="postCancel()"> ยกเลิกใบ EXD</button>
+        </div>
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SHOWING IVRC ITEMS -->
@@ -276,7 +279,7 @@
                 });
                 $scope.diff_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) / 1.07;
                 $scope.diff_total_sales_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : (parseFloat($scope.diff_total_sales_price) / 107) * 7;
-                $scope.new_total_sales_price = (parseFloat($scope.diff_total_sales_price) - $scope.total_amount2)*100/107 ;                            //////
+                $scope.new_total_sales_price = parseFloat((parseFloat($scope.diff_total_sales_price) - $scope.total_amount2)*100/107) ;                            //////
                 $scope.sum_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) * 1.07;
                 $scope.vat_total_sales_no_vat = Math.abs(parseFloat($scope.diff_total_sales_price) - parseFloat($scope.sum_total_sales_no_vat));                //old ver of จำนวนภาษีมูลค่าเพิ่ม
 
@@ -313,6 +316,21 @@
             }
             $scope.cnTotalPrice = $WSD.iv_total_sales_price;
         }
+
+        $scope.update = function($WSD) {
+            if(!$WSD.editing) {
+                $.post("/acc/credit_note/update_PVD", {
+                    post : true,
+                    wsd_no : $WSD.wsd_no,
+                    total_amount : $WSD.total_amount,
+                    note : $WSD.note,
+                }, function(data) {
+                    addModal('successModalupdate', 'ใบลดหนี้ / Credit Note', 'update ' + $WSD.wsd_no + ' update ' +  data);
+                    $('#successModalupdate').modal('toggle');
+                });
+            }
+        }
+
 
 
         $scope.updateCN = function(x) {
@@ -379,7 +397,7 @@
                 vat_total_sales_no_vat : $scope.vat_total_sales_no_vat2,
                 sum_total_sales_no_vat : $scope.sum_total_sales_no_vat2,
 
-                new_sales_price_thai : NumToThai(parseFloat($scope.sum_total_sales_no_vat)),
+                new_sales_price_thai : NumToThai(parseFloat($scope.sum_total_sales_no_vat2)),
                 total_commission : $scope.total_commission,
 
                 totalPurchasePrice : $scope.totalPurchasePrice,
@@ -402,6 +420,24 @@
                 });
                 // console.log();
             });
+        }
+
+        $scope.postCancel = function() {
+            $('#confirmModal').modal('hide');
+                var result = confirm("Are you sure to delete?");
+            if(result){
+                    $.post("/acc/credit_note/post_cancel", { 
+                    post : true,
+                    wsd_no : $scope.wsdNo,
+                }, function(data) {
+                    addModal('successModal', 'ยกเลิก EXD ', ' ยกเลิก ' + $scope.wsdNo.toUpperCase() + data );
+                    $('#successModal').modal('toggle');
+                    $('#successModal').on('hide.bs.modal', function (e) {
+                        window.location.reload();
+                    });
+                    // console.log();
+                });
+            }
         }
 
   	});

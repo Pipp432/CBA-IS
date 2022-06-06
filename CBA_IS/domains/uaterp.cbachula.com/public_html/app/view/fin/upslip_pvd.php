@@ -22,7 +22,7 @@
 					<tr ng-repeat="pvd in pvds | unique:'pvd_no'">
 						<td style="text-align: center;">{{pvd.pvd_no}}</td>
 						<td style="text-align: center;">{{pvd.pvd_date}}</td>
-                        <td style="text-align: center;">{{pvd.diff_total_sales_price}}</td>
+                        <td style="text-align: center;">{{pvd.sum_total_sales_no_vat}}</td>
                         <td style="text-align: center;">{{pvd.bank_no}} <br> {{pvd.bank}}</td>
                         <td style="text-align: center;">{{pvd.recipient}}</td>
                         <td style="text-align: center;">

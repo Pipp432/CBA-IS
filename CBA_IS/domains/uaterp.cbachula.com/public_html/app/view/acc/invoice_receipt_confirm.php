@@ -293,12 +293,12 @@
             if(type == 'DR'){
                 if($scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
                     $scope.CR = firstChar[$scope.DR.charAt(0)] + "1-1"+$scope.DR.charAt(4)+"00";
-                }
+                } else $scope.CR = "";
             }
             if(type == 'CR'){
                 if($scope.CR.length == 7&&($scope.CR.charAt(0) == 5||$scope.CR.charAt(0) == 6) && $scope.CR.substring(1, 4) == "1-1" && $scope.CR.substring(5, 7) == "00"){
                     $scope.DR = firstChar[$scope.CR.charAt(0)] + "1-1"+$scope.CR.charAt(4)+"00";
-                }
+                } else $scope.DR = "";
             }
         }
         
@@ -336,7 +336,7 @@
                             filename = filename.substring(1);
                         }
                         formData.append('iv', filename);
-                    }
+                    } else formData.append('iv', "none");
                 } else formData.append('iv', $scope.iv);
                 
                 formData.append('bill_no', $scope.bill_no);
@@ -344,7 +344,6 @@
                 formData.append('tax_reduce_no', $scope.tax_reduce_no);
                 formData.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
                 formData.append('ivrcDate', ivrcDateStr);
-                firstChar = {5:6,6:5}; //used to check if inputted dr
                 if($scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
                     formData.append('DR',$scope.DR);
                 } else formData.append('DR',false); 
@@ -352,7 +351,6 @@
                 formData.append('CR',$scope.CR);
                
                 
-                // !! Async jQuery method
                 $.ajax({ 
                     url: '/acc/invoice_receipt_confirm/post_ivrc',  
                     data: formData,
@@ -361,23 +359,23 @@
                     processData: false,
                     method: 'POST',
                     type: 'POST',
-                    // Success so modal pop up
                 }).done(function (data) {
-                    // addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', 'บันทึกการวางบิลเรียบร้อยแล้ว(DONE)');
-                    //console.log(data);
                     addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', data);
-                        $('#successModal').modal('toggle');
-                        $('#successModal').on('hide.bs.modal', function (e) {
-                        });
+                    $('#successModal').modal('toggle');
+                    $('#successModal').on('hide.bs.modal', function (e) {
+                        location.assign("/");
+                    });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.log('ajax.fail');
                     addModal('uploadFailModal', 'upload fail', 'fail');
                     $('#uploadFailModal').modal('toggle');
+                    $('#uploadFailModal').on('hide.bs.modal', function (e) {
+                            location.assign("/");
+                    });
                 });
                 
             }
-          
-            //db name = ivpc_file
+        
             
         }
 

@@ -430,4 +430,14 @@ foreach ($list as $value) {
             $this->view->render("fin/pvc_process","navbar"); 
     }
     }
+
+    public function bank_statement(){
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+           
+            $this->view->render("fin/bank_statement","navbar"); 
+        } else if(uri::get(2) == "post_bank_statement") {
+            echo $this->model->postBankStatement();
+        }
+    }
 }

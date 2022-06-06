@@ -13,7 +13,7 @@
                 <div class="form-row">
                     <div class="col-md-4">
                         <label for="soxNo">SOX</label>
-                        <input ng-model='sox_no' type="text" class="form-control mb-2" id="soxNo">
+                        <input ng-model='sox_no' type="text" class="form-control mb-2" placeholder="SOX-xxxxx" id="soxNo">
                     </div>
                     <div class="col-md-4">
                         <label for="totalAmount">จำนวนเงิน</label>

@@ -420,7 +420,7 @@
                     <tr ng-repeat = "PVD in PVDs | unique:'cn_no'  | filter:{cn_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
                         <td class = "center_cell">{{PVD.cn_no}}</td>
                         <td class = "center_cell">{{PVD.employee_id}}</td>
-                        <td class = "center_cell">{{PVD.diff_total_sales_price}}</td>
+                        <td class = "center_cell">{{PVD.sum_total_sales_no_vat}}</td>
                         <td class = "center_cell">{{PVD.vat_id}}</td>
                         <td class = "center_cell">{{PVD.sox_no}}</td>
                         <td class = "center_cell">{{PVD.invoice_no}}</td>
@@ -432,7 +432,7 @@
                     <tr ng-show = "selected_PVD.length != 0">
                         <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.cn_no}}</td>
                         <td class = "center_cell">{{selected_PVD.employee_id}}</td>
-                        <td class = "center_cell">{{selected_PVD.diff_total_sales_price}}</td>
+                        <td class = "center_cell">{{selected_PVD.sum_total_sales_no_vat}}</td>
                         <td class = "center_cell">{{selected_PVD.vat_id}}</td>
                         <td class = "center_cell">{{selected_PVD.sox_no}}</td>
                         <td class = "center_cell">{{selected_PVD.invoice_no}}</td>
@@ -471,11 +471,11 @@
                     </div>
                     <div class="row mx-0">
                         <div class="col-md-4">
-                            <label for="bankPVD">ธนาคาร</label>
+                            <label for="bankPVD">ธนาคารและสาขา</label>
                             <input type="text" class="form-control" id="bankPVD" ng-model="selected_PVD.bank" ng-disabled="!selected_PVD.editing">
                         </div>
                         <div class="col-md-4">
-                            <label for="bankNoPVD">เลขธนาคาร</label>
+                            <label for="bankNoPVD">เลขที่บัญชี</label>
                             <input type="text" class="form-control" id="bankNoPVD" ng-model="selected_PVD.bank_no" ng-disabled="!selected_PVD.editing">
                         </div>   
                     </div>  
@@ -746,7 +746,7 @@
                     $scope.ReReqs = response.data;
                      $scope.pvItem = $scope.ReReqs ;
                      $scope.pvItems = $scope.ReReqs;$scope.isLoad = false;
-                     console.log($scope.ReReqs)});
+                     console.log($scope.ReReqs.debit)});
                 
                 
             } else if($scope.selectedPaymentType==='PD') {
@@ -834,8 +834,12 @@
                     cn_no : $scope.selected_PVD.cn_no,
                     company_code : $scope.selected_PVD.company_code,
                     vat_id : $scope.selected_PVD.vat_id,
-                    diff_total_sales_price : $scope.selected_PVD.diff_total_sales_price,
+                    sum_total_sales_no_vat : $scope.selected_PVD.sum_total_sales_no_vat,
                     note : $scope.selected_PVD.note,
+                    recipient : $scope.selected_PVD.recipient,
+                    bank : $scope.selected_PVD.bank,
+                    bank_no : $scope.selected_PVD.bank_no,
+                    recipient_address : $scope.selected_PVD.recipient_address,     
                     wsd_no : $scope.selected_PVD.wsd_no
                 }, function(data) {
                     addModal('pvdUpdateSuccessModalupdate', 'PV-D', 'insert ' + $scope.selected_PVD.cn_no.toUpperCase() +  data);
@@ -958,7 +962,7 @@
                     }).done(function(data,status){
                         console.log(data)
                         console.log(status)
-                        window.location.reload();
+                        // window.location.reload();
 
                         
                     }).fail(function(e){
@@ -1099,7 +1103,9 @@
                         bankBookName:$scope.pvItems["bank_book_name"],
                         bankBookNumber:$scope.pvItems["bank_book_number"],
                         bankName:$scope.pvItems["bank_name"],
-                        company_code:"3"
+                        company_code:"3",
+                        pvItems:$scope.pvItems,
+                        debit:$scope.pvItemDebit
                     }, function(data) {
                         console.log(JSON.stringify(angular.toJson($scope.pvItems)))
                         console.log(data)
@@ -1147,6 +1153,7 @@
             $scope.JSONdetails =JSON.parse($scope.pvItems['details'])
             console.log( $scope.JSONdetails)
             
+            
             const input_date = document.getElementById("pvItemDate");
             // console.log(input_date.value);
 
@@ -1161,7 +1168,9 @@
             $scope.pvItemDate = new Date($scope.pvDetails[0].authorize_date)
             $scope.pvName = $scope.pvDetails[0].pv_name
             $scope.pvAddress = $scope.pvDetails[0].pv_address
-            
+      
+      
+          
             
         });
         ($scope.JSONdetails).forEach(entry=>{
@@ -1172,7 +1181,10 @@
             $scope.totalVat =$scope.total_tax
             console.log($scope.totalPaid);
 
-            
+           
+            console.log($scope.pvItemDebit)
+            $scope.pvItems["debit"] = $scope.pvItemDebit
+            console.log($scope.pvItems["debit"])
          
             
         }
