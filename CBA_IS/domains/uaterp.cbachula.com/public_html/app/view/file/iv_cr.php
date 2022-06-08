@@ -30,7 +30,7 @@
     <button id="hide" type="button" class="btn btn-secondary" onclick="Hide()">Hide</button>
     <button id="PrintMode" type="button" class="btn btn-primary" onclick="Toggle()">Toggle Print Mode</button>
 </div>-->
-<div id="printing" onclick="Show()">
+<div id="printing">
     <div class="container mt-3" ng-controller="moduleAppController" ng-init="getDetail()">
 
         <div class="row px-2 mt-2">
@@ -240,15 +240,12 @@
 </style>
 
 <script>
-    
     app.controller('moduleAppController', function($scope) {
         
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
             $scope.customer_title = $scope.detail[0].customer_title;
-            console.log($scope.detail)
             $scope.hasTransportation = false;
-            
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
@@ -261,39 +258,24 @@
             }
             if(Number($scope.detail[0]["transportation_price"])>0)  $scope.hasTransportation = true;
             
+            if($scope.detail[0]["payment_type"] =="CC"){
+                $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
+                $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;  
+            }
+            else if($scope.detail[0]["payment_type"] =='FB'){
+                $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
+                $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+            }else{
+                $scope.creditCardFee =0;
+                $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+            }
             
-            // console.log( $scope.detail[0].customer_name.substring(0,6))
-            // console.log( $scope.customer_title)
-            
-           
-                if($scope.detail[0]["payment_type"] =="CC"){
-                    
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
-                   
-                }
-                else if($scope.detail[0]["payment_type"] =='FB'){
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
-                  
-                }else{
-                    $scope.creditCardFee =0;
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
-                   
-                }
-                // console.log($scope.creditCardFee)
-            
-          
-                if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
-                if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
-                if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
-                if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
-                if($scope.customer_title === null) $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
+            if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
+            if($scope.customer_title === null) $scope.customer_title = "";
 
-               $scope.final = Number($scope.detail[0].invoice_total_purchase_vat)+$scope.creditCardFee;
-               $scope.difference = Math.round(Number($scope.detail[0].invoice_total_sales_price)) - Number($scope.detail[0].invoice_total_sales_price);
-            //   console.log($scope.difference)
-              console.log($scope.detail[0].invoice_total_sales_price )
         }
       
         

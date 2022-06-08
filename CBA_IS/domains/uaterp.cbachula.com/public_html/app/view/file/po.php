@@ -120,6 +120,7 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->po; ?>;
+            console.log($scope.detail)
             $scope.company = $scope.detail[0].po_no.substring(0,1);
         }
     });

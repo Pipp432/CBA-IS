@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
 </head>
 
+
 <body>
 
     <div class="container mt-3" ng-controller="moduleAppController">
@@ -33,7 +34,7 @@
                             <th>ลูกค้า</th>
 							<th>Payment Date</th>
 							<th>Payment Time</th>
-                            <th>VAT</th>
+                            <th>tax</th>
 							<th>Payment Amount</th>
                             <th>ราคารวม</th>
                             <th>payment method</th>
@@ -49,8 +50,8 @@
                             <td>{{sox.customer_name}} {{sox.customer_surname}}</td>
 							<td style="text-align: center">{{sox.payment_date==null ? getDate(sox):sox.payment_date}}</td>
 							<td style="text-align: center">{{sox.payment_time==null ? getTime(sox):sox.payment_time}}</td>
-                            <td style="text-align: center">{{sox.so_total_sales_vat}}</td>
-							<td style="text-align: center">{{sox.sox_sales_price - sox.so_total_sales_vat | number:2}}</td>
+							<td style="text-align: center">{{sox.so_total_sales_vat | number:2}}</td>
+                            <td style="text-align: center">{{sox.payment_amount | number:2}}</td>
                             
                             <td style="text-align: right;">
                                 {{sox.sox_sales_price | number:2}}<br>
@@ -280,6 +281,7 @@
                     
                 }
             });
+            console.log($scope.crItems)
 
         //    $scope.crItems.map((x)=>console.log(x.product_name))
             $scope.calculateCrItem(sox);
@@ -390,6 +392,7 @@
                 }
                 $scope.new_total_price = parseFloat(sox.total_sales) + $scope.card_fee;
             }
+            console.log((parseFloat(sox.total_sales)*2.45)/100)
 
             
 
@@ -426,8 +429,9 @@
         }
         
         $scope.postIvCr = function() {
-            
+
             $('#confirmModal').modal('hide');
+            console.log("Hello")
                                   
             // var transferDateStr = $scope.TransferTime.getFullYear() + '-' + 
             //                         (($scope.TransferTime.getMonth()+1) < 10 ? '0' : '') + ($scope.TransferTime.getMonth()+1) + '-' + 
@@ -453,6 +457,7 @@
                 payment_type:$scope.crItems[0].payment_type,
                 total_sales_no_vat:$scope.crItems[0].so_total_sales_no_vat
             }, function(data) {
+                console.log("Hello")
                 console.log(`Return statement: ${data}`);
                 addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);
                 console.log(data);
@@ -462,8 +467,12 @@
                     location.reload();
                     // window.location.assign('/');
                 });           
+            }).done(()=>{console.log("DONE")}).fail(function(a,b,c){
+                console.log(a)
+                console.log(b)
+                console.log(c)
             }); 
-            
+            console.log("Hello")
         }
         
     });

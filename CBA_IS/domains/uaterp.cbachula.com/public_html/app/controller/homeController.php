@@ -24,6 +24,7 @@ class homeController extends controller {
         } else if (uri::get(2)==='get') {
             echo $this->model->getUsernamePassword();
         }
+        
     }
     
     public function add_customer() {
@@ -32,6 +33,9 @@ class homeController extends controller {
             $this->view->render("home/add_customer", "navbar");
         } else if (uri::get(2)==='post_customer') {
             echo $this->model->addCustomer();
+        }
+        else if (uri::get(2)==='get_all') {
+            echo $this->model->getAll();
         }
     }
     

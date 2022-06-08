@@ -7,7 +7,10 @@ use _core\helper\session;
 use _core\helper\input;
 use PDO;
 
+
 class finModel extends model {
+
+   
     // CR Module
     public function getSoxsForCr() {
         $sql = $this->prepare("select 
@@ -59,7 +62,7 @@ class finModel extends model {
                                 left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
                                 SOX.payment_time=Bank_Statement.payment_time and 
                                 SOX.payment_amount=Bank_Statement.payment_amount
-                                where SOX.done = -1 and SOX.cancelled = 0 and (SO.payment = 0 or SO.payment is null) order by SOX.slip_datetime");  
+                                where SOX.done = -1 and SOX.cancelled = 0 and (SO.payment = 0 or SO.payment is null) and SOX.slip_name is not null order by SOX.slip_datetime");  
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -502,10 +505,11 @@ class finModel extends model {
         $cr_no = "";
         
         foreach($crItemsArray as $value) {
-            
+           
             if (array_key_exists($value['so_no'], $soList)) {
                 
                 $iv_no = $soList[$value['so_no']];
+                
                 
             } else {
                   
@@ -567,6 +571,7 @@ class finModel extends model {
                     input::post('payment_type')
                 ]); 
                 $check = $sql->errorInfo()[0];
+                
 
 				if($check == '00000') {
                 //$text = $this->Convert($total_sales_price);
@@ -587,6 +592,7 @@ class finModel extends model {
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     $value['priceInThai']
                 ]);
+               
 
                 // insert commission log
                 $sql = $this->prepare("insert into CommissionLog (cr_no, date, employee_id, commission, cancelled)
@@ -597,128 +603,9 @@ class finModel extends model {
                     $value['employee_id'],
                     (double)$commission
                 ]);
+               
 					
-				//echo 'before';
-
-                // if(is_numeric($value['employee_id'])) {
-					
-				// 	//echo 'after isnumeric';
-                    
-                //     // Archery (week5)
-                //     // $this->updateSalesPro5($value['so_no'], $total_sales_price, $value['employee_id']);
-                    
-                //     $sql = $this->prepare("select so_date as SO_date from SO where so_no = ?");
-                //     $sql->execute([$value['so_no']]);
-                //     $CheckSoDate = $sql->fetchAll()[0]['SO_date'];
-					
-				// 	//echo 'check date';
-					
-				// 	$sql = $this->prepare("select so_time as SO_time from SO where so_no = ?");
-                //     $sql->execute([$value['so_no']]);
-                //     $CheckSoTime = $sql->fetchAll()[0]['SO_time'];
-					
-				// 	//echo 'check time';
-                    
-                //     //$sql = $this->prepare("select point as goody_point from goody_point_log where datetime = ? and employee_id = ?");
-                //     //$sql->execute([$CheckSoDate, $value['employee_id']]);
-                //     //$CheckGoody = $sql->fetchAll()[0]['goody_point'];
-                //     //
-                //     //// Goody Point
-                //     //if($CheckGoody == 0) {
-                //     //    $this->updatePointGoody($value['so_no'], $value['employee_id']);
-                //     //}
-                    
-                //     //Pro Week 7-8
-                //      if (($CheckSoDate == '2021-07-12' && $CheckSoTime >= '14:00:00') || $CheckSoDate == '2021-07-13' || $CheckSoDate == '2021-07-14' || 
-                //          $CheckSoDate == '2021-07-15' || $CheckSoDate == '2021-07-16' || $CheckSoDate == '2021-07-17' || 
-				// 		 $CheckSoDate == '2021-07-19' || $CheckSoDate == '2021-07-20' || $CheckSoDate == '2021-07-21' || 
-                //          $CheckSoDate == '2021-07-22' || $CheckSoDate == '2021-07-23' || $CheckSoDate == '2021-07-24') {
-						 
-				// 		 // check range
-				// 		 $sql = $this->prepare("select lp_range from CboinRange where employee_id = ?");
-                //          $sql->execute([$value['employee_id']]);
-				// 		 $range = $sql->fetchAll()[0]['lp_range'];
-				// 		 //echo ' range ='.$range;
-						 
-				// 		 // check จำนวครั้งที่เคยได้ c-boin จากการขาย
-				// 		 $sql = $this->prepare("select sum(cboin) as count from CboinLog where remark = ? and cancelled = 0 and employee_id = ?");
-				// 		 $sql->execute(['Sales - Range '.$range, $value['employee_id']]);
-				// 		 $count = $sql->fetchAll()[0]['count'];
-				// 		 //echo ' count ='.$count;
-						 
-				// 		 if ($count < 90) {
-							 
-				// 			 // check ยอดจาด iv ทั้งหมดที่เคยขา รวมปัจจุบันด้วย
-				// 			 $sql = $this->prepare("select ifnull(sum(Invoice.total_sales_price),0) as TotalSold from Invoice 
-				// 									INNER JOIN SO on SO.so_no = Invoice.file_no
-				// 									where Invoice.employee_id = ? and Invoice.cancelled = 0 and file_type = 'SO' and SO.cancelled = 0 
-				// 									AND ((so_date = '2021-07-12' and so_time >= '14:00:00') 
-				// 											OR (so_date between '2021-07-13' AND '2021-07-17') 
-				// 											OR (so_date between '2021-07-19' AND '2021-07-24'))");
-				// 			 $sql->execute([$value['employee_id']]);
-				// 			 $totalSold = $sql->fetchAll()[0]['TotalSold'];
-				// 			 //echo ' total sold ='.$totalSold;
-							 
-				// 			 // ดูยอดที่ต้องทำได้ต่อ 30 c-boin ของแต่ละ range
-				// 			 $targetSales = 0;
-				// 			 if ($range == '1') {
-				// 				 $targetSales = 1000;
-				// 			 }
-				// 			 else if ($range == '2') {
-				// 				 $targetSales = 1500;
-				// 			 }
-				// 			 else {
-				// 				 $targetSales = 3000;
-				// 			 }
-							 
-				// 			 //echo ' target sales ='.$targetSales;
-							 
-				// 			 //จำนวนครั้งที่ได้แต้มไปแล้ว
-				// 			 $times=$count;
-							 
-				// 			 //ยอดที่เคยขายและได้แต้มไปแล้ว
-				// 			 $sold=$times*$targetSales;
-							 
-				// 			 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม
-				// 			 $new_total=$totalSold-$sold;
-							 
-				// 			 //ยอดที่ขายไป (รวมล่าสุด) ที่ยังไม่เคยได้แต้ม  หารด้วย ยอดต่อการได้แต้ม 1 ครั้ง
-				// 			 $p_times=intdiv($new_total,$targetSales);
-							 
-				// 			 // set จำนวนครั้งที่คูณแต้ม ตามจำนวน max
-				// 			 $new_p_times = 3 - $count;
-				// 			 if ($p_times > $new_p_times){
-				// 				 $p_times = $new_p_times;
-				// 			 }
-							 
-							 
-				// 			 $extraPoint = ($p_times >= 1) ? $p_times*30: 0;
-							 
-				// 			 if ($extraPoint > 0) {
-				// 				 $sql = $this->prepare("insert into CboinLog (date, time, employee_id, cboin, remark, note, cancelled)
-				// 			 						values(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 0)");
-				// 				 $sql->execute([$value['employee_id'], $extraPoint, 'Sales - Range '.$range, $iv_no]);
-				// 			 }
-							 
-				// 			 //echo ' inserted ja!';
-							 
-							 
-							 
-				// 		 }
-						 
-						 
-						 
-                //      }
-                    
-                     
-                    
-                // }
-                
-                // ============================================================================================================================================================
-                // NEW CBA2020 ACC
-                
-                // insert AccountDetail sequence 1
-                // Dr เงินฝากธนาคาร
+			
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                 $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
@@ -737,6 +624,7 @@ class finModel extends model {
                 
                 // ============================================================================================================================================================
                 // END CBA2020 ACC
+               
                 } else {
             
             	echo 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่ กรุณาแคปหน้าเจอให้กับทางทีม IS ขออภัยในความไม่สะดวก';
@@ -775,6 +663,7 @@ class finModel extends model {
                 (double) $value['total_sales'],
                 $rr_no 
             ]);
+           
                      
             }
             
@@ -797,9 +686,11 @@ class finModel extends model {
                 }
                 else $cutStock = $accumStock;
 
+               
                 $sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) 
                                         values (?, ?, 'IV', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL, ?)");
-                $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]);     
+                $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]);
+                  
                 
             // insert InvoicePrinting for Stock
                 if  ($value['product_type'] == 'Stock') {
@@ -817,10 +708,12 @@ class finModel extends model {
                 ]);
                      
                 }
+               
             
                 $accumStock = $accumStock - $cutStock;
             
             }
+            
             
         }
         return $cr_no;

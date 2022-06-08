@@ -54,9 +54,9 @@
                     
                     var spanText = '';
                     if(sos[i].cancelled == 1) spanText = '<span class="text-danger"><i class="fa fa-square" aria-hidden="true"></i></span> ยกเลิก</h6>';
-                    else if(sos[i].invoice_no == null && sos[i].cancelled == 0) spanText = '<span class="text-dark"><i class="fa fa-square" aria-hidden="true"></i></span> ยังไม่ชำระเงิน</h6>';
-                    else if(sos[i].invoice_no != null && sos[i].cancelled == 0) spanText = '<span class="text-primary"><i class="fa fa-square" aria-hidden="true"></i></span> ชำระเงินแล้ว</h6>';
-                    
+                    else if(sos[i].invoice_no == null && sos[i].cancelled == 0 && sos[i].slip_name == null) spanText = '<span class="text-dark"><i class="fa fa-square" aria-hidden="true"></i></span> ยังไม่ชำระเงิน</h6>';
+                    else if(sos[i].invoice_no == null && sos[i].cancelled == 0 && sos[i].slip_name != null) spanText = '<span class="text-primary"><i class="fa fa-square" aria-hidden="true"></i></span> กำลังตรวจสลิป</h6>';
+                    else if(sos[i].invoice_no != null && sos[i].cancelled == 0 && sos[i].slip_name != null) spanText = '<span class="text-primary"><i class="fa fa-square" aria-hidden="true"></i></span> ชำระเงินแล้ว</h6>';
                     var discountText = '';
                     if(sos[i].discountso != 0) discountText =  '<h6 class="my-0 textLight2" style="text-align:right;"><b>ราคา</b> ฿' + sos[i].total_sales_price + '</h6> \
                                                                 <h6 class="my-0 textLight2" style="text-align:right;"><b>ส่วนลด</b> -฿' + sos[i].discountso + '</h6>';

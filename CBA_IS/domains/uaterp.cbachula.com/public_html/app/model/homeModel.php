@@ -53,5 +53,14 @@ class homeModel extends model {
 		}
 		return [];
 	}
+        public function getAll(){
+                $sql = $this->prepare("SELECT Customer.customer_tel, Customer.address from Customer where 1");
+                $sql->execute();
+		if ( $sql->rowCount() > 0 ) {
+                        return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+		}
+                echo $sql->errorInfo()[0] ;
+		return $sql->errorInfo()[0] ;
+        }
 
 }

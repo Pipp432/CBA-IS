@@ -949,7 +949,7 @@
 
                 totalVat : $scope.totalVat,
 
-                totalPrice : ($scope.totalPrice+$scope.fee).round(),
+                totalPrice : ($scope.totalPrice+$scope.fee),
 
                 totalPoint : $scope.totalPoint,
 

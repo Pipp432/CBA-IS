@@ -56,5 +56,6 @@ class model extends database {
         }
        echo "Hello";
     }
+   
 
 }
