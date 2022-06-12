@@ -15,7 +15,9 @@
         <script>addModuleLink('scmRow', '/scm/get_address', 'arrow-circle-o-down', 'Address');</script>
         <script>addModuleLink('scmRow', '/scm/ird', 'cube', 'IRD');</script>
         <script>addModuleLink('scmRow', '/scm/upload_ird', 'cloud-upload', 'Upload IRD');</script>
-        <script>addModuleLink('scmRow', 'https://docs.google.com/spreadsheets/d/15c4u8HrThVLeCzJyKs_q_SpcQjDOnV8SnbZU62UOo78/edit#gid=0', 'table', 'Tracking Sheet');</script>
+        <script>addModuleLink('scmRow', '/scm/get_IRD_Load', 'arrow-circle-o-down', 'Download Report IRD');</script>
+        <!-- <script>addModuleLink('scmRow', 'https://docs.google.com/spreadsheets/d/15c4u8HrThVLeCzJyKs_q_SpcQjDOnV8SnbZU62UOo78/edit#gid=0', 'table', 'Tracking Sheet');</script> -->
+        <script>addModuleLink('scmRow', '/scm/tracking_sheet', 'table', 'Update Tracking Number');</script>
         <script>addModuleLink('scmRow', '/scm/confirm_shipping', 'truck', 'Confirm Shipping');</script>
         <script>addModuleLink('scmRow', '/scm/check_stock', 'slack', 'Check Stock');</script>
         <script>addModuleLink('scmRow', '/scm/dashboard2', 'folder-open-o', 'Dashboard IRD');</script>

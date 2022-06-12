@@ -931,7 +931,16 @@ class scmModel extends model {
     //ปุ่มยืนยัน-ช่องบน
     public function download_sox(){
         //$sql=$this->prepare("SELECT * FROM SOX WHERE SOX.done=0");
-        $sql=$this->prepare("SELECT * FROM SOX 
+        $sql=$this->prepare("SELECT SOX.sox_datetime,
+        SOX.sox_no,
+        Product.product_type as sox_type,
+        Invoice.invoice_no,
+        SOX.box_size,
+        SOX.note,
+        SO.so_no,
+        Product.product_no,
+        Product.product_name,
+        SOPrinting.quantity FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
@@ -964,7 +973,16 @@ class scmModel extends model {
     }
     //ปุ่มird-ช่องบน
     public function get_status(){
-        $sql=$this->prepare("SELECT * FROM SOX 
+        $sql=$this->prepare("SELECT SOX.sox_datetime,
+        SOX.sox_no,
+        Product.product_type,
+        Invoice.invoice_no,
+        SOX.box_size,
+        SOX.note,
+        SO.so_no,
+        Product.product_no,
+        Product.product_name, 
+        SOPrinting.quantity  FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no
@@ -1088,6 +1106,7 @@ class scmModel extends model {
     return [];
   }
 	
+ 
     public function getAddress(){
         $sql=$this->prepare("SELECT distinct SOX.sox_no,Invoice.invoice_no,SOX.note,Invoice.customer_name,SOX.address,SOX.customer_tel 
         FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
@@ -1096,7 +1115,7 @@ class scmModel extends model {
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
 		INNER JOIN Invoice ON Invoice.file_no=SO.so_no
         INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no 
-        WHERE sox_status=1 AND SOX.done=0;");
+        WHERE sox_status=1 AND SOX.done=0");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();
@@ -1104,17 +1123,19 @@ class scmModel extends model {
         return [];
     }
 
+     //เวอชั่นถูกค่ะ ver 10
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no,SOX.box_size, Invoice.invoice_no, Product.product_no,Product.product_name , SOPrinting.quantity 
+        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no,SOX.box_size, Invoice.invoice_no, SOPrinting.product_no,Product.product_name , SOPrinting.quantity 
         FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
         INNER JOIN Invoice ON Invoice.file_no = SO.so_no
-        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no AND Invoice.invoice_no = InvoicePrinting.invoice_no
-        
-        WHERE sox_status=1 AND SOX.done=0;");
+        INNER JOIN InvoicePrinting ON Invoice.invoice_no = InvoicePrinting.invoice_no AND SOPrinting.product_no = InvoicePrinting.product_no
+        WHERE sox_status=1 AND SOX.done=0  AND SOX.cancelled = 0 
+        GROUP BY SOPrinting.product_no
+ORDER BY `SOX`.`sox_no` ASC");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();
@@ -1252,7 +1273,8 @@ class scmModel extends model {
     }
 
     public function updateTrackingNo() {
-        foreach($_POST["trackingNumArray"] as $value) {
+        $trackingArr = json_decode($_POST["trackingNumArray"]);
+        foreach($trackingArr as $value) {
             $sql = $this->prepare("UPDATE SOX set tracking_number = ? WHERE sox_no = ?"); 
             $sql->execute([$value[1],$value[0]]);
         }

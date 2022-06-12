@@ -23,19 +23,29 @@ class homeModel extends model {
         public function addCustomer() {
                 $sql = $this->prepare("insert into Customer (date,customerTitle, customer_name, customer_surname, customer_nickname, gender, customer_tel, email, province, address, national_id)
                                         values (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");  
+
                 $sql->execute([
-                        input::post('customerTitle'),
-                        input::post('customerFirstName'),
-                        input::post('customerLastName'),
-                        input::post('customerNickName'),
-                        input::post('customerTitle') == 'นาย'|| input::post('customerTitle') == 'เด็กชาย' ? 'M' : 'F',
-                        input::post('customerTel'),
-                        input::post('customerEmail'),
-                        input::post('customerProvince'),
-                        input::post('customerAddress'),
-                        input::post('customerIdNo')
-                ]); 
+                                input::post('customerTitle'),
+                                input::post('customerFirstName'),
+                                input::post('customerLastName'),
+                                input::post('customerNickName'),
+                                input::post('customerTitle') == 'นาย'|| input::post('customerTitle') == 'เด็กชาย' ? 'M' : 'F',
+                                input::post('customerTel'),
+                                input::post('customerEmail'),
+                                input::post('customerProvince'),
+                                input::post('customerAddress'),
+                                input::post('customerIdNo')
+                ]);
+                $errorLog = $sql->errorInfo()[0];
+                echo $sql->errorInfo()[0];
+                if($errorLog=="1062"){
+                        echo " Duplicate customer address and number ";
+                }
         }
+
+                
+              
+        
 	
 	public function getCompanySales() {
 		$sql = $this->prepare("select sum(SOPrinting.sales_no_vat * SOPrinting.quantity) as sales
@@ -53,14 +63,6 @@ class homeModel extends model {
 		}
 		return [];
 	}
-        public function getAll(){
-                $sql = $this->prepare("SELECT Customer.customer_tel, Customer.address from Customer where 1");
-                $sql->execute();
-		if ( $sql->rowCount() > 0 ) {
-                        return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-		}
-                echo $sql->errorInfo()[0] ;
-		return $sql->errorInfo()[0] ;
-        }
+        
 
 }

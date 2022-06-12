@@ -40,6 +40,7 @@
                             <th>payment method</th>
 							<th>ขอใบกำกับภาษี</th>
 							<th>Auto Match Status</th>
+                           
                         </tr>
                         <tr ng-show="soxs.length == 0">
                             <th colspan="10">ไม่มีเลข SOX ที่อัปโหลดสลิปการชำระเงิน</th>
@@ -60,9 +61,11 @@
                                 </a>
                                 <br>{{sox.slip_datetime}}
                             </td>
-                            <td style="text-align: center">{{sox.payment_type}}</td>
+                            <td style="text-align: center">{{sox.payment_type===null ? "-":sox.payment_type }}</td>
 							<td style="text-align: center"><i ng-show="sox.fin_form==1" class="bi bi-check2-circle"></i></td>
 							<td style="text-align: center"><i ng-show="sox.id > 0" class="bi bi-check2-circle"></i></td>
+                           
+                            
                         </tr>
                     </table>
                 </div>
@@ -128,7 +131,7 @@
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ภาษี 7%</th>
-                            <th id="totalPrice" style="text-align: right;">{{crItems[0].sox_sales_price *7/107 | number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{vat_type=="3" ? 0 : crItems[0].sox_sales_price *7/107 | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
@@ -231,14 +234,16 @@
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
         $scope.sox='';
-
+        $scope.error = false;
+        
         $scope.crItems = [];
         // $scope.selectedBank = '';
         // $scope.TransferTime = '';
         $scope.soxs = <?php echo $this->soxs; ?>;
         var first = true;
 
-        console.log($scope.soxs)
+        // console.log($scope.soxs)
+        
 
 
         // $scope.test = function() {
@@ -271,13 +276,30 @@
             
             $scope.crItems = [];
             $scope.sox = sox;
+            $scope.vat_type = $scope.sox.vat_type;
+            console.log(`Vat Type:${$scope.vat_type}`);
+            
             
             $scope.customer_title = '';
+            
             
             angular.forEach($scope.soxs, function (value, key) {
                 if(value.sox_no == sox.sox_no) {
                     $scope.crItems.push(value);
-                    console.log(value)
+                    // console.log(value)
+                
+                   if(value.balance<=0 && value.balance!=null){
+                  
+                        $scope.error = true;
+                        addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', "<h1 style= color:red;>ออกไม่ได้โว้ย</h1>");
+                        
+                        $('#successModal').modal('toggle');
+                        $('#successModal').on('hide.bs.modal', function (e) {
+                        location.reload();
+                    // window.location.assign('/');
+                });
+
+                   }
                     
                 }
             });
@@ -392,7 +414,7 @@
                 }
                 $scope.new_total_price = parseFloat(sox.total_sales) + $scope.card_fee;
             }
-            console.log((parseFloat(sox.total_sales)*2.45)/100)
+            // console.log((parseFloat(sox.total_sales)*2.45)/100)
 
             
 
@@ -457,10 +479,10 @@
                 payment_type:$scope.crItems[0].payment_type,
                 total_sales_no_vat:$scope.crItems[0].so_total_sales_no_vat
             }, function(data) {
-                console.log("Hello")
-                console.log(`Return statement: ${data}`);
+                // console.log("Hello")
+                // console.log(`Return statement: ${data}`);
                 addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);
-                console.log(data);
+                // console.log(data);
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
                     window.open('/file/iv_cr/' + data.substring(0, 9));
@@ -472,7 +494,7 @@
                 console.log(b)
                 console.log(c)
             }); 
-            console.log("Hello")
+            // console.log("Hello")
         }
         
     });

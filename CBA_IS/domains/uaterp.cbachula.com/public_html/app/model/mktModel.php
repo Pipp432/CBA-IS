@@ -1693,6 +1693,7 @@ class mktModel extends model {
 
     $sono = $this->assignSo( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
     $depositSox = '';
+    
 	
 	  
 	// Promotion Week 4 - Check Point Range
@@ -1956,12 +1957,14 @@ class mktModel extends model {
 
       }
 
+      $this->promotionWeek2($sono);
+
       #if(json_decode(session::get('employee_detail'), true)['product_line'] == '3' || #json_decode(session::get('employee_detail'), true)['product_line'] == 'X') {
       #    $this->specialPromotionLine3($sono);
       #}
 
       // promotion week 9		
-		$sql = $this->promotionWeek10($sono);
+		// $sql = $this->promotionWeek10($sono);
 
       //week 7-8 tournament
 		//$score = input::post('totalPrice');
@@ -2117,7 +2120,7 @@ class mktModel extends model {
     INNER JOIN SOPrinting ON SO.so_no = SOPrinting.so_no
     INNER JOIN Product ON SOPrinting.product_no = Product.product_no
     LEFT JOIN SOXPrinting on SO.so_no = SOXPrinting.so_no
-    WHERE SO.cancelled = 0 AND SOXPrinting.sox_no IS null  ;
+    WHERE SO.cancelled = 0 AND SOXPrinting.sox_no IS null ;
     ");
      $sql->execute();
     if ($sql->rowCount() > 0) {
@@ -2795,32 +2798,32 @@ class mktModel extends model {
 
   	public function getSalesReport() {
     $sql = $this->prepare( "select
-                                    SO.so_no,
-                                    Week.week as so_week,
-                                    SO.so_date,
-                                    SO.so_time,
-                                    Product.product_line,
-                                    Product.product_no,
-                                    Product.product_name,
-                                    ProductCategory.category_name,
-                                    Product.sub_category,
-                                    Supplier.supplier_name,
-                                    SOPrinting.quantity,
-                                    SOPrinting.sales_no_vat * SOPrinting.quantity as total_no_vat,
-                                    SOPrinting.total_sales,
-                                    SOPrinting.total_point,
-                                    SOPrinting.total_commission,
-                                    SOPrinting.margin,
-                                    concat(Employee.employee_id, ' ', Employee.employee_nickname_thai) as sp,
-                                    Employee.ce_id as ce
-                                from SOPrinting
-                                inner join SO on SO.so_no = SOPrinting.so_no
-                                inner join Employee on Employee.employee_id = SO.employee_id
-                                left join Product on Product.product_no = SOPrinting.product_no
-                                left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
-                                inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
-                                inner join Week on Week.date = SO.so_date
-                                where SOPrinting.cancelled = 0" );
+    SO.so_no,
+    Week.week as so_week,
+    SO.so_date,
+    SO.so_time,
+    Product.product_line,
+    SOPrinting.product_no,
+    Product.product_name,
+    ProductCategory.category_name,
+    Product.sub_category,
+    Supplier.supplier_name,
+    SOPrinting.quantity,
+    SOPrinting.sales_no_vat * SOPrinting.quantity as total_no_vat,
+    SOPrinting.total_sales,
+    SOPrinting.total_point,
+    SOPrinting.total_commission,
+    SOPrinting.margin,
+    concat(Employee.employee_id, ' ', Employee.employee_nickname_thai) as sp,
+    Employee.ce_id as ce
+from SOPrinting
+inner join SO on SO.so_no = SOPrinting.so_no
+inner join Employee on Employee.employee_id = SO.employee_id
+left join Product on Product.product_no = SOPrinting.product_no
+left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
+inner join Week on Week.date = SO.so_date
+where SOPrinting.cancelled = 0 and not Product.product_name like '%ค่าส่ง%' and not Product.product_name like '%ติดตั้ง%'" );
     $sql->execute();
     if ( $sql->rowCount() > 0 ) {
       return $sql->fetchAll();
@@ -2922,10 +2925,10 @@ class mktModel extends model {
   private function promotionWeek2($sono) {
 
     $sql = $this->prepare("select * from 
-                            (select count(*) as countEasySell from PointLog where employee_id = ? and remark = 'Week 1-2 - Easy Sell' and cancelled = 0) as countEasySell,
+                            (select count(*) as countEasySell from PointLog where employee_id = ? and remark = 'Week 1-2 - Easy Sales' and cancelled = 0) as countEasySell,
                             (select sum(total_sales_price) as totalSold from SO where employee_id = ?) as sumTotalSold");
                             
-    $sql->execute([input::post('sellerNo'), input::post('sellerNo')]);
+    $sql->execute([input::post('sellerNo')]);
     $temp1 = $sql->fetchAll()[0];
     
     // $achieved = $temp['countProLine'];
@@ -2944,9 +2947,9 @@ class mktModel extends model {
             case '1': // ขายกล้องฟิล์มตัวแรก && ขายสินค้าสาย 1 ครบ 1000 บาท
 
                 $sql = $this->prepare("select * from 
-                (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 2 - Line 1.1') as countProLine1,
-                (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 2 - Line 1.2') as countProLine2");
-                $sql->execute([input::post('sellerNo'), input::post('sellerNo')]);
+                (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 2 - Line 1.1' and cancelled = 0) as countProLine1,
+                (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 2 - Line 1.2' and cancelled = 0) as countProLine2");
+                $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
                 $temp = $sql->fetchAll()[0];
 
                 if ($temp['countProLine1'] == 0) {
@@ -3619,7 +3622,7 @@ class mktModel extends model {
             if($extraPoint2 > 0) {
                 $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
                                             values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                $sql->execute([input::post('sellerNo'), $extraPoint2, 'Week 1-2 - Easy Sell', $sono]);
+                $sql->execute([input::post('sellerNo'), $extraPoint2, 'Week 1-2 - Easy Sales', $sono]);
                 echo ' (ได้รับพ้อยท์พิเศษเพิ่มอีก '.$extraPoint2.' พ้อยท์!!!)';
                 }
             

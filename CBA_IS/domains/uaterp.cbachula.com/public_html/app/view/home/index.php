@@ -130,7 +130,7 @@
 				if($this->getPosition=='is') echo '<h4 class="my-2">Everyone</h4>';
 				echo '<div class="row row-cols-2 row-cols-md-5 mt-2" style="padding: 0;" id="ERow">';
 				echo "<script>addModuleLink('ERow', '/mkt/petty_cash_request', 'heart', 'ขอเบิกเงินรองจ่าย');</script>";
-				echo "<script>addModuleLink('ERow', '/mkt/pre_pvd', 'desktop', 'คำร้องขอใบลดหนี้ (PV-D)');</script>";
+				//echo "<script>addModuleLink('ERow', '/mkt/pre_pvd', 'desktop', 'คำร้องขอใบลดหนี้ (PV-D)');</script>";
 				echo '</div>';
 
             ?>
@@ -148,7 +148,7 @@
 			if($this->getPosition=='cm' || $this->getPosition=='ce'){
 			if ($dt > "0900" && $dt < "1900") {}
 			else{
-				echo '<div style="display: flex;justify-content: center;"><img style="width: 1600px;" src="/public/img/petch.png" alt="icon"/></div>';
+				echo '<div style="display: flex;justify-content: center;"><img style="width: 1600px;" src="/public/img/fiatbam.jpg" alt="icon"/></div>';
 			}}
 			?>
 </body>

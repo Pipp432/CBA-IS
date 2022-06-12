@@ -124,7 +124,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="6">มูลค่าตามเอกสารเดิม</th>
-                            <th id="ivtotalPrice" style="text-align: right;">{{diff_total_sales_price2 | number:2}}</th>
+                            <th id="ivtotalPrice" style="text-align: right;">{{iv_total_sales | number:2}}</th>
                         </tr>  
                         <tr>
                             <th style="text-align: right;" colspan="6">มูลค่าที่ถูกต้อง</th>
@@ -212,6 +212,7 @@
         $scope.diff_total_sales_vat2 = '';
         $scope.vat_total_sales_no_vat2 = '';
         $scope.sum_total_sales_no_vat2 = '';
+        $scope.iv_total_sales = '';
 
 
         $scope.isEdit = true;
@@ -261,6 +262,7 @@
             $scope.sum_total_sales_no_vat2 = 0;
             $scope.vat_total_sales_no_vat2 = 0;
             $scope.diff_total_sales_price2 = 0;
+            $scope.iv_total_sales = 0;
 
             $scope.total_commission = 0;
             /////////////
@@ -269,6 +271,7 @@
             if($scope.cnItems.length != 0) {
                 $scope.iv_total_sales_price = $scope.cnItems[0].iv_total_sales_price;
                 $scope.total_amount2 = $scope.WSDs[0].total_amount;
+                $scope.iv_total_sales = $scope.WSDs[0].iv_total_sales;
 
                 angular.forEach($scope.cnItems, function(value, key) {
                     $scope.diff_total_sales_vat += (parseFloat(value.sales_vat) * parseFloat(value.quantity));
@@ -279,7 +282,7 @@
                 });
                 $scope.diff_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) / 1.07;
                 $scope.diff_total_sales_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : (parseFloat($scope.diff_total_sales_price) / 107) * 7;
-                $scope.new_total_sales_price = parseFloat((parseFloat($scope.diff_total_sales_price) - $scope.total_amount2)*100/107) ;                            //////
+                $scope.new_total_sales_price = parseFloat(parseFloat($scope.iv_total_sales) - parseFloat($scope.total_amount2*100/107)) ;                            //////
                 $scope.sum_total_sales_no_vat = (parseFloat($scope.diff_total_sales_vat) == 0) ? 0 : parseFloat($scope.diff_total_sales_price) * 1.07;
                 $scope.vat_total_sales_no_vat = Math.abs(parseFloat($scope.diff_total_sales_price) - parseFloat($scope.sum_total_sales_no_vat));                //old ver of จำนวนภาษีมูลค่าเพิ่ม
 
@@ -388,14 +391,15 @@
 
         $scope.postCnItems = function() {
             $scope.company = $scope.WSDs[0].invoice_no.substring(0,1);
+
             $('#confirmModal').modal('hide');
             $.post("/acc/credit_note/post_cn", { 
                 post : true,
-                diff_total_sales_price : $scope.diff_total_sales_price2,
+                iv_total_sales : $scope.iv_total_sales,
                 new_total_sales_price : $scope.new_total_sales_price,
                 diff_total_sales_vat : $scope.diff_total_sales_vat2,
                 vat_total_sales_no_vat : $scope.vat_total_sales_no_vat2,
-                sum_total_sales_no_vat : $scope.sum_total_sales_no_vat2,
+                sum_total_sales : $scope.sum_total_sales_no_vat2,
 
                 new_sales_price_thai : NumToThai(parseFloat($scope.sum_total_sales_no_vat2)),
                 total_commission : $scope.total_commission,

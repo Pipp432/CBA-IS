@@ -25,12 +25,12 @@
 							<th>วันที่ SOX</th>
                             <th>เลข SOX</th>
 							<th>ประเภท SOX</th>
-							<th>special</th>
-                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							
+							<!-- <th>special</th>
+                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							 -->
                             <th>เลข IV</th>
                             <th>ขนาดกล่อง</th>
 							<th>ขนส่ง</th>
-							<th>ราคารวม</th>
+							<!-- <th>ราคารวม</th> -->
 							<th>รายละเอียด</th>
                         </tr>
     
@@ -38,18 +38,18 @@
                             <td >{{sr.sox_datetime}}</td>
                             <td>{{sr.sox_no}}</td>
 							<td>{{sr.product_type}}</td>
-							<td>
+							<!-- <td>
 								<i class="fa fa-exclamation-circle" aria-hidden="true" ng-show="sr.special != null" style="color: red"></i>
 							</td>
-                            <td><i class="fa fa-check" aria-hidden="true" ng-show="sr.fin_form==1"></i></td>							
+                            <td><i class="fa fa-check" aria-hidden="true" ng-show="sr.fin_form==1"></i></td>							 -->
 							<td>{{sr.invoice_no}}</td>
 							<td >{{sr.box_size}}</td>
 							<td >{{sr.note}}</td>
-							<td style="text-align: center;">{{sr.total_sales_price | number:2}}</td>
+							<!-- <td style="text-align: center;">{{sr.total_sales_price | number:2}}</td> -->
 							<td>
 							  <div class="card card-body">
 								  <table>
-									  <tr ng-repeat="sr_item in soxx" ng-show="sr_item.sox_no===sr.sox_no"">
+									  <tr ng-repeat="sr_item in soxx" ng-show="sr_item.sox_no===sr.sox_no">
 										  <td>{{sr_item.so_no}}</td>
 										  <td>{{sr_item.product_no}}</td>
 										  <td>{{sr_item.product_name}}</td> 
@@ -82,11 +82,12 @@
                             <th colspan="2">วันที่ SOX</th>
                             <th>เลข SOX</th>
 							<th>ประเภท SOX</th>
-							<th>special</th>
-                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							
+							<!-- <th>special</th>
+                            <th><i class="fa fa-check" aria-hidden="true"></i></th>							 -->
                             <th>เลข IV</th>
                             <th>ขนาดกล่อง</th>
-							<th>ราคารวม</th>
+                            <th>ขนส่ง</th>
+							<!-- <th>ราคารวม</th> -->
 							
                         </tr>
                         <tr ng-repeat="irdItem in irdItems | unique: 'sox_no'">
@@ -94,16 +95,17 @@
 							<td>{{irdItem.sox_date}}</td>
                             <td style="text-align: center;">{{irdItem.sox_no}}</td>
                             <td style="text-align: center;">{{irdItem.sox_type}}</td>
-							<td style="text-align: center;">
+							<!-- <td style="text-align: center;">
 								<i class="fa fa-exclamation-circle" aria-hidden="true" ng-show="irdItem.special != null" style="color: red"></i>
 							</td>
-							<td style="text-align: center"><i ng-show="irdItem.fin_form==1" class="bi bi-check2-circle"></i></td>
+							<td style="text-align: center"><i ng-show="irdItem.fin_form==1" class="bi bi-check2-circle"></i></td> -->
 							<td style="text-align: center;">{{irdItem.invoice_no}}</td>
 							<td style="text-align: center;">{{irdItem.box_size}}</td>
-							<td style="text-align: center;">{{irdItem.total_sales_price | number:2}}</td>
+							<td style="text-align: center;">{{sr.note}}</td>
+							<!-- <td style="text-align: center;">{{irdItem.total_sales_price | number:2}}</td> -->
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="8">รวม</th>
+                            <th style="text-align: right;" colspan="6">รวม</th>
                             <th style="text-align: left;">{{count}} &nbsp; &nbsp;&nbsp; &nbsp; กล่อง</th>
                     </table>
                 </div>

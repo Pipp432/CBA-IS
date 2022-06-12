@@ -49,7 +49,7 @@
                             <th>วันที่</th>
                             <th>ประเภทสินค้า</th>
                             <th>รายการสินค้า</th>
-                            <th>ราคาซื้อ</th>
+                            <!-- <th>ราคาซื้อ</th> -->
                         </tr>
                         <tr ng-repeat="po in pos | unique:'po_no' | filter:{supplier_no:selectedSupplier, po_no:filterPo, product_type:selectedProductType}" ng-click="addRrItem(po)">
                             <td>{{po.po_no}}</td>
@@ -58,7 +58,7 @@
                             <td><ul class="my-0">
                                 <li ng-repeat="po_item in pos" ng-show="po_item.po_no===po.po_no">{{po_item.product_name}} (x{{po_item.quantity}})</li>
                             </ul></td>
-                            <td style="text-align: right;">{{po.po_total_purchase_price | number:2}}</td>
+                            <!-- <td style="text-align: right;">{{po.po_total_purchase_price | number:2}}</td> -->
                         </tr>
                     </table>
                 </div>
@@ -84,7 +84,7 @@
                             <th>วันที่</th>
                             <th>ประเภทสินค้า</th>
                             <th>รายการสินค้า</th>
-                            <th>ราคาซื้อ</th>
+                            <!-- <th>ราคาซื้อ</th> -->
                         </tr>
                         <tr ng-repeat="product in rrItems | orderBy:'po_no' | unique:'po_no'">
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropRrItem(product)"></i></td>
@@ -97,7 +97,7 @@
                             <td style="text-align: right;">{{product.po_total_purchase_price | number:2}}</td>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="5">ราคารวม</th>
+                            <!-- <th style="text-align: right;" colspan="5">ราคารวม</th> -->
                             <th style="text-align: right;">{{totalPrice | number:2}}</th>
                         </tr>
                     </table>

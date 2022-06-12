@@ -7,10 +7,7 @@ use _core\helper\session;
 use _core\helper\input;
 use PDO;
 
-
 class finModel extends model {
-
-   
     // CR Module
     public function getSoxsForCr() {
         $sql = $this->prepare("select 
@@ -43,7 +40,7 @@ class finModel extends model {
                                     SOX.total_sales_price as sox_sales_price,
                                     SO.discountso,
 									SO.point as so_point,
-                                    SO.payment as payment,
+                                    SO.payment as payment,SO.vat_type,
                                     SO.commission as so_commission,
                                     SOX.slip_uploaded,
                                     SOX.slip_datetime,
@@ -57,11 +54,13 @@ class finModel extends model {
                                 inner join SO on SO.so_no = SOXPrinting.so_no
                                 inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                 inner join Employee on Employee.employee_id = SOX.employee_id
-                                left join Product on Product.product_no = SOPrinting.product_no
-                                inner join Customer on Customer.customer_tel = SOX.customer_tel
+                                inner join Product on Product.product_no = SOPrinting.product_no
+                                inner join Customer on Customer.customer_tel = SOX.customer_tel and SOX.address = Customer.address
                                 left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
                                 SOX.payment_time=Bank_Statement.payment_time and 
                                 SOX.payment_amount=Bank_Statement.payment_amount
+                              
+                                
                                 where SOX.done = -1 and SOX.cancelled = 0 and (SO.payment = 0 or SO.payment is null) and SOX.slip_name is not null order by SOX.slip_datetime");  
         $sql->execute();
         if ($sql->rowCount() > 0) {
@@ -117,7 +116,7 @@ class finModel extends model {
                                 inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                 inner join Employee on Employee.employee_id = SOX.employee_id
                                 left join Product on Product.product_no = SOPrinting.product_no
-                                inner join Customer on Customer.customer_tel = SOX.customer_tel
+                                inner join Customer on Customer.customer_tel = SOX.customer_tel 
                                 left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
                                 SOX.payment_time=Bank_Statement.payment_time and 
                                 SOX.payment_amount=Bank_Statement.payment_amount
@@ -493,7 +492,7 @@ class finModel extends model {
     
     // CR Module
     public function addCr() {
-        
+    
         $sql = $this->prepare("update SOX set SOX.done = 0 where SOX.sox_no = ?");
         $sql->execute([input::post('sox_number')]);
         
@@ -505,11 +504,10 @@ class finModel extends model {
         $cr_no = "";
         
         foreach($crItemsArray as $value) {
-           
+            
             if (array_key_exists($value['so_no'], $soList)) {
                 
                 $iv_no = $soList[$value['so_no']];
-                
                 
             } else {
                   
@@ -558,7 +556,7 @@ class finModel extends model {
                     input::post('cusAddress'),
                     input::post('cusId'),
                     $value['so_no'],
-                    input::post('total_sales_no_vat'),
+                    $total_sales_no_vat,
                     $total_sales_vat,
                     $total_sales_price,
                     (double) $value['discountso'],
@@ -571,7 +569,7 @@ class finModel extends model {
                     input::post('payment_type')
                 ]); 
                 $check = $sql->errorInfo()[0];
-                
+               
 
 				if($check == '00000') {
                 //$text = $this->Convert($total_sales_price);
@@ -592,7 +590,7 @@ class finModel extends model {
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     $value['priceInThai']
                 ]);
-               
+                
 
                 // insert commission log
                 $sql = $this->prepare("insert into CommissionLog (cr_no, date, employee_id, commission, cancelled)
@@ -603,9 +601,8 @@ class finModel extends model {
                     $value['employee_id'],
                     (double)$commission
                 ]);
-               
-					
-			
+				
+				
                 $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                 $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
@@ -624,7 +621,7 @@ class finModel extends model {
                 
                 // ============================================================================================================================================================
                 // END CBA2020 ACC
-               
+              
                 } else {
             
             	echo 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่ กรุณาแคปหน้าเจอให้กับทางทีม IS ขออภัยในความไม่สะดวก';
@@ -633,7 +630,7 @@ class finModel extends model {
 				return $check;
 				}
             }
-            
+          
             //rr_no for Install / Order / Transport
             if($value['product_type'] == 'Install' || $value['product_type'] == 'Order') { 
                 
@@ -672,50 +669,67 @@ class finModel extends model {
             if ($value['product_type'] == 'Stock') { $accumStock  = (double) $value['quantity']; }
             
             while( $accumStock > 0) {
+
+                
                 
                 $cutStock = 0;
-                $sql = $this->prepare("select * from View_InvoiceStock where product_no = ? and balance <> 0 order by file_no");
+                $sql = $this->prepare("select * from View_InvoiceStock where product_no = ? and balance > 0 order by file_no");
                 $sql->execute([$value['product_no']]);
                 $rrTable = $sql->fetchAll()[0];
+              
                 $rrStock = (int) $rrTable['balance'];
+              
                 $rr_no = $rrTable['file_no'];
                 
-                if( $accumStock > $rrStock )
-                {
-                    $cutStock = $rrStock;
-                }
-                else $cutStock = $accumStock;
+                echo " ".$sql->errorInfo()[0]." Product: ".$value['product_no']." Stock: ".$rrStock." ";
+                if($rrStock<=0) return " ERROR".$sql->errorInfo()[0]." Product: ".$value['product_no']." Stock: ".$rrStock;
 
-               
-                $sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) 
-                                        values (?, ?, 'IV', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL, ?)");
-                $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]);
-                  
+                if($sql->errorInfo()[0]!="00000"){
+                    return "error";
+                }else{   
+                    if( $accumStock > $rrStock )
+                    {
+                        $cutStock = $rrStock;
+                    }
+                    else $cutStock = $accumStock;
+    
+                 
+    
+                    $sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) 
+                                            values (?, ?, 'IV', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL, ?)");
+                    $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]);    
+                    
+                    
+                // insert InvoicePrinting for Stock
+                    if  ($value['product_type'] == 'Stock') {
+                    // echo " ".$value['product_no'];
+                    $sql = $this->prepare("insert into InvoicePrinting (invoice_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, rr_no)
+                                        values (?, ?, ?, ?, ?, ?, ?, 0, ?)");  
+                    $sql->execute([
+                        $iv_no,
+                        $value['product_no'],
+                        (double) $value['sales_no_vat'],
+                        (double) $value['sales_vat'],
+                        (double) $value['sales_price'],
+                        $cutStock,
+                        (double) $value['total_sales'],
+                        $rr_no 
+                    ]);
+                 
+                   
+                    }
                 
-            // insert InvoicePrinting for Stock
-                if  ($value['product_type'] == 'Stock') {
-                $sql = $this->prepare("insert into InvoicePrinting (invoice_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, rr_no)
-                                    values (?, ?, ?, ?, ?, ?, ?, 0, ?)");  
-                $sql->execute([
-                    $iv_no,
-                    $value['product_no'],
-                    (double) $value['sales_no_vat'],
-                    (double) $value['sales_vat'],
-                    (double) $value['sales_price'],
-                    $cutStock,
-                    (double) $value['total_sales'],
-                    $rr_no 
-                ]);
-                     
+                    $accumStock = $accumStock - $cutStock;
                 }
+              
+             
                
-            
-                $accumStock = $accumStock - $cutStock;
             
             }
-            
+
             
         }
+       
         return $cr_no;
     } 
     
@@ -1902,14 +1916,15 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 PVD.pvd_no,
                                 PVD.pvd_time,
                                 PVD.pvd_date,
-                                PVD.sum_total_sales_no_vat,
+                                PVD.sum_total_sales,
                                 PVD.cn_no,
-                                CN.bank,
-                                CN.bank_no,
-                                CN.recipient
+                                WSD.bank,
+                                WSD.bank_no,
+                                WSD.recipient
 
                                 From PVD
                                 left join CN on PVD.cn_no = CN.cn_no
+                                left join WSD on WSD.wsd_no = CN.wsd_no
 
                                 where PVD.PVD_status = 2
                                 order by PVD.pvd_date, PVD.pvd_time");
@@ -2029,6 +2044,8 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                     pv_date,
                                     total_paid,
                                     product_names,
+                                    additional_cash,
+                                    additional_cash_reason,
                                     pv_status
                                 from PVA_bundle");
         $sql->execute();
@@ -2063,6 +2080,38 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
         echo "yes";
     }
+    public function getbankreconcile() {
+        $sql = $this->prepare( "SELECT Invoice.invoice_no, SOX.sox_no, Invoice.file_no, Invoice.invoice_date, Invoice.total_sales_price , Bank_Statement.payment_date , Bank_Statement.payment_time , Bank_Statement.payment_amount FROM Invoice INNER JOIN SOXPrinting on Invoice.file_no = SOXPrinting.so_no INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and SOX.payment_time=Bank_Statement.payment_time and SOX.payment_amount=Bank_Statement.payment_amount where SOX.cancelled = 0 AND SOX.slip_uploaded = 1 group by Invoice.invoice_no;" );
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+          return $sql->fetchAll();
+        }
+        return [];
+      }
+
+      public function getSalesReportforfin() {
+        $sql = $this->prepare( "select                          
+
+        Week.week as so_week,
+        Product.product_line,
+        ProductCategory.category_name,
+        SOPrinting.sales_no_vat * SOPrinting.quantity as total_no_vat,
+        SOPrinting.total_sales,
+        SOPrinting.margin
+    from SOPrinting
+    inner join SO on SO.so_no = SOPrinting.so_no
+    inner join Invoice on Invoice.file_no = SO.so_no
+    left join Product on Product.product_no = SOPrinting.product_no
+    left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+    inner join Week on Week.date = SO.so_date
+    where SOPrinting.cancelled = 0 AND Invoice.cancelled = 0;" );
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+          return $sql->fetchAll();
+        }
+        return [];
+      }
+
 
 }
 

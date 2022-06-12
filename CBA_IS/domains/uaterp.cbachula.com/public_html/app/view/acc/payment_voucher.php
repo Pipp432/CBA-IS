@@ -420,7 +420,7 @@
                     <tr ng-repeat = "PVD in PVDs | unique:'cn_no'  | filter:{cn_no:filter_anything}" ng-click="selectPVD(PVD)" ng-show = "selected_PVD.length == 0">
                         <td class = "center_cell">{{PVD.cn_no}}</td>
                         <td class = "center_cell">{{PVD.employee_id}}</td>
-                        <td class = "center_cell">{{PVD.sum_total_sales_no_vat}}</td>
+                        <td class = "center_cell">{{PVD.sum_total_sales}}</td>
                         <td class = "center_cell">{{PVD.vat_id}}</td>
                         <td class = "center_cell">{{PVD.sox_no}}</td>
                         <td class = "center_cell">{{PVD.invoice_no}}</td>
@@ -432,7 +432,7 @@
                     <tr ng-show = "selected_PVD.length != 0">
                         <td class = "center_cell"><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPVD()"></i> {{selected_PVD.cn_no}}</td>
                         <td class = "center_cell">{{selected_PVD.employee_id}}</td>
-                        <td class = "center_cell">{{selected_PVD.sum_total_sales_no_vat}}</td>
+                        <td class = "center_cell">{{selected_PVD.sum_total_sales}}</td>
                         <td class = "center_cell">{{selected_PVD.vat_id}}</td>
                         <td class = "center_cell">{{selected_PVD.sox_no}}</td>
                         <td class = "center_cell">{{selected_PVD.invoice_no}}</td>
@@ -834,7 +834,7 @@
                     cn_no : $scope.selected_PVD.cn_no,
                     company_code : $scope.selected_PVD.company_code,
                     vat_id : $scope.selected_PVD.vat_id,
-                    sum_total_sales_no_vat : $scope.selected_PVD.sum_total_sales_no_vat,
+                    sum_total_sales : $scope.selected_PVD.sum_total_sales,
                     note : $scope.selected_PVD.note,
                     recipient : $scope.selected_PVD.recipient,
                     bank : $scope.selected_PVD.bank,

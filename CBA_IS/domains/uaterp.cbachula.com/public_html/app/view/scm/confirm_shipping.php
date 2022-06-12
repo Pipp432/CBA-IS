@@ -41,7 +41,7 @@
                             <th>ผู้ขาย</th>
 							<th>เลข IRD</th>
                             <th>รายการสินค้า</th>
-                            <th>ราคาซื้อ</th>
+                            <!-- <th>ราคาซื้อ</th> -->
                             <th>สถานะสินค้า</th>
                         </tr>
                         <tr ng-repeat="sox in soxs | unique:'sox_no' | filter:{sox_no:filterSox, product_type:selectedProductType}">
@@ -52,7 +52,7 @@
                             <td  ng-click="addCsItem(sox)"><ul class="my-0">
                                 <li ng-repeat="sox_item in soxs" ng-show="sox_item.sox_no == sox.sox_no">{{sox_item.product_name}} (x{{sox_item.quantity}})</li>
                             </ul></td>
-                            <td style="text-align: right;"  ng-click="addCsItem(sox)">{{sox.sox_total_sales_price | number:2}}</td>
+                            <!-- <td style="text-align: right;"  ng-click="addCsItem(sox)">{{sox.sox_total_sales_price | number:2}}</td> -->
                             <td style="text-align: right;" ng-show="sox.note == 'flash'">{{sox.status}} 
 								<a target="_blank" href="https://www.flashexpress.co.th/tracking/?se={{sox.tracking_number}}">คลิก!!</a></td>
 							<td style="text-align: right;" ng-show="sox.note == 'Flash'">{{sox.status}} 
@@ -92,7 +92,7 @@
 							<th>เลข IRD</th>
                             <th>ประเภทสินค้า</th>
                             <th>รายการสินค้า</th>
-                            <th>ราคาซื้อ</th>
+                            <!-- <th>ราคาซื้อ</th> -->
                             
                         </tr>
                         <tr ng-repeat="product in csItems | orderBy:'sox_no' | unique:'sox_no'">
@@ -104,11 +104,11 @@
                             <td><ul class="my-0">
                                 <li ng-repeat="sox_item in csItems" ng-show="sox_item.sox_no == product.sox_no">{{sox_item.product_name}} (x{{sox_item.quantity}})</li>
                             </ul></td>
-                            <td style="text-align: right;">{{product.sox_total_sales_price | number:2}}</td>
+                            <!-- <td style="text-align: right;">{{product.sox_total_sales_price | number:2}}</td>
                         </tr>
                          <tr>
                             <th style="text-align: right;" colspan="6">ราคารวม</th>
-                            <th style="text-align: right;">{{totalPrice | number:2}}</th>
+                            <th style="text-align: right;">{{totalPrice | number:2}}</th> -->
                         </tr>
                     </table>
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">ยืนยันการจัดส่ง</button>

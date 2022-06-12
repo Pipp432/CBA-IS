@@ -440,4 +440,78 @@ foreach ($list as $value) {
             echo $this->model->postBankStatement();
         }
     }
+
+
+    public function bank_reconsile() {
+        
+        header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=bank_reconsile.xls");
+        $data = $this->model->getbankreconcile();
+        echo "\xEF\xBB\xBF";
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>invoice_no</th>';
+                echo '<th>sox_no</th>';
+                echo '<th>file_no</th>';
+                echo '<th>invoice_date</th>';
+                echo '<th>total_sales_price</th>';
+                echo '<th>payment_date</th>';
+                echo '<th>payment_time</th>';
+                echo '<th>payment_amount</th>';
+                
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['invoice_no'].'</td>';
+                    echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['file_no'].'</td>';
+                    echo '<td>'.$value['invoice_date'].'</td>';
+                    echo '<td>'.$value['total_sales_price'].'</td>';
+                    echo '<td>'.$value['payment_date'].'</td>';
+                    echo '<td>'.$value['payment_time'].'</td>';
+                    echo '<td>'.$value['payment_amount'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
+
+    public function sales_report_fin() {
+        
+        header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=sales_report_fin.xls");
+        $data = $this->model->getSalesReportforfin();
+        echo "\xEF\xBB\xBF";
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>so_week</th>';
+                echo '<th>product_line</th>';
+                echo '<th>category_name</th>';
+                echo '<th>total_no_vat</th>';
+                echo '<th>total_sales</th>';
+                echo '<th>margin</th>';
+                
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    
+                    echo '<td>'.$value['so_week'].'</td>';
+                    echo '<td>'.$value['product_line'].'</td>';
+                    echo '<td>'.$value['category_name'].'</td>';
+                    echo '<td>'.$value['total_no_vat'].'</td>';
+                    echo '<td>'.$value['total_sales'].'</td>';
+                    echo '<td>'.$value['margin'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
 }

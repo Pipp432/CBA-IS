@@ -112,7 +112,7 @@
                         <h6 class="my-0" style="text-align:center;"><span class="spinner-border" role="status" aria-hidden="true" style="width:25px; height:25px;"></span> กำลังโหลด ...</h6>
                     </th>
                 </tr>
-                <tr ng-repeat="dashboard in dashboards | orderBy:'file_no':false:[orderByPO,orderByCompany]" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards | orderBy:'file_no':true:[orderByPO,orderByCompany]" ng-click="viewFile(dashboard)">
                     <td>{{dashboard.file_no}} 
                         <span ng-show="doc == 'PO'">({{dashboard.rr}}{{dashboard.ci}})</span>
                         <span ng-show="doc == 'IV' && dashboard.invoice_type == 'CN'">(ลดหนี้)</span>
@@ -166,7 +166,7 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards">
                     <td>{{dashboard.pvd_no}}</td>
                     <td>{{dashboard.cn_no}}</td>
                     <td>{{dashboard.pvd_date}}</td>
@@ -183,6 +183,7 @@
                     </td>
                     <!-- todo convert status to readable -->
                     <td>
+                        <span ng-show="dashboard.wsd_status == 1">รอออก PVD</span>
                         <span ng-show="dashboard.PVD_status == 2">รอโอนเงิน</span>
                         <span ng-show="dashboard.PVD_status == 3">รอ confirm PV</span>
                         <span ng-show="dashboard.PVD_status == 4">confirmed</span>
@@ -212,7 +213,7 @@
                     </th>
                 </tr>
                 <!-- todo view file -->
-                <tr ng-repeat="dashboard in dashboards" ng-click="viewFile(dashboard)">
+                <tr ng-repeat="dashboard in dashboards" ng-click="viewFilePrePVD(dashboard)">
                     <td>
                         <span ng-show="dashboard.wsd_status < 0">-</span>
                         <span ng-show="dashboard.wsd_status >= 1">{{dashboard.cn_no}}</span>
@@ -224,7 +225,8 @@
                         <span ng-show="dashboard.wsd_status >= 1">{{dashboard.cn_date}}</span>
                     </td>
                     <td>
-                        <span ng-show="dashboard.wsd_status < 1">ยังไม่ออกใบ CN</span>
+                        <span ng-show="dashboard.wsd_status < 0">-</span>
+                        <span ng-show="dashboard.wsd_status == 0">ยังไม่ออกใบ CN</span>
                         <a ng-show="dashboard.wsd_status >= 1" href="https://uaterp.cbachula.com/file/cn/{{dashboard.invoice_no}}" target="_blank" ng-click="stopEvent($event)" >CN</a>
                     </td>
                     <!-- todo convert status to readable -->
@@ -249,7 +251,9 @@
                     <th>เลข PV-A</th>
                     <th>วันที่</th>
                     <th>รายการ</th>
-                    <th>จำนวนเงิน</th>
+                    <th>เติมเพิ่ม</th>
+                    <th>จำนวนเงินจ่ายพนักงาน</th>
+                    <th>จำนวนเงินรวม</th>
                     <th>Slip</th>
                     <th>สถานะ</th>
                 </tr>
@@ -261,15 +265,15 @@
                 <tr ng-repeat="dashboard in dashboards" ng-click="viewFilePVA(dashboard)">
                     <td>{{dashboard.pv_no}}</td>
                     <td>{{dashboard.pv_date}} {{dashboard.pv_time}}</td>
-                    <td>{{dashboard.product_names}}</td>
+                    <td class = "newLine">{{dashboard.product_names}}</td>
+                    <td>{{dashboard.additional_cash}} <br> {{dashboard.additional_cash_reason}}</td>
                     <td>{{dashboard.total_paid}}</td>
+                    <td>{{dashboard.realTotal | number:2}}</td>
                     <td>
                         <span ng-show="dashboard.pv_status < 4">fin ยังไม่ upload slip</span>
                         <a ng-show = "dashboard.pv_status >= 4" href="/acc/confirm_payment_voucher/get_pvaslip/{{dashboard.pv_no}}" target="_blank" ng-click="stopEvent($event)">slip</a> 
-
                     </td>
-                    <!-- todo convert status to readable -->
-                    <td>{{dashboard.pv_status}}</td>
+                    <td>{{dashboard.pv_status_readable}}</td>
                 </tr>
             </table>
             
@@ -390,6 +394,7 @@
     td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
     .card:hover { transform: translate(0,-4px); box-shadow: 0 4px 8px lightgrey; }
+    .newLine {white-space: pre}
 </style>
 
 <script>
@@ -415,7 +420,8 @@
             5:"เรียบร้อย",
         }
         angular.forEach($scope.dashboardsPva, function(value, key) {
-            value["pv_status"] = convert_pva_status[value["pv_status"]];
+            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
+            value["realTotal"] = parseFloat(value["total_paid"]) + parseFloat(value["additional_cash"]);
         });
 
 
@@ -509,10 +515,14 @@
         
         $scope.viewFile = function(file) {
             if(file.invoice_type == 'CN') {
-                window.open('/file/cn/' + file.file_no);
+                window.open('/file/iv/' + file.invoice_no);
             } else {
                 window.open('/file/' + $scope.doc.toLowerCase() + '/' + file.file_no);
             }
+        }
+
+        $scope.viewFilePrePVD = function(file) {
+            window.open('/file/iv/' + file.invoice_no);
         }
 
         $scope.viewFilePVA = function($dashboard) {

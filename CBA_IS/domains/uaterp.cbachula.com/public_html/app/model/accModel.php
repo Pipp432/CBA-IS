@@ -279,7 +279,7 @@ class accModel extends model {
                     WSD.total_amount,
                     WSD.note,
                     WSD.wsd_status,
-                    Invoice.total_sales_price as iv_total_sales_price
+                    Invoice.total_sales_no_vat as iv_total_sales
                     from WSD 
                     Left join Invoice on WSD.invoice_no = Invoice.invoice_no
        
@@ -375,34 +375,35 @@ class accModel extends model {
     public function addCn() {
 
         $cn_no = $this->assignCN(input::post('company'));
+        $new_price = input::post('new_total_sales_price');
+        if($new_price == null){
+            $new_price =0;
+        }
 
-        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no, company_code, total_commission)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?)");
+        $sql = $this->prepare("INSERT into CN(cn_no, cn_date, cn_time, employee_id, wsd_no, company_code, total_commission, iv_total_sales, new_total_sales_price, diff_total_sales_vat, vat_total_sales_no_vat, sum_total_sales, new_sales_price_thai )
+                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         // $statement = $this->prepare($sql);
         $success = $sql->execute([
             $cn_no,  
             json_decode(session::get('employee_detail'), true)['employee_id'],
             input::post('wsd_no'),
             input::post('company'),
-            input::post('total_commission')
-            // input::post('diff_total_sales_price'),
-            // input::post('vat_total_sales_no_vat'),
-            // input::post('sum_total_sales_no_vat'),
-            // input::post('new_sales_price_thai')
-        
+            input::post('total_commission'),
+            input::post('iv_total_sales'),
+            $new_price,
+            input::post('diff_total_sales_vat'),
+            input::post('vat_total_sales_no_vat'),
+            input::post('sum_total_sales'),
+            input::post('new_sales_price_thai'),
         ]);
-
-        // if($success) echo 'success';
-        // else echo print_r($statement->errorInfo());
-
 
         if($success) {
             echo ' success(';
-            echo input::post("cn_no");
+            echo $cn_no;
             echo')';
         } else {
             echo ' failed(';
-            echo input::post("cn_no");
+            echo $cn_no;
             echo')';
         }
 
@@ -410,25 +411,21 @@ class accModel extends model {
         $items = json_decode( $items, true );
 
         $invoice_no = input::post('invoice_no');
-        $new_price = input::post('new_total_sales_price');
-        if($new_price == null){
-            $new_price =0;
-        }
-  
         foreach ( $items as $value ) {
   
             // insert SOPrinting
-            $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, product_no, diff_total_sales_price, new_total_sales_price, diff_total_sales_vat, vat_total_sales_no_vat, sum_total_sales_no_vat, new_sales_price_thai, sales_price, new_quantity, new_total_sales)
-                                           values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+            $sql = $this->prepare( "INSERT into CNPrinting(wsd_no, cn_no, product_no, sales_price, new_quantity, new_total_sales)
+                                           values ( ?, ?, ?, ?, ?, ?)" );
             $sql->execute([
                 input::post('wsd_no'),
+                $cn_no,
                 $value[ 'product_no' ],
-                input::post('diff_total_sales_price'),
-                $new_price,
-                input::post('diff_total_sales_vat'),
-                input::post('vat_total_sales_no_vat'),
-                input::post('sum_total_sales_no_vat'),
-                input::post('new_sales_price_thai'),
+                // input::post('iv_total_sales'),
+                // $new_price,
+                // input::post('diff_total_sales_vat'),
+                // input::post('vat_total_sales_no_vat'),
+                // input::post('sum_total_sales'),
+                // input::post('new_sales_price_thai'),
                 ( double )$value[ 'sales_price' ],
                 ( double )$value[ 'quantity' ],
                 ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
@@ -437,22 +434,22 @@ class accModel extends model {
 
           }
     
-        $sql = $this->prepare("SELECT
-                                Invoice.id_no
-                            from Invoice
-                            where Invoice.invoice_no = ?");
-        $sql->execute([$invoice_no]);
-        $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-        $vat_id = intval($tempp[0]["id_no"]);
+        // $sql = $this->prepare("SELECT
+        //                         Invoice.id_no
+        //                     from Invoice
+        //                     where Invoice.invoice_no = ?");
+        // $sql->execute([$invoice_no]);
+        // $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+        // $vat_id = intval($tempp[0]["id_no"]);
     
   
-        $sql = $this->prepare("UPDATE WSD set wsd_status=1,
-                                              vat_id = ?,
-                                              total_amount = ?
+        $sql = $this->prepare("UPDATE WSD set wsd_status=1
+                                            --   vat_id = ?,
+                                            -- total_amount = ?
                                 where WSD.wsd_no = ?");
         $sql->execute([
-            $vat_id,
-            input::post("sum_total_sales_no_vat"),
+            // $vat_id,
+            // input::post("sum_total_sales"),
             input::post('wsd_no')
         ]);
 
@@ -466,7 +463,7 @@ class accModel extends model {
             $invoice_no,
             '11',
             '41-1'.$invoice_no[0].'10',
-            (double) input::post('diff_total_sales_price'),
+            (double) input::post('diff_total_sales_vat'),
             0,
             'CN'
         ]);
@@ -485,14 +482,14 @@ class accModel extends model {
 
         //sequence 13 CN
         // Cr 11.1 เงินคืนค่ารับสินค้าคืน - โครงการ X
-        $sql = $this->prepare("insert into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                 values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
         $sql->execute([
             $invoice_no,
             '13',
             '24-1'.$invoice_no[0].'20',
             0,
-            (double) input::post('sum_total_sales_no_vat'),
+            (double) input::post('sum_total_sales'),
             'CN'
         ]);
 
@@ -571,26 +568,26 @@ class accModel extends model {
     public function getPVDForPV() {
         $sql = "SELECT 
                     WSD.wsd_no,
-                    CN.cn_no,
-                    CN.cn_date,
-                    CN.cn_time,
-                    CN.employee_id,
-                    CN.company_code,
                     WSD.bank,
                     WSD.bank_no,
                     WSD.recipient,
+                    WSD.recipient_address,
                     WSD.invoice_no,
                     WSD.sox_no,
                     WSD.vat_id,
                     WSD.note,
                     WSD.wsd_status,
-                    CNPrinting.new_total_sales_price,
-                    CNPrinting.diff_total_sales_price,
-                    CNPrinting.vat_total_sales_no_vat,
-                    CNPrinting.sum_total_sales_no_vat,
-                    CNPrinting.new_sales_price_thai,
-                    Invoice.customer_address as recipient_address
-
+                    CN.cn_no,
+                    CN.cn_date,
+                    CN.cn_time,
+                    CN.employee_id,
+                    CN.company_code,
+                    CN.new_total_sales_price,
+                    CN.iv_total_sales,
+                    CN.vat_total_sales_no_vat,
+                    CN.sum_total_sales,
+                    CN.new_sales_price_thai
+                    
                 from CN
                 left join WSD on CN.wsd_no = WSD.wsd_no
                 left join CNPrinting on CN.wsd_no = CNPrinting.wsd_no
@@ -607,15 +604,11 @@ class accModel extends model {
 
     public function updatePVDForPV() {
         $sql = "UPDATE CN SET  
-            company_code = ?, recipient = ?, bank = ?, bank_no = ?, recipient_address = ?
+            company_code = ?
             WHERE cn_no = ?";
         $statement = $this->prepare($sql);
         $success = $statement->execute([
             input::post("company_code"),
-            input::post("recipient"),
-            input::post("bank"),
-            input::post("bank_no"),
-            input::post("recipient_address"),
             input::post("cn_no")
         ]);
         if($success) echo ' สำเร็จ';
@@ -636,25 +629,15 @@ class accModel extends model {
     
     public function postPVDForPV() {
         $pvd_no = $this->assignPVD(input::post('company_code'));
-        $sql = $this->prepare("INSERT into PVD(pvd_no, 
-                                                      cn_no,
-                                                      pvd_date, 
-                                                      pvd_time, 
-                                                      employee_id, 
-                                                      sum_total_sales_no_vat,
-                                                      vat_id, 
-                                                      company_code, 
-                                                      note, 
-                                                      PVD_status)
-                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, 2)");  
+
+        $sql = $this->prepare("INSERT into PVD(pvd_no, cn_no, wsd_no, pvd_date, pvd_time, employee_id, sum_total_sales,PVD_status)
+                                    values (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, 2)");  
         $success = $sql->execute([
             $pvd_no,
             input::post("cn_no"),
+            input::post("wsd_no"),
             json_decode(session::get('employee_detail'), true)['employee_id'],
-            input::post("sum_total_sales_no_vat"),
-            input::post("vat_id"),
-            input::post("company_code"),
-            input::post("note")
+            input::post("sum_total_sales")
         ]);
         // if($success) echo ' สำเร็จ';
         // else print_r($statement->errorInfo());
@@ -689,25 +672,21 @@ class accModel extends model {
         ]);
 
         $sql = "UPDATE CN SET  
-            company_code = ?, recipient = ?, bank = ?, bank_no = ?, recipient_address = ?
+            company_code = ?
             WHERE cn_no = ?";
         $statement = $this->prepare($sql);
         $success = $statement->execute([
             input::post("company_code"),
-            input::post("recipient"),
-            input::post("bank"),
-            input::post("bank_no"),
-            input::post("recipient_address"),
             input::post("cn_no")
         ]);
-
+        
     }
 
     public function getPVDConfirmPV() {
         $sql = $this->prepare("SELECT 
                                 pvd_no as pv_no,
                                 pvd_date as pv_date,
-                                sum_total_sales_no_vat as total_paid,
+                                sum_total_sales as total_paid,
                                 slipName as receipt_name,
                                 cn_no
                                 
@@ -2038,44 +2017,56 @@ class accModel extends model {
             echo $value;
             echo ' ';
 
+    // $sql = $this->prepare("SELECT
+    //                         Invoice.customer_address
+    //                         FROM
+    //                             SOX
+    //                         LEFT JOIN SOXPrinting ON SOX.sox_no = SOXPrinting.sox_no
+    //                         LEFT JOIN Invoice ON Invoice.file_no = SOXPrinting.so_no
+    //                         where SOX.sox_no = ?
+    //                       ");
+    // $sql->execute([input::post('sox_no')]);
+    // if($sql->rowCount() > 0) {             
+    //   $add = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['customer_address']; 
+    // }
+
             if($success) {
                 $sql = $this->prepare("SELECT
-                                        sum_total_sales_no_vat,
-                                        PVD.pvd_no,
-                                        CN.wsd_no,
-                                        CN.cn_no
-                                    from CNPrinting
-                                    left join CN on CN.wsd_no = CNPrinting.wsd_no
-                                    left join PVD on PVD.cn_no = CN.cn_no
+                                        PVD.sum_total_sales
+                                    from PVD
                                     where pvd_no = ?");
                 $sql->execute([$value]);
-                $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $sum_total_sales_no_vat = floatval($temp[0]["sum_total_sales_no_vat"]);
+                if($sql->rowCount() > 0) {             
+                    $sum_total_sales = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['sum_total_sales']; 
+                }
+                // $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+                // $sum_total_sales = floatval($temp[0]["sum_total_sales"]);
                 //sequence 1 PD
                 //dr เงินคืนค่าสินค้ารับคืน 24-1x20
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value,'1','24-1'.$value[0].'20',(double) $sum_total_sales_no_vat,0,'PVD']);
+                $sql->execute([$value,'1','24-1'.$value[0].'20',(double) $sum_total_sales,0,'PVD']);
 
                 //sequence 2 PD
                 //cr เงินฝากออมทรัพย์ 12-1x00
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value,'2','12-1'.$value[0].'00',0,(double) $sum_total_sales_no_vat,'PVD']);
+                $sql->execute([$value,'2','12-1'.$value[0].'00',0,(double) $sum_total_sales,'PVD']);
 
 
                 
 
                 $sql = $this->prepare("SELECT
-                                        CN.total_commission,
-                                        CN.cn_no,
-                                        PVD.pvd_no
+                                        CN.total_commission
                                     from CN
                                     left join PVD on PVD.cn_no =CN.cn_no
                                     where pvd_no = ?");
                 $sql->execute([$value]);
-                $tempp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $total_commission = floatval($tempp[0]["total_commission"]);
+                if($sql->rowCount() > 0) {             
+                    $total_commission = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['total_commission']; 
+                }
+                // $tempp = $sql->fetchAll(PDO::FETCH_ASSOC);
+                // $total_commission = floatval($tempp[0]["total_commission"]);
 
                 //sequence 3 PD
                 //dr ค่าคอมมิชชั่นค้างจ่าย 22-1x00
@@ -2087,7 +2078,7 @@ class accModel extends model {
                 //cr ค่าคอมมิชชั่น 52-0x00
                 $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                $sql->execute([$value,'4','52-1'.$value[0].'00',0,(double) $total_commission,'PVD']);
+                $sql->execute([$value,'4','52-0'.$value[0].'00',0,(double) $total_commission,'PVD']);
             }
         }
     }
@@ -2313,6 +2304,8 @@ class accModel extends model {
                                     pv_date,
                                     total_paid,
                                     product_names,
+                                    additional_cash,
+                                    additional_cash_reason,
                                     pv_status
                                 from PVA_bundle");
         $sql->execute();

@@ -252,7 +252,6 @@ class fileController extends controller {
         if(empty(uri::get(2))) {
             $this->err404();
         } else {
-            $this->requirePostition("acc");
             $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
             $this->view->pv = $this->model->getPva(Uri::get(2));
             $this->view->pvaChilds = $this->model->getPvaChild(Uri::get(2));
@@ -310,6 +309,21 @@ class fileController extends controller {
                 $this->view->setTitle("ใบส่งสินค้า #".uri::get(2));
                 $this->view->ird = $this->model->getIRD(uri::get(2));
                 $this->view->render("file/ird");
+            } else {
+                $this->err404();
+            }
+        }
+    }
+
+    public function pve() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") 
+                {
+                $this->view->setTitle("ใบสำคัญสั่งจ่าย".uri::get(2));
+                //$this->view->cn = $this->model->getCn(uri::get(2));
+                $this->view->render("file/pve");
             } else {
                 $this->err404();
             }

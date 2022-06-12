@@ -961,18 +961,21 @@
                 
                 paymentType: $scope.selectedPaymentType 
 
-            }).done(function(data) {
+            }, function(data) {
 
-    addModal('successModal', 'Sales Order',  data);
-    $('#successModal').modal('toggle');
-    $('#successModal').on('hide.bs.modal', function (e) {
-     window.location.replace('https://uaterp.cbachula.com/');
+                addModal('successModal', 'ใบสั่งขาย / Sales Order (SO)', data);
 
-});
+                $('#successModal').modal('toggle');
 
-}).fail((a,b,c)=>{console.log(a,b,c)}) 
-    }
+                $('#successModal').on('hide.bs.modal', function (e) {
 
+                    window.location.assign('/');
+
+                });
+
+            });
+
+        }
 
         
 

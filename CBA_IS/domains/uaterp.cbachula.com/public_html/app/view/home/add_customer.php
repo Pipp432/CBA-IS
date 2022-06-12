@@ -183,16 +183,33 @@
                 customerEmail : $('#customerEmail').val(),
                 customerAddress : $('#customerAddress').val() + ' ' + provinceStr + ' ' + $('#customerPostCode').val(),
                 customerProvince : $('#customerProvince').val()
-            }, function(data) {
+            }).done(function(data) {
+               if(data=="23000"){
+                    addModal('failModal', 'เพิ่มข้อมูลลูกค้า / Add Customer', 'เบอร์โทรนี้และที่อยู่นี้ อยู่ในฐานข้อมูลแล้ว ลองใส่เบอร์ใน sales order เลย');
+                    $('#failModal').modal('toggle');
+                    $('#failModal').on('hide.bs.modal', function (e) {
+                     window.location.replace('https://uaterp.cbachula.com/home/add_customer');
+                });
+
+                  
+               }else{
                 addModal('successModal', 'เพิ่มข้อมูลลูกค้า / Add Customer', 'บันทึกข้อมูลลูกค้าสำเร็จ');
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hide.bs.modal', function (e) {
-                    window.location.replace('https://uaterp.cbachula.com/home/add_customer');
+                     window.location.replace('https://uaterp.cbachula.com/home/add_customer');
                 });
-            });
+                   
+               }
+               
+            })
+            
+
+            ;
             
         }
-
+        
+        
+       
   	});
 
 </script>
