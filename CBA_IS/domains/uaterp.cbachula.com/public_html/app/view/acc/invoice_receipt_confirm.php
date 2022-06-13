@@ -336,7 +336,7 @@
                             filename = filename.substring(1);
                         }
                         formData.append('iv', filename);
-                    } else formData.append('iv', "none");
+                    } else formData.append('iv', "- ");
                 } else formData.append('iv', $scope.iv);
                 
                 formData.append('bill_no', $scope.bill_no);

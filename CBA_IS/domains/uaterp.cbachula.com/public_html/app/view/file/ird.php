@@ -51,18 +51,22 @@
 					<th>เลขที่ SOX</th>
 					<th>เลขที่ SO</th>
 					<th>รหัสสินค้า</th>
+                    <th>การขนส่ง</th>
                     <th>รายการ</th>
                     <th>จำนวน</th>
                     <th>หน่วย</th>
+                    
                     <!--<th>มูลค่าสินค้า</th>-->
                 </tr>
                 <tr ng-repeat="item in detail">
 					<td style="text-align: center;">{{item.sox_no}}</td>
 					<td style="text-align: center;">{{item.so_no}}</td>
                     <td style="text-align: center;">{{item.product_no}}</td>
+                    <td style="text-align: left;">{{item.note}}</td>
 					<td style="text-align: left;">{{item.product_name}}</td>
                     <td style="text-align: right;">{{item.quantity}}</td>
                     <td style="text-align: left;">{{item.unit}}</td>
+                    
                     <!--<td style="text-align: right;">{{item.total_sales | number:2}}</td> -->
                 </tr>
                 <tr>
@@ -90,7 +94,7 @@
                 
                     </th>
                     <th colspan="2" rowspan = "3" style="text-align: center;">จำนวนกล่องทั้งหมด</th>
-                    <th colspan="1" rowspan = "3" style="text-align: center;">{{detail[0].box_count}}</th>
+                    <th colspan="2" rowspan = "3" style="text-align: center;">{{detail[0].box_count}}</th>
                 </tr>
                 <!--<tr>
                     <th colspan="2" rowspan = "2" style="text-align: right;">มูลค่าสินค้า</th>

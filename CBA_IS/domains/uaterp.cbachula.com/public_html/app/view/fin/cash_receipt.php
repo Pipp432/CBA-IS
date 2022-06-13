@@ -126,24 +126,25 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวมก่อนภาษี</th>
-                            <th id="totalPrice" style="text-align: right;">{{vat_type==='3'?crItems[0].sox_sales_price:crItems[0].sox_sales_price*100/107| number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{vat_type==='3'? crItems[0].so_total_sales_no_vat2 + crItems[0].so_total_sales_vat2 : crItems[0].so_total_sales_no_vat2| number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="4">ส่วนลด</th>
                             <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_discount | number:2}}</th>
-                        </tr>  
-                        <tr>
-                            <th style="text-align: right;" colspan="4">ภาษี 7%</th>
-                            <th id="totalPrice" style="text-align: right;">{{vat_type=="3" ? 0 : crItems[0].sox_sales_price *7/107 | number:2}}</th>
-                        </tr>  
+                        </tr> 
                         <tr>
                             <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
-                            <th id="cardFee" style="text-align: right;">{{card_fee  | number:2}}</th>
+                            <th id="cardFee" style="text-align: right;">{{roundedPrice*(100/107) - crItems[0].so_total_sales_no_vat2 | number:2}}</th>
+                        </tr>   
+                        <tr>
+                            <th style="text-align: right;" colspan="4">ภาษี 7%</th>
+                            <th id="totalPrice" style="text-align: right;">{{vat_type=="3" ? 0 :roundedPrice * 7/107 | number:2}}</th>
                         </tr>  
+                        
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวม</th>
-                            <th id="totalPrice" style="text-align: right;">{{crItems[0].sox_sales_price| number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{(crItems[0].sox_sales_price)| number:0}}</th>
                             <!--ผิด table-->
                         </tr>
                         <!--<tr>
@@ -281,9 +282,13 @@
         $scope.addCrItem = function(sox) {
             
             $scope.crItems = [];
+          
             $scope.sox = sox;
             $scope.vat_type = $scope.sox.vat_type;
             console.log(`Vat Type:${$scope.vat_type}`);
+            $scope.roundedPrice =  Math.round(Number(sox.sox_sales_price));
+            console.log(sox.so_total_sales_no_vat);
+
          
             
             
@@ -417,11 +422,11 @@
             if($scope.crItems.length != 0) {
                 $scope.card_fee = 0;
                 if($scope.crItems[0].payment_type === 'CC'){
-                    $scope.card_fee = (parseFloat(sox.total_sales)*2.45)/100 ;
+                    $scope.card_fee = (parseFloat(sox.so_total_sales_no_vat2 )*2.45)/100 ;
                 } else if($scope.crItems[0].payment_type === 'FB'){
-                    $scope.card_fee = (parseFloat(sox.total_sales)*2.75)/100 ;
+                    $scope.card_fee = (parseFloat(sox.so_total_sales_no_vat2 )*2.75)/100 ;
                 }
-                $scope.new_total_price = parseFloat(sox.total_sales) + $scope.card_fee;
+                $scope.new_total_price = parseFloat(sox.so_total_sales_no_vat2 ) + $scope.card_fee;
             }
             // console.log((parseFloat(sox.total_sales)*2.45)/100)
 

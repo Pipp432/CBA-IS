@@ -13,16 +13,16 @@
                 <h3 style="text-align: center;"><b>ใบสำคัญสั่งจ่าย<br>Payment Voucher</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">ตัวจริง</h5>
-                <h5 style="text-align: right;"><b>เลขที่ {{detail[0].pv_no}}</b></h5>
-                <h6 style="text-align: right;">วันที่ {{detail[0].pv_date}}</h6>
+                <h5 style="text-align: right;">ต้นฉบับ</h5>
+                <h5 style="text-align: right;"><b>เลขที่ P</b></h5>
+                <h6 style="text-align: right;">วันที่ 2022-0</h6>
             </div>
         </div>
         
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                    <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ P)</b><br>
                     อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
                     โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
                 </p>
@@ -37,7 +37,7 @@
                     <tr>
                         <td><b>สั่งจ่าย</b> กรมสรรพากร</td>
                         <td><b>จ่ายเพื่อ</b> ภาษีมูลค่าเพิ่ม</td>
-                        <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].due_date}}</td>
+                        <td><b>วันครบกำหนดจ่ายเงิน</b> 2022-0</td>
                     </tr>
                 </table>
             </div>
@@ -49,27 +49,33 @@
                     <th>เอกสารอ้างอิงลงวันที่</th>
                     <th>หมายเลขอ้างอิง<br>ใบกำกับภาษี/ใบเบิกค่าใช้จ่าย</th>
                     <th>รายละเอียด</th>
-                    <th>จำนวน</th>
+                    <!-- <th>จำนวน</th> -->
                     <th>หมายเหตุ</th>
                 </tr>
                 <tr ng-repeat="item in detail">
-                    <td style="text-align: left;">{{item.file_date}}</td>
-                    <td style="text-align: left;">{{item.iv_no}}</td>
-                    <td style="text-align: left;">{{item.detail}}</td>
-                    <td style="text-align: right;">{{item.paid_total | number:2}}</td>
-                    <td style="text-align: left;">{{item.note}}</td>
+                    <td style="text-align: left;">P</td>
+                    <td style="text-align: left;">PE</td>
+                    <td style="text-align: left;">P</td>
+                    <!-- <td style="text-align: right;">P</td> -->
+                    <td style="text-align: left;">P</td>
+                </tr>
+                <tr>
+                    <th colspan="1" style="text-align: center;">P</th>
+                    <th colspan="1" style="text-align: left;">P</th>
+                    <th colspan="1" style="text-align: center;">P</th>
+                    <th colspan="1" style="text-align: right;">P</th>
                 </tr>
                 <tr>
                     <th colspan="1" style="text-align: center;">จำนวนเงิน</th>
-                    <th colspan="2" style="text-align: left;">{{detail[0].thai_text}}</th>
+                    <th colspan="1" style="text-align: left;">0</th>
                     <th colspan="1" style="text-align: center;">รวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].total_paid | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">0</th>
                 </tr>
             </table>
         </div>  
         
         <div class="row px-2 mt-3">
-            <p><i>หมายเหตุ : จ่าย {{detail[0].bank}}</i></p>
+            <!-- <p><i>หมายเหตุ : จ่าย {{detail[0].bank}}</i></p> -->
         </div>  
     
     </div>

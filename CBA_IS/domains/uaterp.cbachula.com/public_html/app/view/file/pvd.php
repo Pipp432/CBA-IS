@@ -94,7 +94,7 @@
                         {{detail[0].new_sales_price_thai}}
                     </th>
                     <th colspan="2" style="text-align: right;">จำนวนเงินทั้งสิ้น</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].sum_total_sales_no_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].sum_total_sales | number:2}}</th>
                     <!-- <th colspan="2" style="text-align: right;">ส่วนลด</th>
                     <th colspan="1" style="text-align: right;">{{detail[0].discount | number:2}}</th> -->
                 </tr>

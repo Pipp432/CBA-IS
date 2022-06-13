@@ -391,6 +391,7 @@
 
         $scope.postCnItems = function() {
             $scope.company = $scope.WSDs[0].invoice_no.substring(0,1);
+            $scope.sox_no =  $scope.WSDs[0].sox_no;
 
             $('#confirmModal').modal('hide');
             $.post("/acc/credit_note/post_cn", { 
@@ -412,6 +413,7 @@
                 //debit : $scope.debit,
                 //credit : $scope.credit,
                 // cnItems : JSON.stringify(angular.toJson($scope.cnItems)),
+                sox_no : $scope.sox_no,
                 invoice_no : $scope.invoice_no,
                 wsd_no : $scope.wsdNo,
                 company : $scope.company

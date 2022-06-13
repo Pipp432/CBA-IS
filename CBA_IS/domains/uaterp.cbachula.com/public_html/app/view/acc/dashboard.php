@@ -135,10 +135,10 @@
 
                         
                         <span ng-show="pvType == 'Supplier'"> 
-                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" target="_blank">ดูใบวางบิล </a>
-                            <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" target="_blank">ดูใบแจ้งหนี้</a>
-                            <a href="/acc/payment_voucher/get_invoice/{{dashboard.rrci_no}}" target="_blank">ดูใบกำกับภาษี</a>
-                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" target="_blank">ดูใบลดหนี้ </a> 
+                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/tax/{{dashboard.file_no}}" ng-click="stopEvent($event)" target="_blank">ดูใบวางบิล </a>
+                            <a href="/acc/dashboard/get_IVPC_Files_dashboard/bill/{{dashboard.file_no}}" ng-click="stopEvent($event)" target="_blank">ดูใบแจ้งหนี้</a>
+                            <a href="/acc/payment_voucher/get_invoice/{{dashboard.rrci_no}}" ng-click="stopEvent($event)" target="_blank">ดูใบกำกับภาษี</a>
+                            <a  href="/acc/dashboard/get_IVPC_Files_dashboard/debt/{{dashboard.file_no}}" ng-click="stopEvent($event)" target="_blank">ดูใบลดหนี้ </a> 
                         </span>
                         
                     </td>

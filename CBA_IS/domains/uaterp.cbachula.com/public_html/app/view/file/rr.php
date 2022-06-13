@@ -13,7 +13,7 @@
                 <h3 style="text-align: center;"><b>ใบรับสินค้า<br>Receiving Report</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">สำเนา</h5>
+                <h5 style="text-align: right;">ตัวจริง</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].rr_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].rr_date}}</h6>
             </div>

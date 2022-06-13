@@ -132,15 +132,19 @@
                         </div>
                     </th>
                     <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_purchase_no_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type == "3" ? detail[0].invoice_total_sales_price : detail[0].invoice_total_sales_price * 100/107 - creditCardFee  | number:2}}</th>
                 </tr>
+                    <!-- <tr>
+                        <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
+                        <th colspan="1" style="text-align: right;">{{creditCardFee | number:2}}</th>
+                    </tr> -->
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{ detail[0].vat_type =='3'? 0:detail[0].invoice_total_sales_price * 7/107 | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price| number:0}}</th>
                 </tr>
             </table>
         </div> 
@@ -248,6 +252,35 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
+
+            if($scope.detail[0]["payment_type"] =="CC"){
+                    
+                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
+                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                   
+                }
+                else if($scope.detail[0]["payment_type"] =='FB'){
+                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
+                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                  
+                }else{
+                    $scope.creditCardFee =0;
+                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+                   
+                }
+                // console.log($scope.creditCardFee)
+            
+          
+                if($scope.detail[0].customer_name.substring(0,6)==='บริษัท') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,3)==='นาง') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,6)==='นางสาว') $scope.customer_title = "";
+                if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
+                if($scope.customer_title === null) $scope.customer_title = "";
+
+               $scope.final = Number($scope.detail[0].invoice_total_purchase_vat)+$scope.creditCardFee;
+               $scope.difference = Math.round(Number($scope.detail[0].invoice_total_sales_price)) - Number($scope.detail[0].invoice_total_sales_price);
+            //   console.log($scope.difference)
+              console.log($scope.detail[0].invoice_total_sales_price )
            
         }
       

@@ -59,13 +59,13 @@
             
                 <tr>
                     <td style="text-align: left;">จำนวนที่ต้องการเติมเพิ่ม</td>
-                    <td style="text-align: left;"></td>
+                    <td style="text-align: left;">{{detail[0].additional_cash_reason}}</td>
                     <td style="text-align: right;">{{detail[0].additional_cash | number:2}}</td>
                 </tr>
 
                 <tr>
                     <th style="text-align: left;">จำนวนรวม </td>
-                    <th style="text-align: left;">{{detail[0].thai_text}}</td>
+                    <th style="text-align: left;">{{detail[1]}}</td>
                     <th style="text-align: right;">{{netTotal | number:2}}</td>
                 </tr>
             </table>
