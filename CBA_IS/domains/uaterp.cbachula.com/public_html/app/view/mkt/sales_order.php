@@ -708,7 +708,7 @@
 
             
 
-            if($scope.selectedProductType == 'Stock' && product.stock == 0) {
+            if($scope.selectedProductType == 'Stock' && product.stock <= 0) {
 
                 $('#noProductInStock').modal('toggle');
 

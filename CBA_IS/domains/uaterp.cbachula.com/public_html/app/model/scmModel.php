@@ -1125,17 +1125,16 @@ class scmModel extends model {
 
      //เวอชั่นถูกค่ะ ver 10
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT SO.so_no,SOX.sox_no,SOX.box_size, Invoice.invoice_no, SOPrinting.product_no,Product.product_name , SOPrinting.quantity 
+        $sql=$this->prepare("SELECT distinct SO.so_no,SOX.sox_no,SOX.box_size, Invoice.invoice_no, SOPrinting.product_no,Product.product_name , SOPrinting.quantity 
         FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
-        INNER JOIN Invoice ON Invoice.file_no = SO.so_no
-        INNER JOIN InvoicePrinting ON Invoice.invoice_no = InvoicePrinting.invoice_no AND SOPrinting.product_no = InvoicePrinting.product_no
-        WHERE sox_status=1 AND SOX.done=0  AND SOX.cancelled = 0 
-        GROUP BY SOPrinting.product_no
-ORDER BY `SOX`.`sox_no` ASC");
+		INNER JOIN Invoice ON Invoice.file_no=SO.so_no
+        INNER JOIN InvoicePrinting ON Product.product_no=InvoicePrinting.product_no 
+        WHERE sox_status=1 AND SOX.done=0 AND SOX.cancelled = 0
+ORDER BY SOX.sox_no ASC;");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

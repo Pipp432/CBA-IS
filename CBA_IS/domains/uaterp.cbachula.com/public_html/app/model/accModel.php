@@ -430,7 +430,7 @@ class accModel extends model {
                 ( double )$value[ 'quantity' ],
                 ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
             ] );
-            print_r($sql->errorInfo());
+            // print_r($sql->errorInfo());
 
           }
     
@@ -452,6 +452,23 @@ class accModel extends model {
             // input::post("sum_total_sales"),
             input::post('wsd_no')
         ]);
+
+        $sql = $this->prepare("UPDATE SOX 
+                        LEFT JOIN SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
+                        LEFT JOIN SO ON SOXPrinting.so_no = SO.so_no
+                        LEFT JOIN SOPrinting on SO.so_no = SOPrinting.so_no
+                        LEFT JOIN PointLog on SOXPrinting.so_no = PointLog.note
+                        SET
+                        SOX.cancelled = 1,
+                        SO.cancelled = 1,
+                        SOPrinting.cancelled = 1,
+                        PointLog.cancelled = 1
+                        WHERE SOX.sox_no = ? ;
+                                ");             
+        $sql->execute([
+            input::post('sox_no')
+        ]);
+        
 
 
         //CBA2022 กระบวนการออกใบลดหนี้ เมื่อลูกค้าคืนของ (PV-D)

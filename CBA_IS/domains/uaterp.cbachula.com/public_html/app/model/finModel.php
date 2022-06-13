@@ -11,57 +11,59 @@ class finModel extends model {
     // CR Module
     public function getSoxsForCr() {
         $sql = $this->prepare("select 
-                                    SOX.sox_no,
-                                    SOX.sox_datetime,
-                                    SOX.employee_id,
-                                    Employee.employee_nickname_thai,
-                                    Customer.customer_name,
-                                    Customer.customerTitle,
-                                    Customer.customer_surname,
-                                    SOX.address,
-                                    Customer.national_id,
-                                    SO.so_no,
-                                    SO.product_type,
-                                    SO.payment_type,
-                                    SOPrinting.product_no,
-                                    Product.product_name,
-                                    SOPrinting.sales_no_vat,
-                                    SOPrinting.sales_vat,
-                                    SOPrinting.sales_price,
-                                    SOPrinting.quantity,
-                                    SOPrinting.total_sales,
-                                    SOX.transportation_no_vat,
-                                    SOX.transportation_vat,
-                                    SOX.transportation_price,
-                                    SOX.so_total_discount,
-                                    SOXPrinting.total_sales_no_vat as so_total_sales_no_vat,
-                                    SOXPrinting.total_sales_vat as so_total_sales_vat,
-                                    SOXPrinting.total_sales_price as so_total_sales_price,
-                                    SOX.total_sales_price as sox_sales_price,
-                                    SO.discountso,
-									SO.point as so_point,
-                                    SO.payment as payment,SO.vat_type,
-                                    SO.commission as so_commission,
-                                    SOX.slip_uploaded,
-                                    SOX.slip_datetime,
-                                    SOX.payment_date,
-                                    SOX.payment_time,
-									SOX.payment_amount,
-                                    SOX.fin_form,
-                                    Bank_Statement.id
-                                from SOXPrinting 
-                                inner join SOX on SOX.sox_no = SOXPrinting.sox_no
-                                inner join SO on SO.so_no = SOXPrinting.so_no
-                                inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                inner join Employee on Employee.employee_id = SOX.employee_id
-                                inner join Product on Product.product_no = SOPrinting.product_no
-                                inner join Customer on Customer.customer_tel = SOX.customer_tel and SOX.address = Customer.address
-                                left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
-                                SOX.payment_time=Bank_Statement.payment_time and 
-                                SOX.payment_amount=Bank_Statement.payment_amount
-                              
-                                
-                                where SOX.done = -1 and SOX.cancelled = 0 and (SO.payment = 0 or SO.payment is null) and SOX.slip_name is not null order by SOX.slip_datetime");  
+        SOX.sox_no,
+        SOX.sox_datetime,
+        SOX.employee_id,
+        Employee.employee_nickname_thai,
+        Customer.customer_name,
+        Customer.customerTitle,
+        Customer.customer_surname,
+        SOX.address,
+        Customer.national_id,
+        SO.so_no,
+        SO.product_type,
+        SO.payment_type,
+        SOPrinting.product_no,
+        Product.product_name,
+        SOPrinting.sales_no_vat,
+        SOPrinting.sales_vat,
+        SOPrinting.sales_price,
+        SOPrinting.quantity,
+        SOPrinting.total_sales,
+        SOX.transportation_no_vat,
+        SOX.transportation_vat,
+        SOX.transportation_price,
+        SOX.so_total_discount,
+        SOXPrinting.total_sales_no_vat as so_total_sales_no_vat,
+        SOXPrinting.total_sales_vat as so_total_sales_vat,
+        SOXPrinting.total_sales_price as so_total_sales_price,
+        SOX.total_sales_price as sox_sales_price,
+        SO.discountso,
+        SO.point as so_point,
+        SO.payment as payment,SO.vat_type,
+        SO.commission as so_commission,
+        SOX.slip_uploaded,
+        SOX.slip_datetime,
+        SOX.payment_date,
+        SOX.payment_time,
+        SOX.payment_amount,
+        SOX.fin_form,
+        Bank_Statement.id,
+        MAX(View_InvoiceStock.balance) as balance
+    from SOXPrinting 
+    inner join SOX on SOX.sox_no = SOXPrinting.sox_no
+    inner join SO on SO.so_no = SOXPrinting.so_no
+    inner join SOPrinting on SOPrinting.so_no = SO.so_no
+    inner join Employee on Employee.employee_id = SOX.employee_id
+    inner join Product on Product.product_no = SOPrinting.product_no
+    inner join Customer on Customer.customer_tel = SOX.customer_tel and SOX.address = Customer.address
+    left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
+    SOX.payment_time=Bank_Statement.payment_time and 
+    SOX.payment_amount=Bank_Statement.payment_amount
+    LEFT JOIN View_InvoiceStock ON Product.product_no = View_InvoiceStock.product_no
+    WHERE SOX.done = -1 and SOX.cancelled = 0 and (SO.payment = 0 or SO.payment is null) and SOX.slip_name is not null 
+    GROUP BY SOX.sox_no, SO.so_no,Product.product_no
+    order by SOX.slip_datetime;");  
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -495,6 +497,7 @@ class finModel extends model {
     
         $sql = $this->prepare("update SOX set SOX.done = 0 where SOX.sox_no = ?");
         $sql->execute([input::post('sox_number')]);
+       
         
         $crItemsArray = json_decode(input::post('crItems'), true); 
         $crItemsArray = json_decode($crItemsArray, true); 
@@ -681,12 +684,9 @@ class finModel extends model {
               
                 $rr_no = $rrTable['file_no'];
                 
-                echo " ".$sql->errorInfo()[0]." Product: ".$value['product_no']." Stock: ".$rrStock." ";
-                if($rrStock<=0) return " ERROR".$sql->errorInfo()[0]." Product: ".$value['product_no']." Stock: ".$rrStock;
+                if($rrStock<=0) return "<h1 style='color:red'>ออกไม่ได้ หยุดการออก IV ติดต่อ IS</h1>";
 
-                if($sql->errorInfo()[0]!="00000"){
-                    return "error";
-                }else{   
+               
                     if( $accumStock > $rrStock )
                     {
                         $cutStock = $rrStock;
@@ -720,7 +720,7 @@ class finModel extends model {
                     }
                 
                     $accumStock = $accumStock - $cutStock;
-                }
+                
               
              
                
