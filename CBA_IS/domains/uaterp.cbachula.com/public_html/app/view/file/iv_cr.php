@@ -244,6 +244,7 @@
         
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
+            console.log($scope.detail);
             $scope.customer_title = $scope.detail[0].customer_title;
             $scope.hasTransportation = false;
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);

@@ -1446,20 +1446,20 @@ class mktModel extends model {
 		$price_ems = 0;
 
 		if($weight <= 500) {
-			$price_reg = 30;
-			$price_ems = 40;
+			$price_reg = 32;
+			$price_ems = 42;
 		} else if($weight <= 2500) {
-			$price_reg = 40;
-			$price_ems = 50;
+			$price_reg = 42;
+			$price_ems = 52;
 		} else if($weight <= 5000) {
-			$price_reg = 50;
-			$price_ems = 60;
+			$price_reg = 52;
+			$price_ems = 62;
 		} else if($weight <= 8000) {
-			$price_reg = 60;
-			$price_ems = 80;
+			$price_reg = 62;
+			$price_ems = 82;
 		} else {
-			$price_reg = 90;
-			$price_ems = 110;
+			$price_reg = 92;
+			$price_ems = 112;
 		}
 
 		return [

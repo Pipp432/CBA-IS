@@ -135,6 +135,7 @@
                     newPo = false;
                 }
             });
+            console.log($scope.ciItems)
             if(newPo) {
                 angular.forEach($scope.pos, function (value, key) {
                     if(value.po_no == po.po_no) {
@@ -153,6 +154,7 @@
                 }
             });
             $scope.ciItems = tempRemoved;
+            
             $scope.calculateTotalPrice();
         }
         

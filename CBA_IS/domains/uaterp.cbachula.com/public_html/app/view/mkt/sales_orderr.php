@@ -323,7 +323,7 @@
 
                         </tr>
 						
-						<!-- <tr ng-show="selectedProductType == 'Install'">
+						<tr ng-show="selectedProductType == 'Install'">
 							
 							<th style="text-align: right;" colspan="6">
 								<div class="custom-control">
@@ -344,7 +344,7 @@
 							</div>
 
                             </th>
-                        </tr> -->
+                        </tr>
 							<!-- <div class="custom-control custom-checkbox mt-2">
 								<input type="checkbox" class="custom-control-input" id="fin_form" name="fin_form" value="0" ng-click="fin_form_check()">
 								<label class="custom-control-label" for="fin_form">กรอกฟอร์มแล้ว</label>
@@ -449,7 +449,7 @@
 
 </style>
 <script>
-        //  addModal('installValidate', 'Sales Order', 'Please select a payment method');
+         addModal('installValidate', 'Sales Order', 'Please select a payment method');
         
          
 </script>
@@ -910,8 +910,8 @@
 
                 $scope.finishEdit();
 
-            // }else if(!$scope.selected){
-            //  $('#installValidate').modal('toggle');
+            }else if(!$scope.selected){
+             $('#installValidate').modal('toggle');
 
             }else {
 
@@ -963,7 +963,7 @@
 
                 soItems : JSON.stringify(angular.toJson($scope.soItems)),
                 
-                paymentType: null 
+                paymentType: $scope.selectedPaymentType 
 
             }).done(function(data) {
 

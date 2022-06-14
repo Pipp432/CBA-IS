@@ -736,7 +736,15 @@
                         $scope.isLoad = false;
                     });
             } else if($scope.selectedPaymentType === 'PB') {
-                $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){$scope.rrcinopvs = response.data; $scope.isLoad = false;});
+                $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){
+                    $scope.rrcinopvs = response.data;
+                    angular.forEach($scope.rrcinopvs, items =>{
+                        if(items['invoice_no'] == 'none'){
+                            items['invoice_no'] = "-";
+                        }
+                    });
+                    $scope.isLoad = false;
+                });
                 $('#pvNameLabel').html('จ่าย Supplier');
                 $("#pvAddressTextbox").prop("disabled", true);
             } else if($scope.selectedPaymentType==='PC') {

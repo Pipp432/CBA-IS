@@ -588,7 +588,7 @@ class accModel extends model {
                     WSD.bank,
                     WSD.bank_no,
                     WSD.recipient,
-                    WSD.recipient_address,
+                    Invoice.customer_address as recipient_address,
                     WSD.invoice_no,
                     WSD.sox_no,
                     WSD.vat_id,
@@ -1402,7 +1402,7 @@ class accModel extends model {
         }
         return $rqPrefix . $runningNo;
     }
-    
+     
 	
     // PV-B Module
 	public function getRRCINOPV() {
@@ -2332,6 +2332,23 @@ class accModel extends model {
         return json_encode([]);
     }
 
+    public function getDashboardExa() {
+        $sql = $this->prepare("select
+                                    internal_pva_no, 
+                                	pv_no,
+                                    pv_time,
+                                    pv_date,
+                                    total_paid,
+                                    product_names,
+                                    pv_status
+                                from PVA");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
     public function getDashboardPvb() {
         $sql = $this->prepare("SELECT
                                 	PV.pv_no as file_no,
@@ -3251,12 +3268,14 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
     }
 
 
-
-
-
-
-
-
+    public function getforecastvat() {
+        $sql = $this->prepare( "SELECT Invoice.invoice_no,SUBSTRING_INDEX(Invoice.invoice_no, 'IV', '1') as โครงการ,Invoice.invoice_date, extract(month from Invoice.invoice_date), Invoice.total_sales_no_vat,Invoice.total_sales_vat,Invoice.total_sales_price FROM Invoice;" );
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+          return $sql->fetchAll();
+        }
+        return [];
+    }
 
 
 }

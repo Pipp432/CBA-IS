@@ -231,13 +231,14 @@ class accController extends controller {
         }
     }
     
-    public function dashboard() {
+    public function dashboard() { 
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
             $this->view->setTitle("Dashboard");
             $this->view->dashboardIv = $this->model->getDashboardIv();
             $this->view->dashboardPv = $this->model->getDashboardPv();
             $this->view->dashboardPva = $this->model->getDashboardPva();
+            $this->view->dashboardExa = $this->model->getDashboardExa();
             $this->view->dashboardPvb = $this->model->getDashboardPvb();
             $this->view->dashboardPvd = $this->model->getDashboardPvd();
             $this->view->dashboardPrePvd = $this->model->getDashboardPrePvd();
@@ -391,6 +392,42 @@ class accController extends controller {
         } 
     }
     
-
+    public function forecast_vat() {
+        
+        header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=forecast_vat.xls");
+        $data = $this->model->getforecastvat();
+        echo "\xEF\xBB\xBF";
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>invoice_no</th>';
+                echo '<th>โครงการ</th>';
+                echo '<th>Date</th>';
+                echo '<th>month</th>';
+                echo '<th>total_invoice_no_vat</th>';
+                echo '<th>total_invoice_vat</th>';
+                echo '<th>total_invoice_price</th>';
+                
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    
+                    echo '<td>'.$value['invoice_no'].'</td>';
+                    echo '<td>'.$value['โครงการ'].'</td>';
+                    echo '<td>'.$value['invoice_date'].'</td>';
+                    echo '<td>'.$value['extract(month from Invoice.invoice_date)'].'</td>';
+                    echo '<td>'.$value['total_sales_no_vat'].'</td>';
+                    echo '<td>'.$value['total_sales_vat'].'</td>';
+                    echo '<td>'.$value['total_sales_price'].'</td>';
+                    
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
 
 }

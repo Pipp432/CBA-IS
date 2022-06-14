@@ -49,6 +49,14 @@
             </div>
 
             <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardEXA()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">EX-A (เงินรองจ่าย)</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPVB()">
                     <div class="card-body">
                         <h5 class="card-title my-0">PV-B (Supplier)</h5>
@@ -93,7 +101,7 @@
         <!-- DOCUMENT everything not pv  -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-        <div ng-show = "temp != 'PV-D' && temp != 'PPV-D' && temp != 'PV-A' && temp != 'PV-C' && temp != 'PPV-C'" class="mt-2 p-0">
+        <div ng-show = "temp != 'PV-D' && temp != 'PPV-D' && temp != 'PV-A' && temp != 'PV-C' && temp != 'PPV-C' && temp != 'EX-A'" class="mt-2 p-0">
             
             <table class="table table-hover my-1">
                 <tr>
@@ -279,6 +287,45 @@
             
         </div>
 
+
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        <!-- DOCUMENT EXA -->
+        <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+        
+        <div ng-show = "temp == 'EX-A'" class="mt-2 p-0">
+            
+            <table class="table table-hover my-1">
+                <tr>
+                    <th>เลข EX-A</th>
+                    <th>เลข PV-A</th>
+                    <th>วันที่</th>
+                    <th>รายการ</th>
+                    <th>จำนวนเงิน</th>
+                    <th>Slip</th>
+                    <th>สถานะ</th>
+                </tr>
+                <tr ng-show="dashboardsExa.length == 0">
+                    <th colspan="5">
+                        <h6 class="my-0" style="text-align:center;"> no PV-A to show</h6>
+                    </th>
+                </tr>
+                <tr ng-repeat="prePva in dashboardsExa">
+                    <td>{{prePva.internal_pva_no}}</td>
+                    <td>{{prePva.pv_no}}</td>
+                    <td>{{prePva.pv_date}} {{prePva.pv_time}}</td>
+                    <td>{{prePva.product_names}}</td>
+                    <td>{{prePva.total_paid}}</td>
+                    <td>
+                        <a target = '_blank' href="/fin/validate_petty_cash_request/get_re/{{prePva.internal_pva_no}}">Check reciept/invoice</a>
+                        <a target = '_blank' href="/fin/validate_petty_cash_request/get_iv/{{prePva.internal_pva_no}}">Check slip</a>
+                        <a ng-show="prePva.pv_status >= 1" href="/fin/create_pva/get_fin_slip/{{prePva.internal_pva_no}}" target="_blank">สลิปโอนให้พนักงาน</a> 
+                    </td>
+                    <td>{{prePva.pv_status_readable}}</td>
+                </tr>
+            </table>
+            
+        </div>
+ 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
@@ -409,6 +456,7 @@
         
         $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
         $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
+        $scope.dashboardsExa = <?php echo $this->dashboardExa; ?>;
         
         convert_pva_status = {
             '-1':"ยกเลิก",
@@ -422,6 +470,10 @@
         angular.forEach($scope.dashboardsPva, function(value, key) {
             value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
             value["realTotal"] = parseFloat(value["total_paid"]) + parseFloat(value["additional_cash"]);
+        });
+
+        angular.forEach($scope.dashboardsExa, function(value, key) {
+            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
         });
 
 
@@ -461,6 +513,13 @@
             $scope.doc = 'PV';
             $scope.pvType = 'pva';
             $scope.temp = 'PV-A';
+        }
+
+        $scope.getDashboardEXA = function() {
+            $scope.dashboards = [];
+            $scope.doc = 'PV';
+            $scope.pvType = 'exa';
+            $scope.temp = 'EX-A';
         }
 
         $scope.getDashboardPVB = function() {
