@@ -22,7 +22,7 @@ class fileModel extends model {
     							    POPrinting.product_no,
     							    Product.product_description,
     							    POPrinting.quantity,
-    							    Product.unit,
+    							    Product.unit,Product.vat_type,
     							    POPrinting.purchase_price,
     							    POPrinting.total_purchase_price,
     							    PO.total_purchase_no_vat as 'po_total_purchase_no_vat',

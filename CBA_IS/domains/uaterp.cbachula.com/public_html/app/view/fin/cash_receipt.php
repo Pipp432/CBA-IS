@@ -126,7 +126,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวมก่อนภาษี</th>
-                            <th id="totalPrice" style="text-align: right;">{{vat_type==='3'? crItems[0].so_total_sales_no_vat2 + crItems[0].so_total_sales_vat2 : crItems[0].so_total_sales_no_vat2| number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{priceBeforeVat|number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <tr>
@@ -135,16 +135,16 @@
                         </tr> 
                         <tr>
                             <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
-                            <th id="cardFee" style="text-align: right;">{{crItems[0].payment_type==='MB' || crItems[0].product_type !=='Install' ||crItems[0].payment_type===null  ? 0:roundedPrice*(100/107) - crItems[0].so_total_sales_no_vat2 | number:2}}</th>
+                            <th id="cardFee" style="text-align: right;">{{creditCardfee|number:2}}</th>
                         </tr>   
                         <tr>
                             <th style="text-align: right;" colspan="4">ภาษี 7%</th>
-                            <th id="totalPrice" style="text-align: right;">{{vat_type=="3" ? 0 :roundedPrice * 7/107 | number:2}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{vat|number:2}}</th>
                         </tr>  
                         
                         <tr>
                             <th style="text-align: right;" colspan="4">ราคารวม</th>
-                            <th id="totalPrice" style="text-align: right;">{{(crItems[0].sox_sales_price)| number:0}}</th>
+                            <th id="totalPrice" style="text-align: right;">{{finalPrice}}</th>
                             <!--ผิด table-->
                         </tr>
                         <!--<tr>
@@ -245,6 +245,10 @@
         // $scope.selectedBank = '';
         // $scope.TransferTime = '';
         $scope.soxs = <?php echo $this->soxs; ?>;
+        $scope.creditCardfee=0;
+        $scope.finalPrice=0;
+        $scope.priceBeforeVat=0;
+        $scope.vat=0;
        
         
         var first = true;
@@ -279,8 +283,7 @@
             
         }
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        $scope.creditCardfee=0;
-        $scope.finalPrice=0;
+      
         $scope.processNumber = function(sox){
            
             if(sox.product_type!=='Install') {
@@ -298,24 +301,34 @@
             }
             else{
                 $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat)
-                if(sox.vat_type==='3') { 
-                    $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat2)
-                    $scope.vat = 0;
-                }
-                if(sox.payment_type==='MB' || sox.payment_type===null){
+                
+                if((sox.payment_type==='MB' || sox.payment_type===null)){
                     $scope.creditCardfee = 0;
                     $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(2);
-                    $scope.vat = Number(sox.so_total_sales_no_vat) * 7/100;
+                    if(sox.vat_type==='3') { 
+                        $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat)
+                        $scope.vat = 0;
+                    }else{
+                        $scope.vat = Number(sox.so_total_sales_no_vat) * 7/100;
+                    }
+                    
                 }else{
                    
                     $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(0);
-                    $scope.creditCardfee =  $scope.finalPrice*100/107 - $scope.priceBeforeVat; 
-                    $scope.vat = Number(sox.so_total_sales_no_vat) * 7/100;
+                    $scope.creditCardfee =  $scope.finalPrice*100/107 - $scope.priceBeforeVat;
+                    if(sox.vat_type==='3') { 
+                        $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat)
+                        $scope.vat = 0;
+                    }else{
+                        $scope.vat = Number(sox.so_total_sales_no_vat) * 7/100;
+                    }
                 }
             }
 
             console.log(`Product Type: ${sox.product_type}`)
             console.log(`Price before VAT: ${($scope.priceBeforeVat).toFixed(2)}`)
+            console.log(`Payment Type: ${sox.payment_type}`);
+            
             console.log(`VAT type: ${sox.vat_type}`);
             console.log(`VAT amount: ${($scope.vat).toFixed(2)}`);
             

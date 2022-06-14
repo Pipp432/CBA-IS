@@ -83,7 +83,7 @@
                    
                     <div class="col-md-3">
                         <label for="pvItemPaidTotal">จำนวนเงิน</label>
-                        <input type="text" class="form-control" id="pvItemPaidTotal" ng-model="pvItemPaidTotal">
+                        <input type="text" class="form-control" id="pvItemPaidTotal" ng-model="total_money">
                         <div class="custom-control custom-checkbox mt-2">
                             <input type="checkbox" class="custom-control-input" id="vatCheck" ng-model="vat" ng-click="vat_check()">
                             <label class="custom-control-label" for="vatCheck">ขอคืนภาษี</label>
@@ -261,9 +261,9 @@
                             <th colspan="2">เลข EXC</th>
                             <th>วันที่อนุมัติ</th>
                             <th>เดบิต</th>
-                            <th>รายละเอียด</th>
+                            <th colspan="2">รายละเอียด</th>
                             <th ng-show="selectedPaymentType=='PB'">เลขที่ RR/CI</th>
-                            <th ng-show="selectedPaymentType=='PA' || selectedPaymentType=='PC'">เลขที่ใบเบิกค่าใช้จ่าย</th>
+                            <th ng-show="selectedPaymentType=='PA'">เลขที่ใบเบิกค่าใช้จ่าย</th>
                            
                             
                         </tr>
@@ -284,7 +284,7 @@
                                
                                 </ul>
                             </td>
-                            <td style="text-align: center;">{{pvItem.re_req_no}}</td>
+                          
                             
                             
                         </tr>
@@ -1151,7 +1151,10 @@
             var date = $scope.pvItems["authorize_date"];
             // console.log($scope.pvItems)
             $scope.pvPayto = $scope.pvItems["pv_payto"];
-            $scope.pvPayout = $scope.pvItems["pv_payout"];
+            $scope.pvPayout = $scope.pvItems['company']
+            if($scope.pvItems['company'] =='project3') $scope.pvPayout = 'โครงการ 3'
+            if($scope.pvItems['company'] =='project2') $scope.pvPayout = 'โครงการ 2'
+            if($scope.pvItems['company'] =='project1') $scope.pvPayout = 'โครงการ 1'
             $scope.bank = $scope.pvItems["bank_name"]
             $scope.pvAddress = $scope.pvItems["pv_address"];
             $scope.pvName = $scope.pvPayto
@@ -1159,7 +1162,7 @@
            
             $scope.dueDate = new Date($scope.pvItems["due_date"]);
             $scope.JSONdetails =JSON.parse($scope.pvItems['details'])
-            console.log( $scope.JSONdetails)
+          
             
             
             const input_date = document.getElementById("pvItemDate");

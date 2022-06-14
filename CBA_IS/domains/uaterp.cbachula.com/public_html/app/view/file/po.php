@@ -13,7 +13,7 @@
                 <h3 style="text-align: center;"><b>ใบสั่งซื้อ<br>Purchase Order</b></h3>
             </div>
             <div class="col-4 px-0">
-                <h5 style="text-align: right;">ต้นฉบับ</h5>
+                <h5 style="text-align: right;">สำเนา</h5>
                 <h5 style="text-align: right;"><b>เลขที่ {{detail[0].po_no}}</b></h5>
                 <h6 style="text-align: right;">วันที่ {{detail[0].po_date}}</h6>
             </div>
@@ -68,11 +68,11 @@
                         โปรดนำสำเนาใบสั่งซื้อมาทุกครั้ง<br>ที่ส่งสินค้าและวางบิล<br>(จะชำระราคาตามใบสั่งซื้อเท่านั้น)
                     </th>
                     <th colspan="2" style="text-align: right;">ราคาสินค้า</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_no_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type==='1' ? detail[0].po_total_purchase_price *100/107: detail[0].po_total_purchase_price | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type==='1'? detail[0].po_total_purchase_price *7/107:0 | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ราคารวมทั้งสิ้น</th>
@@ -120,8 +120,9 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->po; ?>;
-            console.log($scope.detail)
             $scope.company = $scope.detail[0].po_no.substring(0,1);
+            console.log($scope.detail)
+           
         }
     });
     
