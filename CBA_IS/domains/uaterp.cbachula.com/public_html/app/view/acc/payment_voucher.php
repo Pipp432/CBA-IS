@@ -1164,7 +1164,7 @@
             console.log($scope.pvItems)
             // console.log( $scope.pvItems);
             $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
-            if($scope.pvItems['retunrn_tax']==='true'){
+            if($scope.pvItems['return_tax']==='true'){
                 $("#vatCheck").prop('checked',true);
             }else{
                 $("#vatCheck").prop('checked',false);
