@@ -1406,65 +1406,71 @@ class accModel extends model {
 	
     // PV-B Module
 	public function getRRCINOPV() {
-        $sql = $this->prepare("select cirr_no_pv.*, Supplier.supplier_name, Supplier.address from (select 
-                                	View_CIRR_NOPV.*,
-                                    Product.product_no,
-                                	Product.product_name,
-                                	CIPrinting.purchase_no_vat,
-                                	CIPrinting.purchase_vat,
-                                	CIPrinting.purchase_price,
-                                	CIPrinting.quantity,
-                                    Product.unit,
-                                	'CI' as type
-                                from View_CIRR_NOPV
-                                inner join CI on CI.ci_no = View_CIRR_NOPV.ci_no
-                                inner join CIPrinting on CIPrinting.ci_no = View_CIRR_NOPV.ci_no
-                                left join Product on Product.product_no = CIPrinting.product_no
-                                union
-                                select 
-                                	View_CIRR_NOPV.*,
-                                    Product.product_no,
-                                	Product.product_name,
-                                	RRPrinting.purchase_no_vat,
-                                	RRPrinting.purchase_vat,
-                                	RRPrinting.purchase_price,
-                                	RRPrinting.quantity,
-                                    Product.unit,
-                                	'RR' as type
-                                from View_CIRR_NOPV
-                                inner join RR on RR.rr_no = View_CIRR_NOPV.ci_no
-                                inner join RRPrinting on RRPrinting.rr_no = View_CIRR_NOPV.ci_no
-                                left join Product on Product.product_no = RRPrinting.product_no
-                                union
-                                select
-                                	RI.ri_no,
-                                    RI.ri_date,
-                                    RI.approved_employee,
-                                    RI.supplier_no,
-                                    RR.invoice_no,
-                                    RI.total_return_no_vat * -1,
-                                    RI.total_return_vat * -1,
-                                    RI.total_return_price * -1,
-                                    PO.po_no,
-                                    Supplier.vat_type,
-                                    RIPrinting.product_no,
-                                    Product.product_name,
-                                    RIPrinting.purchase_no_vat * -1,
-                                    RIPrinting.purchase_vat * -1,
-                                    RIPrinting.purchase_price * -1,
-                                    RIPrinting.quantity,
-                                    Product.unit,
-                                    'RI'
-                                from RI
-                                join RIPrinting on RIPrinting.ri_no = RI.ri_no
-                                left join RR on RIPrinting.rr_no = RR.rr_no
-                                left join PO on PO.po_no = RR.po_no
-                                left join Product on Product.product_no = RIPrinting.product_no
-                                left join Supplier on Supplier.supplier_no = Product.supplier_no
-                                where RR.invoice_no <> '-') as cirr_no_pv
-                                inner join Supplier on Supplier.supplier_no = cirr_no_pv.supplier_no
-                                left join PVPrinting on PVPrinting.rr_no = cirr_no_pv.ci_no
-                                where PVPrinting.rr_no is null");
+        $sql = $this->prepare("SELECT 
+        PVB.*,
+        IVPC_Files.tax_no
+    FROM
+        (select cirr_no_pv.*, Supplier.supplier_name, Supplier.address from (select 
+                                        View_CIRR_NOPV.*,
+                                        Product.product_no,
+                                        Product.product_name,
+                                        CIPrinting.purchase_no_vat,
+                                        CIPrinting.purchase_vat,
+                                        CIPrinting.purchase_price,
+                                        CIPrinting.quantity,
+                                        Product.unit,
+                                        'CI' as type
+                                    from View_CIRR_NOPV
+                                    inner join CI on CI.ci_no = View_CIRR_NOPV.ci_no
+                                    inner join CIPrinting on CIPrinting.ci_no = View_CIRR_NOPV.ci_no
+                                    left join Product on Product.product_no = CIPrinting.product_no
+                                    union
+                                    select 
+                                        View_CIRR_NOPV.*,
+                                        Product.product_no,
+                                        Product.product_name,
+                                        RRPrinting.purchase_no_vat,
+                                        RRPrinting.purchase_vat,
+                                        RRPrinting.purchase_price,
+                                        RRPrinting.quantity,
+                                        Product.unit,
+                                        'RR' as type
+                                    from View_CIRR_NOPV
+                                    inner join RR on RR.rr_no = View_CIRR_NOPV.ci_no
+                                    inner join RRPrinting on RRPrinting.rr_no = View_CIRR_NOPV.ci_no
+                                    left join Product on Product.product_no = RRPrinting.product_no
+                                    union
+                                    select
+                                        RI.ri_no,
+                                        RI.ri_date,
+                                        RI.approved_employee,
+                                        RI.supplier_no,
+                                        RR.invoice_no,
+                                        RI.total_return_no_vat * -1,
+                                        RI.total_return_vat * -1,
+                                        RI.total_return_price * -1,
+                                        PO.po_no,
+                                        Supplier.vat_type,
+                                        RIPrinting.product_no,
+                                        Product.product_name,
+                                        RIPrinting.purchase_no_vat * -1,
+                                        RIPrinting.purchase_vat * -1,
+                                        RIPrinting.purchase_price * -1,
+                                        RIPrinting.quantity,
+                                        Product.unit,
+                                        'RI'
+                                    from RI
+                                    join RIPrinting on RIPrinting.ri_no = RI.ri_no
+                                    left join RR on RIPrinting.rr_no = RR.rr_no
+                                    left join PO on PO.po_no = RR.po_no
+                                    left join Product on Product.product_no = RIPrinting.product_no
+                                    left join Supplier on Supplier.supplier_no = Product.supplier_no
+                                    where RR.invoice_no <> '-') as cirr_no_pv
+                                    inner join Supplier on Supplier.supplier_no = cirr_no_pv.supplier_no
+                                    left join PVPrinting on PVPrinting.rr_no = cirr_no_pv.ci_no
+                                    where PVPrinting.rr_no is null  
+    ORDER BY `cirr_no_pv`.`ci_no`  DESC) AS PVB 
+    LEFT join IVPC_Files on BINARY(PVB.ci_no) = BINARY(IVPC_Files.rrci_no)");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

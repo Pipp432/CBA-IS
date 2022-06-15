@@ -451,12 +451,12 @@
         // $scope.isLoad = true;
         $scope.dashboards = [];
         $scope.doc = '';
-        $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
-		$scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
+       
+		
         
-        $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
-        $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
-        $scope.dashboardsExa = <?php echo $this->dashboardExa; ?>;
+       
+      
+       
         
         convert_pva_status = {
             '-1':"ยกเลิก",
@@ -477,31 +477,34 @@
         });
 
 
-        $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
-        $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
-        $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
-        $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
-        $scope.dashboardsPrePvd = <?php echo $this->dashboardPrePvd; ?>;
-        $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
+       
+       
+        
+     
+     
         $scope.pvType = '';
         console.log($scope.dashboardsPvc_confirm)
 		$scope.getDashboardIVCR = function() {
+            $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
             $scope.dashboards = $scope.dashboardsIv;
             $scope.doc = 'IV_CR';
             $scope.temp = 'เลข SO';
         }
         $scope.getDashboardIV = function() {
+            $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
             $scope.dashboards = $scope.dashboardsIv;
             $scope.doc = 'IV';
             $scope.temp = 'เลข SO';
         }
 		$scope.getDashboardCR = function() {
+            $scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
             $scope.dashboards = $scope.dashboardsCr;
             $scope.doc = 'CR';
             $scope.temp = 'เลข IV';
         }
         
         $scope.getDashboardPV = function() {
+            $scope.dashboardsPv = <?php echo $this->dashboardPv; ?>;
             $scope.dashboards = $scope.dashboardsPv; 
             $scope.doc = 'PV';
             $scope.pvType = '';
@@ -509,6 +512,7 @@
         }
 
         $scope.getDashboardPVA = function() {
+            $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
             $scope.dashboards = $scope.dashboardsPva; 
             $scope.doc = 'PV';
             $scope.pvType = 'pva';
@@ -516,6 +520,7 @@
         }
 
         $scope.getDashboardEXA = function() {
+            $scope.dashboardsExa = <?php echo $this->dashboardExa; ?>;
             $scope.dashboards = [];
             $scope.doc = 'PV';
             $scope.pvType = 'exa';
@@ -523,6 +528,7 @@
         }
 
         $scope.getDashboardPVB = function() {
+            $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
 
             $scope.dashboards = $scope.dashboardsPvb; 
             $scope.doc = 'PV';
@@ -531,6 +537,7 @@
         }
 
         $scope.getDashboardPVD = function() {
+            $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
 
             $scope.dashboards = $scope.dashboardsPvd; 
             $scope.doc = 'PV';
@@ -539,7 +546,8 @@
         }
 
         $scope.getDashboardPre_PVD = function() {
-
+  
+            $scope.dashboardsPrePvd = <?php echo $this->dashboardPrePvd; ?>;
             $scope.dashboards = $scope.dashboardsPrePvd; 
             $scope.doc = 'PV';
             $scope.pvType = 'pvd';
@@ -547,6 +555,7 @@
         }
 
         $scope.getDashboardPVC = function(){
+            $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
             $scope.dashboards = $scope.dashboardsPvc; 
             console.log($scope.dashboards)
             $scope.doc = 'PV';
@@ -555,6 +564,7 @@
         }
 
         $scope.getDashboardPVC_confirm = function(){
+            $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
             $scope.dashboards = $scope.dashboardsPvc_confirm; 
             $scope.doc = 'PV';
             $scope.pvType = 'pvc';
@@ -563,6 +573,7 @@
 
         
         $scope.getDashboardPO = function() {
+            $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
             $scope.dashboards = $scope.dashboardsPo;
             $scope.doc = 'PO';
             $scope.temp = 'Supplier';

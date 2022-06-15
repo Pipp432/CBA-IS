@@ -134,19 +134,19 @@
                         </div>
                     </th>
                     <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type == "3" ? detail[0].invoice_total_sales_price : salesWithVAT * 100/107 | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{priceBefore}}</th>
                 </tr>
                     <tr>
                         <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
-                        <th colspan="1" style="text-align: right;">{{roundedPrice* 100/107 - ( salesWithVAT* 100/107 ).toFixed(2) | number:2}}</th>
+                        <th colspan="1" style="text-align: right;">{{creditCardFee}}</th>
                     </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{ detail[0].vat_type =='3'? 0:roundedPrice * 7/107 | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{vat}}</th>
                 </tr>
                 <tr>
                     <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price| number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].payment_type==='MB'||detail[0].payment_type===null ? detail[0].invoice_total_sales_price :rounded}}</th>
                 </tr>
             </table>
         </div> 
@@ -296,7 +296,44 @@
             $scope.roundedPrice=Math.round(Number($scope.detail[0].invoice_total_sales_price ))
             $scope.salesWithVAT =0 ;
             ($scope.detail).forEach(e=>{$scope.salesWithVAT+= Number(e.sales_price)})
-            console.log($scope.salesWithVAT)
+            
+         
+
+            $scope.vat = 0
+            $scope.priceBefore = 0;
+            $scope.creditCardFee = 0;
+            $scope.finalPrice = 0;
+            $scope.rounded = 0;
+           
+                $scope.finalPrice = Number($scope.detail[0].invoice_total_sales_price);
+                if($scope.detail[0].payment_type==='CC' || $scope.detail[0].payment_type==='FB'){
+                    $scope.rounded = ($scope.finalPrice).toFixed(0);
+                    if($scope.detail[0].vat_type==='3') {
+                        $scope.vat = 0;
+                        $scope.priceBefore = $scope.rounded.toFixed(2) ;
+                    }
+                    else {
+                        $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
+                        $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                    }
+                    $scope.creditCardFee = ($scope.rounded -$scope.salesWithVAT).toFixed(2)
+
+                    
+                }else{
+                    $scope.creditCardFee = 0.00;
+                    if($scope.detail[0].vat_type==='3') {
+                        $scope.vat = 0;
+                        $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                    }
+                    else {
+                        $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
+                        $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                    }
+                }
+                
+   
+               console.log($scope.priceBefore)
+           
         
         }
       

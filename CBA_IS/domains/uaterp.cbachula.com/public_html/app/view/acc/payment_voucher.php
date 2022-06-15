@@ -781,7 +781,7 @@
                 $scope.supplierNoForFilter = JSON.parse($scope.selectedSupplier).supplier_no;
                 $scope.pvItemDebit = '21-1' + JSON.parse($scope.selectedSupplier).supplier_no;
                 $("#pvItemDebit").prop("disabled", true);
-                if(JSON.parse($scope.selectedSupplier).vat_type == 1) {
+                if(JSON.parse($scope.selectedSupplier).vat_type === "1") {
                     $scope.vat = true;
                 } else {
                     $scope.vat = false;
@@ -920,7 +920,7 @@
             $("#pvItemIV").prop("disabled", true);
             $("#pvItemPaidTotal").prop("disabled", true);
             $scope.pvItemRR = rrcinopv.ci_no;
-            $scope.pvItemIV = rrcinopv.invoice_no;
+            $scope.pvItemIV = rrcinopv.tax_no;
             $scope.pvItemPaidTotal = rrcinopv.confirm_total;
             $scope.ci_no = rrcinopv.ci_no;
         }
@@ -936,7 +936,7 @@
                 $('#formValidate6').modal('toggle');
             // } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemIV==='') {
             //     $('#formValidate7').modal('toggle');
-            } else if (($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') && $scope.pvItemPaidTotal==='') {
+            } else if (($scope.selectedPaymentType==='PA' ) && $scope.pvItemPaidTotal==='') {
                 $('#formValidate8').modal('toggle');
                 console.log($scope.pvItemPaidTotal)
             } else if ($scope.pvItemDate==='') {
@@ -951,7 +951,21 @@
                 
                                     
                 if($scope.selectedPaymentType==='PC')
-                { let tax= ($scope.tax ? "Yes" : "No")
+                { 
+                    console.log(document.getElementById("vatCheck").value);
+                    if(document.getElementById("vatCheck").value==='1'){
+                            $scope.vat = true;
+                    }else{
+                        $scope.vat = false;
+                    }
+                    console.log($scope.vat)
+                    let tax = false;
+                    if($scope.vat){
+                        tax  = true
+                    }else{
+                        tax = false
+                    }
+                    console.log(tax);
                     
                     $.post(`/acc/payment_voucher/confirm/${$scope.pvItemRR}`,{
                         "debit" : String($scope.pvItemDebit),
@@ -970,7 +984,7 @@
                     }).done(function(data,status){
                         console.log(data)
                         console.log(status)
-                        // window.location.reload();
+                        window.location.reload();
 
                         
                     }).fail(function(e){
@@ -1077,7 +1091,7 @@
             } else if($scope.selectedPaymentType==='PC') {
                 
                 // if($scope.otherExpense) $scope.company_code = '3';
-                console.log($scope.pvItems)
+               
                 
                 
                     var d = new Date();
@@ -1137,17 +1151,25 @@
         }
 
         $scope.getReReqDetail = function(re_req,index) {
-            $("#vatCheck").prop('checked',true);
            
             $("#pvItemRR").prop("disabled", true);
+            
+            
            
             $scope.pvItemRR = re_req.ex_no;
             // console.log($scope.pvItemRR);
             $scope.pvDetails = JSON.parse($scope.ReReqs[index]["details"])
             // console.log( $scope.pvDetails[0].money)
             $scope.pvItems = $scope.ReReqs[index]
+            console.log($scope.pvItems)
             // console.log( $scope.pvItems);
             $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
+            if($scope.pvItems['retunrn_tax']==='true'){
+                $("#vatCheck").prop('checked',true);
+            }else{
+                $("#vatCheck").prop('checked',false);
+            }
+           
             var date = $scope.pvItems["authorize_date"];
             // console.log($scope.pvItems)
             $scope.pvPayto = $scope.pvItems["pv_payto"];
@@ -1199,6 +1221,7 @@
          
             
         }
+        
 
         $scope.stopEvent = function(e){
             e.stopPropagation();

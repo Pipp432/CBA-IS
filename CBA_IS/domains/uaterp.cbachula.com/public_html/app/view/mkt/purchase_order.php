@@ -417,10 +417,13 @@
         $scope.selectedProductType='';
 
         $scope.suppliers = <?php echo $this->suppliers; ?>;
+        console.log($scope.suppliers)
+        
 
         $scope.allProducts = <?php echo $this->products; ?>;
 
         $scope.allSos = <?php echo $this->sos; ?>;
+        $scope.vat_type="0";
 
         
 
@@ -447,6 +450,15 @@
                 $('#formValidate2').modal('toggle');
 
             } else {
+                console.log($scope.selectedSupplier)
+                $scope.sup = ($scope.suppliers).forEach((e)=>{
+                if(e.supplier_no == $scope.selectedSupplier){
+                    $scope.vat_type = e.vat_type;
+                }
+                
+            })
+           
+          
 
                 
 
@@ -475,6 +487,7 @@
                 
 
             }
+           
 
         }
 
@@ -670,6 +683,15 @@
 
             $('#confirmModal').modal('hide');
 
+            if($scope.vat_type =='1'){
+                $scope.vat = 0;
+                $scope.beforeVat = $scope.totalPrice;
+            }else{
+                $scope.vat = $scope.totalPrice*7/107;
+                $scope.beforeVat = $scope.totalPrice*100/107;
+
+            }
+
             $.post("purchase_order/post_po_items", {
 
                 post : true,
@@ -678,9 +700,9 @@
 
                 productType : $scope.selectedProductType,
 
-                totalNoVat : $scope.totalNoVat,
+                totalNoVat : $scope.beforeVat,
 
-                totalVat : $scope.totalVat,
+                totalVat : $scope.vat,
 
                 totalPrice : $scope.totalPrice,
 

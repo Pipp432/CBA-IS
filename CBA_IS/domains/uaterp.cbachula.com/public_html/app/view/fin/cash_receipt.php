@@ -289,22 +289,26 @@
             if(sox.product_type!=='Install') {
               
                 $scope.creditCardfee = 0;
+                $scope.actualPrice = $scope.finalPrice
                 $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(2);
                 $scope.priceBeforeVat = ($scope.finalPrice)*100/107
                 if(sox.vat_type==='3'){
                     $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat)
                     $scope.vat = 0;
                 }else{
-                    $scope.vat = ($scope.finalPrice)*7/107;
+                    $scope.vat = ($scope.actualPrice)*7/107;
                    
                 }
             }
             else{
-                $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat)
+                
                 
                 if((sox.payment_type==='MB' || sox.payment_type===null)){
                     $scope.creditCardfee = 0;
+                    $scope.actualPrice = $scope.finalPrice
                     $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(2);
+                    $scope.priceBeforeVat = $scope.finalPrice *100/107
+                    
                     if(sox.vat_type==='3') { 
                         $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat)
                         $scope.vat = 0;
