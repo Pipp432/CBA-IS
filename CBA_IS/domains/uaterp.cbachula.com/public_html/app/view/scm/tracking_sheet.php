@@ -122,7 +122,7 @@
         $scope.upload = () => {
             $.post("/scm/tracking_sheet/update_tracking_no", {
                 post: true,
-                trackingNumArray: $scope.lines
+                trackingNumArray: JSON.stringify($scope.lines)
             }, function (data) {
                 console.log(data)
                 location.reload();

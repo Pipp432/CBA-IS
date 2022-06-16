@@ -239,7 +239,9 @@
         $scope.filterRRCI = '';
         $scope.iv = '';
         $scope.ivrcItems = [];
+        $scope,vat = 0;
         $scope.rrcis = <?php echo $this->rrcis; ?>;
+        console.log($scope.rrcis)
 
         // $scope.test = function() {
         //     console.log($('#billFormUpload')[0].files[0]);
@@ -264,6 +266,7 @@
                 }
                 $scope.calculateTotalPrice();
             }
+            
         }
         
         $scope.dropIvrcItem = function(rrci) {
@@ -286,6 +289,18 @@
                 $scope.total_purchase_vat += (value.purchase_vat * value.quantity);
                 $scope.total_purchase_price += (value.purchase_price * value.quantity);
             });
+            if($scope.ivrcItems[0].vat_type === '1'){
+                $scope.total_purchase_vat = $scope.total_purchase_price * 7/107;
+                $scope.total_purchase_no_vat = $scope.total_purchase_price * 100/107;
+
+            }else{
+                $scope.total_purchase_vat = 0;
+                $scope.total_purchase_no_vat= $scope.total_purchase_price;
+            }
+            console.log($scope.ivrcItems[0].vat_type)
+            console.log($scope.total_purchase_no_vat);
+            console.log($scope.total_purchase_vat);
+            console.log($scope.total_purchase_price);
         }
 
         $scope.autoDRCR = (type)=>{

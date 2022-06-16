@@ -834,7 +834,7 @@ class accModel extends model {
         //                        where RR.invoice_no = '-'");
         $sql = $this->prepare("select 
                                  View_CIRR_NOIV.*,
-                                    Supplier.supplier_name,
+                                    Supplier.*,
                                     Product.product_no,
                                  Product.product_name,
                                     CIPrinting.so_no,
@@ -853,7 +853,7 @@ class accModel extends model {
                                 union
                                 select 
                                 	View_CIRR_NOIV.*,
-                                    Supplier.supplier_name,
+                                    Supplier.*,
                                     Product.product_no,
                                 	Product.product_name,
                                     RRPrinting.so_no,
@@ -883,7 +883,7 @@ class accModel extends model {
                                     RI.note,
                                     PO.po_no,
                                     PO.product_type,
-                                    Supplier.supplier_name,
+                                    Supplier.*,
                                     RIPrinting.product_no,
                                     Product.product_name,
                                     '-',
@@ -1713,6 +1713,7 @@ class accModel extends model {
             
         ]);
         
+        
       
         $sql = $this->prepare("UPDATE `Reimbursement_Request` SET confirmed='1' WHERE re_req_no =?");
         $sql->execute([ input::post('re_req_no')]);
@@ -1735,6 +1736,7 @@ class accModel extends model {
             // $sql = $this->prepare("update WS set pv_no = ?, status = 2 where form_no = ?");  
             // $sql->execute([$pvno, $pvItem['rr_no']]);
             
+            //! NANI
             $i++;
             
             // insert AccountDetail sequence 3
@@ -1742,16 +1744,19 @@ class accModel extends model {
 		if (input::post('debit') != NULL && input::post('debit') != '' ){
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-			$sql->execute([$pvno, 1, input::post('debit'), (double)  input::post('totalPaid')/1.07, 0, 'PVC']);
+			$sql->execute([$pvno, 1, input::post('debit'), (double)  input::post('totalPaid')*100/107, 0, 'PVC']);
+            // echo "100/107 check";
+            
 		
             
         //     // insert AccountDetail sequence 4
         //     // Dr ภาษีซื้อ - โครงการ X
-		if ($pvItem["vat_check"]=='1'){
+		
             $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                     values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
 			$sql->execute([$pvno, 2, '61-1'.$pvno[0].'00', ((double)  input::post('totalPaid'))*7/107, 0, 'PVC']);
-		}
+          
+		
 
         //     // insert AccountDetail sequence 5
         //     // Cr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
@@ -1761,22 +1766,14 @@ class accModel extends model {
             
         // insert AccountDetail sequence 1
         //     // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
-            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-             $sql->execute([$pvno, 1, '23-1'.$pvno[0].'00', (double)  input::post('totalPaid'), 0, 'PVC']);
-
-        //     // insert AccountDetail sequence 2
-        //     // Cr เงินฝากออมทรัพย์ - โครงการ x
-            $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-             $sql->execute([$pvno, 2, '12-1'.$pvno[0].'00', 0, (double)  input::post('totalPaid'), 'PVC']);
+           
             
         // }x
            
         
         }   
     
-    echo $sql->errorInfo()[0];
+    // echo $sql->errorInfo()[0];
     return $pvno;   
 }
 	// PV Module
@@ -2110,14 +2107,26 @@ class accModel extends model {
     public function confirmPVC() {
         $cpvItemsArray = json_decode(input::post('cpvItems'), true); 
         $pv_no_array = json_decode($cpvItemsArray, true);
+        $pvno = input::post('pv_no');
         foreach($pv_no_array as $value) {
             $sql = $this->prepare("UPDATE PVC SET confirmed = 1,confirmed_employee=? WHERE pv_no = ?");    
             $sql->execute([
                 json_decode(session::get('employee_detail'), true)['employee_id']
             ,$value]);
             echo $value;
-            echo ' ';
+          
         }
+        $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)");  
+                $sql->execute([$value, 4, '23-1'.$pvno[0].'00', (double) input::post('totalPaid'), 0, 'PVC']);
+               
+
+                //cr เงินฝากออมทรัพย์
+                $sql = $this->prepare("INSERT into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                 $sql->execute([$value, 5, '12-1'.$pvno[0].'00', 0, (double) input::post('totalPaid'), 'PVC']);
+                
+        
     }
 
     public function confirmPVA() {
@@ -2308,7 +2317,8 @@ class accModel extends model {
                                     employee_nickname_thai as file_emp_name,
                                     PV.slip_name,
                                     PV.receipt_name,
-                                    PV.pv_name
+                                    PV.pv_name,
+                                    PV.paid
                                 from PV
                                 inner join Employee on Employee.employee_id = PV.approved_employee
 								where cancelled = 0
@@ -2366,7 +2376,8 @@ class accModel extends model {
                                     PV.receipt_name,
                                     PV.cr_name,
                                     PV.pv_name,
-                                    IVPC_Files.rrci_no
+                                    IVPC_Files.rrci_no,
+                                    PV.paid
                                 from PV
                                 inner join Employee on Employee.employee_id = PV.approved_employee
                                 left JOIN IVPC_Files on BINARY IVPC_Files.pv_no = BINARY PV.pv_no
@@ -3221,7 +3232,7 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
 
     }
     public function getPVCConfirmPV(){
-        $sql=$this->prepare("SELECT * FROM PVC WHERE confirmed = '0' ");
+        $sql=$this->prepare("SELECT * FROM PVC INNER JOIN Reimbursement_Request ON PVC.ex_no = Reimbursement_Request.ex_no WHERE PVC.confirmed = '0'");
         $sql->execute([]);
         if ($sql->rowCount() > 0) return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE) ;
         else return "error";

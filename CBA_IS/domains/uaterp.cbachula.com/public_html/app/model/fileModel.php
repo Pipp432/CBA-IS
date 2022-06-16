@@ -531,7 +531,7 @@ class fileModel extends model {
                                 left join Product on Product.product_no=SOPrinting.product_no
                                 INNER JOIN SOXPrinting ON SOXPrinting.so_no=SO.so_no 
                                 INNER JOIN SOX ON SOX.sox_no=SOXPrinting.sox_no 
-								where IRD.cancelled = 0 and IRD.ird_no = ?");
+								where IRD.cancelled = 0 and IRD.ird_no = ? and SOPrinting.cancelled = 0");
 		$sql->execute([$ird_no]);
 		if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

@@ -290,33 +290,39 @@
                 if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
                 if($scope.customer_title === null) $scope.customer_title = "";
 
-               $scope.final = Number($scope.detail[0].invoice_total_purchase_vat)+$scope.creditCardFee;
-               $scope.difference = Math.round(Number($scope.detail[0].invoice_total_sales_price)) - Number($scope.detail[0].invoice_total_sales_price);
+         
             //   console.log($scope.difference)
             $scope.roundedPrice=Math.round(Number($scope.detail[0].invoice_total_sales_price ))
             $scope.salesWithVAT =0 ;
             ($scope.detail).forEach(e=>{$scope.salesWithVAT+= Number(e.sales_price)})
-            
-         
-
+  
             $scope.vat = 0
             $scope.priceBefore = 0;
             $scope.creditCardFee = 0;
             $scope.finalPrice = 0;
             $scope.rounded = 0;
-           
-                $scope.finalPrice = Number($scope.detail[0].invoice_total_sales_price);
+
+            // ราคาสุดท้ายหลังรวมทุกอย่าง
+            $scope.finalPrice = Number($scope.detail[0].invoice_total_sales_price);
+
                 if($scope.detail[0].payment_type==='CC' || $scope.detail[0].payment_type==='FB'){
-                    $scope.rounded = ($scope.finalPrice).toFixed(0);
+                    // ราคาปัดเศษ
+                    $scope.rounded = (Math.ceil($scope.finalPrice)).toFixed(0);
+
+                    // กรณี vat type = 3
                     if($scope.detail[0].vat_type==='3') {
+                        // ตั้ง vat =  0
                         $scope.vat = 0;
+                        // มูลค่าสินค้า
                         $scope.priceBefore = $scope.rounded.toFixed(2) ;
                     }
                     else {
-                        $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
-                        $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                        // vat คิดจากราคาสุดท้าย
+                        $scope.vat = ($scope.finalPrice * 7/107).toFixed(2);
+                        // มูลค่าสินค้า
+                        $scope.priceBefore = ($scope.finalPrice* 100/107).toFixed(2)
                     }
-                    $scope.creditCardFee = ($scope.rounded -$scope.salesWithVAT).toFixed(2)
+                    $scope.creditCardFee = ($scope.rounded - ($scope.priceBefore + $scope.vat)).toFixed(2)
 
                     
                 }else{
@@ -332,7 +338,7 @@
                 }
                 
    
-               console.log($scope.priceBefore)
+               
            
         
         }

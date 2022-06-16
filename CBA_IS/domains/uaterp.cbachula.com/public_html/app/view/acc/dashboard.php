@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+    <?php flush()?>
 
 <body>
 
@@ -28,14 +29,21 @@
                     </div>
                 </div>
             </div>
-
+            <div class="col">
+                <div class="card text-white bg-info m-2" ng-click="getDashboardPVC_confirm()">
+                    <div class="card-body">
+                        <h5 class="card-title my-0">PV-C (ค่าใช้จ่าย)</h5>
+                    </div>
+                </div>
+            </div>
+<!-- 
             <div class="col">
                 <div class="card text-white bg-info m-2" ng-click="getDashboardPV()">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบสำคัญสั่งจ่าย (PV)</h5>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
 		</div>
 		<div class="row row-cols-2 row-cols-md-3 mt-2 p-0">
@@ -88,13 +96,7 @@
                 </div>
             </div> -->
 
-            <div class="col">
-                <div class="card text-white bg-info m-2" ng-click="getDashboardPVC_confirm()">
-                    <div class="card-body">
-                        <h5 class="card-title my-0">PV-C (ค่าใช้จ่าย)</h5>
-                    </div>
-                </div>
-            </div>
+            
         </div>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -133,9 +135,10 @@
                     <td>{{dashboard.file_date}} {{dashboard.file_time}}</td>
                     <td>{{dashboard.file_emp_id}} {{dashboard.file_emp_name}}</td>
                     <td ng-show="doc == 'PV'">
-                        <span ng-show="dashboard.slip_name == null && dashboard.receipt_name == null">รอโอนเงิน</span>
-                        <span ng-show="dashboard.slip_name != null && dashboard.receipt_name == null">โอนเงินแล้ว</span>
-                        <span ng-show="dashboard.slip_name != null && dashboard.receipt_name != null">ได้ใบเสร็จแล้ว</span>
+                        <span ng-show="dashboard.slip_name == null && dashboard.receipt_name == null && dashboard.paid == 0">รอโอนเงิน</span>
+                        <span ng-show="dashboard.slip_name != null && dashboard.receipt_name == null && dashboard.paid == 0">โอนเงินแล้ว</span>
+                        <span ng-show="dashboard.slip_name != null && dashboard.receipt_name != null && dashboard.paid == 0">ได้ใบเสร็จแล้ว</span>
+                        <span ng-show="dashboard.paid == 1">Confirmed</span>
                         <span ng-show="dashboard.slip_name != null && temp != 'PV-B'"> <a href="/acc/dashboard/pv_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
                         <span ng-show="dashboard.slip_name != null && temp == 'PV-B'"> <a href="/acc/dashboard/pvb_slip/{{dashboard.file_no}}" target="_blank" ng-click="stopEvent($event)">สลิป invoice</a></span>
                         <span ng-show="dashboard.cr_name == null">ไม่มีใบ CR </span>
@@ -467,14 +470,9 @@
             4:"รอ account confirm pva", 
             5:"เรียบร้อย",
         }
-        angular.forEach($scope.dashboardsPva, function(value, key) {
-            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
-            value["realTotal"] = parseFloat(value["total_paid"]) + parseFloat(value["additional_cash"]);
-        });
 
-        angular.forEach($scope.dashboardsExa, function(value, key) {
-            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
-        });
+
+
 
 
        
@@ -517,6 +515,10 @@
             $scope.doc = 'PV';
             $scope.pvType = 'pva';
             $scope.temp = 'PV-A';
+            angular.forEach($scope.dashboardsPva, function(value, key) {
+            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
+            value["realTotal"] = parseFloat(value["total_paid"]) + parseFloat(value["additional_cash"]);
+        });
         }
 
         $scope.getDashboardEXA = function() {
@@ -525,6 +527,9 @@
             $scope.doc = 'PV';
             $scope.pvType = 'exa';
             $scope.temp = 'EX-A';
+            angular.forEach($scope.dashboardsExa, function(value, key) {
+            value["pv_status_readable"] = convert_pva_status[value["pv_status"]];
+        });
         }
 
         $scope.getDashboardPVB = function() {

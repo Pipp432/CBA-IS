@@ -26,6 +26,7 @@
         <script>addModuleLink('scmRow', '/mkt/reimbursement_request', 'desktop', 'ใบขอเบิกค่าใช้จ่าย');</script>
         <script>addModuleLink('scmRow', '/scm/counter_sales_in', 'sign-in', 'Counter Sales (In)');</script>
         <script>addModuleLink('scmRow', '/scm/counter_sales_out', 'sign-out', 'Counter Sales (Out)');</script>
+        <script>addModuleLink('scmRow', '/scm/confirm_pickup', 'truck', 'Confirm Pick Up');</script>
 		<!--<script>addModuleLink('scmRow', '/is/thelastday', 'heart', 'The Last Day');</script>-->
     </div>
     

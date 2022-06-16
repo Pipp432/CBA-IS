@@ -285,18 +285,23 @@
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
         $scope.processNumber = function(sox){
+
+            console.log(`===================== ${sox.sox_no} ======================`);
+            
            
             if(sox.product_type!=='Install') {
               
                 $scope.creditCardfee = 0;
-                $scope.actualPrice = $scope.finalPrice
+           
+               
                 $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(2);
-                $scope.priceBeforeVat = ($scope.finalPrice)*100/107
+                $scope.actualPrice = Number(sox.sox_sales_price)
+                $scope.priceBeforeVat = ($scope.actualPrice)*100/107
                 if(sox.vat_type==='3'){
-                    $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat)
+                    $scope.priceBeforeVat = $scope.finalPrice
                     $scope.vat = 0;
                 }else{
-                    $scope.vat = ($scope.actualPrice)*7/107;
+                    $scope.vat = Number($scope.actualPrice)*7/107;
                    
                 }
             }
@@ -305,20 +310,20 @@
                 
                 if((sox.payment_type==='MB' || sox.payment_type===null)){
                     $scope.creditCardfee = 0;
-                    $scope.actualPrice = $scope.finalPrice
+                    $scope.actualPrice = $scope.finalPrice;
                     $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(2);
-                    $scope.priceBeforeVat = $scope.finalPrice *100/107
-                    
+              
                     if(sox.vat_type==='3') { 
-                        $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat)
+                        $scope.priceBeforeVat = $scope.finalPrice;
                         $scope.vat = 0;
                     }else{
                         $scope.vat = Number(sox.so_total_sales_no_vat) * 7/100;
+                        $scope.priceBeforeVat = $scope.finalPrice *100/107
                     }
                     
                 }else{
                    
-                    $scope.finalPrice = (Number(sox.sox_sales_price)).toFixed(0);
+                    $scope.finalPrice = Math.ceil(Number(sox.sox_sales_price)).toFixed(0);
                     $scope.creditCardfee =  $scope.finalPrice*100/107 - $scope.priceBeforeVat;
                     if(sox.vat_type==='3') { 
                         $scope.priceBeforeVat = Number(sox.so_total_sales_no_vat) + Number(sox.so_total_sales_vat)
@@ -329,15 +334,14 @@
                 }
             }
 
-            console.log(`Product Type: ${sox.product_type}`)
-            console.log(`Price before VAT: ${($scope.priceBeforeVat).toFixed(2)}`)
-            console.log(`Payment Type: ${sox.payment_type}`);
-            
-            console.log(`VAT type: ${sox.vat_type}`);
-            console.log(`VAT amount: ${($scope.vat).toFixed(2)}`);
-            
-            
-            console.log(`Credit Card fee: ${($scope.creditCardfee).toFixed(2)}`);
+            // console.log(`Product Type: ${sox.product_type}`)
+            // console.log(`Price before VAT: ${($scope.priceBeforeVat)}`)
+            // console.log(`Payment Type: ${sox.payment_type}`);
+            // console.log(`VAT type: ${sox.vat_type}`);
+            // console.log(`VAT amount: ${($scope.vat)}`);
+            // console.log(`Credit Card fee: ${($scope.creditCardfee)}`);
+            // console.log(`Actual Price: ${$scope.actualPrice}`)
+            // console.log(`Final Price: ${$scope.finalPrice}`)
             
             
 
@@ -346,32 +350,19 @@
         $scope.addCrItem = function(sox) {
             
             $scope.crItems = [];
-          
             $scope.sox = sox;
             $scope.vat_type = $scope.sox.vat_type;
-            console.log(`Vat Type:${$scope.vat_type}`);
             $scope.roundedPrice =  Math.round(Number(sox.sox_sales_price));
-            console.log(`Sales No VAT: ${sox.so_total_sales_no_vat}`);
-            console.log(sox);
             $scope.processNumber(sox)
-            console.log(`Final price: ${$scope.finalPrice}`)
-
-         
-            
-            
             $scope.customer_title = '';
             
             
             angular.forEach($scope.soxs, function (value, key) {
                 if(value.sox_no == sox.sox_no) {
                     $scope.crItems.push(value);
-                    // console.log(value)
-                   
-                
                    if(value.balance<=0 && value.balance!=null){
                   
                         $scope.error = true;
-                        console.log(value)
                         addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', "<h1 style= color:red;>ออกไม่ได้โว้ย</h1>");
                         
                         $('#successModal').modal('toggle');
@@ -386,10 +377,9 @@
             });
            
 
-        //    $scope.crItems.map((x)=>console.log(x.product_name))
-            $scope.calculateCrItem(sox);
-            console.log(`CR ITEMS JSON:`)
-             console.log($scope.crItems)
+   
+         console.log($scope.crItems)
+         $scope.calculateCrItem(sox)
         }
 
         $scope.calculateVat = function(sox){
@@ -445,6 +435,7 @@
                 }
                 
                 Object.assign(value, {priceInThai: NumToThai(parseFloat(value.so_total_sales_price2))});
+                console.log(NumToThai(parseFloat(value.so_total_sales_price2)))
                 
             });
             

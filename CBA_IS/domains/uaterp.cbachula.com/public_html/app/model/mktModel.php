@@ -1180,6 +1180,34 @@ class mktModel extends model {
     $remark = '';
     $error = '';
 
+    $is_reg_20_ems_24 = true;
+
+		foreach($sos as $so) {
+		$is_reg_20_ems_24 = $is_reg_20_ems_24 && in_array($so['supplier_no'], ['619']);
+		}
+		
+		if($is_reg_20_ems_24) {
+				return json_encode([
+					"shippings" => [
+						[
+							"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
+							"name" => 'Thai Post (REG)',
+							"price" => 20,
+							"bin_id" => '-',
+							"remark" => $remark
+						],
+						[
+							"url" => "https://faceticket.net/wp-content/uploads/2020/06/Thaipost-Logo.jpg",
+							"name" => 'Thai Post (EMS)',
+							"price" => 24,
+							"bin_id" => '-',
+							"remark" => $remark
+						]
+					],
+					"error" => $error
+				]);
+			}
+
 		$item_list = [];
 		$not_free_pk = false;
 
@@ -1980,15 +2008,15 @@ class mktModel extends model {
 		$dt_formatted=$dt->format('Hi'); //get time: hhmm
 		
 
-		if(strcasecmp($dayOfWeek,'wednesday')==0){
-			if($dt_formatted>='1000' && $dt_formatted<='1100'){
-				$score*=1.5;
-			}
+		// if(strcasecmp($dayOfWeek,'wednesday')==0){
+		// 	if($dt_formatted>='1000' && $dt_formatted<='1100'){
+		// 		$score*=1.5;
+		// 	}
       
-		}
+		// }
 
-    if(strcasecmp($dayOfWeek,'friday')==0){
-			if($dt_formatted>='1000' && $dt_formatted<='1100'){
+    if(strcasecmp($dayOfWeek,'saturday')==0){
+			if($dt_formatted>='1000' && $dt_formatted<='1200'){
 				$score*=1.5;
 			}
       
@@ -6545,8 +6573,8 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
   
   public function assign_re_req_no() {
 
-    $rqPrefix = 'ReReq-';
-    $sql = $this->prepare(  "select ifnull(max(re_req_no),0) as max from Reimbursement_Request where re_req_no like 'REREQ-%'" );
+    $rqPrefix = 'EXC-';
+    $sql = $this->prepare(  "select ifnull(max(re_req_no),0) as max from Reimbursement_Request where re_req_no like 'EXC-%'" );
     $sql->execute();
     $maxRqNo = $sql->fetchAll()[ 0 ][ 'max' ];
   

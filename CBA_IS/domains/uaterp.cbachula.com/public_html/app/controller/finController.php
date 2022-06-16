@@ -185,6 +185,9 @@ foreach ($list as $value) {
         }else if(uri::get(2)==="post_additional_data"){
             $this->positionEcho('fin', $this->model->postAdditionReReqDetail());
         }
+        else if(uri::get(2)==="cancel_exc"){
+            $this->positionEcho('fin', $this->model->cancelEXC());
+        }
     }
     public function upload()
     {

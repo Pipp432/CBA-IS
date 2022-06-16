@@ -104,7 +104,14 @@
                             <td style="text-align: center;">{{cpvItem.pv_type}}</td>
                             <td style="text-align: center;"><ul class="my-0">
                                 <li ng-repeat="cpv_item in cpvItems" ng-show="cpv_item.pv_no===cpvItem.pv_no && cpvItem.pv_type != 'pvc' && cpvItem.pv_type != 'pva'">{{cpv_item.detail}} ({{cpv_item.paid_total | number:2}})</li>
-                                <li ng-show = "cpvItem.pv_type == 'pvc'">{{cpvItem.pv_details}}</li>
+                                <div ng-show = "cpvItem.pv_type == 'pvc'">
+                                   <ul ng-repeat = "detail in addedPV track by $index">
+                                    <li>{{detail.date}} {{detail.details}} {{detail.money}}</li>
+                                    
+                                    
+
+                                   </ul>
+                                </div>
                                 <pre ng-show = "cpvItem.pv_type == 'pva'">{{cpvItem.product_names}}</pre>
                             </ul></td>
                             <td style="text-align: right;">{{cpvItem.total_paid | number:2}}</td>
@@ -170,11 +177,12 @@
             angular.forEach(response['data'], function (value) {
                 value.pv_type = "pvc";
                 $scope.pvs.push(value);
-                console.log($scope.pvs)
+                
             });
         });
         
         $scope.addCpvItem = function(pv) {
+           
             var newPv = true;
             angular.forEach($scope.cpvItems, function (value, key) {
                 if(value.pv_no == pv.pv_no) {
@@ -189,7 +197,11 @@
                     }
                 });
             }
-
+          
+           
+          $scope.addedPV = JSON.parse($scope.cpvItems[0].details);
+          
+           
         }
         
         $scope.dropCpvItem = function(cpvItem) {
@@ -210,7 +222,7 @@
                 $('body').append($compile(confirmModal)($scope));
                 $('#confirmModal').modal('toggle');
             }
-            console.log( $scope.cpvItems)
+            
         }
         
         $scope.postCpvItems = function() {
@@ -231,7 +243,7 @@
                     cpvcs.push(value.pv_no);
                 } else cpvs.push(value);
             });
-            console.log(cpvcs)
+           
            
             if(cpvs.length != 0) {
                 
@@ -310,7 +322,8 @@
             else if(cpvcs.length != 0) {
                 $.post("/acc/confirm_payment_voucher/post_cpvc_items", {
                     post : true,
-                   
+                    pv_no:  $scope.cpvItems[0]['pv_no'],
+                    totalPaid:$scope.cpvItems[0]['total_paid'],
                     cpvItems : JSON.stringify(angular.toJson(cpvcs))
                 }, function(data) {
                     respond.concat(data);
@@ -327,7 +340,7 @@
             } else respond_count++;
 
 
-            console.log(cpvcs);
+            
         }
 
 

@@ -24,7 +24,7 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ {{company}})</b><br>
+                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ 3)</b><br>
                     อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
                     โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
                 </p>
@@ -70,7 +70,7 @@
         <div>
             <p><b>(สำหรับฝ่ายการเงิน)<br></b></p>
             <p><u>จ่ายออกจากโครงการ</u></p>
-            <p>(&nbsp;{{details[0].company =="project1" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp; {{details[0].company =="project2" ? "X" : "" }} &nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;{{details[0].company =="project3" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;3&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ1" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;1&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ2" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;2</p>
+            <p>(&nbsp;{{details[0].company =="project1" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp; {{details[0].company =="project2" ? "X" : "" }} &nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;{{details[0].company =="3" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;3&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ1" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;1&emsp;&emsp;(&nbsp;{{details[0].company =="SPJ2" ? "X" : "" }}&nbsp;)&nbsp;SPJ&nbsp;2</p>
         </div>
 
         <div>

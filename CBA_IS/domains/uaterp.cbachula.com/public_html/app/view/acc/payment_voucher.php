@@ -83,7 +83,7 @@
                    
                     <div class="col-md-3">
                         <label for="pvItemPaidTotal">จำนวนเงิน</label>
-                        <input type="text" class="form-control" id="pvItemPaidTotal" ng-model="total_money">
+                        <input type="text" class="form-control" id="pvItemPaidTotal" ng-model="pvItemPaidTotal">
                         <div class="custom-control custom-checkbox mt-2">
                             <input type="checkbox" class="custom-control-input" id="vatCheck" ng-model="vat" ng-click="vat_check()">
                             <label class="custom-control-label" for="vatCheck">ขอคืนภาษี</label>
@@ -294,7 +294,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">รวมสุทธิ</th>
-                            <th style="text-align: right;">{{total_money| number:2}}</th>
+                            <th style="text-align: right;">{{pvItemPaidTotal| number:2}}</th>
                         </tr>
                     </table>
                 </div>
@@ -1017,7 +1017,7 @@
             $scope.pvItemDetail = '';  
             if($scope.selectedPaymentType==='PA' || $scope.selectedPaymentType==='PC') $scope.pvItemDebit = '';  
             $scope.pvItemIV = '';  
-            $scope.pvItemPaidTotal = '';
+            $scope.pvItemPaidTotal = 0;
             $("#pvItemRR").prop("disabled", false);
             $("#pvItemIV").prop("disabled", false);
             $("#pvItemPaidTotal").prop("disabled", false);
@@ -1102,7 +1102,7 @@
                         (month<10 ? '0' : '') + month + '/' +
                         (day<10 ? '0' : '') + day;
                         
-
+                    console.log( angular.toJson($scope.pvItems));
 
                     $.post("/acc/payment_voucher/post_pvc", {
                         post : true,
@@ -1113,8 +1113,8 @@
                         ex_no:$scope.pvItemRR,
                         re_req_no:$scope.pvItems["re_req_no"],
                         company_code : $scope.company_code,
-                        pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
-                        totalPaid : $scope.total_money,
+                        pvItems : angular.toJson($scope.pvItems),
+                        totalPaid : $scope.pvItemPaidTotal,
                         totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
@@ -1127,7 +1127,8 @@
                         bankName:$scope.pvItems["bank_name"],
                         company_code:"3",
                         pvItems:$scope.pvItems,
-                        debit:$scope.pvItemDebit
+                        debit:$scope.pvItemDebit,
+                        return_tax: $scope.pvItems["return_tax"]
                     }, function(data) {
                         console.log(JSON.stringify(angular.toJson($scope.pvItems)))
                         console.log(data)
@@ -1163,7 +1164,7 @@
             $scope.pvItems = $scope.ReReqs[index]
             console.log($scope.pvItems)
             // console.log( $scope.pvItems);
-            $scope.pvItemPaidTotal = $scope.pvDetails[0].money;
+            $scope.pvItemPaidTotal =0;
             if($scope.pvItems['return_tax']==='true'){
                 $("#vatCheck").prop('checked',true);
             }else{
@@ -1207,17 +1208,20 @@
             
         });
         ($scope.JSONdetails).forEach(entry=>{
-            $scope.total_money += Number(entry.money);
+            console.log(Number(entry.money));
+            console.log(Number($scope.pvItemPaidTotal));
+            
+            $scope.pvItemPaidTotal = Number($scope.pvItemPaidTotal)+ Number(entry.money);
             $scope.total_tax += Number(entry.money*7/107);
         });
-        $scope.totalPaid =$scope.total_money
+        $scope.totalPaid =$scope.pvItemPaidTotal
             $scope.totalVat =$scope.total_tax
-            console.log($scope.totalPaid);
+            console.log($scope.pvItemPaidTotal);
 
            
-            console.log($scope.pvItemDebit)
-            $scope.pvItems["debit"] = $scope.pvItemDebit
-            console.log($scope.pvItems["debit"])
+           
+            $scope.pvItems["debit"] = $scope.pvItemDebit;
+            
          
             
         }

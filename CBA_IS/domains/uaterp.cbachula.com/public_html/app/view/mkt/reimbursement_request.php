@@ -112,7 +112,7 @@
                     <br>
                 </form>
                     
-                    <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" ng-click="submit()">ยืนยัน</button>
+                    <button type="button" class="btn btn-default btn-block btn-transition" id="buttonConfirmDetail" ng-click="submit()">ยืนยัน</button>
                     
                 </div>
            
@@ -131,6 +131,14 @@
     th{
         border: 3px solid #dddddd;
         text-align: center;
+    }
+    .btn-transition{
+        transition: 1.5s;
+
+}
+    .btn-transition:hover{
+        background-color: #44b853;
+
     }
 </style>
 

@@ -438,7 +438,7 @@ class finModel extends model {
         return json_encode([]);
     }
     public function getReReq(){
-        $sql = $this->prepare("SELECT * from Reimbursement_Request where ex_no IS Null and evidence IS Null and company is null");
+        $sql = $this->prepare("SELECT * from Reimbursement_Request where ex_no IS Null and evidence IS Null and company is null and confirmed>=0");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1193,7 +1193,7 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
                                 inner join SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
                                 inner join Invoice on SOXPrinting.so_no = Invoice.file_no
                                 inner join Employee on Employee.employee_id = Invoice.approved_employee
-                                where SOX.cancelled = 0
+                                
                                 order by Invoice.invoice_date desc, Invoice.invoice_time desc");
                                                          
         $sql->execute();
@@ -2081,7 +2081,12 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         echo "yes";
     }
     public function getbankreconcile() {
-        $sql = $this->prepare( "SELECT Invoice.invoice_no, SOX.sox_no, Invoice.file_no, Invoice.invoice_date, Invoice.total_sales_price , Bank_Statement.payment_date , Bank_Statement.payment_time , Bank_Statement.payment_amount FROM Invoice INNER JOIN SOXPrinting on Invoice.file_no = SOXPrinting.so_no INNER JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and SOX.payment_time=Bank_Statement.payment_time and SOX.payment_amount=Bank_Statement.payment_amount where SOX.cancelled = 0 AND SOX.slip_uploaded = 1 group by Invoice.invoice_no;" );
+        $sql = $this->prepare( "SELECT Invoice.invoice_no, SOX.sox_no, Invoice.file_no, Invoice.invoice_date, Invoice.total_sales_price , Bank_Statement.payment_date , Bank_Statement.payment_time , Bank_Statement.payment_amount 
+        FROM Invoice 
+        left JOIN SOXPrinting on Invoice.file_no = SOXPrinting.so_no
+        left JOIN SOX ON SOXPrinting.sox_no = SOX.sox_no 
+        left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and SOX.payment_time=Bank_Statement.payment_time and SOX.payment_amount=Bank_Statement.payment_amount
+         group by Invoice.invoice_no;" );
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
           return $sql->fetchAll();
@@ -2111,9 +2116,18 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return [];
       }
+      public function cancelEXC(){
+        
+        $sql = $this->prepare("UPDATE `Reimbursement_Request` SET `confirmed` = -1 WHERE `re_req_no`= ? ");
+        $sql->execute([input::post('re_req_number')]);
+       
+        return input::post('re_req_number');
+
+      }
+      
 
 
-}
+    }
 
 
 

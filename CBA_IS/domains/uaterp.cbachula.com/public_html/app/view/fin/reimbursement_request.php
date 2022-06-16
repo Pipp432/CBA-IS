@@ -67,10 +67,7 @@
                             <label for="option2"> โครงการ 2</label><br>
                             <input type="checkbox" value="project3" checked>
                             <label for="option3"> โครงการ 3</label><br>
-                            <input type="checkbox"  value="SPJ1">
-                            <label for="option3"> SPJ 1</label><br>
-                            <input type="checkbox"  value="SPJ2">
-                            <label for="option3"> SPJ 2</label><br>
+                          
                         </div>
                     </form>
                 
@@ -95,7 +92,8 @@
                         <p><h3>กรุณาเลือกไฟล์ Reimbursement Request</h3></p>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-default btn-block" id="buttonConfirmDetail" ng-click="submit(currentNo)">ยืนยัน</button>
+                        <button type="button" class="btn btn-default btn-block btn-transition" id="buttonConfirmDetail" ng-click="submit(currentNo)">ยืนยัน</button>
+                        <button type="button" class="cancelBtn" id="buttonCancel" ng-click="cancel(currentNo)">Cancel</button>
                     </div>
                     
             </div>
@@ -116,6 +114,28 @@
 <style>
     td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
+    .cancelBtn{
+        width:100%;
+        background-color: #5bbaf5;
+        transition: 1.5s;
+        border-radius: 10px;
+        height: 40px;
+        margin-top: 10px;
+        border-style:hidden;
+        color :white;
+    }
+    .cancelBtn:hover{
+        background-color: #f54254;
+
+    }
+    .btn-transition{
+        transition: 1.5s;
+
+}
+    .btn-transition:hover{
+        background-color: #44b853;
+
+    }
 </style>
 <script>
     app.controller('moduleAppController', function($scope, $http, $compile) {
@@ -139,20 +159,28 @@
             });
             
         }
-        $('input[type="checkbox"]').on('change', function() {
-        $(this).siblings('input[type="checkbox"]').prop('checked', false);
+        
+      
+        $scope.cancel = function(re_req_no){
+            $.post(`/fin/reimbursement_request/cancel_exc`,{
+               re_req_number: $scope.currentNo
+           },function(data){
+            addModal('successModal', 'เบิกเงินรองจ่าย',`ยกเลิก ${data} สำเร็จ`);
+                $('#successModal').modal('toggle');
+                $('#successModal').on('hidden.bs.modal', function (e) {
+                    
+                })})
+
+        }
         $scope.submit = function(re_req_no){
            
             
             
-            if(re_req_no=="") {
-                $('#formValidate1').modal('toggle');
-            }
+            
             const detail={};
             const options = document.querySelectorAll("input[type='checkbox']:checked")
-            if( !options[1]) $('#formValidate2').modal('toggle')
-            else if (!options)  $('#formValidate2').modal('toggle')
-            else  details = {"proof":"quotation","project":options[1].value};
+            
+           details = {"proof":"quotation","project":options[1].value};
          
             var date = new Date();
             var dd = String(date.getDate()).padStart(2, '0');
@@ -163,17 +191,17 @@
             
            $.post(`/fin/reimbursement_request/post_additional_data`,{
                proof: details["proof"], 
-               project:details["project"],
+               project:3,
                re_req_number: $scope.currentNo,
                authorize_date: date
            },function(data){
             addModal('successModal', 'เบิกเงินรองจ่าย',`ออกใบ ${data} สำเร็จ`);
                 $('#successModal').modal('toggle');
                 $('#successModal').on('hidden.bs.modal', function (e) {
-                    
+                    $scope.toMainMenu();
                 })
            })
-           $scope.toMainMenu();
+           
           
         }
        
@@ -182,5 +210,5 @@
             window.location.assign(url);
         }
 });
-  	});
+
 </script>
