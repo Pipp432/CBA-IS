@@ -55,10 +55,11 @@ class mktController extends controller {
 			echo '<div class="form-check" style="margin-bottom:1rem;">';
 			
 			echo '<input class="form-check-input" type="radio" name="transportRadio" id="ThaiPost" value="'.$priceList['price'].'" checked>';
-			echo '<lable>Courier : <b>Thailand Post</b> </lable> </br>';
+			echo '<lable>Courier : <b>Thailand Post (ถ้าขึ้นราคาเดียวเกิดจากสินค้าเกิน 2 kg ส่งแบบ EMS เท่านั้น!!!)</b> </lable> </br>';
 			echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
-			echo '<lable>ลงทะเบียน : <b>'.$priceList['shippings'][0]['price'].'</b> บาท</lable> </br>';
-			echo '<lable>EMS : <b>'.$priceList['shippings'][1]['price'].'</b> บาท</lable><br>';
+            echo 'ลงทะเบียน/EMS : <b>'.$priceList['shippings'][0]['price'].'</b> บาท / <b>'.$priceList['shippings'][1]['price'].'</b> บาท</lable> </br>';
+			// echo '<lable>ลงทะเบียน/EMS(ถ้าสั่งของจำนวนเยอะ) : <b>'.$priceList['shippings'][0]['price'].'</b> บาท</lable> </br>';
+			// echo '<lable>EMS : <b>'.$priceList['shippings'][1]['price'].'</b> บาท</lable><br>';
 			
 		// 	echo '<input class="form-check-input" type="radio" name="transportRadio" id="ThaiPost(EMS)" value="'.$priceList['price'].'" checked>';
 		// 	echo '<lable>Courier : <b>Kerry</b> </lable> </br>';

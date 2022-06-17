@@ -7,6 +7,7 @@
     <div class="container mt-3" ng-controller="moduleAppController">
 
         <h2 class="mt-3">Dashboard</h2>
+        <div class = 'WIP'> Page Under Construction (VERY SLOW 🥲) </div>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- PO -->
@@ -15,7 +16,7 @@
         <div class="row row-cols-2 row-cols-md-3 mt-2 p-0">
 			
             <div class="col">
-                <div class="card text-white bg-secondary m-2" ng-click="getDashboardIVCR()">
+                <div class="card text-white bg-secondary m-2" ng-click="getDashboardIVCR(fetchNum)" onclick="on()">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบกำกับภาษี/ใบเสร็จรับเงิน (IV/CR)</h5>
                     </div>
@@ -95,19 +96,27 @@
                     </div>
                 </div>
             </div> -->
+            
 
             
         </div>
+        
+        <div id="overlay" onclick="off()" ng-show = "dashboards.length==0">
+            <div class="loader">Wait a minute (รอหน่อยๆ)</div>
+            
+        </div>
+       
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- DOCUMENT everything not pv  -->
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-        <div ng-show = "temp != 'PV-D' && temp != 'PPV-D' && temp != 'PV-A' && temp != 'PV-C' && temp != 'PPV-C' && temp != 'EX-A'" class="mt-2 p-0">
+        <div ng-show = "temp != 'PV-D' && temp != 'PPV-D' && temp != 'PV-A' && temp != 'PV-C' && temp != 'PPV-C' && temp != 'EX-A' " class="mt-2 p-0">
             
             <table class="table table-hover my-1">
                 <tr>
                     <th>เลข {{doc}}</th>
+                 
                     <th>{{temp}}</th>
                     <th ng-show="doc == 'PV'">ชื่อ Supplier</th>
 					<th ng-show="doc == 'PO'">เลข SO</th>
@@ -130,8 +139,8 @@
                     <td>{{dashboard.temp}}</td>
                     <td ng-show="doc == 'PV'">{{dashboard.pv_name}}</td>
 					<td ng-show="doc == 'PO'">{{dashboard.so}}</td>
-                    <td ng-show="doc == 'IV_CR'">{{dashboard.sox_no}}</td>
-                    
+                    <td ng-show="doc == 'IV_CR' && dashboard.cancelled =='1' "><p style="color: red">{{dashboard.sox_no}}</p></td>
+                    <td ng-show="doc == 'IV_CR' && dashboard.cancelled =='0' "><p style="color: green">{{dashboard.sox_no}}</p></td>
                     <td>{{dashboard.file_date}} {{dashboard.file_time}}</td>
                     <td>{{dashboard.file_emp_id}} {{dashboard.file_emp_name}}</td>
                     <td ng-show="doc == 'PV'">
@@ -155,6 +164,7 @@
                     </td>
                 </tr>
             </table>
+            <div ></div>
             
         </div>
 
@@ -421,7 +431,7 @@
 
                         </div>
 
-                    <td> <div ng-show="dashboard.confirmed_employee===null">
+                    <td> <div ng-show="dashboard.confirmed_employee===null">☢️
                             <p>Not Confirmed</p>
 
                         </div>
@@ -431,21 +441,94 @@
 
                 </tr>
             </table>
+           
             
         </div>
-
+        <div class ="page-selector" ng-show = "temp =='เลข SO'">
+        <button ng-click = "decrement()" id= 'decrement'> << </button><h2 >{{pageNum}}</h2><button ng-click = 'increment()'> >> </button><button ng-click = 'viewAll()'> VIEW ALL (WARNING SLOW !!!) </button>
+       
+        </div>
     </div>
+    
+    
+   
 
 </body> 
 
+
 </html>
+
 
 <style>
     td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
     .card:hover { transform: translate(0,-4px); box-shadow: 0 4px 8px lightgrey; }
     .newLine {white-space: pre}
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        position: absolute;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        text-align: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+    .WIP{
+        font-size: 30px;
+    }
+    .page-selector{
+        display: flex;
+        width: 100%;
+        gap: 10px;
+    
+        justify-content: center
+
+    }
+    .page-selector button{
+        background-color: #33f5f2;
+        color:black;
+        margin: 10px
+        
+    }
+    .page-selector button:hover{
+        background-color: #4339fa;
+        color: white;
+    }
+    #overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+}
+   
 </style>
+<script>
+    function on() {
+  document.getElementById("overlay").style.display = "block";
+}
+
+function off() {
+  document.getElementById("overlay").style.display = "none";
+}
+</script>
 
 <script>
 
@@ -454,11 +537,43 @@
         // $scope.isLoad = true;
         $scope.dashboards = [];
         $scope.doc = '';
-       
-		
         
        
-      
+        
+        $scope.pageNum = 1;
+        $scope.on =  function(){
+            document.getElementById("overlay").style.display = "block";
+        }
+        $scope.off = function() {
+  document.getElementById("overlay").style.display = "none";
+}
+        $scope.decrement = function(){
+            if($scope.pageNum===1){
+                $scope.pageNum = 1;
+                
+            }else{
+                $scope.on()
+;
+                $scope.pageNum--;
+                $scope.fetchNum = $scope.pageNum * 100 ===100 ? 0 :$scope.pageNum * 100;
+                $scope.getDashboardIVCR($scope.fetchNum)
+            }
+    
+        }
+        $scope.increment = function(){
+            $scope.dashboards = [];
+            $scope.on()
+            $scope.pageNum++;
+            $scope.fetchNum = $scope.pageNum * 100 ===100 ? 0 :($scope.pageNum * 100)-100;
+            $scope.getDashboardIVCR($scope.fetchNum)
+          
+        }
+        $scope.viewAll = function(){
+            $scope.fetchNum = 999;
+            $scope.getDashboardIVCR($scope.fetchNum)
+
+        }
+        
        
         
         convert_pva_status = {
@@ -481,19 +596,25 @@
      
      
         $scope.pvType = '';
-        console.log($scope.dashboardsPvc_confirm)
-		$scope.getDashboardIVCR = function() {
-            $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
-            $scope.dashboards = $scope.dashboardsIv;
+   
+		$scope.getDashboardIVCR = function(fetchNum) {
+            console.log(fetchNum)
+            $http.get(`/acc/dashboard/getIV_CR/${fetchNum}`).then((response)=>{
+                
+                $scope.dashboards = response.data;
+               
+            })
+
+           
             $scope.doc = 'IV_CR';
             $scope.temp = 'เลข SO';
         }
-        $scope.getDashboardIV = function() {
-            $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
-            $scope.dashboards = $scope.dashboardsIv;
-            $scope.doc = 'IV';
-            $scope.temp = 'เลข SO';
-        }
+        // $scope.getDashboardIV = function() {
+        //     $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
+        //     $scope.dashboards = $scope.dashboardsIv;
+        //     $scope.doc = 'IV';
+        //     $scope.temp = 'เลข SO';
+        // }
 		$scope.getDashboardCR = function() {
             $scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
             $scope.dashboards = $scope.dashboardsCr;
@@ -510,7 +631,7 @@
         }
 
         $scope.getDashboardPVA = function() {
-            $scope.dashboardsPva = <?php echo $this->dashboardPva; ?>;
+            $scope.dashboardsPva = <?php echo $this->dashboardPva;  ?>;
             $scope.dashboards = $scope.dashboardsPva; 
             $scope.doc = 'PV';
             $scope.pvType = 'pva';
@@ -562,7 +683,7 @@
         $scope.getDashboardPVC = function(){
             $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
             $scope.dashboards = $scope.dashboardsPvc; 
-            console.log($scope.dashboards)
+           
             $scope.doc = 'PV';
             $scope.pvType = 'pvc';
             $scope.temp = 'PPV-C';
@@ -575,6 +696,10 @@
             $scope.pvType = 'pvc';
             $scope.temp = 'PV-C';
         }
+       
+      
+        
+        
 
         
         $scope.getDashboardPO = function() {
@@ -582,6 +707,7 @@
             $scope.dashboards = $scope.dashboardsPo;
             $scope.doc = 'PO';
             $scope.temp = 'Supplier';
+           
         }
 
         $scope.stopEvent = function(e){
@@ -607,19 +733,18 @@
         {
             first = p1.value.substring(4)
             second = p2.value.substring(4);
-            console.log( p1);
-            console.log(parseInt(first)<parseInt(second) ? -1:1);
+          
             return parseInt(first)<parseInt(second) ? -1:1;
         }
         $scope.orderByCompany = function(p1,p2)
         {
             first = p1.value[0];
             second = p2.value[0];
-            console.log( p1);
-            console.log(parseInt(first)<parseInt(second) ? -1:1);
+           
             return parseInt(first)<parseInt(second) ? -1:1;
         }
          
+        
         
 
     

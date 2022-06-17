@@ -27,17 +27,6 @@ class scmController extends controller {
         }
     }
 
-    public function confirm_pickup() {
-        if(empty(uri::get(2))) {
-            $this->requirePostition("scm");
-            $this->view->setTitle("Confirm Pick Up");
-            $this->view->soxs = $this->model->getSoxsForCp();
-            $this->view->render("scm/confirm_pickup", "navbar");
-        } else if (uri::get(2)==='post_cs_items') {
-            $this->positionEcho('scm', $this->model->addCp());
-        }
-    }
-
     public function confirm_purchase_order() {
         if(empty(uri::get(2))) {
             $this->requirePostition("scm");

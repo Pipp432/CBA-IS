@@ -2265,7 +2265,59 @@ class accModel extends model {
 	}
      
     // Dashboard Module
-    public function getDashboardIv() {
+    public function getDashboardIv($fetchNum) {
+        if($fetchNum==0){
+            $sql = $this->prepare("select
+            invoice_no as file_no,
+            invoice_date as file_date,
+            invoice_time as file_time,
+            invoice_type,
+            approved_employee as file_emp_id,
+            employee_nickname_thai as file_emp_name,
+            file_no as temp,
+            SOX.sox_no,
+            SOX.cancelled,
+            SOX.done,
+            Invoice.confirmPrint,
+            Invoice.acc_confirm
+        from Invoice 
+        inner join Employee on Employee.employee_id = Invoice.approved_employee
+        inner join SOXPrinting on SOXPrinting.so_no = file_no
+        inner join SOX on SOX.sox_no =SOXPrinting.sox_no
+        where acc_confirm = 1 and confirmPrint = 1
+        order by invoice_date desc, invoice_time desc
+        LIMIT 100");
+        $sql->execute();
+
+        return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+
+        }
+        if($fetchNum==999){
+            $sql = $this->prepare("select
+            invoice_no as file_no,
+            invoice_date as file_date,
+            invoice_time as file_time,
+            invoice_type,
+            approved_employee as file_emp_id,
+            employee_nickname_thai as file_emp_name,
+            file_no as temp,
+            SOX.sox_no,
+            SOX.cancelled,
+            SOX.done,
+            Invoice.confirmPrint,
+            Invoice.acc_confirm
+        from Invoice 
+        inner join Employee on Employee.employee_id = Invoice.approved_employee
+        inner join SOXPrinting on SOXPrinting.so_no = file_no
+        inner join SOX on SOX.sox_no =SOXPrinting.sox_no
+        where acc_confirm = 1 and confirmPrint = 1
+        order by invoice_date desc, invoice_time desc
+        ");
+        $sql->execute();
+
+        return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+
+        }
         $sql = $this->prepare("select
                                 	invoice_no as file_no,
                                     invoice_date as file_date,
@@ -2274,17 +2326,24 @@ class accModel extends model {
                                     approved_employee as file_emp_id,
                                     employee_nickname_thai as file_emp_name,
                                     file_no as temp,
-                                    sox_no
+                                    SOX.sox_no,
+                                    SOX.cancelled,
+                                    SOX.done,
+                                    Invoice.confirmPrint,
+                                    Invoice.acc_confirm
                                 from Invoice 
                                 inner join Employee on Employee.employee_id = Invoice.approved_employee
                                 inner join SOXPrinting on SOXPrinting.so_no = file_no
-                                where confirmPrint = 1 and acc_confirm = 1
-                                order by invoice_date desc, invoice_time desc");
+                                inner join SOX on SOX.sox_no =SOXPrinting.sox_no
+                                where acc_confirm = 1 and confirmPrint = 1
+                                order by invoice_date desc, invoice_time desc
+                                LIMIT ". $fetchNum.", 100");
         $sql->execute();
-        if ($sql->rowCount() > 0) {
+        
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return null;
+        
+        
+       
     }
 	
 	// Dashboard Module

@@ -106,7 +106,7 @@
                 </div>
                 <form id="form" >
                     <br>
-                    <label>ใบเสนอราคา(pdf)</label>
+                    <label>ใบเสนอราคา (KEEP BELOW 10 MB)</label>
                     <input type="file" class="form-control-file" id="quotation" name="quotation_pic">
                     
                     <br>
@@ -118,6 +118,7 @@
            
             
         </div>
+       
 </body>
 </html>
 <style>
@@ -133,13 +134,15 @@
         text-align: center;
     }
     .btn-transition{
-        transition: 1.5s;
+        transition: 0.5s;
 
 }
     .btn-transition:hover{
         background-color: #44b853;
 
     }
+    
+    
 </style>
 
 <script>
@@ -320,28 +323,22 @@
             $.ajax({
                 url: "reimbursement_request/post_quotation",
                 type: "POST",
-                dataType: 'json',
+                
                 method: 'POST',
                 data: formData,
                 cache: false,
                 processData: false,
                 contentType: false,
                 }).done(function (data) {
-                console.log(data);
-                
-                console.log(data['success']);
-                if(data['success']) {
-                    $scope.rq_no = data['rq_no'];
+                    $scope.rq_no = data;
+                    console.log(data)
                     $scope.postReReq();
-                } else {
-                    addModal('uploadFailModal', 'upload image');
-                    $('#uploadFailModal').modal('toggle');
-                }
+                
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
                 console.log(textStatus);
                 console.log(errorThrown);
-                addModal('uploadFailModal', 'upload image');
+                addModal('uploadFailModal', 'upload image','file size to big keep file size below 10 MB');
                 $('#uploadFailModal').modal('toggle');
             });    
                 
@@ -366,15 +363,15 @@
                 createdDate: $scope.getCreatedDate(),
                 table : $scope.getTableData(),
                 company_code:"3"                
-            }).done(function(done){ 
-                console.log(done)
-                addModal('successModal', 'เบิกเงินรองจ่าย','สำเร็จ');
+            }).done(function(data){ 
+                console.log(data)
+                addModal('successModal', 'เบิกเงินรองจ่าย',`บันทึก ${data} สำเร็จ`);
                 $('#successModal').modal('toggle');
-                 
+                $('#successModal').on('hide.bs.modal', function (e) {  $scope.toMainMenu(); });
             }).fail(function(a,b,c){
                 console.log(a,b,c)
             })
-            $scope.toMainMenu();
+           
 
         }
             

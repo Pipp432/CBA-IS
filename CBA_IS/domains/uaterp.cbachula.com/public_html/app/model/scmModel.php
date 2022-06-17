@@ -45,49 +45,7 @@ class scmModel extends model {
                                 inner join Product on Product.product_no = SOPrinting.product_no
                                 inner join Invoice on Invoice.file_no = SOXPrinting.so_no
                                 inner join Employee on Employee.employee_id = SOX.employee_id
-                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null and SOX.note <> 'pickup'
-								ORDER BY SOX.ird_no, SOX.sox_no ASC");
-        $sql->execute();
-        if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return json_encode([]);
-    }
-
-    public function getSoxsForCp() {
-        $sql = $this->prepare("select
-                                	SOX.sox_no,
-                                    SOX.sox_datetime,
-                                    SOX.employee_id,
-                                    SOX.tracking_number,
-									SOX.note,
-                                    Employee.employee_nickname_thai,
-                                    SOX.total_sales_price as sox_total_sales_price,
-                                    SOX.ird_no,
-                                	SOXPrinting.product_line,
-                                	SOXPrinting.so_no,
-                                    Invoice.invoice_no,
-                                    Invoice.total_sales_no_vat,
-                                    Invoice.total_sales_vat,
-                                    Invoice.total_sales_price,
-                                    Invoice.commission,
-                                    Product.product_no,
-                                	Product.product_name,
-                                    Product.product_type,
-                                    SO.so_no,
-                                    SOPrinting.sales_no_vat,
-                                    SOPrinting.sales_vat,
-                                    SOPrinting.sales_price,
-                                    SOPrinting.quantity,
-                                    SOPrinting.total_sales
-                                from SOX
-                                inner join SOXPrinting on SOX.sox_no = SOXPrinting.sox_no
-                                inner join SOPrinting on SOXPrinting.so_no = SOPrinting.so_no
-                                inner join SO on SOPrinting.so_no = SO.so_no
-                                inner join Product on Product.product_no = SOPrinting.product_no
-                                inner join Invoice on Invoice.file_no = SOXPrinting.so_no
-                                inner join Employee on Employee.employee_id = SOX.employee_id
-                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null and SOX.note = 'pickup'
+                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null
 								ORDER BY SOX.ird_no, SOX.sox_no ASC");
         $sql->execute();
         if ($sql->rowCount() > 0) {

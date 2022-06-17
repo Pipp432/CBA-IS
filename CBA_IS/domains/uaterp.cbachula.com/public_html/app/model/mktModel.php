@@ -6601,7 +6601,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     $sql = $this->prepare("update Reimbursement_Request SET withdraw_date=?, withdraw_name=?, employee_id=?, 
     line_id=?, bank_name=?, tax_number=?, bank_book_name=?, bank_book_number=? , 
     details=?,due_date=? WHERE re_req_no  = ?");
-    $success = $sql->execute([
+    $sql->execute([
       
       input::post( 'withdrawDate' ),
       input::post( 'withdrawName' ),
@@ -6618,7 +6618,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       
     ]);
     
-    echo $sql->errorInfo()[0];
+    return input::post( 're_req_no' );
     
     
   }
@@ -6628,21 +6628,15 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
     $Quotation_pic = $_FILES['quotation_pic']; 
     
     
-    if(filesize($Quotation_pic['tmp_name']) > 50000) {
-      $success = false;
-      $re->cause = 'File size too big!! Max file size is 50 kb.';
-    } else if(!@is_array(getimagesize($Quotation_pic['tmp_name']))){
-      $success = false;
-      $re->cause = 'File is not an image.';
-    } else {
+   
     $rq_no = $this->assign_re_req_no();
      
-     if(isset($Quotation_pic)) {
+     
        $file1 = file_get_contents($Quotation_pic['tmp_name']);
        $file1 = base64_encode($file1);
        $file1Name = $Quotation_pic['name'];
        $file1Type = $Quotation_pic['type'];
-     }
+     
       
   
       $sql = $this->prepare("insert into Reimbursement_Request (re_req_no, quotation_name, quotation_type, quotation_data)
@@ -6654,18 +6648,12 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
          $file1
        
       ]);
+      return $rq_no;
       
   
-      $re->rq_no = $rq_no;
-    }
-    if ($success) {
-      $re->success = true;
-      echo json_encode($re);
-    } else {
-      $re->success = false;
-      $re->errorlog = print_r($sql->errorInfo()); //have to change dataType to text to check sql error
-      echo json_encode($re);
-    }
+      
+    
+ 
   
   }
 

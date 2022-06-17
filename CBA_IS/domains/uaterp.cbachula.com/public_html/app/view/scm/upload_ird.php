@@ -48,7 +48,7 @@
                     </div>
         	</div>
 			<div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postirdItems()">upload IRD!</button>
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="postirdItems(irdItemir)">upload IRD!</button>
         	</div>
 		</div>
 	</div>
@@ -77,7 +77,7 @@
         }
 		
 		
-		$scope.postirdItems = function() {
+		$scope.postirdItems = function(ird_no) {
             
             if($scope.irdItemir == '') {
                 $('#formValidate1').modal('toggle');
@@ -87,7 +87,7 @@
                 data.append('ird_no', $scope.irdItemir);
                 
 			$.ajax({
-				url: '/scm/upload_ird/post_ird_file',
+				url: `/scm/upload_ird/post_ird_file/${ird_no}`,
 				data: data,
 				cache: false,
 				contentType: false,

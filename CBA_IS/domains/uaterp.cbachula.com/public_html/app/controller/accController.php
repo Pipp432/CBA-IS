@@ -235,7 +235,6 @@ class accController extends controller {
         if(empty(uri::get(2))) {
             $this->requirePostition("acc");
             $this->view->setTitle("Dashboard");
-            $this->view->dashboardIv = $this->model->getDashboardIv();
             $this->view->dashboardPv = $this->model->getDashboardPv();
             $this->view->dashboardPva = $this->model->getDashboardPva();
             $this->view->dashboardExa = $this->model->getDashboardExa();
@@ -287,7 +286,12 @@ class accController extends controller {
                 $this->err404();
             }
         }
-    }
+        else if (uri::get(2)==='getIV_CR') {
+                $this->positionEcho('acc', $this->model-> getDashboardIv(Uri::get(3)));
+            } 
+        }
+    
+
     
     public function dashboard_acc() {
         if(empty(uri::get(2))) {
