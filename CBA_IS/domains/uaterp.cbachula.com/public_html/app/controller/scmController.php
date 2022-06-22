@@ -290,6 +290,7 @@ class scmController extends controller {
     }
 
 	public function get_sox_no_ird() {
+       
         
         header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         header("Content-Disposition: attachment; filename=SOX no IRD.xls");

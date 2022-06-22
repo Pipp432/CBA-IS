@@ -345,6 +345,9 @@
 
                             </th>
                         </tr>
+
+
+
 							<!-- <div class="custom-control custom-checkbox mt-2">
 								<input type="checkbox" class="custom-control-input" id="fin_form" name="fin_form" value="0" ng-click="fin_form_check()">
 								<label class="custom-control-label" for="fin_form">กรอกฟอร์มแล้ว</label>
@@ -449,7 +452,7 @@
 
 </style>
 <script>
-         addModal('installValidate', 'Sales Order', 'Please select a payment method');
+        //  addModal('installValidate', 'Sales Order', 'Please select a payment method');
         
          
 </script>
@@ -471,18 +474,6 @@
 
         
 		
-		// $scope.payment_check = function() {
-        //     if (document.getElementById('payment').checked==true){
-		// 			document.getElementById('payment').value = '1';
-		// 	}else if(document.getElementById('payment').checked==false){
-		// 			document.getElementById('payment').value = '0';
-		// 	}
-        //     //if (document.getElementById('payment_K').checked==true){
-		// 	//		document.getElementById('payment_K').value = '1';
-		// 	//}else if(document.getElementById('payment_K').checked==false){
-		// 	//		document.getElementById('payment_K').value = '0';
-		// 	//}
-        // }
        
        
             
@@ -910,8 +901,8 @@
 
                 $scope.finishEdit();
 
-            }else if(!$scope.selected){
-             $('#installValidate').modal('toggle');
+            // }else if(!$scope.selected){
+            //  $('#installValidate').modal('toggle');
 
             }else {
 
@@ -926,56 +917,106 @@
             }
 
         }
-
-
+        //! With credit card
 
         $scope.postSoItems = function() {
 
-            $('#confirmModal').modal('hide');
+$('#confirmModal').modal('hide');
 
-            $.post("sales_order/post_so_items", {
+$.post("sales_order/post_so_items", {
 
-                post : true,
+    post : true,
 
-                sellerNo : $scope.seller_employee_id.toUpperCase(),
+    sellerNo : $scope.seller_employee_id.toUpperCase(),
 
-                customerTel : $scope.customer_tel,
-                
-                address: $scope.address,
+    customerTel : $scope.customer_tel,
+    
+    address: $scope.address,
 
-                productType : $scope.selectedProductType,
-				
-				payment : 0 ,
+    productType : $scope.selectedProductType,
+    
+    payment : 0 ,
 
-                vatType : $scope.vatType,
+    vatType : $scope.vatType,
 
-                totalNoVat : $scope.totalNoVat,
+    totalNoVat : $scope.totalNoVat,
 
-                totalVat : $scope.totalVat,
+    totalVat : $scope.totalVat,
 
-                totalPrice : ($scope.totalPrice+$scope.fee),
+    totalPrice : ($scope.totalPrice+$scope.fee),
 
-                totalPoint : $scope.totalPoint,
+    totalPoint : $scope.totalPoint,
 
-                totalCommission : $scope.totalCommission,
+    totalCommission : $scope.totalCommission,
 
-                discount : $scope.discount,
+    discount : $scope.discount,
 
-                soItems : JSON.stringify(angular.toJson($scope.soItems)),
-                
-                paymentType: $scope.selectedPaymentType 
+    soItems : JSON.stringify(angular.toJson($scope.soItems)),
+    
+    paymentType: $scope.selectedPaymentType 
 
-            }).done(function(data) {
+}).done(function(data) {
 
-    addModal('successModal', 'Sales Order',  data);
-    $('#successModal').modal('toggle');
-    $('#successModal').on('hide.bs.modal', function (e) {
-     window.location.replace('https://uaterp.cbachula.com/');
+addModal('successModal', 'Sales Order',  data);
+$('#successModal').modal('toggle');
+$('#successModal').on('hide.bs.modal', function (e) {
+window.location.replace('https://uaterp.cbachula.com/');
 
 });
 
 }).fail((a,b,c)=>{console.log(a,b,c)}) 
-    }
+}
+
+
+//! NO CREDIT CARD 
+
+    //     $scope.postSoItems = function() {
+
+    //         $('#confirmModal').modal('hide');
+
+    //         $.post("sales_order/post_so_items", {
+
+    //             post : true,
+
+    //             sellerNo : $scope.seller_employee_id.toUpperCase(),
+
+    //             customerTel : $scope.customer_tel,
+                
+    //             address: $scope.address,
+
+    //             productType : $scope.selectedProductType,
+				
+	// 			payment : 0 ,
+
+    //             vatType : $scope.vatType,
+
+    //             totalNoVat : $scope.totalNoVat,
+
+    //             totalVat : $scope.totalVat,
+
+    //             totalPrice : ($scope.totalPrice+$scope.fee),
+
+    //             totalPoint : $scope.totalPoint,
+
+    //             totalCommission : $scope.totalCommission,
+
+    //             discount : $scope.discount,
+
+    //             soItems : JSON.stringify(angular.toJson($scope.soItems)),
+                
+    //             paymentType: null 
+
+    //         }).done(function(data) {
+
+    // addModal('successModal', 'Sales Order',  data);
+    // $('#successModal').modal('toggle');
+    // $('#successModal').on('hide.bs.modal', function (e) {
+    //  window.location.replace('https://uaterp.cbachula.com/');
+
+// });
+
+// }).fail((a,b,c)=>{console.log(a,b,c)}) 
+//     }
 
 
         

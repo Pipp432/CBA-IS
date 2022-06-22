@@ -167,6 +167,7 @@
                 $scope.totalVat += (value.quantity * value.poprinting_purchase_vat);
                 $scope.totalPrice += (value.quantity * value.poprinting_purchase_price);
             });
+            console.log($scope.ciItems)
         }
         
         $scope.formValidate = function() {
@@ -182,6 +183,7 @@
         var clicked = false;
         
         $scope.postCiItems = function() {
+           
             
             $('#confirmModal').modal('hide');
             

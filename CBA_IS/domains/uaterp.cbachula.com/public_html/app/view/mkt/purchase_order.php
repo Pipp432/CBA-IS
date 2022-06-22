@@ -682,14 +682,12 @@
         $scope.postPoItems = function() {
 
             $('#confirmModal').modal('hide');
-
             if($scope.vat_type =='1'){
-                $scope.vat = 0;
-                $scope.beforeVat = $scope.totalPrice;
-            }else{
                 $scope.vat = $scope.totalPrice*7/107;
                 $scope.beforeVat = $scope.totalPrice*100/107;
-
+            }else{
+                $scope.vat = 0;
+                $scope.beforeVat = $scope.totalPrice;
             }
 
             $.post("purchase_order/post_po_items", {

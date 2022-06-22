@@ -318,11 +318,11 @@
                     }
                     else {
                         // vat คิดจากราคาสุดท้าย
-                        $scope.vat = ($scope.finalPrice * 7/107).toFixed(2);
+                        $scope.vat = ($scope.rounded * 7/107).toFixed(2);
                         // มูลค่าสินค้า
-                        $scope.priceBefore = ($scope.finalPrice* 100/107).toFixed(2)
+                        $scope.priceBefore = ($scope.salesWithVAT* 100/107).toFixed(2)
                     }
-                    $scope.creditCardFee = ($scope.rounded - ($scope.priceBefore + $scope.vat)).toFixed(2)
+                    $scope.creditCardFee = (Number($scope.rounded) - (Number($scope.priceBefore) + Number($scope.vat))).toFixed(2)
 
                     
                 }else{
@@ -336,6 +336,11 @@
                         $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
                     }
                 }
+                console.log($scope.vat)
+                console.log($scope.priceBefore)
+                console.log($scope.creditCardFee)
+                console.log( $scope.finalPrice)
+                console.log($scope.rounded)
                 
    
                

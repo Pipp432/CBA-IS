@@ -434,4 +434,94 @@ class accController extends controller {
         
     }
 
+    public function total_CN() {
+        
+        header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=total_CN.xls");
+        $data = $this->model->gettotalCN();
+        echo "\xEF\xBB\xBF";
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>cn no</th>';
+                echo '<th>company code</th>';
+                echo '<th>Date</th>';
+                echo '<th>month</th>';
+                echo '<th>iv total sales</th>';
+                echo '<th>new total sales price</th>';
+                echo '<th>diff total sales no vat</th>';
+                echo '<th>diff vat</th>';
+                echo '<th>total credit note</th>';
+
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    
+                    echo '<td>'.$value['cn_no'].'</td>';
+                    echo '<td>'.$value['company_code'].'</td>';
+                    echo '<td>'.$value['cn_date'].'</td>';
+                    echo '<td>'.$value['extract(month from CN.cn_date)'].'</td>';
+                    echo '<td>'.$value['iv_total_sales'].'</td>';
+                    echo '<td>'.$value['new_total_sales_price'].'</td>';
+                    echo '<td>'.$value['diff_total_sales_vat'].'</td>';
+                    echo '<td>'.$value['vat_total_sales_no_vat'].'</td>';
+                    echo '<td>'.$value['sum_total_sales'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
+
+    public function statement() { 
+        if(empty(uri::get(2))) {
+            $this->requirePostition("acc");
+            $this->view->setTitle("Statement");
+            $this->view->statement1 = $this->model->getStatement1();
+            $this->view->statement2 = $this->model->getStatement2();
+            $this->view->statement3 = $this->model->getStatement3();
+            $this->view->statementProj1 = $this->model->getStatementProj1();
+            $this->view->statementProj2 = $this->model->getStatementProj2();
+            $this->view->statementProfit1 = $this->model->getStatementProfit1();
+            $this->view->statementProfit2 = $this->model->getStatementProfit2();
+			$this->view->statementProfit3 = $this->model->getStatementProfit3();
+            $this->view->render("acc/statement", "navbar");
+        }
+        // } else if (uri::get(2)==='pv_slip') {
+        //     if (!empty(Uri::get(3))) {
+        //         $this->positionEcho('acc', $this->model->getSlipData(Uri::get(3)));
+        //     } else {
+        //         $this->err404();
+        //     }
+            
+        // } else if (uri::get(2)==='pv_iv') {
+        //     if (!empty(Uri::get(3))) {
+        //         $this->positionEcho('acc', $this->model->getIVData(Uri::get(3)));
+        //     } else {
+        //         $this->err404();
+        //     }
+        // }
+        // else if (uri::get(2)==='pvb_slip') {
+        //     if (!empty(Uri::get(3))) {
+        //         $this->positionEcho('acc', $this->model->getSlipPVB(Uri::get(3)));
+        //     } else {
+        //         $this->err404();
+        //     }
+        // } else if (uri::get(2)==='get_IVPC_Files_dashboard') {
+        //     if (!empty(Uri::get(4))) {
+        //         $this->positionEcho('acc', $this->model->getIVPCFilesDashboard(Uri::get(3),Uri::get(4)));
+        //     } else {
+        //         $this->err404();
+        //     }
+        // } else if (uri::get(2)==='get_PVB_CR') {
+        //     if (!empty(Uri::get(3))) {
+        //         $this->positionEcho('acc', $this->model->getPVBCR(Uri::get(3)));
+        //     } else {
+        //         $this->err404();
+        //     }
+        // }
+    }
+
 }

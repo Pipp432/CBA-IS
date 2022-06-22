@@ -413,10 +413,9 @@ class finModel extends model {
                 echo $iv_no.' ('.$value['so_no'].') ';
                 
                 if($value['so_total_sales_vat2'] != 0) {
+                    $total_sales_no_vat = ((double) $value['so_total_sales_price2']) / 1.07;
+                    $total_sales_vat = ((double) $value['so_total_sales_price2']) / 107 * 7;
                     $total_sales_price = (double) $value['so_total_sales_price2'];
-                    $total_sales_no_vat = ((double) ceil($total_sales_price)) *100/107;
-                    $total_sales_vat = ((double) ceil($total_sales_price)) *7/107;
-                  
                 } else {
                     $total_sales_no_vat = (double) $value['so_total_sales_price2'];
                     $total_sales_vat = 0;
@@ -497,40 +496,194 @@ class finModel extends model {
                     $value['employee_id'],
                     (double)$commission
                 ]);
-                $paymentType = input::post('payment_type');
-
-
-                    if($paymentType=='CC' || $paymentType=='FB' ){
-                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $sql->execute([$iv_no, '1', '13-3'.$iv_no[0].'00', (double) ceil($total_sales_price), 0, 'IV']);
-
-                    }
-                    else{
-                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
-    
-
-                    }  
-                    // insert AccountDetail sequence 2
-                    // Cr รายได้รับล่วงหน้า - โครงการ X
-                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
-                    
-                    // insert AccountDetail sequence 3
-                    // Cr ภาษีขาย - โครงการ X
-                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
-
+				
+				
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
                 
+                // insert AccountDetail sequence 2
+                // Cr รายได้รับล่วงหน้า - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
                 
+                // insert AccountDetail sequence 3
+                // Cr ภาษีขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
                 
                 // ============================================================================================================================================================
                 // END CBA2020 ACC
-              
+                $sql = $this->prepare("SELECT
+                SO.vat_type
+            from SO
+            where SO.so_no = ?");
+        $sql->execute([$value['so_no']]);
+        $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+        $vat_type = intval($temp[0]["vat_type"]);
+
+        $sql = $this->prepare("SELECT
+                SO.payment_type
+            from SO
+            where SO.so_no = ?");
+$sql->execute([$value['so_no']]);
+$tempp = $sql->fetchAll(PDO::FETCH_ASSOC);
+$payment_type = $tempp[0]["payment_type"];
+
+$new_total_price =((double) $value['new_total_price']);
+//CBA2022 กระบวนการขาย stock, order  บัตรเครดิต
+// Credit Card
+if($payment_type == 'MB'){
+    $dr1 = (($new_total_price)*102.75/100)*97.325/100;
+    $dr2 = (($new_total_price)*102.75/100)*2.5/100;
+    $dr3 = (($new_total_price)*102.75/100)*(2.5/100) *(7/100);
+    $cr1 = (($new_total_price)*102.75/100)*(100/107);
+    $cr2 = (($new_total_price)*102.75/100)*(7/107);
+
+    $cr1_3 = (($new_total_price)*102.75/100);                    
+
+    if($vat_type < 3) { // vat type 1, 2
+        // Dr. เงินฝากออมทรัพย์(12-0000) seq 1 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '1' , '12-0000' , (double) $dr1 , 0 , 'IV']);
+        // Dr. ค่าธรรมเนียมบัตรเครดิต (52-2X10 ) – โครงการ X seq 2 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '2' , '52-2'.$iv_no[0].'10' , (double) $dr2 , 0 , 'IV']);
+        // Dr ภาษีซื้อ – โครงการ X  (61-1X00) seq 3 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '3' , '61-1'.$iv_no[0].'00' , (double) $dr3 , 0 , 'IV']);
+        
+        // Cr. รายได้รับล่วงหน้า – โครงการ X (24-1X00) sequence 4 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '4' , '24-1'.$iv_no[0].'00' , 0 , (double) $cr1 , 'IV']);
+        // Cr ภาษีขาย – โครงการ X (ถ้ามี) (62-1X00) sequence 5 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '5' , '62-1'.$iv_no[0].'00' , 0 , (double) $cr2 , 'IV']);
+
+}   
+else {
+    // Dr. เงินฝากออมทรัพย์(12-0000) seq 1 IV
+    $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+    $sql->execute([ $iv_no , '1' , '12-0000' , (double) $dr1 , 0 , 'IV']);
+    // Dr. ค่าธรรมเนียมบัตรเครดิต (52-2X10 ) – โครงการ X seq 2 IV
+    $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+    $sql->execute([ $iv_no , '2' , '52-2'.$iv_no[0].'10' , (double) $dr2 , 0 , 'IV']);
+    // Dr ภาษีซื้อ – โครงการ X  (61-1X00) seq 3 IV
+    $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+    $sql->execute([ $iv_no , '3' , '61-1'.$iv_no[0].'00' , (double) $dr3 , 0 , 'IV']);
+
+    // Cr. รายได้รับล่วงหน้า – โครงการ X (24-1X00) sequence 4 IV
+    $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+    $sql->execute([ $iv_no , '4' , '24-1'.$iv_no[0].'00' , 0 , (double) $cr1_3 , 'IV']);
+    // Cr ภาษีขาย – โครงการ X (ถ้ามี) (62-1X00) sequence 5 IV
+    $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+    $sql->execute([ $iv_no , '5' , '62-1'.$iv_no[0].'00' , 0 , 0 , 'IV']);
+}
+}
+
+if($payment_type == 'CC'){
+    $dr1 = (($new_total_price)*102.45/100);
+    $cr1 = (($new_total_price)*102.45/100) *100/107;
+    $cr2 = (($new_total_price)*102.45/100) *7/107;
+    $cr1_3 = (($new_total_price)*102.45/100);
+
+    if($vat_type < 3) { // vat type 1, 2
+        // Dr ลูกหนี้บัตรเครดิต 13-3x00 sequence 1 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '1' , '13-3'.$iv_no[0].'00' , (double) $dr1 , 0 , 'IV']);
+        // Cr รายได้รับล่วงหน้า 24-1X00 sequence 2 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '2' , '24-1'.$iv_no[0].'00' , 0 , (double) $cr1 , 'IV']);
+        // Cr ภาษีขาย 62-1x00 sequence 3 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '3' , '62-1'.$iv_no[0].'00' , 0 , (double) $cr2 , 'IV']);
+    }   
+    else {
+        // Dr ลูกหนี้บัตรเครดิต 13-3x00 sequence 1 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '1' , '13-3'.$iv_no[0].'00' , (double) $dr1 , 0 , 'IV']);
+        // Cr รายได้รับล่วงหน้า 24-1X00 sequence 2 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '2' , '24-1'.$iv_no[0].'00' , 0 , (double) $dr1 , 'IV']);
+        // Cr ภาษีขาย 62-1x00 sequence 3 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '3' , '62-1'.$iv_no[0].'00' , 0 , 0 , 'IV']);
+    }
+}
+    if($payment_type == 'FB'){
+        $dr1 = (($new_total_price)*102.75/100)*97.325/100;
+        $dr2 = (($new_total_price)*102.75/100)*2.5/100;
+        $dr3 = (($new_total_price)*102.75/100)*(2.5/100) *(7/100);
+        $cr1 = (($new_total_price)*102.75/100)*(100/107);
+        $cr2 = (($new_total_price)*102.75/100)*(7/107);
+        $cr1_3 = (($new_total_price)*102.75/100);                    
+
+    if($vat_type < 3) { // vat type 1, 2
+        // Dr. เงินฝากออมทรัพย์(12-0000) seq 1 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '1' , '12-0000' , (double) $dr1 , 0 , 'IV']);
+        // Dr. ค่าธรรมเนียมบัตรเครดิต (52-2X10 ) – โครงการ X seq 2 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '2' , '52-2'.$iv_no[0].'10' , (double) $dr2 , 0 , 'IV']);
+        // Dr ภาษีซื้อ – โครงการ X  (61-1X00) seq 3 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '3' , '61-1'.$iv_no[0].'00' , (double) $dr3 , 0 , 'IV']);
+
+        // Cr. รายได้รับล่วงหน้า – โครงการ X (24-1X00) sequence 4 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '4' , '24-1'.$iv_no[0].'00' , 0 , (double) $cr1 , 'IV']);
+        // Cr ภาษีขาย – โครงการ X (ถ้ามี) (62-1X00) sequence 5 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '5' , '62-1'.$iv_no[0].'00' , 0 , (double) $cr2 , 'IV']);
+
+    }   
+    else {
+        // Dr. เงินฝากออมทรัพย์(12-0000) seq 1 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '1' , '12-0000' , (double) $dr1 , 0 , 'IV']);
+        // Dr. ค่าธรรมเนียมบัตรเครดิต (52-2X10 ) – โครงการ X seq 2 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '2' , '52-2'.$iv_no[0].'10' , (double) $dr2 , 0 , 'IV']);
+        // Dr ภาษีซื้อ – โครงการ X  (61-1X00) seq 3 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '3' , '61-1'.$iv_no[0].'00' , (double) $dr3 , 0 , 'IV']);
+        
+        // Cr. รายได้รับล่วงหน้า – โครงการ X (24-1X00) sequence 4 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '4' , '24-1'.$iv_no[0].'00' , 0 , (double) $cr1_3 , 'IV']);
+        // Cr ภาษีขาย – โครงการ X (ถ้ามี) (62-1X00) sequence 5 IV
+        $sql = $this->prepare("INSERT into AccountDetail(file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+        $sql->execute([ $iv_no , '5' , '62-1'.$iv_no[0].'00' , 0 , 0 , 'IV']);
+    }
+}
               
                 } else {
             
@@ -1251,7 +1404,7 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
 			} else{
 				$detail=NULL;
 				$sql -> execute([$tr_no,$cr["cr_no"],$detail]);
-				$sql = $this -> prepare("SELECT CR.cr_no,SO.payment_type FROM CR
+				$sql = $this -> prepare("SELECT CR.cr_no,SO.payment FROM CR
 									left join Invoice on CR.cr_no=Invoice.cr_no
 									left join SO on Invoice.file_no=SO.so_no
 									where CR.cr_no=?");
@@ -1259,10 +1412,10 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
 				$so_no = $sql->fetchAll();
 				
 				foreach ($so_no as $so){
-					$payment=$so["payment_type"];
+					$payment=$so["payment"];
 				}
 				
-				if ($payment=='CC' || $payment=='FB'){
+				if ($payment=='1'){
 					$sql = $this -> prepare("INSERT INTO AccountDetail (file_no,sequence,date,time,account_no,debit,credit,cancelled,note)
 								VALUES(?,5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,?,?,0,0,'CR')");
 					$p_num='12-1'.substr($cr["cr_no"],0,1).'00';

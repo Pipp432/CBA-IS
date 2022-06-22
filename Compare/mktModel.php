@@ -2235,6 +2235,44 @@ class mktModel extends model {
 
   //PO Module
   public function getOrderInstallSo() {
+
+    
+      if ('supplier_no = B01') { 
+        
+      $sql = $this->prepare( "select
+      SO.so_no,
+        SO.so_date,
+        SO.so_time,
+        concat(orderer.employee_id, ' ', orderer.employee_nickname_thai) as orderer,
+        concat(approved.employee_id, ' ', approved.employee_nickname_thai) as approved,
+        SO.product_line,
+        SO.product_type,
+        SOPrinting.sales_price,
+        SOPrinting.quantity,
+        Product.*,
+        Supplier.supplier_name
+    from SOPrinting
+    inner join SO on SO.so_no = SOPrinting.so_no
+    left join SO as sd on sd.note = SO.so_no
+    left join SOPrinting as sdPrinting on sdPrinting.so_no = sd.so_no
+    inner join Employee as orderer on orderer.employee_id = SO.employee_id
+    inner join Employee as approved on approved.employee_id = SO.approve_employee_no
+    left join Product on Product.product_no = SOPrinting.product_no
+    left join SOXPrinting on SOXPrinting.so_no = SO.so_no
+    left join SOX on SOX.sox_no = SOXPrinting.sox_no
+    inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
+    where SOPrinting.cancelled = 0 and not Product.product_type = 'Stock' and SO.po_no is null and Product.product_line = ? and Product.supplier_no = 'B03' and SO.note is null
+    GROUP BY SO.so_no, Product.product_no
+    order by SOPrinting.so_no desc" );
+
+    $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] ] );
+    if ( $sql->rowCount() > 0 ) {
+      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    }
+    return json_encode( [] );
+
+      }else {
+    
     $sql = $this->prepare( "select
                                 	SO.so_no,
                                     SO.so_date,
@@ -2265,6 +2303,7 @@ class mktModel extends model {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
     }
     return json_encode( [] );
+  }
   }
 
   // PO Module

@@ -68,15 +68,15 @@
                         โปรดนำสำเนาใบสั่งซื้อมาทุกครั้ง<br>ที่ส่งสินค้าและวางบิล<br>(จะชำระราคาตามใบสั่งซื้อเท่านั้น)
                     </th>
                     <th colspan="2" style="text-align: right;">ราคาสินค้า</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type==='1' ? detail[0].po_total_purchase_price *100/107: detail[0].po_total_purchase_price | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{beforeVat | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type==='1'? detail[0].po_total_purchase_price *7/107:0 | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{vat | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ราคารวมทั้งสิ้น</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_price | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{sum | number:2}}</th>
                 </tr>
             </table>
         </div> 
@@ -122,6 +122,27 @@
             $scope.detail = <?php echo $this->po; ?>;
             $scope.company = $scope.detail[0].po_no.substring(0,1);
             console.log($scope.detail)
+            $scope.sum = 0;
+            $scope.vat = 0;
+            $scope.beforeVat = 0;
+            $scope.detail.forEach(
+                (e)=>{
+                  
+                    $scope.sum+=Number(e.total_purchase_price)
+                    if(e.vat_type=="1") {
+                        $scope.vat +=Number(e.total_purchase_price)*7/107;
+                        $scope.beforeVat +=Number(e.total_purchase_price)*100/107
+                    }else{
+                        $scope.beforeVat +=Number(e.total_purchase_price);
+                    }
+                    
+                    
+                }
+                )
+
+            console.log(`Sum of all price: ${$scope.sum}`)
+            console.log(`VAT: ${$scope.vat}`) 
+            console.log(`Before VAT: ${$scope.beforeVat}`)       
            
         }
     });

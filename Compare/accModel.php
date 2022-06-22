@@ -1061,6 +1061,7 @@ class accModel extends model {
                         $sql=$this->prepare("update CI set diff = ? where ci_no = ?");
                         $sql->execute([$diff, $value['ci_no']]);
                     }
+
                     if($_POST["DR"]){
                         // insert AccountDetail sequence 12
                         // DR tax diff

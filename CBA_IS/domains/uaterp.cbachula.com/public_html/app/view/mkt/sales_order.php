@@ -795,7 +795,7 @@
 
         }
 
-        
+         
 
         $scope.edit = function() {
 
@@ -917,7 +917,7 @@
             }
 
         }
-        //! With credit card
+      //! With credit card
 
 //         $scope.postSoItems = function() {
 

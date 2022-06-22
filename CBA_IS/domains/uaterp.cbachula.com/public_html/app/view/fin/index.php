@@ -27,7 +27,7 @@
         <script>addModuleLink('finRow', '/fin/bank_statement', 'cloud-upload', 'bank statement');</script>
         <script>addModuleLink('finRow', '/fin/bank_reconsile', 'cloud-download', 'bank reconsile');</script>
         <script>addModuleLink('finRow', '/fin/sales_report_fin', 'cloud-download', 'sales report fin');</script>
-        
+        <script>addModuleLink('finRow', '/acc/forecast_vat', 'cloud-download', 'Total Invoice');</script>
     </div>
     
 </body>
