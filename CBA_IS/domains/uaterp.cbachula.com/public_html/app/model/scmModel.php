@@ -45,8 +45,28 @@ class scmModel extends model {
                                 inner join Product on Product.product_no = SOPrinting.product_no
                                 inner join Invoice on Invoice.file_no = SOXPrinting.so_no
                                 inner join Employee on Employee.employee_id = SOX.employee_id
-                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null
+                                where SOX.done = 0 and SOX.cancelled = 0 and not Product.product_type = 'Install' and not SOX.ird_no = '-' and SOX.tracking_number is not null and SOX.note <> 'pickup'
 								ORDER BY SOX.ird_no, SOX.sox_no ASC");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function getSoxsForCp() {
+        $sql = $this->prepare("SELECT SOX.sox_no,Invoice.invoice_no,SOX.address, Product.product_name, SOPrinting.quantity,
+        SOX.total_sales_price as sox_total_sales_price, Invoice.total_sales_no_vat,Invoice.total_sales_vat,Invoice.total_sales_price,Invoice.commission,Product.product_no,SO.so_no,
+        SOPrinting.sales_no_vat,SOPrinting.sales_vat,SOPrinting.sales_price,SOPrinting.total_sales
+
+        FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
+        INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
+		INNER JOIN Invoice ON Invoice.file_no=SO.so_no 
+        where SOX.done = 0 and SOX.cancelled = 0 and Product.product_type <> 'Install' and SOX.note = 'pickup'
+		ORDER BY SOX.ird_no, SOX.sox_no ASC");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -215,6 +235,61 @@ class scmModel extends model {
         }
         
     }
+    public function addCp() {
+        
+        $csItemsArray = json_decode(input::post('csItems'), true); 
+        $csItemsArray = json_decode($csItemsArray, true);
+        
+        $soxList = array();
+        
+        foreach($csItemsArray as $value) {
+            
+            if (array_key_exists($value['invoice_no'], $soxList)) {
+                
+                $irno = $soxList[$value['invoice_no']];
+                
+            } else {
+                
+                $irno = $this->assignIr($value['invoice_no']);
+                $soxList += [$value['invoice_no']=>$irno];
+                
+                // update SOX 
+                $sql = $this->prepare("update SOX set done = 1 where sox_no = ?");
+                $sql->execute([$value['sox_no']]); 
+                
+                // insert AccountDetail sequence 1
+                // Dr รายได้รับล่วงหน้า - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '4', '24-1'.$value['invoice_no'][0].'00', (double) $value['total_sales_no_vat'], 0, 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 2
+                // Cr ขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '5', '41-1'.$value['invoice_no'][0].'00', 0, (double) $value['total_sales_no_vat'], 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 3
+                // Dr ค่า Commission
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '6', '52-1000', (double) $value['commission'], 0, 'IV']);
+                    
+                    
+                // insert AccountDetail sequence 4
+                // Cr ค่า Commission ค้างจ่าย
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                      values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$value['invoice_no'], '7', '22-0000', 0, (double) $value['commission'], 'IV']);
+
+            }
+            
+        }
+        
+    }
+    
     
     // CS Module
     private function assignIr($iv_no) {
@@ -586,7 +661,25 @@ class scmModel extends model {
         }
         
     }
-    
+    public function dashPickup() {
+        $sql = $this->prepare("SELECT SOX.sox_no,Invoice.invoice_no,SOX.address, group_concat(DISTINCT concat(Product.product_name ,' x ', SOPrinting.quantity)) AS product_detail,
+        (CASE WHEN SOX.done=0 AND SOX.cancelled = 0 THEN 2 WHEN SOX.done = 1 AND SOX.cancelled = 0 THEN 1 WHEN SOX.cancelled=1 THEN 3 END ) AS status 
+		FROM SOX 
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
+        INNER JOIN Invoice ON Invoice.file_no=SO.so_no 
+        INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no 
+        INNER JOIN Product ON InvoicePrinting.product_no = Product.product_no 
+        WHERE sox_status=1 AND SOX.cancelled = 0 AND SOX.note = 'pickup' 
+        group by SOX.sox_no
+        ORDER BY SOX.sox_no ASC");
+        $sql->execute();
+        if ($sql->rowCount()>0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
     // Dashboard Module
     public function getDashboard() {
         $sql = $this->prepare("select 
@@ -990,7 +1083,7 @@ class scmModel extends model {
         INNER JOIN Invoice ON Invoice.file_no=SO.so_no
         INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no AND InvoicePrinting.product_no = Product.product_no
         
-        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1;");
+        WHERE SO.product_type IN ('Stock','Order') AND SOX.done=0 AND SOX.slip_uploaded = 1 AND SOX.sox_status = 1 AND SOX.note <> 'pickup';");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1108,14 +1201,13 @@ class scmModel extends model {
 	
  
     public function getAddress(){
-        $sql=$this->prepare("SELECT distinct SOX.sox_no,SOX.note,concat(Customer.customer_name, ' ', Customer.customer_surname) AS customername,SOX.address,SOX.customer_tel 
+        $sql=$this->prepare("SELECT distinct SOX.sox_no,SOX.note,concat(Customer.customer_name,' ',Customer.customer_surname) AS customer_name,SOX.address,SOX.customer_tel 
         FROM SOX INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
-		INNER JOIN Customer ON SOX.customer_tel = Customer.customer_tel AND SOX.address = Customer.address
-        
-        WHERE sox_status=1 AND SOX.done=0;");
+        INNER JOIN Customer ON SOX.customer_tel =  Customer.customer_tel AND SOX.address = Customer.address	 
+        WHERE sox_status=1 AND SOX.done=0 AND SOX.note <> 'pickup'");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();
@@ -1125,15 +1217,33 @@ class scmModel extends model {
 
      //เวอชั่นถูกค่ะ ver 10
 	public function getSOXnoIRD(){
-        $sql=$this->prepare("SELECT distinct SO.so_no,SOX.sox_no,SOX.box_size, SOPrinting.product_no,Product.product_name , SOPrinting.quantity 
+        $sql=$this->prepare("SELECT distinct SO.so_no,SOX.sox_no,SOX.box_size,  SOPrinting.product_no,Product.product_name , SOPrinting.quantity 
         FROM SOX 
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
-		
-        WHERE sox_status=1 AND SOX.done=0 AND SOX.cancelled = 0
+        WHERE sox_status=1 AND SOX.done=0 AND SOX.cancelled = 0 AND SOX.note <> 'pickup'
 ORDER BY SOX.sox_no ASC;");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
+
+    public function getPickup(){
+        $sql=$this->prepare("SELECT SOX.sox_no,Invoice.invoice_no,SOX.address, group_concat(DISTINCT concat(Product.product_name ,' x ', SOPrinting.quantity)) AS product_detail 
+		FROM SOX  
+        INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+        INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+        INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
+        INNER JOIN Invoice ON Invoice.file_no=SO.so_no 
+        INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no 
+        INNER JOIN Product ON InvoicePrinting.product_no = Product.product_no 
+        WHERE sox_status=1 AND SOX.done=0 AND SOX.cancelled = 0 AND SOX.note = 'pickup' 
+        group by SOX.sox_no
+        ORDER BY SOX.sox_no ASC;");
         $sql->execute();
         if ( $sql->rowCount() > 0 ) {
             return $sql->fetchAll();

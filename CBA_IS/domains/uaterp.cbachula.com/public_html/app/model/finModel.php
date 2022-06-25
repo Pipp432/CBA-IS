@@ -412,7 +412,7 @@ class finModel extends model {
                 
                 echo $iv_no.' ('.$value['so_no'].') ';
                 
-                if($value['so_total_sales_vat2'] != 0) {
+                if($value['vat_type'] != "3") {
                     $total_sales_price = (double) $value['so_total_sales_price2'];
                     $total_sales_no_vat = ((double) ceil($total_sales_price)) *100/107;
                     $total_sales_vat = ((double) ceil($total_sales_price)) *7/107;
@@ -1251,7 +1251,7 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
 			} else{
 				$detail=NULL;
 				$sql -> execute([$tr_no,$cr["cr_no"],$detail]);
-				$sql = $this -> prepare("SELECT CR.cr_no,SO.payment_type FROM CR
+				$sql = $this -> prepare("SELECT CR.cr_no,SO.payment FROM CR
 									left join Invoice on CR.cr_no=Invoice.cr_no
 									left join SO on Invoice.file_no=SO.so_no
 									where CR.cr_no=?");
@@ -1259,10 +1259,10 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
 				$so_no = $sql->fetchAll();
 				
 				foreach ($so_no as $so){
-					$payment=$so["payment_type"];
+					$payment=$so["payment"];
 				}
 				
-				if ($payment=='CC' || $payment=='FB'){
+				if ($payment=='1'){
 					$sql = $this -> prepare("INSERT INTO AccountDetail (file_no,sequence,date,time,account_no,debit,credit,cancelled,note)
 								VALUES(?,5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,?,?,0,0,'CR')");
 					$p_num='12-1'.substr($cr["cr_no"],0,1).'00';

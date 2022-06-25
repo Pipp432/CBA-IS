@@ -2235,6 +2235,44 @@ class mktModel extends model {
 
   //PO Module
   public function getOrderInstallSo() {
+
+    
+    if (input::post('supplierNo') == 'B03') { 
+        
+      $sql = $this->prepare( "select
+      SO.so_no,
+        SO.so_date,
+        SO.so_time,
+        concat(orderer.employee_id, ' ', orderer.employee_nickname_thai) as orderer,
+        concat(approved.employee_id, ' ', approved.employee_nickname_thai) as approved,
+        SO.product_line,
+        SO.product_type,
+        SOPrinting.sales_price,
+        SOPrinting.quantity,
+        Product.*,
+        Supplier.supplier_name
+    from SOPrinting
+    inner join SO on SO.so_no = SOPrinting.so_no
+    left join SO as sd on sd.note = SO.so_no
+    left join SOPrinting as sdPrinting on sdPrinting.so_no = sd.so_no
+    inner join Employee as orderer on orderer.employee_id = SO.employee_id
+    inner join Employee as approved on approved.employee_id = SO.approve_employee_no
+    left join Product on Product.product_no = SOPrinting.product_no
+    left join SOXPrinting on SOXPrinting.so_no = SO.so_no
+    left join SOX on SOX.sox_no = SOXPrinting.sox_no
+    inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
+    where SOPrinting.cancelled = 0 and not Product.product_type = 'Stock' and SO.po_no is null and Product.product_line = ? and Product.supplier_no = 'B03' and SO.note is null
+    GROUP BY SO.so_no, Product.product_no
+    order by SOPrinting.so_no desc" );
+
+    $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] ] );
+    if ( $sql->rowCount() > 0 ) {
+      return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
+    }
+    return json_encode( [] );
+
+    }else {
+    
     $sql = $this->prepare( "select
                                 	SO.so_no,
                                     SO.so_date,
@@ -2266,6 +2304,7 @@ class mktModel extends model {
     }
     return json_encode( [] );
   }
+}
 
   // PO Module
   public function addPo() {
@@ -2317,6 +2356,7 @@ class mktModel extends model {
     echo $pono;
 
   }
+
 
   // PO Module
   private function assignPo( $productLine ) {
@@ -2479,15 +2519,30 @@ class mktModel extends model {
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
           $sql->execute( [ $cino, '2', '41-1' . $value[ 'po_no' ][ 0 ] . '00', 0, ( double )$value[ 'total_sales_no_vat' ], 'CI' ] );
 
+      
+          // insert AccountDetail sequence 3
+          // Dr ค่า Commission
+          $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
+          $sql->execute( [ $cino, '3', '52-0'.$value[ 'po_no' ][ 0 ].'00', ( double )$value[ 'commission' ], 0, 'CI' ] );
+
+          // insert AccountDetail sequence 4
+          // Cr ค่า Commission ค้างจ่าย
+          $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
+          $sql->execute( [ $cino, '4', '22-1'.$value[ 'po_no' ][ 0 ].'00', 0, ( double )$value[ 'commission' ], 'CI' ] );
+
+           // insert AccountDetail sequence 5
           // Dr ซื้อ
           $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
-          $sql->execute( [ $cino, '3', '52-0' . $value[ 'po_no' ][ 0 ] . '00', ( double )$value[ 'total_purchase_no_vat' ], 0, 'CI' ] );
+          $sql->execute( [ $cino, '5', '51-1' . $value[ 'po_no' ][ 0 ] . '00', ( double )$value[ 'total_purchase_no_vat' ], 0, 'CI' ] );
 
+          // insert AccountDetail sequence 6
           // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
           $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
-          $sql->execute( [ $cino, '4', '22-1' . $value[ 'po_no' ][ 0 ]. '00', 0, ( double )$value[ 'total_purchase_no_vat' ], 'CI' ] );
+          $sql->execute( [ $cino, '6', '21-2' . $value[ 'supplier_no' ], 0, ( double )$value[ 'total_purchase_no_vat' ], 'CI' ] );
           
 
         } else {

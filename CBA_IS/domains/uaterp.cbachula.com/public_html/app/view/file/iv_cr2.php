@@ -132,22 +132,23 @@
                         </div>
                     </th>
                     <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].vat_type == "3" ? detail[0].invoice_total_sales_price : detail[0].invoice_total_sales_price * 100/107 - creditCardFee  | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{priceBefore}}</th>
                 </tr>
                     <!-- <tr>
                         <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
-                        <th colspan="1" style="text-align: right;">{{creditCardFee | number:2}}</th>
+                        <th colspan="1" style="text-align: right;">{{creditCardFee}}</th>
                     </tr> -->
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{ detail[0].vat_type =='3'? 0:detail[0].invoice_total_sales_price * 7/107 | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{vat}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price| number:0}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 
+        <br>
     
     </div>
 </div>
@@ -217,7 +218,7 @@
 		<div class="row" style="height: 12px"></div>
 		<div class="row" style="width: 100%">
 			<div class="col-10"></div>
-			<div class="col" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</div>
+			<div class="col" style="text-align: right;">{{totalPrice | number:2}}</div>
 		</div>
 
       
@@ -239,9 +240,13 @@
 <script>
     
     app.controller('moduleAppController', function($scope) {
+        
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->iv; ?>;
-             console.log( $scope.detail)
+            $scope.customer_title = $scope.detail[0].customer_title;
+            console.log($scope.detail)
+            $scope.hasTransportation = false;
+            
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
 			$scope.month = $scope.detail[0].invoice_date.substring(5,7);
@@ -252,8 +257,14 @@
                 case '3': $scope.company_id = '0-9920-04240-24-7'; break;
                 default: $scope.company_id = 'XXX'; break;
             }
-
-            if($scope.detail[0]["payment_type"] =="CC"){
+            if(Number($scope.detail[0]["transportation_price"])>0)  $scope.hasTransportation = true;
+            
+            
+            // console.log( $scope.detail[0].customer_name.substring(0,6))
+            // console.log( $scope.customer_title)
+            
+           
+                if($scope.detail[0]["payment_type"] =="CC"){
                     
                     $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
                     $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
@@ -277,11 +288,62 @@
                 if($scope.detail[0].customer_name.substring(0,3)==='นาย') $scope.customer_title = "";
                 if($scope.customer_title === null) $scope.customer_title = "";
 
-               $scope.final = Number($scope.detail[0].invoice_total_purchase_vat)+$scope.creditCardFee;
-               $scope.difference = Math.round(Number($scope.detail[0].invoice_total_sales_price)) - Number($scope.detail[0].invoice_total_sales_price);
+         
             //   console.log($scope.difference)
-              console.log($scope.detail[0].invoice_total_sales_price )
+            $scope.roundedPrice=Math.round(Number($scope.detail[0].invoice_total_sales_price ))
+            $scope.salesWithVAT =0 ;
+            ($scope.detail).forEach(e=>{$scope.salesWithVAT+= Number(e.total_sales_price)})
+  
+            $scope.vat = 0
+            $scope.priceBefore = 0;
+            $scope.creditCardFee = 0;
+            $scope.finalPrice = 0;
+            $scope.rounded = 0;
+
+            // ราคาสุดท้ายหลังรวมทุกอย่าง
+            $scope.finalPrice = Number($scope.detail[0].invoice_total_sales_price);
+
+                if($scope.detail[0].payment_type==='CC' || $scope.detail[0].payment_type==='FB'){
+                    // ราคาปัดเศษ
+                    $scope.rounded = (Math.ceil($scope.finalPrice)).toFixed(0);
+
+                    // กรณี vat type = 3
+                    if($scope.detail[0].vat_type==='3') {
+                        // ตั้ง vat =  0
+                        $scope.vat = 0;
+                        // มูลค่าสินค้า
+                        $scope.priceBefore = $scope.rounded.toFixed(2) ;
+                    }
+                    else {
+                        // vat คิดจากราคาสุดท้าย
+                        $scope.vat = ($scope.rounded * 7/107).toFixed(2);
+                        // มูลค่าสินค้า
+                        $scope.priceBefore = ($scope.salesWithVAT* 100/107).toFixed(2)
+                    }
+                    $scope.creditCardFee = (Number($scope.rounded) - (Number($scope.priceBefore) + Number($scope.vat))).toFixed(2)
+
+                    
+                }else{
+                    $scope.creditCardFee = 0.00;
+                    if($scope.detail[0].vat_type==='3') {
+                        $scope.vat = 0;
+                        $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                    }
+                    else {
+                        $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
+                        $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                    }
+                }
+                console.log($scope.vat)
+                console.log($scope.priceBefore)
+                console.log($scope.creditCardFee)
+                console.log($scope.finalPrice)
+                console.log($scope.rounded)
+                
+   
+               
            
+        
         }
       
         

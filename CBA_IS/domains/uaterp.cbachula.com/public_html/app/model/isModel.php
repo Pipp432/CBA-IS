@@ -325,6 +325,127 @@ order by substring(SOPrinting.product_no, 1, 1)");
         //return $sql->fetchAll();
            
     }
+
+    public function getIRDRRstock(){
+        $sql = $this->prepare(" SELECT
+                                    View_StockIRD.product_no,
+                                    View_StockIRD.stock_in,
+                                    View_StockIRD.stock_out,
+                                    View_StockIRD.stock_left,
+                                    rr_in.*
+                                FROM
+                                    `View_StockIRD`
+                                JOIN(
+                                    SELECT
+                                        product_no,
+                                        SUM(RRPrinting.quantity) AS rr_q,
+                                        GROUP_CONCAT(rr_no) AS rr_csv,
+                                        GROUP_CONCAT(
+                                            CAST(
+                                                RRPrinting.quantity AS VARCHAR(10)
+                                            )
+                                        ) AS rr_csv_q
+                                    FROM
+                                        `RRPrinting`
+                                    GROUP BY
+                                        RRPrinting.product_no
+                                ) AS rr_in
+                                ON
+                                    View_StockIRD.product_no = rr_in.product_no;");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+		return [];
+    }
+
+    public function splitRR() {
+        $rr_split = json_decode($_POST['rr_split']);
+        foreach ($rr_split as $products) {
+            $new_rr = $this->assignRR($products[0]->rr_no);
+            
+            echo $new_rr;
+            foreach ($products as $product) {
+                //update quantity rr_printing
+                    $sql = $this->prepare("UPDATE RRPrinting set quantity = ? where rr_no = ? AND product_no = ?");
+                    $sql->execute([$product->q_out, $product->rr_no, $product->product_no]);
+                //update total rr_printing
+                    $sql = $this->prepare("UPDATE RRPrinting set total_purchase_price = quantity*purchase_price where rr_no = ? AND product_no = ?");
+                    $sql->execute([$product->rr_no, $product->product_no]);
+				//get cost from prev rr_printing
+                    $sql = $this->prepare("SELECT purchase_no_vat,purchase_vat,purchase_price FROM RRPrinting where rr_no = ? AND product_no = ?");
+                    $sql->execute([$product->rr_no, $product->product_no]);
+                    $total = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+                //insert new rr into rr_printing
+                    $sql = $this->prepare("INSERT INTO RRPrinting(rr_no, so_no, product_no, purchase_no_vat, purchase_vat, purchase_price, quantity, total_purchase_price, cancelled, note) VALUES (?,'-',?,?,?,?,?,?,0,NULL)");
+                    $sql->execute([$new_rr, $product->product_no,$total["purchase_no_vat"],$total["purchase_vat"],$total["purchase_price"], $product->q_remain, $total["purchase_price"] * $product->q_remain]);
+				
+				//update old stock in
+					$sql = $this->prepare("UPDATE StockIn SET quantity_in = ? where file_no = ? AND product_no = ?");
+					$sql->execute([$product->q_out,$product->rr_no, $product->product_no]);
+				//insert into new stock in
+					$sql = $this->prepare("insert into StockIn (product_no, file_no, file_type, date, time, quantity_in, lot) select ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, count(*) + 1 from StockIn where product_no = ?");
+					$sql->execute([$product->product_no, $new_rr, 'RR', $product->q_remain, $product->product_no]); 
+            }
+			//update old rr
+            	$sql = $this->prepare(" SELECT
+            	                            SUM(quantity*purchase_price) as total_purchase_price,
+            	                            SUM(quantity*purchase_vat) as total_purchase_vat,
+            	                            SUM(quantity*purchase_no_vat) as total_purchase_no_vat
+            	                        FROM
+            	                            RRPrinting
+            	                        WHERE
+            	                            rr_no = ?
+            	                        group by rr_no;");
+            	$sql->execute([$product->rr_no]);
+            	$total = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+                $sql = $this->prepare("UPDATE RR set total_purchase_no_vat = ?,total_purchase_vat = ?,total_purchase_price = ? where rr_no = ?");
+                $sql->execute([$total['total_purchase_no_vat'],$total['total_purchase_vat'],$total['total_purchase_price'] , $product->rr_no]);
+			
+			
+				//insert new rr
+				$sql = $this->prepare(" SELECT
+											SUM(quantity*purchase_price) as total_purchase_price,
+											SUM(quantity*purchase_vat) as total_purchase_vat,
+											SUM(quantity*purchase_no_vat) as total_purchase_no_vat
+										FROM
+											RRPrinting
+										WHERE
+											rr_no = ?
+										group by rr_no;");
+				$sql->execute([$new_rr]);
+				$total_new = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+				$sql = $this->prepare("SELECT po_no FROM RR where rr_no = ?");
+				$sql->execute([$product->rr_no]);
+				$po_no = $sql->fetchAll(PDO::FETCH_ASSOC)[0]['po_no'];
+                $sql = $this->prepare("INSERT into RR (rr_no, rr_date, approved_employee, supplier_no, invoice_no, total_purchase_no_vat, total_purchase_vat, total_purchase_price, cancelled, po_no) values(?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 0, ?)");
+                $sql->execute([$new_rr,"IS001",substr($product->product_no,8,3),'-',(double) $total_new['total_purchase_no_vat'],(double) $total_new['total_purchase_vat'],(double) $total_new['total_purchase_price'],$po_no]);
+            
+        }
+
+    }
+
+    private function assignRR($rr_no) {
+        $rrPrefix = $rr_no[0].'RR-';
+        $sql = $this->prepare("select ifnull(max(rr_no),0) as max from RR where rr_no like ?");
+        $sql->execute([$rrPrefix.'%']);
+        $maxRrNo = $sql->fetchAll()[0]['max'];
+        $runningNo = '';
+        if($maxRrNo=='0') {
+            $runningNo = '00001';
+        } else {
+            $latestRunningNo = (int) substr($maxRrNo, 4) + 1;
+            if(strlen($latestRunningNo) == 5) {
+                $runningNo = $latestRunningNo;
+            } else {
+                for ($x = 1; $x <= 5 - strlen($latestRunningNo); $x++) {
+                    $runningNo .= '0';
+                }
+                $runningNo .= $latestRunningNo;
+            }
+        }
+        return $rrPrefix.$runningNo;
+    }  
     
     
 }

@@ -421,9 +421,9 @@
         
 
         $scope.allProducts = <?php echo $this->products; ?>;
-        $scope.sos = '';
+
         $scope.allSos = <?php echo $this->sos; ?>;
-        
+        $scope.sos()
         $scope.vat_type="0";
 
         
@@ -677,17 +677,20 @@
             }
 
         }
-        $scope.getSos = function() {
+
+        $scope.sos = function() {
             $.post("purchase_order/get_install_fortulip", {
+
                 post : true,
+
                 supplierNo : $scope.selectedSupplier,
+
             }
-            , function(data) {
-                $scope.sos = data
+            , function(data) {$scope.sos = data
             })
 
         }
-        $scope.getSos();
+
 
 
         $scope.postPoItems = function() {

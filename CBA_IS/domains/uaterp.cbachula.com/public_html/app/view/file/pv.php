@@ -98,6 +98,11 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->pv; ?>;
+            angular.forEach($scope.detail, items =>{
+                        if(items['iv_no'] == 'none'){
+                            items['iv_no'] = "-";
+                        }
+                    });
             $scope.company = $scope.detail[0].pv_no.substring(0,1);
         }
     });

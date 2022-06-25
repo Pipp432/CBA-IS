@@ -34,8 +34,9 @@
                         <label for="dropdownSupplier">Supplier</label>
                         <select class="form-control" ng-model="selectedSupplier" id="dropdownSupplier">
                             <option value="">เลือก Supplier</option>
-                            <option ng-repeat="supplier in suppliers | filter:{product_line:selectedProductLine} | unique:'supplier_no' | orderBy:'supplier_no'" value="{{supplier.supplier_no}}">
+                            <option ng-repeat="supplier in allProducts | filter:{product_line:selectedProductLine} | unique:'supplier_no' | orderBy:'supplier_no'" value="{{supplier}}">
                                 {{supplier.supplier_no}} : {{supplier.supplier_name}}
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -222,10 +223,13 @@
                 
                 if ($scope.selectedProductType === 'Stock') {
                     $scope.showIfStock = true;
-                    $scope.products = $scope.allProducts.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
+                    $scope.products = $scope.allProducts.filter(product=>product.supplier_no == JSON.parse($scope.selectedSupplier).supplier_no)
+                    console.log($scope.selectedSupplier.supplier_no);
+                    console.log($scope.allProducts);
+                    console.log($scope.products);
                 } else if ($scope.selectedProductType === 'Order' || $scope.selectedProductType === 'Install') {
                     $scope.showIfOrderInstall = true;
-                    $scope.sos = $scope.allSos.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
+                    $scope.sos = $scope.allSos.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier.supplier_no;});
                 }
                 
             }
@@ -342,8 +346,8 @@
                 $('#confirmModal').modal('toggle');
             }
         }
-
-        $scope.postREItems = function() {
+        
+        $scope.postRIItems = function() {
             $('#confirmModal').modal('hide');
             $.post("return_inventory/post_ri_items", {
                 post : true,

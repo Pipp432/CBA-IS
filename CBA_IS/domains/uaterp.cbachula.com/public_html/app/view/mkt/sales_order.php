@@ -660,7 +660,7 @@
 
                 $scope.showAfterSubmit = true;
 
-                $scope.vatType = JSON.parse($scope.selectedSupplier).vat_type;
+                
 
                 $scope.selectedSupplierNo = JSON.parse($scope.selectedSupplier).supplier_no;
 
@@ -673,13 +673,7 @@
 
 
         $scope.addSoItem = function(product) {
-           
-
-            
-
-            var newProduct = true;
-
-            
+         var newProduct = true;
 
             if ($scope.hasDeposit) {
 
@@ -708,7 +702,8 @@
                 $('#noProductInStock').modal('toggle');
 
             } else {
-
+               
+               
                 angular.forEach($scope.soItems, function (value, key) {
 
                     if(value.product_no == product.product_no) {
@@ -766,10 +761,30 @@
                 }
 
                 $scope.calculateTotalPrice();
+                
 
             }
 
             $scope.getFee()
+            $scope.intial_vat_type = ($scope.soItems[0].product_no).charAt(3)
+                $scope.soItems.forEach((e)=>{
+                    if(e.product_no.charAt(3) != $scope.intial_vat_type){
+                        $scope.soItems.splice(-1);
+                        addModal('successModal', 'ใบสั่งขาย / Sales Order (SO)',"รายการสินค้าใน SO ต้องเป็น VAT type เดียวกัน");
+
+                            $('#successModal').modal('toggle');
+
+                            $('#successModal').on('hide.bs.modal', function (e) {
+                             
+   
+
+                });
+
+                      
+                    }
+                })
+                $scope.vatType = $scope.soItems[0].vat_type;
+                console.log($scope.soItems[0].vat_type)
 
         }
 

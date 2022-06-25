@@ -80,9 +80,9 @@
                 <tr ng-repeat="item in detail">
                     <td style="text-align: center;">{{$index+1}}</td>
                     <td style="text-align: center;">{{item.product_no}}</td>
-                    <td style="text-align: left;">{{item.product_name}}</td>
+                    <td style="text-align: left;">{{item.product_name==null? 'ค่าขนส่ง' : item.product_name}}</td>
                     <td style="text-align: right;">{{item.new_quantity}}</td>
-                    <td style="text-align: left;">{{item.unit}}</td>
+                    <td style="text-align: left;">{{item.unit==null? 'รายการ' : item.unit}}</td>
                     <td style="text-align: right;">{{item.sales_price | number:2}}</td>
                     <td style="text-align: right;">{{item.new_total_sales | number:2}}</td>
                 </tr>

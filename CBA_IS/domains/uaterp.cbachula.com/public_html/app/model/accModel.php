@@ -914,6 +914,11 @@ class accModel extends model {
         }
         return json_encode([]);
     }
+    public function debugIVRC(){
+        
+            echo $_POST['diff_cr_sup_cash'];
+        
+    }
     
     // IVRC Module
     public function addIvrc() {
@@ -1028,38 +1033,38 @@ class accModel extends model {
                                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                     $sql->execute([$value['ci_no'], '11', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], 0, (double) $value['confirm_total'], 'CIV']);
                 
-                } else if ($value['type'] == 'RI') {
+                // } else if ($value['type'] == 'RI') {
                     
-                    // insert AccountDetail sequence 8
-                    // Dr เจ้าหนี้การค้า - Supplier XXX
-                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                            values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '8', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'] * -1, 0, 'CIV']);
+                //     // insert AccountDetail sequence 8
+                //     // Dr เจ้าหนี้การค้า - Supplier XXX
+                //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //     $sql->execute([$value['ci_no'], '8', $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'] * -1, 0, 'CIV']);
                     
-                    // insert AccountDetail sequence 9
-                    // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
-                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                            values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '9', $_POST['ivrcDate'], '21-2'.$value['supplier_no'], 0, (double) $value['confirm_subtotal'] * -1, 'CIV']);
+                //     // insert AccountDetail sequence 9
+                //     // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
+                //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //     $sql->execute([$value['ci_no'], '9', $_POST['ivrcDate'], '21-2'.$value['supplier_no'], 0, (double) $value['confirm_subtotal'] * -1, 'CIV']);
                     
-                    // insert AccountDetail sequence 10
-                    // Cr ภาษีซื้อ
-                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                            values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '61-1'.$value['ci_no'][0].'00', 0, (double) $value['confirm_vat'] * -1, 'CIV']);
+                //     // insert AccountDetail sequence 10
+                //     // Cr ภาษีซื้อ
+                //     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                             values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                //     $sql->execute([$value['ci_no'], '10', $_POST['ivrcDate'], '61-1'.$value['ci_no'][0].'00', 0, (double) $value['confirm_vat'] * -1, 'CIV']);
                     
                 }
                 if(!$did){ //use first ci_no as ref
                     $did = true;
 
-                        if($_POST["DRCR_cash"] == "61-1100") $diff = $_POST["DRCR_cash"];
+                    if($_POST["DRCR_cash"] == "61-1100") $diff = $_POST["DRCR_cash"];
                     else $diff = -$_POST["DRCR_cash"];
                     if($value['type'] == 'RR') {
-                        $sql=$this->prepare("update RR set diff = ? where rr_no = ?");
-                        $sql->execute([$diff, $value['ci_no']]);
+                        $sql=$this->prepare("update RR set diff = ?, diff_dr_sup = ?, diff_dr_tax = ?, diff_cr_sup = ? where rr_no = ?");
+                        $sql->execute([$diff,(double) $_POST["diff_dr_sup_cash"],(double) $_POST["diff_dr_tax_cash"],(double) $_POST["diff_cr_sup_cash"], $value['ci_no']]);
                     } else if ($value['type'] == 'CI') {
-                        $sql=$this->prepare("update CI set diff = ? where ci_no = ?");
-                        $sql->execute([$diff, $value['ci_no']]);
+                        $sql=$this->prepare("update CI set diff = ?, diff_dr_sup = ?, diff_dr_tax = ?, diff_cr_sup = ? where ci_no = ?");
+                        $sql->execute([$diff,(double) $_POST["diff_dr_sup_cash"],(double) $_POST["diff_dr_tax_cash"],(double) $_POST["diff_cr_sup_cash"], $value['ci_no']]);
                     }
                     if($_POST["DR"]){
                         // insert AccountDetail sequence 12
@@ -1067,11 +1072,23 @@ class accModel extends model {
                         $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                         $sql->execute([$value['ci_no'], '12', $_POST['ivrcDate'],$_POST["DR"],(double) $_POST["DRCR_cash"], 0, 'CIV']);
-                        // insert AccountDetail sequence 13
-                        // CR tax diff
+                       
                         $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                                 values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                         $sql->execute([$value['ci_no'], '13', $_POST['ivrcDate'], $_POST["CR"], 0, (double) $_POST["DRCR_cash"], 'CIV']);
+                       
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                        values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$value['ci_no'], '14', $_POST['ivrcDate'],$_POST["diff_dr_1_sup"],(double) $_POST["diff_dr_sup_cash"], 0, 'CIV']);
+                        
+
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                                values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$value['ci_no'], '15', $_POST['ivrcDate'], $_POST["diff_cr_sup"], 0, (double) $_POST["diff_cr_sup_cash"], 'CIV']);
+
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                                values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$value['ci_no'], '16', $_POST['ivrcDate'], $_POST["diff_dr_2_sup"],  (double) $_POST["diff_dr_tax_cash"],0, 'CIV']);
                     }
                 }
             }   
@@ -1423,6 +1440,11 @@ class accModel extends model {
 	
     // PV-B Module
 	public function getRRCINOPV() {
+        $array1 = [];
+        $array2 = [];
+        $array3 = [];
+       
+
         $sql = $this->prepare("SELECT 
         PVB.*,
         IVPC_Files.tax_no
@@ -1437,7 +1459,7 @@ class accModel extends model {
                                         CIPrinting.quantity,
                                         Product.unit,
                                         'CI' as type,
-                                        CI.diff
+                                        CI.diff,CI.diff_dr_sup, CI.diff_cr_sup,CI.diff_dr_tax
                                     from View_CIRR_NOPV
                                     inner join CI on CI.ci_no = View_CIRR_NOPV.ci_no
                                     inner join CIPrinting on CIPrinting.ci_no = View_CIRR_NOPV.ci_no
@@ -1453,7 +1475,7 @@ class accModel extends model {
                                         RRPrinting.quantity,
                                         Product.unit,
                                         'RR' as type,
-                                        RR.diff
+                                        RR.diff,RR.diff_dr_sup,RR.diff_dr_tax,RR.diff_cr_sup
                                     from View_CIRR_NOPV
                                     inner join RR on RR.rr_no = View_CIRR_NOPV.ci_no
                                     inner join RRPrinting on RRPrinting.rr_no = View_CIRR_NOPV.ci_no
@@ -1478,7 +1500,7 @@ class accModel extends model {
                                         RIPrinting.quantity,
                                         Product.unit,
                                         'RI',
-                                        0 as diff
+                                        0 as diff,diff_dr_sup,diff_dr_tax,diff_cr_sup
                                     from RI
                                     join RIPrinting on RIPrinting.ri_no = RI.ri_no
                                     left join RR on RIPrinting.rr_no = RR.rr_no
@@ -1490,12 +1512,17 @@ class accModel extends model {
                                     left join PVPrinting on PVPrinting.rr_no = cirr_no_pv.ci_no
                                     where PVPrinting.rr_no is null
     ORDER BY `cirr_no_pv`.`ci_no`  DESC) AS PVB 
-    LEFT join IVPC_Files on BINARY(PVB.ci_no) = BINARY(IVPC_Files.rrci_no);");
+    LEFT join IVPC_Files on BINARY(PVB.ci_no) = BINARY(IVPC_Files.rrci_no)");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return null;
+            
+        }else{
+            return "error or empty";
+        }   
+        
+     
+        
     }
     
     // PV-B Module
@@ -1568,14 +1595,14 @@ class accModel extends model {
             //กระบวนการชำระเงินแก่ supplier  (กด Confirm payment voucher : PV-B) 
             // insert AccountDetail sequence 3
             // // Dr เจ้าหนี้การค้า - Supplier XXX
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-            values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$value['ci_no'], '1' , $_POST['ivrcDate'], '21-1'.$value['supplier_no'], (double) $value['confirm_total'],0, 'PVB']);
+            
+            // $sql->execute([$iv_no, '2' , '12-1'.$iv_no[0].'00', 0, (double) $value['confirm_total'], 'PVB']);$sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            // values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            // $sql->execute([$pvItem['ci_no'], '1' , $_POST['ivrcDate'], '21-1'.$pvItem['supplier_no'], (double) $pvItem['confirm_total'],0, 'PVB']);
 
-            // Cr เงินฝากออมทรัพย์ - โครงการ X
-            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                 values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$iv_no, '2' , '12-1'.$iv_no[0].'00', 0, (double) $value['confirm_total'], 'PVB']);
+            // // Cr เงินฝากออมทรัพย์ - โครงการ X
+            // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            //                      values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
 
             // insert AccountDetail sequence 12
             // Dr เงินฝากออมทรัพย์ส่วนบุคคล - โครงการ x
@@ -2879,6 +2906,16 @@ class accModel extends model {
     
     
     //RE Product
+
+    public function getSuppliers() {
+        $sql = $this->prepare("select supplier_no, supplier_name, id_no, address, product_line, vat_type from Supplier");
+        $sql->execute();
+        if ($sql->rowCount()>0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return null;
+    }
+    
     public function getRIProduct() {
         $sql=$this->prepare("select
 									Product.product_no,
@@ -2902,7 +2939,7 @@ class accModel extends model {
 								left join (select Product.product_no, StockInXiaomi.quantity_in - ifnull(outt.quan_out,0) as stockXiaomi from StockInXiaomi 
 											left join Product on Product.product_description = StockInXiaomi.product_description
 											left join (select StockOutXiaomi.product_no, sum(StockOutXiaomi.quantity_out) as quan_out from StockOutXiaomi where done = 0 group by StockOutXiaomi.product_no) outt on outt.product_no = Product.product_no) stockXiaomi on stockXiaomi.product_no = Product.product_no");
-        $sql->execute();
+        $sql->execute([]);
         if ($sql->rowCount()>0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
@@ -2930,11 +2967,12 @@ class accModel extends model {
         $reno = $this->assignRI($company);
 
 
-        $sql = $this->prepare("insert into RE (ri_no, ri_date, supplier_no,  total_return_no_vat, total_return_vat, total_return_price,total_return_price_thai, approved_employee, cancelled)
+        $sql = $this->prepare("insert into RI (ri_no, ri_date, supplier_no,  total_return_no_vat, total_return_vat, total_return_price,total_return_price_thai, approved_employee, cancelled)
                                 values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 0)");
+                                
         $sql->execute([
             $reno,
-            input::post('supplierNo'),
+            input::post('supplier_no'),
             (double) input::post('totalNoVat'),
             (double) input::post('totalVat'),
             (double) input::post('totalPrice'),
@@ -2942,6 +2980,8 @@ class accModel extends model {
             session::get('employee_id'),
         ]);
 
+        print_r($sql->errorInfo());
+        
         $reItemsArray = json_decode(input::post('riItems'), true); 
         $reItemsArray = json_decode($reItemsArray, true); 
 
@@ -2963,6 +3003,8 @@ class accModel extends model {
                 }
                 else $cutStock = $accumStock;
 
+                echo $sql->errorInfo()[0];
+
                 $sql = $this->prepare("insert into RIPrinting (ri_no, product_no,  purchase_no_vat, purchase_vat, purchase_price, quantity, total_purchase_price,  cancelled, rr_no)
                 values (?, ?, ?, ?, ?, ?, ?, 0 ,?)");
                 $sql->execute([
@@ -2975,7 +3017,7 @@ class accModel extends model {
                 (double) $cutStock * $value['purchase_price'],
                 $rrno
                 ]);
-                
+                echo $sql->errorInfo()[0];
         
                 $sql = $this->prepare("insert into StockOut (product_no, file_no,  file_type, date, time, quantity_out, lot,rr_no)
                 values (?, ?,'RI',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, ?,'0' ,?)");
@@ -2985,22 +3027,38 @@ class accModel extends model {
                 (int) $cutStock,
                 $rrno
                 ]);
-
+                echo $sql->errorInfo()[0];
             
                 $accumStock = (int) $accumStock - (int) $cutStock;
             
             
             }
-            $debitRI = '21-2'.(input::post('supplierNo'));
-            $creditRI = '51-1'.$company.'10';
-            //RE Account1
+
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '8', $debitRI, (double) input::post('totalNoVat'), 0 , 'RI']);
-            //RE Account2
+                                    values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            $sql->execute([$value['ri_no'], '1', $_POST['ri_date'], '21-1'.$value['supplier_no'], (double) $value['total_return_price'] * -1, 0, 'RI']);
+                           
+            // insert AccountDetail sequence 9
+            // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
+           //  $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+           //                          values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+           //  $sql->execute([$value['ci_no'], '9', $_POST['ivrcDate'], '21-2'.$value['supplier_no'], 0, (double) $value['confirm_subtotal'] * -1, 'RI']);
+                           
+            // insert AccountDetail sequence 10
+            // Cr ภาษีซื้อ
             $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-            $sql->execute([$reno, '9', $creditRI, 0 , (double) input::post('totalNoVat') , 'RI']);
+                                    values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            $sql->execute([$value['ri_no'], '2', $_POST['ri_date'], '51-1'.$value['ci_no'][0].'10', 0, (double) $value['total_return_price'] * -1, 'RI']);
+            // $debitRI = '21-2'.(input::post('supplierNo'));
+            // $creditRI = '51-1'.$company.'10';
+            // //RE Account1
+            // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            // values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            // $sql->execute([$reno, '8', $debitRI, (double) input::post('totalNoVat'), 0 , 'RI']);
+            // //RE Account2
+            // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+            // values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+            // $sql->execute([$reno, '9', $creditRI, 0 , (double) input::post('totalNoVat') , 'RI']);
             
             
         
@@ -3009,8 +3067,16 @@ class accModel extends model {
 
         
         echo $reno;
+
+        // if($value['type'] == 'RI') {
+                    
+            // insert AccountDetail sequence 8
+            // Dr เจ้าหนี้การค้า - Supplier XXX
+            
+       
+           }
         
-    }
+    
     private function assignRI($company) {
         
         if($company == '1')
@@ -3046,8 +3112,8 @@ class accModel extends model {
         return $rePrefix.$runningNo;
     }
     public function getRIreport() {
-        $sql = $this->prepare("SELECT RI.`ri_no`,RI.`ri_date`,concat(Supplier.supplier_no,' : ',Supplier.supplier_name) as ri_supplier ,RE.total_return_price as ri_total 
-FROM RE 
+        $sql = $this->prepare("SELECT RI.`ri_no`,RI.`ri_date`,concat(Supplier.supplier_no,' : ',Supplier.supplier_name) as ri_supplier ,RI.total_return_price as ri_total 
+FROM RI
 join Supplier on Supplier.supplier_no = RI.supplier_no");
         $sql->execute();
         return $sql->fetchAll();
@@ -3212,19 +3278,12 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
     }
 
     public function confirmPrintIV() {
-        //// change var 
-		// $pivArray = json_decode(input::post('pivValue'), true); 
-        // $pivArray = json_decode($pivArray, true);
-
         $invoice_no = input::post('invoice_no');
 
-        // foreach($pivArray as $value) {
-			$sql = $this->prepare("UPDATE Invoice 
-									set confirmPrint = '1'
-									where invoice_no = ? ");
-            // $sql = $this->prepare("insert into Invoice (acc_confirm) 
-            //                         value (?) ");
-			$sql->execute([$invoice_no]);
+		$sql = $this->prepare("UPDATE Invoice 
+								set confirmPrint = '1'
+								where invoice_no = ? ");
+		$sql->execute([$invoice_no]);
 
 		//}
 	}
@@ -3373,9 +3432,41 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
         return [];
     }
 
-
-}
     
+    public function getStm() {
+        $sql = "SELECT AccountName.account_name,
+                    AccountDetail.account_no,  
+                    SUM(AccountDetail.debit-AccountDetail.credit) as การเงิน 
+
+                    FROM AccountDetail 
+                    left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
+                    group by AccountDetail.account_no";
+
+        $statement = $this->prepare($sql);
+        $statement->execute([]);
+
+        if ($statement->rowCount() > 0) {
+            return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        } else return json_encode([]); 
+
+        if($statement) {
+            echo ' success(';
+            echo input::post('selected_stm_type');
+            echo')';
+        } else {
+            echo ' failed(';
+            echo input::post('selected_date');
+            echo')';
+        }
 
 
-
+	}
+    public function gettotalCN() {
+        $sql = $this->prepare( "SELECT CN.cn_no,CN.company_code,CN.cn_date, extract(month from CN.cn_date),CN.iv_total_sales, CN.new_total_sales_price,CN.diff_total_sales_vat,CN.vat_total_sales_no_vat,CN.sum_total_sales FROM CN;" );
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+          return $sql->fetchAll();
+        }
+        return [];
+    }
+}

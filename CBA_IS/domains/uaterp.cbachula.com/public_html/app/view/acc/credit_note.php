@@ -265,6 +265,7 @@
             $scope.iv_total_sales = 0;
 
             $scope.total_commission = 0;
+            $scope.comm =0
             /////////////
             //$scope.new_total_purchase_price = 0;
             
@@ -276,7 +277,10 @@
                 angular.forEach($scope.cnItems, function(value, key) {
                     $scope.diff_total_sales_vat += (parseFloat(value.sales_vat) * parseFloat(value.quantity));
                     $scope.diff_total_sales_price += (parseFloat(value.sales_price) * parseFloat(value.quantity)); //old ver of ผลต่าง
-                    $scope.total_commission += (parseFloat(value.commission) * parseFloat(value.quantity));
+                    if(value.commission == null){
+                        $scope.comm = 0;
+                    }else {$scope.comm = value.commission;}
+                    $scope.total_commission += (parseFloat($scope.comm) * parseFloat(value.quantity));
                     $scope.totalPurchasePrice += (value.quantity * value.purchase_price);
                     $scope.totalSalesPrice += (value.quantity * value.sales_price);
                 });

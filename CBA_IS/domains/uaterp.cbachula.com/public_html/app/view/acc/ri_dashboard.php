@@ -37,7 +37,7 @@
                         <tr> 
                         <?php
                             
-                            echo '<td><a href="/file/rI/'.$row['ri_no'].'" target="_blank">'.$row['ri_no'].'</a></th>';
+                            echo '<td><a href="/file/ri/'.$row['ri_no'].'" target="_blank">'.$row['ri_no'].'</a></th>';
                             echo "<td>".$row['ri_date']."</td>";
                             echo "<td>".$row['ri_supplier']."</td>";
                             echo "<td>".$row['ri_total']."</td>";

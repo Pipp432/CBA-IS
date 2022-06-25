@@ -19,7 +19,7 @@
                         <select class="form-control" ng-model="selectedPaymentType" ng-change="selectPaymentType()" id="dropdownPaymentType">
                             <option value="">เลือกประเภทการสั่งจ่าย</option>
                             <option value="PA">เงินรองจ่าย(PV-A)</option>
-                            <option value="PB">จ่าย Supplier</option>
+                            <option value="PB">จ่าย Supplier(PV-B)</option>
                             <option value="PC">ค่าใช้จ่าย(PV-C)</option>
                             <option value="PD">ลดหนี้(PV-D)</option>
                         </select>
@@ -196,7 +196,7 @@
                                 <li ng-repeat="rrcinopv_item in rrcinopvs" ng-show="rrcinopv_item.ci_no===rrcinopv.ci_no">{{rrcinopv_item.product_name}} (x{{rrcinopv_item.quantity}})</li>
                             </ul></td>
                             <td></td>
-                            <td style="text-align: right;">{{rrcinopv.confirm_total | number:2}}</td>
+                            <td style="text-align: center;"> {{ rrcinopv.confirm_total | number:2}} </td>
                         </tr>
                     </table>
                 </div>
@@ -290,7 +290,7 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">ภาษีสุทธิ</th>
-                            <th style="text-align: right;">{{total_tax | number:2}}</th>
+                            <th style="text-align: right;">{{total_tax| number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">รวมสุทธิ</th>
@@ -738,10 +738,13 @@
             } else if($scope.selectedPaymentType === 'PB') {
                 $http.get('/acc/payment_voucher/get_rr_ci_no_pv').then(function(response){
                     $scope.rrcinopvs = response.data;
+                    console.log(response.data);
+                    
                     angular.forEach($scope.rrcinopvs, items =>{
                         if(items['invoice_no'] == 'none'){
                             items['invoice_no'] = "-";
                         }
+                        items['confirm_total'] = (Number(items['confirm_total']) + Number(items['diff_cr_sup'])).toFixed(2);
                     });
                     $scope.isLoad = false;
                 });
@@ -874,11 +877,7 @@
             
         }
 
-        // $scope.test = () => {
-        //     console.log($scope.selected_PVA_child);
-        //     console.log($scope.selected_PVA);
-        // }
-
+        
         $scope.dropPVA = function() {
             $scope.selected_PVA = [];
             $scope.selected_PVA_child = [];
@@ -914,15 +913,20 @@
             }
         }
 
-        
+        $scope.diff = 0;
         $scope.getrrcinopvDetail = function(rrcinopv) {
             $("#pvItemRR").prop("disabled", true);
             $("#pvItemIV").prop("disabled", true);
             $("#pvItemPaidTotal").prop("disabled", true);
             $scope.pvItemRR = rrcinopv.ci_no;
             $scope.pvItemIV = rrcinopv.tax_no;
-            $scope.pvItemPaidTotal = rrcinopv.confirm_total;
+            $scope.pvItemPaidTotal = parseFloat(rrcinopv.confirm_total);
             $scope.ci_no = rrcinopv.ci_no;
+            $scope.diff = rrcinopv.diff;
+            $scope.diff_sup = rrcinopv.diff_dr_sup;
+            $scope.total_tax = Number(rrcinopv.confirm_vat) + Number(rrcinopv.diff_dr_tax)
+            console.log($scope.diff_tax)
+            
         }
         
         $scope.getWsDetail = function(ws) {
@@ -992,6 +996,8 @@
                     });
                 }
 
+                $scope.final_vat_diff = $scope.diff_tax == '0'? $scope.diff: $scope.diff_tax;
+
 
                 $scope.pvItems.push({
                     "debit" : $scope.pvItemDebit,
@@ -1000,7 +1006,7 @@
                     "detail" : $scope.pvItemDetail,
                     "rr_no" : $scope.pvItemRR,
                     "total_paid" : parseFloat($scope.pvItemPaidTotal),
-                    "vat" : parseFloat(($scope.vat) ? $scope.pvItemPaidTotal * 7 / 107 : 0)
+                    "vat" : ($scope.vat) ? ($scope.pvItemPaidTotal * 7 / 107 + parseFloat($scope.final_vat_diff)): 0
                 });
 
                 
@@ -1214,8 +1220,10 @@
             $scope.pvItemPaidTotal = Number($scope.pvItemPaidTotal)+ Number(entry.money);
             $scope.total_tax += Number(entry.money*7/107);
         });
+        console.log($scope.JSONdetails);
+        
         $scope.totalPaid =$scope.pvItemPaidTotal
-            $scope.totalVat =$scope.total_tax
+            $scope.totalVat =$scope.total_tax 
             console.log($scope.pvItemPaidTotal);
 
            

@@ -5,7 +5,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)</h2>
+        <h2 class="mt-3">ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC) </h2>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- SELECTING CI/RR -->
@@ -117,6 +117,8 @@
                         <label for="textboxIv">เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี</label>
                         <input type="text" class="form-control" id="textboxIv" ng-model="iv" placeholder="เลขที่ใบสำคัญ/ใบวางบิล/ใบกำกับภาษี">
                     </div> -->
+                    <!-- //! FIRST 2 -->
+                    <i style="color:red"> กรณี vat diff อย่างเดียว</i>
                     <div class = "row mx-0 mt-2">
                         <div class="col-md-4">
                             <label for="DR_text">DR เศษเงิน</label>
@@ -136,7 +138,44 @@
                             <label for="CR_cash_text">จำนวนเงิน</label>
                             <input type="text" class="form-control" id="CR_cash_text" ng-model="DRCR_cash">
                         </div> 
+                    </div>
+
+                    <!-- //! ELSE -->
+                    <br>
+                    <i style="color:red">กรณีทุกอย่าง diff</i>
+                    <div class = "row mx-0 mt-2">
+                        <div class="col-md-4">
+                            <label for="DR_text">DR เศษเงิน</label>
+                            <input type="text" class="form-control" id="all_DR_1_text" ng-model="all_DR_1" placeholder="DR เศษเงิน" ng-change = "autoDRCR('allDR')">
+                        </div> 
+                        <div class="col-md-4">
+                            <label for="DR_cash_text">จำนวนเงิน</label>
+                            <input type="text" class="form-control" id="all_DR_1_cash_text" ng-model="all_DR_1_cash">
+                        </div> 
                     </div> 
+                    <div class = "row mx-0 mt-2">
+                        <div class="col-md-4">
+                            <label for="CR_text">DR เศษเงิน</label>
+                            <input type="text" class="form-control" id="all_DR_2_text" ng-model="all_DR_2" placeholder="DR เศษเงิน" ng-change = "autoDRCR('allDR')">
+                        </div> 
+                        <div class="col-md-4">
+                            <label for="CR_cash_text">จำนวนเงิน</label>
+                            <input type="text" class="form-control" id="all_DR_2_cash_text" ng-model="all_DR_2_cash">
+                        </div> 
+                    </div>  
+                    <div class = "row mx-0 mt-2">
+                        <div class="col-md-4">
+                            <label for="CR_text">CR เศษเงิน</label>
+                            <input type="text" class="form-control" id="all_CR_text" ng-model="all_CR" placeholder="CR เศษเงิน" ng-change = "autoDRCR('allDR')">
+                        </div> 
+                        <div class="col-md-4">
+                            <label for="CR_cash_text">จำนวนเงิน</label>
+                            <input type="text" class="form-control" id="all_CR_cash_text" ng-model="all_CR_cash">
+                        </div> 
+                    </div>
+                    
+                    
+
                     <div class="col-md-4">
                         <label for="datetime-input">วันที่</label>
                         <input class="form-control" type="date" id="datetime-input" ng-model="ivrcDate">
@@ -196,6 +235,9 @@
                 <div class="row mx-0 mt-2">
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postivrcItems()">บันทึกการยืนยันการวางบิล</button>
                 </div>
+                <!-- <div class="row mx-0 mt-2">
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="debug()">DEBUG</button>
+                </div> -->
             </div>
             <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="test()">test</button> -->
         </div>
@@ -241,7 +283,8 @@
         $scope.ivrcItems = [];
         $scope,vat = 0;
         $scope.rrcis = <?php echo $this->rrcis; ?>;
-        console.log($scope.rrcis)
+        // console.log($scope.rrcis)
+        $scope.supplier_no = '';
 
         // $scope.test = function() {
         //     console.log($('#billFormUpload')[0].files[0]);
@@ -266,6 +309,26 @@
                 }
                 $scope.calculateTotalPrice();
             }
+            console.log(rrci)
+          
+            $scope.all_CR = "21-1" + rrci.supplier_no
+            if(0<=rrci.product_line && rrci.product_line<=3){
+                $scope.company = '1';
+            }
+            if(3<rrci.product_line && rrci.product_line<=5){
+                $scope.company = '2';
+            } 
+            if(5<rrci.product_line){
+                $scope.company = '3';
+            }
+            $scope.all_DR_2 = "61-1" + $scope.company + '00'
+            $scope.all_DR_1 = "51-1" +  $scope.company + '00'
+            $scope.all_DR_1_cash = "0.00";
+            $scope.all_DR_2_cash = "0.00";
+            $scope.all_CR_cash = "0.00";
+            $scope.DRCR_cash = '0.00' 
+          
+            
             
         }
         
@@ -304,6 +367,26 @@
         }
 
         $scope.autoDRCR = (type)=>{
+            
+            if($("all_DR_1_text").val!=null){
+                $scope.DRCR_cash = "0.00"
+               
+                
+            }else{
+                $scope.DRCR_cash = ''
+            }
+           
+          
+
+            
+          
+          if($scope.all_CR.length == 7&&($scope.all_DR_1.charAt(0) == 2) && $scope.all_DR_1.substring(1, 4) == "1-1"){
+              console.log('hey');
+              
+              $scope.all_DR_1 =  "21-2"+$scope.all_CR.substring(4,$scope.all_CR.length);
+          } else $scope.allCR = "";
+
+      
             firstChar = {5:6,6:5};
             if(type == 'DR'){
                 if($scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
@@ -315,6 +398,8 @@
                     $scope.DR = firstChar[$scope.CR.charAt(0)] + "1-1"+$scope.CR.charAt(4)+"00";
                 } else $scope.DR = "";
             }
+           
+
         }
         
         $scope.postivrcItems = function() {
@@ -364,7 +449,13 @@
                 } else formData.append('DR',false); 
                 formData.append('DRCR_cash',parseFloat($scope.DRCR_cash).toFixed(2));
                 formData.append('CR',$scope.CR);
-               
+                formData.append('diff_dr_sup_cash',parseFloat($scope.all_DR_1_cash).toFixed(2));
+                formData.append('diff_dr_1_sup',$scope.all_DR_1)
+                formData.append('diff_dr_tax_cash',parseFloat($scope.all_DR_2_cash).toFixed(2));
+                formData.append('diff_dr_2_sup',$scope.all_DR_2)
+                formData.append('diff_cr_sup_cash',parseFloat($scope.all_CR_cash).toFixed(2));
+                formData.append('diff_cr_sup',$scope.all_CR)
+             
                 
                 $.ajax({ 
                     url: '/acc/invoice_receipt_confirm/post_ivrc',  
@@ -392,6 +483,76 @@
             }
         
             
+        }
+        $scope.debug = function(){
+              // Creating PVB here
+                // Create date for ivrc
+                var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
+                                    (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
+                                    ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
+                // Creation of data
+                // FormData is a web page interface where (key: value)
+               
+                var formData = new FormData();
+                formData.append('bill', $('#billFormUpload')[0].files[0]);
+                formData.append('tax', $('#taxFormUpload')[0].files[0]);
+                formData.append('taxIV', $('#taxInvoiceUpload')[0].files[0]);
+                formData.append('tax_reduce_upload', $('#taxReduceUpload')[0].files[0]);
+                
+                
+                if($scope.iv == '-') {
+                    var fullPath = document.getElementById('taxReduceUpload').value;
+                    if (fullPath) {
+                        var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+                        var filename = fullPath.substring(startIndex);
+                        if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+                            filename = filename.substring(1);
+                        }
+                        formData.append('iv', filename);
+                    } else formData.append('iv', "none");
+                } else formData.append('iv', $scope.iv);
+                
+                formData.append('bill_no', $scope.bill_no);
+                formData.append('tax_form_no', $scope.tax_form_no);
+                formData.append('tax_reduce_no', $scope.tax_reduce_no);
+                formData.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
+                formData.append('ivrcDate', ivrcDateStr);
+                if($scope.DR!=null&&$scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
+                    formData.append('DR',$scope.DR);
+                } else formData.append('DR',false); 
+                formData.append('DRCR_cash',parseFloat($scope.DRCR_cash).toFixed(2));
+                formData.append('CR',$scope.CR);
+                formData.append('diff_dr_sup_cash',parseFloat($scope.all_DR_1_cash).toFixed(2));
+                formData.append('diff_dr_sup_no',$scope.all_DR_1)
+                formData.append('diff_dr_tax_cash',parseFloat($scope.all_DR_2_cash).toFixed(2));
+                formData.append('diff_dr_tax_no',$scope.all_DR_2)
+                formData.append('diff_cr_sup_cash',parseFloat($scope.all_CR_cash).toFixed(2));
+                formData.append('diff_cr_sup_no',$scope.all_CR)
+                // for(const pair of formData.entries()) {
+                //     console.log(`${pair[0]}, ${pair[1]}`);
+                // }
+                console.log($scope.ivrcItems)
+                $.ajax({ 
+                    url: '/acc/invoice_receipt_confirm/debug',  
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    method: 'POST',
+                    type: 'POST',
+                }).done(function (data) {
+                    console.log(data)
+
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log('ajax.fail');
+                    addModal('uploadFailModal', 'upload fail', 'fail');
+                    $('#uploadFailModal').modal('toggle');
+                    $('#uploadFailModal').on('hide.bs.modal', function (e) {
+                            location.assign("/");
+                    });
+                });
+                
+
         }
 
   	});

@@ -87,18 +87,39 @@
                         โปรดนำสำเนาใบสั่งซื้อมาทุกครั้ง<br>ที่ส่งสินค้าและวางบิล<br>(จะชำระราคาตามใบสั่งซื้อเท่านั้น)
                     </th>
                     <th colspan="2" style="text-align: right;">ราคาสินค้า</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_no_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{beforeVat | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_vat | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{vat | number:2}}</th>
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ราคารวมทั้งสิ้น</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].po_total_purchase_price | number:2}}</th>
+                    <th colspan="1" style="text-align: right;">{{sum | number:2}}</th>
                 </tr>
             </table>
         </div> 
+        <br>
+        
+        <!-- Customer Detail -->
+        <hr style="border-top: 1px dashed;" ng-show="detail[0].product_type == 'Install' ">
+        <div class="row px-2 mt-2"  ng-show="detail[0].product_type == 'Install' ">
+            <div class="col-12 px-0">
+                <h4><b>ข้อมูลลูกค้า</b></h4>
+                <div class="p-3" style="border:1px solid black;">
+                    <h5 class="my-0"><b>ชื่อ</b> {{detail[0].customer_name}} {{detail[0].customer_surname}} <b>เบอร์โทร</b> {{detail[0].customer_tel}}</h5>
+                    <h5 class="mt-3 mb-0"><b>ที่อยู่</b> {{detail[0].customer_address}}</h5>
+                </div>
+            </div>
+        </div>  
+		<hr style="border-top: 1px dashed;" ng-show="detail[0].product_type == 'Install'">
+		<div class="row px-2 mt-2"  ng-show="detail[0].product_type == 'Install' " >
+            <div class="col-12 px-0">
+                <h5><br>เงื่อนไขการสั่งซื้อและชําระเงิน :<br><br>
+				1. ใบสั่งซื้อฉบับนี้เป็นเอกสารอิเล็กทรอนิกส์ที่ออกโดยระบบอัตโนมัติ ดังนั้นจึงไม่มีผู้ลงนาม</h4>
+                
+            </div>
+        </div>  
     
     </div>
 
@@ -118,6 +139,29 @@
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->po; ?>;
             $scope.company = $scope.detail[0].po_no.substring(0,1);
+            console.log($scope.detail)
+            $scope.sum = 0;
+            $scope.vat = 0;
+            $scope.beforeVat = 0;
+            $scope.detail.forEach(
+                (e)=>{
+                  
+                    $scope.sum+=Number(e.total_purchase_price)
+                    if(e.vat_type=="1") {
+                        $scope.vat +=Number(e.total_purchase_price)*7/107;
+                        $scope.beforeVat +=Number(e.total_purchase_price)*100/107
+                    }else{
+                        $scope.beforeVat +=Number(e.total_purchase_price);
+                    }
+                    
+                    
+                }
+                )
+
+            console.log(`Sum of all price: ${$scope.sum}`)
+            console.log(`VAT: ${$scope.vat}`) 
+            console.log(`Before VAT: ${$scope.beforeVat}`)       
+           
         }
     });
     

@@ -146,7 +146,7 @@
                 </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].payment_type==='MB'||detail[0].payment_type===null ? detail[0].invoice_total_sales_price :rounded}}</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 

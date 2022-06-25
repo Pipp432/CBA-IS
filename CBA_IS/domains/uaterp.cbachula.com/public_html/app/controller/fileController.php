@@ -40,6 +40,20 @@ class fileController extends controller {
             }
         }
     }
+
+    public function po3() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "ce" || $this->getPosition() == "cm" || $this->getPosition() == "smd" || $this->getPosition() == "scm" || $this->getPosition() == "is" || $this->getPosition() == "acc") {
+                $this->view->setTitle("ใบสั่งซื้อ #".uri::get(2));
+                $this->view->po = $this->model->getPo3(uri::get(2));
+                $this->view->render("file/po3");
+            } else {
+                $this->err404();
+            }
+        }
+    }
     
     public function special_po() { 
         if(empty(uri::get(2))) {
@@ -252,6 +266,7 @@ class fileController extends controller {
         if(empty(uri::get(2))) {
             $this->err404();
         } else {
+            $this->requirePostition("acc");
             $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
             $this->view->pv = $this->model->getPva(Uri::get(2));
             $this->view->pvaChilds = $this->model->getPvaChild(Uri::get(2));
@@ -273,13 +288,13 @@ class fileController extends controller {
         }
     }
     
-    public function re() { 
+    public function RI() { 
         if(empty(uri::get(2))) {
             $this->err404();
         } else {
             if ($this->getPosition() == "ce" || $this->getPosition() == "cm" || $this->getPosition() == "smd" || $this->getPosition() == "scm" || $this->getPosition() == "is" || $this->getPosition() == "acc") {
                 $this->view->setTitle("ใบคืนสินค้า #".uri::get(2));
-                $this->view->re = $this->model->getRE(uri::get(2));
+                $this->view->ri = $this->model->getRI(uri::get(2));
                 $this->view->render("file/ri");
             } else {
                 $this->err404();

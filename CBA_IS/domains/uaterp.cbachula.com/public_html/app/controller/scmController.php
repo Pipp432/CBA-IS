@@ -27,6 +27,17 @@ class scmController extends controller {
         }
     }
 
+    public function confirm_pickup() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("scm");
+            $this->view->setTitle("Confirm Pick Up");
+            $this->view->soxs = $this->model->getSoxsForCp();
+            $this->view->render("scm/confirm_pickup", "navbar");
+        } else if (uri::get(2)==='post_cs_items') {
+            $this->positionEcho('scm', $this->model->addCp());
+        }
+    }
+
     public function confirm_purchase_order() {
         if(empty(uri::get(2))) {
             $this->requirePostition("scm");
@@ -266,7 +277,6 @@ class scmController extends controller {
         
             echo '<tr>';
                 echo '<th>sox_no</th>';
-                echo '<th>iv_no</th>';
                 echo '<th>ลทบ/EMS</th>';
                 echo '<th>ชื่อ</th>';
                 echo '<th>ที่อยู่</th>';
@@ -277,7 +287,6 @@ class scmController extends controller {
             foreach($data as $value) {
                 echo '<tr>';
                     echo '<td>'.$value['sox_no'].'</td>';
-                    echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['note'].'</td>';
                     echo '<td>'.$value['customer_name'].'</td>';
                     echo '<td>'.$value['address'].'</td>';
@@ -290,7 +299,6 @@ class scmController extends controller {
     }
 
 	public function get_sox_no_ird() {
-       
         
         header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         header("Content-Disposition: attachment; filename=SOX no IRD.xls");
@@ -302,7 +310,6 @@ class scmController extends controller {
                 echo '<th>so_no</th>';
                 echo '<th>sox_no</th>';
                 echo '<th>box_size</th>';
-                echo '<th>iv_no</th>';
                 echo '<th>Product No.</th>';
                 echo '<th>Product Name.</th>';
                 echo '<th>Quantity</th>';
@@ -313,7 +320,6 @@ class scmController extends controller {
                     echo '<td>'.$value['so_no'].'</td>';
                     echo '<td>'.$value['sox_no'].'</td>';
                     echo '<td>'.$value['box_size'].'</td>';
-                    echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['product_no'].'</td>';
                     echo '<td>'.$value['product_name'].'</td>';
                     echo '<td>'.$value['quantity'].'</td>';
@@ -323,6 +329,53 @@ class scmController extends controller {
             
         echo '</table>';
         
+    }
+
+
+    public function get_pickup() {
+        
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=Pick Up.xls");
+        $data = $this->model->getPickup();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>sox_no</th>';
+                echo '<th>iv_no</th>';
+                echo '<th>วันที่มารับของ</th>';
+                echo '<th>เวลาที่มารับของ</th>';
+                echo '<th>ผู้รับ CE/SP</th>';
+                echo '<th>เบอร์ติดต่อ</th>';
+                echo '<th>รายการสินค้า</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['sox_no'].'</td>';
+                    echo '<td>'.$value['invoice_no'].'</td>';
+                    $data = explode(',',substr($value['address'],1,-1));
+                    echo '<td>'.$data[0].'</td>';
+                    echo '<td>'.$data[1].'</td>';
+                    echo '<td>'.$data[2].'</td>';
+                    echo '<td>'.$data[3].'</td>';
+                    echo '<td>'.$value['product_detail'].'</td>';
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
+
+    public function dash_pickup() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("scm");
+            $this->view->setTitle("Pick Up");
+            $this->view->dashboards = $this->model->dashPickup();
+            $this->view->render("scm/dash_pickup", "navbar");
+        } else if (uri::get(2)==='get_getPickup') {
+            $this->positionEcho('scm', $this->model->dashPickup());
+        }
     }
     
     public function dashboard() {

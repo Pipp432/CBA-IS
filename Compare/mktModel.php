@@ -2237,7 +2237,7 @@ class mktModel extends model {
   public function getOrderInstallSo() {
 
     
-      if ('supplier_no = B01') { 
+    if (input::post('supplierNo') == 'B03') { 
         
       $sql = $this->prepare( "select
       SO.so_no,
@@ -2271,7 +2271,7 @@ class mktModel extends model {
     }
     return json_encode( [] );
 
-      }else {
+    }else {
     
     $sql = $this->prepare( "select
                                 	SO.so_no,
@@ -2304,7 +2304,7 @@ class mktModel extends model {
     }
     return json_encode( [] );
   }
-  }
+}
 
   // PO Module
   public function addPo() {
@@ -2356,6 +2356,7 @@ class mktModel extends model {
     echo $pono;
 
   }
+
 
   // PO Module
   private function assignPo( $productLine ) {
@@ -2518,15 +2519,30 @@ class mktModel extends model {
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
           $sql->execute( [ $cino, '2', '41-1' . $value[ 'po_no' ][ 0 ] . '00', 0, ( double )$value[ 'total_sales_no_vat' ], 'CI' ] );
 
+      
+          // insert AccountDetail sequence 3
+          // Dr ค่า Commission
+          $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
+          $sql->execute( [ $cino, '3', '52-0'.$value[ 'po_no' ][ 0 ].'00', ( double )$value[ 'commission' ], 0, 'CI' ] );
+
+          // insert AccountDetail sequence 4
+          // Cr ค่า Commission ค้างจ่าย
+          $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
+          $sql->execute( [ $cino, '4', '22-1'.$value[ 'po_no' ][ 0 ].'00', 0, ( double )$value[ 'commission' ], 'CI' ] );
+
+           // insert AccountDetail sequence 5
           // Dr ซื้อ
           $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
-          $sql->execute( [ $cino, '3', '52-0' . $value[ 'po_no' ][ 0 ] . '00', ( double )$value[ 'total_purchase_no_vat' ], 0, 'CI' ] );
+          $sql->execute( [ $cino, '5', '51-1' . $value[ 'po_no' ][ 0 ] . '00', ( double )$value[ 'total_purchase_no_vat' ], 0, 'CI' ] );
 
+          // insert AccountDetail sequence 6
           // Cr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
           $sql = $this->prepare( "insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
 											values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)" );
-          $sql->execute( [ $cino, '4', '22-1' . $value[ 'po_no' ][ 0 ]. '00', 0, ( double )$value[ 'total_purchase_no_vat' ], 'CI' ] );
+          $sql->execute( [ $cino, '6', '21-2' . $value[ 'supplier_no' ], 0, ( double )$value[ 'total_purchase_no_vat' ], 'CI' ] );
           
 
         } else {

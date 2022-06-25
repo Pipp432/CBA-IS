@@ -134,5 +134,15 @@ class isController extends controller {
         }
     }
 
+    public function split_rr() { 
+        if(empty(uri::get(2))) {
+            $this->requirePostition("is");
+            $this->view->setTitle("split RR");
+            $this->view->IRDRRstock = $this->model->getIRDRRstock();
+            $this->view->render("is/split_rr", "navbar");
+        } else if (uri::get(2) === 'split') {
+            echo $this->model->splitRR();
+        }
+    }
 }
  

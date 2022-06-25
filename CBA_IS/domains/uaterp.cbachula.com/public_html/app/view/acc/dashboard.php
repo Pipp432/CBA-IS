@@ -7,7 +7,7 @@
     <div class="container mt-3" ng-controller="moduleAppController">
 
         <h2 class="mt-3">Dashboard</h2>
-        <div class = 'WIP'> Page Under Construction (VERY SLOW 🥲) </div>
+       
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- PO -->
@@ -24,7 +24,7 @@
             </div>
             
             <div class="col">
-                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()">
+                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()" onclick="on()">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบสั่งซื้อ (PO)</h5>
                     </div>

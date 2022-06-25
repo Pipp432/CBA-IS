@@ -122,6 +122,7 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->ri; ?>;
+            console.log($scope.detail)
             $scope.company = $scope.detail[0].ri_no.substring(0,1);
             $scope.year = $scope.detail[0].ri_date.substring(0,4);
 			$scope.month = $scope.detail[0].ri_date.substring(5,7);
