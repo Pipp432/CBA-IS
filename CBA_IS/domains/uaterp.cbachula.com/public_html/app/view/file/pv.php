@@ -98,6 +98,9 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->pv; ?>;
+            console.log($scope.detail);
+            
+            
             angular.forEach($scope.detail, items =>{
                         if(items['iv_no'] == 'none'){
                             items['iv_no'] = "-";

@@ -56,7 +56,7 @@ class finModel extends model {
     inner join SOPrinting on SOPrinting.so_no = SO.so_no
     inner join Employee on Employee.employee_id = SOX.employee_id
     inner join Product on Product.product_no = SOPrinting.product_no
-    inner join Customer on Customer.customer_tel = SOX.customer_tel and SOX.address = Customer.address
+    inner join Customer on Customer.customer_tel = SOX.customer_tel
     left join Bank_Statement on SOX.payment_date=Bank_Statement.payment_date and 
     SOX.payment_time=Bank_Statement.payment_time and 
     SOX.payment_amount=Bank_Statement.payment_amount
@@ -413,14 +413,14 @@ class finModel extends model {
                 echo $iv_no.' ('.$value['so_no'].') ';
                 
                 if($value['vat_type'] != "3") {
-                    $total_sales_price = (double) $value['so_total_sales_price2'];
+                    $total_sales_price = (double) ceil($value['so_total_sales_price2']);
                     $total_sales_no_vat = ((double) ceil($total_sales_price)) *100/107;
                     $total_sales_vat = ((double) ceil($total_sales_price)) *7/107;
                   
                 } else {
-                    $total_sales_no_vat = (double) $value['so_total_sales_price2'];
+                    $total_sales_no_vat = (double) ceil($value['so_total_sales_price2']);
                     $total_sales_vat = 0;
-                    $total_sales_price = (double) $value['so_total_sales_price2'];
+                    $total_sales_price = (double) ceil($value['so_total_sales_price2']);
                 }
 
                 $soxslip = explode(' ', $value['slip_datetime']);
@@ -1949,7 +1949,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                                 	pv_no,
                                     pv_time,
                                     pv_date,
-                                    total_paid,
+                                    total_paid + additional_cash as total_paid,
                                     product_names,
                                     additional_cash,
                                     additional_cash_reason,

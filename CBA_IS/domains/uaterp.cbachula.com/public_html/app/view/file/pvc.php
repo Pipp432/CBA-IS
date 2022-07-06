@@ -56,7 +56,7 @@
                     <th>ใบสำคัญลงวันที่</th>
                     <th>เลขที่ใบสำคัญ/ใบรับวางบิล/<br>ใบกำกับภาษี/ใบเบิกค่าใช้จ่าย</th>
                     <th>รายละเอียด</th>
-                    <th>เลขที่ RR/CI</th>
+                    
                     <th>จำนวน</th>
                     <th>หมายเหตุ</th>
                 </tr>
@@ -64,7 +64,7 @@
                     <td style="text-align: left;">{{detail[0].exc_date}}</td>
                     <td style="text-align: left;">{{detail[0].ex_no}}</td>
                     <td style="text-align: left;">{{detail[0].pv_details}}</td>
-                    <td style="text-align: left;">{{detail[0].re_req_no}}</td>
+                    
                     <td style="text-align: right;">{{detail[0].total_paid| number:2}}</td>
                     <td style="text-align: left;">{{item.note}}</td>
                 

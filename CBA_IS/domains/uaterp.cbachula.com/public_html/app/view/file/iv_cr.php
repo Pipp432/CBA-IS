@@ -136,17 +136,17 @@
                     <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
                     <th colspan="1" style="text-align: right;">{{priceBefore}}</th>
                 </tr>
-                    <!-- <tr>
+                    <tr>
                         <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
                         <th colspan="1" style="text-align: right;">{{creditCardFee}}</th>
-                    </tr> -->
+                    </tr>
                 <tr>
                     <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
                     <th colspan="1" style="text-align: right;">{{vat}}</th>
                 </tr>
                 <tr>
-                    <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0].invoice_total_sales_price | number:2}}</th>
+                    <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
+                    <th colspan="1" style="text-align: right;">{{detail[0]["payment_type"]=='CC' ? rounded : detail[0].invoice_total_sales_price | number:2}}</th>
                 </tr>
             </table>
         </div> 

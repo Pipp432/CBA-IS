@@ -114,6 +114,21 @@ class fileController extends controller {
         }
     }
 
+    public function iv_cr_test() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบกำกับภาษี/ใบเสร็จรับเงิน #".uri::get(2));
+                $this->view->iv = $this->model->getIv(uri::get(2));
+                $this->view->serial = uri::get(3);
+                $this->view->render("file/iv_cr_test");
+            } else {
+                $this->err404();
+            }
+        }
+    }
+
     public function iv() { 
         if(empty(uri::get(2))) {
             $this->err404();
@@ -195,13 +210,11 @@ class fileController extends controller {
             $this->view->render("file/pvc");
 
         }else {
-            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+          
                 $this->view->setTitle("ใบสำคัญสั่งจ่าย #".uri::get(2));
                 $this->view->pv = $this->model->getPv(uri::get(2));
                 $this->view->render("file/pv");
-            } else {
-                $this->err404();
-            }
+             
         }
     }
     public function pvc() { 
@@ -266,7 +279,6 @@ class fileController extends controller {
         if(empty(uri::get(2))) {
             $this->err404();
         } else {
-            $this->requirePostition("acc");
             $this->view->setTitle("ใบสั่งเติมเงินรองจ่าย #".uri::get(2));
             $this->view->pv = $this->model->getPva(Uri::get(2));
             $this->view->pvaChilds = $this->model->getPvaChild(Uri::get(2));

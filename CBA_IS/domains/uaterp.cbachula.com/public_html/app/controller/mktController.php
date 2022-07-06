@@ -122,7 +122,7 @@ class mktController extends controller {
             $this->view->render("mkt/purchase_order", "navbar");
         } else if (uri::get(2)==='post_po_items') {
             $this->positionEcho('mkt', $this->model->addPo());
-        } else if (uri::get(2)==='get_install_fortulip') {
+        } else if (uri::get(2)==='get_install_forB03') { //speacial case wtf
             $this->positionEcho('mkt', $this->model->getOrderInstallSo());}
     }
 
@@ -136,7 +136,10 @@ class mktController extends controller {
             $this->positionEcho('mkt', $this->model->getInstallPo());
         } else if (uri::get(2)==='post_ci_items') {
             $this->positionEcho('mkt', $this->model->addCi());
-        }  
+        }
+        else if (uri::get(2)==='debug') {
+            $this->positionEcho('mkt', $this->model->debugCi());
+        }    
     }
     
     public function request_counter_sales() {
@@ -479,9 +482,9 @@ class mktController extends controller {
             $this->view->setTitle("Reimbursement Request"); 
             $this->view->render("mkt/reimbursement_request","navbar");
         }else if (uri::get(2)==='post_reimbursement_Request'){
-            $this->positionEcho('mkt', $this->model->addReReqDetails());
+            echo $this->model->addReReqDetails();
         }else if(uri::get(2)==='post_quotation'){
-            $this->positionEcho('mkt', $this->model->uploadImgForReReq());
+            echo $this->model->uploadImgForReReq();
         }
         
     }

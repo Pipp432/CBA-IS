@@ -99,11 +99,11 @@
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">รวม</th>
-                            <th style="text-align: right;">{{total_purchase_no_vat | number:2}}</th>
+                            <th style="text-align: right;">{{final_purchase_no_vat | number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">ภาษีมูลค่าเพิ่ม</th>
-                            <th style="text-align: right;">{{total_purchase_vat | number:2}}</th>
+                            <th style="text-align: right;">{{final_purchase_vat | number:2}}</th>
                         </tr>
                         <tr>
                             <th style="text-align: right;" colspan="5">รวมสุทธิ</th>
@@ -176,10 +176,10 @@
                     
                     
 
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <label for="datetime-input">วันที่</label>
                         <input class="form-control" type="date" id="datetime-input" ng-model="ivrcDate">
-                    </div>
+                    </div> -->
                     <form id="form">
                         <div class = "row mx-0 mt-2">
                             <div class="col-md-4">
@@ -236,7 +236,7 @@
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="postivrcItems()">บันทึกการยืนยันการวางบิล</button>
                 </div>
                 <!-- <div class="row mx-0 mt-2">
-                    <button type="button" class="btn btn-default btn-block my-1" ng-click="debug()">DEBUG</button>
+                    <button type="button" class="btn btn-default btn-block my-1" ng-click="debug()">DEBUG (IS กดเท่านั้น acc pls ignore)</button>
                 </div> -->
             </div>
             <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="test()">test</button> -->
@@ -309,16 +309,16 @@
                 }
                 $scope.calculateTotalPrice();
             }
-            console.log(rrci)
+           
           
             $scope.all_CR = "21-1" + rrci.supplier_no
-            if(0<=rrci.product_line && rrci.product_line<=3){
+            if(0<rrci.product_line && rrci.product_line<=3){
                 $scope.company = '1';
             }
             if(3<rrci.product_line && rrci.product_line<=5){
                 $scope.company = '2';
             } 
-            if(5<rrci.product_line){
+            if(5<rrci.product_line || rrci.product_line =='0'){
                 $scope.company = '3';
             }
             $scope.all_DR_2 = "61-1" + $scope.company + '00'
@@ -327,44 +327,110 @@
             $scope.all_DR_2_cash = "0.00";
             $scope.all_CR_cash = "0.00";
             $scope.DRCR_cash = '0.00' 
+            console.log($scope.ivrcItems)
           
             
             
         }
         
         $scope.dropIvrcItem = function(rrci) {
-            var tempIvrcItem = [];
+            $scope.deleted_data = Number(rrci.confirm_total)
+            console.log(rrci);
+            $scope.final_purchase_no_vat-=Number(( $scope.deleted_data*100/107).toFixed(2))
+            if(rrci.vat_type =='1') $scope.final_purchase_vat -= Number(( $scope.deleted_data*7/107).toFixed(2))
+            $scope.total_purchase_price-= $scope.deleted_data
+            var tempRemoved = [];
             angular.forEach($scope.ivrcItems, function (value, key) {
                 if(value.ci_no != rrci.ci_no) {
-                    tempIvrcItem.push(value);
+                    tempRemoved.push(value);
                 }
             });
-            $scope.ivrcItems = tempIvrcItem;
-            $scope.calculateTotalPrice();
+            $scope.ivrcItems = tempRemoved;
+
+
+            
+            
+            $scope.ci_old.filter((entry)=>entry.ci_no!=rrci.ci_no)
+          
+            console.log($scope.ci_old)
         }
+            $scope.final_purchase_no_vat = 0;
+           $scope.final_purchase_vat = 0;
+           $scope.final_purchase_price = 0;
+           $scope.ci_old = [];
         
         $scope.calculateTotalPrice = function() {
-            $scope.total_purchase_no_vat = 0;
-            $scope.total_purchase_vat = 0;
-            $scope.total_purchase_price = 0;
-            angular.forEach($scope.ivrcItems, function (value, key) {
-                $scope.total_purchase_no_vat += (value.purchase_no_vat * value.quantity);
-                $scope.total_purchase_vat += (value.purchase_vat * value.quantity);
-                $scope.total_purchase_price += (value.purchase_price * value.quantity);
-            });
-            if($scope.ivrcItems[0].vat_type === '1'){
-                $scope.total_purchase_vat = $scope.total_purchase_price * 7/107;
-                $scope.total_purchase_no_vat = $scope.total_purchase_price * 100/107;
+            console.log($scope.selectedSupplier)
+           
+           
+           $scope.total_purchase_no_vat = 0;
+           $scope.total_purchase_vat = 0;
+           $scope.total_purchase_price = 0;
+           $scope.ci = ''
+          
+           
+           
+           
+           
+           angular.forEach($scope.ivrcItems, function (value, key) {
+               $scope.total_purchase_price += (value.purchase_price * value.quantity);
+               // console.log(!$scope.ci_old.includes($scope.ivrcItems[$scope.index].ci_no));
+               console.log(value)
 
-            }else{
-                $scope.total_purchase_vat = 0;
-                $scope.total_purchase_no_vat= $scope.total_purchase_price;
-            }
-            console.log($scope.ivrcItems[0].vat_type)
-            console.log($scope.total_purchase_no_vat);
-            console.log($scope.total_purchase_vat);
-            console.log($scope.total_purchase_price);
-        }
+               if(!$scope.ci_old.includes(value.ci_no )){
+                   console.log(value.ci_no);
+                   $scope.ci = value.ci_no
+                   
+                   
+                   
+                   
+                   $scope.current =Number(value.purchase_price * value.quantity);
+                   
+                   
+               
+                       if(value.product_no.charAt(3) == '1'){
+                       $scope.total_purchase_no_vat += Number(($scope.current * 100/107));
+                       $scope.total_purchase_vat += Number(($scope.current * 7/107));
+                       
+                       }else{
+                           $scope.total_purchase_vat += 0;
+                           $scope.total_purchase_no_vat+= $scope.current;
+                           
+                       }
+
+               }else{  
+               $scope.index++;
+
+               }
+             
+              
+             
+               
+
+
+           });
+           console.log($scope.ci_old)
+           $scope.ci_old.push($scope.ci);
+           console.log($scope.ci_old)
+           $scope.final_purchase_no_vat += Number(($scope.total_purchase_no_vat).toFixed(2));
+           $scope.final_purchase_vat += Number(($scope.total_purchase_vat).toFixed(2));
+           $scope.total_purchase_no_vat = 0;
+           $scope.total_purchase_vat = 0;
+           // console.log(`PRICE NO VAT: ${ $scope.final_purchase_no_vat}`);
+           // console.log(`VAT: ${$scope.final_purchase_vat }`);
+           
+           
+          
+         
+           
+           // console.log($scope.total_purchase_price);
+           
+           // console.log(`With VAT: ${$scope.total_purchase_vat}`);
+           // console.log($scope.total_purchase_price);
+           // console.log(`before vat Sum: ${$scope.sum}`);
+          
+           
+       }
 
         $scope.autoDRCR = (type)=>{
             
@@ -414,9 +480,9 @@
                 
                 // Creating PVB here
                 // Create date for ivrc
-                var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
-                                    (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
-                                    ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
+                // var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
+                //                     (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
+                //                     ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
                 // Creation of data
                 // FormData is a web page interface where (key: value)
                
@@ -425,6 +491,9 @@
                 formData.append('tax', $('#taxFormUpload')[0].files[0]);
                 formData.append('taxIV', $('#taxInvoiceUpload')[0].files[0]);
                 formData.append('tax_reduce_upload', $('#taxReduceUpload')[0].files[0]);
+                formData.append('final_purchase_no_vat',$scope.final_purchase_no_vat)
+                formData.append('final_purchase_vat',$scope.final_purchase_vat)
+                formData.append('total_purchase_price',$scope.total_purchase_price)
                 
                 
                 if($scope.iv == '-') {
@@ -443,7 +512,7 @@
                 formData.append('tax_form_no', $scope.tax_form_no);
                 formData.append('tax_reduce_no', $scope.tax_reduce_no);
                 formData.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
-                formData.append('ivrcDate', ivrcDateStr);
+                // formData.append('ivrcDate', ivrcDateStr);
                 if($scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
                     formData.append('DR',$scope.DR);
                 } else formData.append('DR',false); 
@@ -469,14 +538,18 @@
                     addModal('successModal', 'ยืนยันการวางบิลจาก Supplier / Invoice Receipt Confirm (IVRC)', data);
                     $('#successModal').modal('toggle');
                     $('#successModal').on('hide.bs.modal', function (e) {
-                        location.assign("/");
+                        // location.assign("/");
                     });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     console.log('ajax.fail');
+                    console.log(jqXHR)
+                    console.log(`textStatus: ${textStatus}`)
+                    console.log(`errorThrown ${errorThrown}`)
+
                     addModal('uploadFailModal', 'upload fail', 'fail');
                     $('#uploadFailModal').modal('toggle');
                     $('#uploadFailModal').on('hide.bs.modal', function (e) {
-                            location.assign("/");
+                            // location.assign("/");
                     });
                 });
                 
@@ -487,9 +560,9 @@
         $scope.debug = function(){
               // Creating PVB here
                 // Create date for ivrc
-                var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
-                                    (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
-                                    ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
+                // var ivrcDateStr = $scope.ivrcDate.getFullYear() + '-' + 
+                //                     (($scope.ivrcDate.getMonth()+1) < 10 ? '0' : '') + ($scope.ivrcDate.getMonth()+1) + '-' + 
+                //                     ($scope.ivrcDate.getDate() < 10 ? '0' : '') + $scope.ivrcDate.getDate();
                 // Creation of data
                 // FormData is a web page interface where (key: value)
                
@@ -498,6 +571,9 @@
                 formData.append('tax', $('#taxFormUpload')[0].files[0]);
                 formData.append('taxIV', $('#taxInvoiceUpload')[0].files[0]);
                 formData.append('tax_reduce_upload', $('#taxReduceUpload')[0].files[0]);
+                formData.append('final_purchase_no_vat',$scope.final_purchase_no_vat)
+                formData.append('final_purchase_vat',$scope.final_purchase_vat)
+                formData.append('total_purchase_price',$scope.total_purchase_price)
                 
                 
                 if($scope.iv == '-') {
@@ -516,7 +592,7 @@
                 formData.append('tax_form_no', $scope.tax_form_no);
                 formData.append('tax_reduce_no', $scope.tax_reduce_no);
                 formData.append('ivrcItems', JSON.stringify(angular.toJson($scope.ivrcItems)));
-                formData.append('ivrcDate', ivrcDateStr);
+                // formData.append('ivrcDate', ivrcDateStr);
                 if($scope.DR!=null&&$scope.DR.length == 7&&($scope.DR.charAt(0) == 5||$scope.DR.charAt(0) == 6) && $scope.DR.substring(1, 4) == "1-1" && $scope.DR.substring(5, 7) == "00"){
                     formData.append('DR',$scope.DR);
                 } else formData.append('DR',false); 
@@ -528,10 +604,12 @@
                 formData.append('diff_dr_tax_no',$scope.all_DR_2)
                 formData.append('diff_cr_sup_cash',parseFloat($scope.all_CR_cash).toFixed(2));
                 formData.append('diff_cr_sup_no',$scope.all_CR)
+                
+
                 // for(const pair of formData.entries()) {
                 //     console.log(`${pair[0]}, ${pair[1]}`);
                 // }
-                console.log($scope.ivrcItems)
+                
                 $.ajax({ 
                     url: '/acc/invoice_receipt_confirm/debug',  
                     data: formData,

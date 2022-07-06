@@ -16,7 +16,7 @@
         <div class="row row-cols-2 row-cols-md-3 mt-2 p-0">
 			
             <div class="col">
-                <div class="card text-white bg-secondary m-2" ng-click="getDashboardIVCR(fetchNum)" onclick="on()">
+                <div class="card text-white bg-secondary m-2" ng-click="getDashboardIVCR(fetchNum)">
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบกำกับภาษี/ใบเสร็จรับเงิน (IV/CR)</h5>
                     </div>
@@ -24,7 +24,7 @@
             </div>
             
             <div class="col">
-                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO()" onclick="on()">
+                <div class="card text-white bg-primary m-2" ng-click="getDashboardPO(1)" >
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบสั่งซื้อ (PO)</h5>
                     </div>
@@ -86,6 +86,17 @@
                     <div class="card-body">
                         <h5 class="card-title my-0">ใบลดหนี้ </h5>
                     </div>
+                </div>
+            </div>
+        
+            <div class="col">
+                <div class="card text-white bg-info m-2" ng-show = 'showFilter' >
+                    <select ng-model = 'selectedCompany' ng-change = "dropDownHandler()" ng-click = "clearDashboard()">
+                    <option value="">Select โครงการ</option>
+                    <option value="1">โครงการ 1</option>
+                    <option value="2">โครงการ 2</option>
+                    <option value="3">โครงการ 3</option>
+                    </select>
                 </div>
             </div>
 
@@ -444,10 +455,10 @@
            
             
         </div>
-        <div class ="page-selector" ng-show = "temp =='เลข SO'">
+        <!-- <div class ="page-selector" ng-show = "temp =='เลข SO'">
         <button ng-click = "decrement()" id= 'decrement'> << </button><h2 >{{pageNum}}</h2><button ng-click = 'increment()'> >> </button><button ng-click = 'viewAll()'> VIEW ALL (WARNING SLOW !!!) </button>
        
-        </div>
+        </div> -->
     </div>
     
     
@@ -520,15 +531,6 @@
 }
    
 </style>
-<script>
-    function on() {
-  document.getElementById("overlay").style.display = "block";
-}
-
-function off() {
-  document.getElementById("overlay").style.display = "none";
-}
-</script>
 
 <script>
 
@@ -537,6 +539,9 @@ function off() {
         // $scope.isLoad = true;
         $scope.dashboards = [];
         $scope.doc = '';
+        $scope.selectedCompany ='';
+        $scope.showFilter = false;
+    
         
        
         
@@ -591,7 +596,9 @@ function off() {
 
 
        
-       
+       $scope.dropDownHandler = function(){
+            $scope.getDashboardPO($scope.selectedCompany);
+       }
         
      
      
@@ -610,11 +617,12 @@ function off() {
             $scope.temp = 'เลข SO';
         }
         // $scope.getDashboardIV = function() {
-        //     $scope.dashboardsIv = <?php echo $this->dashboardIv; ?>;
+        
         //     $scope.dashboards = $scope.dashboardsIv;
         //     $scope.doc = 'IV';
         //     $scope.temp = 'เลข SO';
         // }
+        
 		$scope.getDashboardCR = function() {
             $scope.dashboardsCr = <?php echo $this->dashboardCr; ?>;
             $scope.dashboards = $scope.dashboardsCr;
@@ -631,6 +639,7 @@ function off() {
         }
 
         $scope.getDashboardPVA = function() {
+            $scope.showFilter = false;
             $scope.dashboardsPva = <?php echo $this->dashboardPva;  ?>;
             $scope.dashboards = $scope.dashboardsPva; 
             $scope.doc = 'PV';
@@ -643,6 +652,7 @@ function off() {
         }
 
         $scope.getDashboardEXA = function() {
+            $scope.showFilter = false;
             $scope.dashboardsExa = <?php echo $this->dashboardExa; ?>;
             $scope.dashboards = [];
             $scope.doc = 'PV';
@@ -655,7 +665,7 @@ function off() {
 
         $scope.getDashboardPVB = function() {
             $scope.dashboardsPvb = <?php echo $this->dashboardPvb; ?>;
-
+            $scope.showFilter = false;
             $scope.dashboards = $scope.dashboardsPvb; 
             $scope.doc = 'PV';
             $scope.pvType = 'Supplier';
@@ -663,6 +673,7 @@ function off() {
         }
 
         $scope.getDashboardPVD = function() {
+            $scope.showFilter = false;
             $scope.dashboardsPvd = <?php echo $this->dashboardPvd; ?>;
 
             $scope.dashboards = $scope.dashboardsPvd; 
@@ -672,7 +683,7 @@ function off() {
         }
 
         $scope.getDashboardPre_PVD = function() {
-  
+            $scope.showFilter = false;
             $scope.dashboardsPrePvd = <?php echo $this->dashboardPrePvd; ?>;
             $scope.dashboards = $scope.dashboardsPrePvd; 
             $scope.doc = 'PV';
@@ -681,6 +692,7 @@ function off() {
         }
 
         $scope.getDashboardPVC = function(){
+            $scope.showFilter = false;
             $scope.dashboardsPvc = <?php echo $this->dashboardPvc; ?>;
             $scope.dashboards = $scope.dashboardsPvc; 
            
@@ -690,6 +702,7 @@ function off() {
         }
 
         $scope.getDashboardPVC_confirm = function(){
+            $scope.showFilter = false;
             $scope.dashboardsPvc_confirm = <?php echo $this->dashboardPvc_confirm; ?>;
             $scope.dashboards = $scope.dashboardsPvc_confirm; 
             $scope.doc = 'PV';
@@ -702,12 +715,39 @@ function off() {
         
 
         
-        $scope.getDashboardPO = function() {
-            $scope.dashboardsPo = <?php echo $this->dashboardPo; ?>;
-            $scope.dashboards = $scope.dashboardsPo;
-            $scope.doc = 'PO';
-            $scope.temp = 'Supplier';
+        // $scope.getDashboardPO = function() {
+       
+        //     $scope.dashboards = $scope.dashboardsPo;
+        //     $scope.doc = 'PO';
+        //     console.log($scope.dashboards);
+            
+        //     $scope.temp = 'Supplier';
            
+        // }
+        $scope.getDashboardPO = function(company) {
+            $scope.showFilter = true;
+           
+            $http.get(`/acc/dashboard/getPO/${company}`).then((response)=>{
+                
+                $scope.dashboards = response.data;
+                console.log($scope.dashboards)
+               
+            })
+
+           
+            $scope.doc = 'PO';
+            $scope.temp = 'เลข SO';
+           
+        }
+        $scope.clearDashboard = ()=>{
+            $scope.dashboards = []
+            console.log($scope.dashboards)
+        }
+        $scope.dropDownHandler = ()=>{
+            
+            $scope.getDashboardPO($scope.selectedCompany);
+            console.log($scope.dashboards);
+            
         }
 
         $scope.stopEvent = function(e){

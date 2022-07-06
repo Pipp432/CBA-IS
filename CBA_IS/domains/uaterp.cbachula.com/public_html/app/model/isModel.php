@@ -326,6 +326,9 @@ order by substring(SOPrinting.product_no, 1, 1)");
            
     }
 
+
+
+    //split RR module
     public function getIRDRRstock(){
         $sql = $this->prepare(" SELECT
                                     View_StockIRD.product_no,
@@ -447,5 +450,170 @@ order by substring(SOPrinting.product_no, 1, 1)");
         return $rrPrefix.$runningNo;
     }  
     
+    //to fix split RR since it only consider view_stockIRD and not view_invoiceStock
+    public function splitStockOut() {
+        //select problemetic product
+        $sql = $this->prepare(" SELECT
+                                    View_InvoiceStock.*
+                                FROM
+                                    View_InvoiceStock
+                                RIGHT JOIN(
+                                    SELECT
+                                        product_no
+                                    FROM
+                                        `View_InvoiceStock`
+                                    WHERE
+                                        `balance` < 0
+                                ) AS product_err
+                                ON
+                                    product_err.product_no = View_InvoiceStock.product_no
+                                ORDER BY
+                                    `View_InvoiceStock`.`product_no` ASC,
+                                    View_InvoiceStock.file_no ASC;");
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            $stock = $sql->fetchAll(PDO::FETCH_ASSOC);
+            // echo count($stock);
+            // print_r($stock);
+        } else return;
+
+		$i = -1;
+		$productArr = [[]];
+		$prevProduct_no = "";
+
+		//group data by product no
+		foreach ($stock as $value){
+			if($value["product_no"] == $prevProduct_no) {
+				array_push($productArr[$i],$value);
+				
+			} else {
+				$i++;
+				$productArr[$i] = [$value];
+				$prevProduct_no = $value["product_no"];
+			}
+		}
+        // echo '<pre>';
+        // print_r($productArr);
+        // echo '</pre>';
+		echo '<pre>';
+
+		foreach ($productArr as $product){
+			//check
+			$negative = 0;
+
+
+			echo '<b>'.$product[0]['product_no'].'</b>';
+			echo '<br />';
+			foreach($product as $RR) {
+				//prev balance is negative. move stock out to  this one
+				if($negative == 1) {
+
+					// move bad stock to new RR
+					foreach($stockToMove as $eachStockOut) {
+						$sql = $this->prepare("UPDATE StockOut SET rr_no = ? where file_no = ? AND rr_no = ? AND product_no = ? AND file_type = 'IV'");
+						$sql->execute([$RR["file_no"],$eachStockOut["file_no"],$eachStockOut["rr_no"],$RR["product_no"]]);
+						if($sql->errorInfo()[0] != '00000') print_r($sql->errorInfo());
+						if($sql->errorInfo()[1] == '1062') { //probly duplicate primary key. then add this q to the duplicated q
+							$sql = $this->prepare("DELETE FROM StockOut where file_no = ? AND rr_no = ? AND product_no = ? AND file_type = 'IV'");
+							$sql->execute([$eachStockOut["file_no"],$eachStockOut["rr_no"],$RR["product_no"]]);
+							if($sql->errorInfo()[0] != '00000') print_r($sql->errorInfo());
+							$sql = $this->prepare("UPDATE StockOut SET quantity_out = quantity_out + ? where file_no = ? AND rr_no = ? AND product_no = ? AND file_type = 'IV'");
+							$sql->execute([$eachStockOut['quantity_out'],$eachStockOut["file_no"],$RR["file_no"],$RR["product_no"]]);
+							if($sql->errorInfo()[0] != '00000') print_r($sql->errorInfo());
+						}
+						
+						
+						echo 'move STOCK OUT from : ';
+						echo '<br />';
+						print_r($eachStockOut);
+						echo 'to RR : ';
+						echo '<br />';
+						print_r($RR);
+						echo '<br />';
+						echo '----------------------------';
+						echo '<br />';
+					}
+
+
+					if( $defict != 0) { //defict not exactly 0. have to split stock out
+						$lastStockOut = end($stockToMove);
+						$sql = $this->prepare("UPDATE StockOut SET quantity_out = ?,rr_no = ? where file_no = ? AND rr_no = ? AND product_no = ? AND file_type = 'IV'");
+						$sql->execute([$defict,$lastStockOut["rr_no"],$lastStockOut["file_no"],$RR["file_no"],$RR["product_no"]]);
+
+						$sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) values (?, ?, 'IV', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL, ?)");
+                		$sql->execute([$RR["product_no"], $lastStockOut["file_no"],$lastStockOut["quantity_out"] - $defict, $RR["file_no"]]);     
+
+						echo 'but defict != 0';
+						echo 'remove '. $defict.' from STOCK OUT : ';
+						echo '<br />';
+						print_r($lastStockOut);
+						echo '<br />';
+						echo 'and put '.$defict.' into RR : '; 
+						echo '<br />';
+						print_r($RR);
+						echo '<br />';
+						echo '----------------------------';
+						echo '<br />';
+					}
+					$negative = 0;
+				}
+
+				//check if negative. prep bad stock to remove
+				if ($RR["balance"] < 0) {
+					$negative = 1;
+					//get stock out newest first
+					$sql = $this->prepare("SELECT * FROM StockOut WHERE `product_no` = ? AND rr_no = ?  AND `file_type` = 'IV' ORDER BY concat(date, ' ', Time) DESC;");
+					$sql->execute([$RR["product_no"],$RR["file_no"]]);
+					$stockOut = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+					$defict = $RR["balance"];
+					$n = 0;
+					$stockToMove = [];
+					
+					while($defict < 0) {
+						$defict  = $defict + $stockOut[$n]["quantity_out"];
+						array_push($stockToMove,$stockOut[$n]);
+						$n++;
+					}
+				} else $negative = 0;
+
+			}
+		//	break; //for test one only
+			echo '----------------------------<br />';
+			echo '----------------------------<br />';
+			echo '----------------------------<br />';
+		}
+
+		echo '</pre>';
+    }
+
+
+
+    public function checkWaveProgress() {
+        $sql = $this->prepare("SELECT COUNT(*),`stage`,GROUP_CONCAT(`sp_id`) FROM `WaveToSuccess` GROUP BY `stage`;");
+        $sql->execute();
+
+        echo '<pre>';
+
+        if ($sql->rowCount() > 0) {
+            $dats = $sql->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($dats as $dat){
+            echo 'stage : ';
+            echo $dat['stage'];
+            echo '. count = ';
+            echo $dat['COUNT(*)'];
+            echo '<br />';
+            echo 'sp id : ';
+            echo $dat["GROUP_CONCAT(`sp_id`)"];
+            echo '<br /><br />----------------------------<br /><br />';
+        }
+
+
+
+        } else echo "no data";
+
+
+        echo '</pre>';
+    }
     
 }

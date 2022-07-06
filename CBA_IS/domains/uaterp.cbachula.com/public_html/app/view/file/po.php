@@ -125,20 +125,19 @@
             $scope.sum = 0;
             $scope.vat = 0;
             $scope.beforeVat = 0;
-            $scope.detail.forEach(
-                (e)=>{
-                  
-                    $scope.sum+=Number(e.total_purchase_price)
-                    if(e.vat_type=="1") {
-                        $scope.vat +=Number(e.total_purchase_price)*7/107;
-                        $scope.beforeVat +=Number(e.total_purchase_price)*100/107
-                    }else{
-                        $scope.beforeVat +=Number(e.total_purchase_price);
-                    }
-                    
-                    
-                }
-                )
+            $scope.vat_type = $scope.detail[0].vat_type;
+            if($scope.vat_type =='1'){
+                $scope.sum = $scope.detail[0].po_total_purchase_price;
+                $scope.vat = $scope.sum *7/107;
+                $scope.beforeVat = $scope.sum*100/107; 
+            }
+            else{
+                $scope.sum = $scope.detail[0].po_total_purchase_price;
+                $scope.beforeVat = $scope.sum;
+
+            }
+            
+                
 
             console.log(`Sum of all price: ${$scope.sum}`)
             console.log(`VAT: ${$scope.vat}`) 

@@ -144,5 +144,13 @@ class isController extends controller {
             echo $this->model->splitRR();
         }
     }
+
+    public function split_stockout() {
+        echo $this->model->splitStockOut();
+    }
+
+    public function checkWave() {
+        echo $this->model->checkWaveProgress();
+    }
 }
  

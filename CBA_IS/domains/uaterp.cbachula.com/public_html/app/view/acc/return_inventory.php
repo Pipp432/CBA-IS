@@ -229,7 +229,8 @@
                     console.log($scope.products);
                 } else if ($scope.selectedProductType === 'Order' || $scope.selectedProductType === 'Install') {
                     $scope.showIfOrderInstall = true;
-                    $scope.sos = $scope.allSos.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier.supplier_no;});
+                    $scope.sos = $scope.allSos.filter(function filter(product){return product.supplier_no == $scope.selectedSupplier.supplier_no;});
+                    // $scope.sos = $scope.allSos.filter(function filter(product){return product.supplier_no == $scope.selectedSupplierNo;});
                 }
                 
             }
@@ -351,7 +352,8 @@
             $('#confirmModal').modal('hide');
             $.post("return_inventory/post_ri_items", {
                 post : true,
-                supplierNo : $scope.selectedSupplier,
+                supplier_no :JSON.parse($scope.selectedSupplier).supplier_no,   //ไม่แน่ใจ
+                supplierNo : $scope.selectedSupplier, //เลขซับ+ชื่อซับ
                 productType : $scope.selectedProductType,
                 productLine : $scope.selectedProductLine,
                 totalNoVat : $scope.totalNoVat,

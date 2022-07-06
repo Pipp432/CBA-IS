@@ -18,7 +18,7 @@ class fileModel extends model {
                                     PO.product_type,
     							    Supplier.supplier_no,
     							    Supplier.supplier_name,
-    							    Supplier.address,
+    							    Supplier.address,Supplier.vat_type as supplier_vat_type,
     							    POPrinting.product_no,
     							    Product.product_description,
     							    POPrinting.quantity,
@@ -84,44 +84,6 @@ class fileModel extends model {
         }
         return null;
 	}
-
-    public function getPo3($po_no) {
-		$sql = $this->prepare("select
-    								PO.po_no,
-    							    PO.po_date,
-                                    PO.product_type,
-    							    Supplier.supplier_no,
-    							    Supplier.supplier_name,
-    							    Supplier.address,
-    							    POPrinting.product_no,
-    							    Product.product_description,
-    							    POPrinting.quantity,
-    							    Product.unit,
-    							    POPrinting.purchase_price,
-    							    POPrinting.total_purchase_price,
-    							    PO.total_purchase_no_vat as 'po_total_purchase_no_vat',
-    							    PO.total_purchase_vat as 'po_total_purchase_vat',
-    							    PO.total_purchase_price as 'po_total_purchase_price',
-                                    Customer.customer_name,
-                                    Customer.customer_surname,
-                                    Customer.customer_tel,
-                                    SOX.address as customer_address
-    							from POPrinting
-    							inner join PO on PO.po_no = POPrinting.po_no
-    							inner join Supplier on Supplier.supplier_no = PO.supplier_no and Supplier.product_line = PO.product_line
-    							left join Product on Product.product_no = POPrinting.product_no
-                                left join SO on SO.po_no = PO.po_no and SO.so_no = POPrinting.so_no
-                                left join SOXPrinting on SOXPrinting.so_no = SO.so_no
-                                left join SOX on SOX.sox_no = SOXPrinting.sox_no
-                                left join CustomerTransaction on CustomerTransaction.so_no = SO.so_no
-                                left join Customer on Customer.customer_tel = CustomerTransaction.customer_tel AND SOX.address = Customer.address
-    							where PO.po_no = ?");
-        $sql->execute([$po_no]);
-        if ($sql->rowCount() > 0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return null;
-	}
     
     public function getIv($iv_no) {
 		$sql = $this->prepare("SELECT
@@ -147,13 +109,17 @@ class fileModel extends model {
                                     Invoice.payment_type,
                                     SO.vat_type,
                                     SO.total_sales_price as so_total_sales_price,
-                                    SOX.transportation_price
+                                    SOX.transportation_price,
+                                    SOX.note,
+                                    SOX.total_sales_price as SOX_total_sales_price
+                                    
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
                                 left join Product on Product.product_no = InvoicePrinting.product_no
                                 inner join  SO   on Invoice.file_no = SO.so_no
                                 inner join SOXPrinting on SO.so_no = SOXPrinting.so_no
                                 inner join SOX on SOX.sox_no  = SOXPrinting.sox_no
+                                
     							where Invoice.invoice_no = ? 
                                 group by InvoicePrinting.product_no");
         $sql->execute([$iv_no]);
@@ -410,7 +376,7 @@ class fileModel extends model {
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
-        return $sql->errorInfo()[0];
+        return null;
 	}
 	
 	public function getRR($rr_no) {
@@ -569,7 +535,7 @@ class fileModel extends model {
                                 left join Product on Product.product_no=SOPrinting.product_no
                                 INNER JOIN SOXPrinting ON SOXPrinting.so_no=SO.so_no 
                                 INNER JOIN SOX ON SOX.sox_no=SOXPrinting.sox_no 
-								where IRD.cancelled = 0 and IRD.ird_no = ?");
+								where IRD.cancelled = 0 and IRD.ird_no = ? and SOPrinting.cancelled = 0");
 		$sql->execute([$ird_no]);
 		if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);

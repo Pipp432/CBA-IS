@@ -144,9 +144,8 @@ class accController extends controller {
                 $this->err404();
             }
         } else if (uri::get(2)==='get_pvaslip') {
-            $this->requirePostition("acc");
             if (!empty(Uri::get(3))) {
-                $this->positionEcho('acc', $this->model->getPVAReceiptData(Uri::get(3)));
+                echo $this->model->getPVAReceiptData(Uri::get(3));
             } else {
                 $this->err404();
             }
@@ -244,7 +243,7 @@ class accController extends controller {
             $this->view->dashboardPvb = $this->model->getDashboardPvb();
             $this->view->dashboardPvd = $this->model->getDashboardPvd();
             $this->view->dashboardPrePvd = $this->model->getDashboardPrePvd();
-            $this->view->dashboardPo = $this->model->getDashboardPo();
+          
 			$this->view->dashboardCr = $this->model->getDashboardCr();
             $this->view->dashboardPvc = $this->model->getDashboardPvc();
             $this->view->dashboardPvc_confirm = $this->model->getDashboardPvc_confirm();
@@ -291,7 +290,11 @@ class accController extends controller {
         }
         else if (uri::get(2)==='getIV_CR') {
                 $this->positionEcho('acc', $this->model-> getDashboardIv(Uri::get(3)));
-            } 
+            }
+            else if (uri::get(2)==='getPO') {
+                $this->positionEcho('acc', $this->model-> getDashboardPo(Uri::get(3)));
+            }
+             
         }
     
 
@@ -343,7 +346,7 @@ class accController extends controller {
             $this->view->suppliers = $this->model->getSuppliers();
             $this->view->Riproducts = $this->model->getRIProduct();
             $this->view->render("acc/return_inventory", "navbar");
-        } else if (uri::get(2)==='post_riitems') {
+        } else if (uri::get(2)==='post_ri_items') {
             $this->positionEcho('acc', $this->model->addRI());
         }
     }

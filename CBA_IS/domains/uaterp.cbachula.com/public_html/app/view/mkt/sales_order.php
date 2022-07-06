@@ -323,7 +323,7 @@
 
                         </tr>
 						
-						<!-- <tr ng-show="selectedProductType == 'Install'">
+						<tr ng-show="selectedProductType == 'Install'">
 							
 							<th style="text-align: right;" colspan="6">
 								<div class="custom-control">
@@ -338,13 +338,10 @@
 								</div>
                             
                             
-                            <div class="custom-control">
-                                <input type="radio" class="custom-control-input" id="payment2" name="payment" value="0" ng-click="getFee()">
-								<label class="custom-control-label" for="payment2">ชำระผ่าน Facebook Pay</label>
-							</div>
+                           
 
                             </th>
-                        </tr> -->
+                        </tr>
 
 
 
@@ -895,12 +892,17 @@
                 $scope.totalCommission += (value.quantity * value.commission);
 
                 $scope.totalWeight += (value.quantity * value.weight);
+                console.log(value.weight);
+                
 
             });
 
             // $scope.transportPrice = $scope.totalWeight;
 
-            console.log($scope.totalWeight);
+           if($scope.totalWeight>=5000){
+            addModal('overweightModal', 'Sales Order', 'สินค้ารวมหนักเกิน 5 kg');
+            $('#overweightModal').modal('toggle');
+           }
 
         }
 
@@ -934,104 +936,109 @@
         }
       //! With credit card
 
-//         $scope.postSoItems = function() {
-
-// $('#confirmModal').modal('hide');
-
-// $.post("sales_order/post_so_items", {
-
-//     post : true,
-
-//     sellerNo : $scope.seller_employee_id.toUpperCase(),
-
-//     customerTel : $scope.customer_tel,
-    
-//     address: $scope.address,
-
-//     productType : $scope.selectedProductType,
-    
-//     payment : 0 ,
-
-//     vatType : $scope.vatType,
-
-//     totalNoVat : $scope.totalNoVat,
-
-//     totalVat : $scope.totalVat,
-
-//     totalPrice : ($scope.totalPrice+$scope.fee),
-
-//     totalPoint : $scope.totalPoint,
-
-//     totalCommission : $scope.totalCommission,
-
-//     discount : $scope.discount,
-
-//     soItems : JSON.stringify(angular.toJson($scope.soItems)),
-    
-//     paymentType: $scope.selectedPaymentType 
-
-// }).done(function(data) {
-
-// addModal('successModal', 'Sales Order',  data);
-// $('#successModal').modal('toggle');
-// $('#successModal').on('hide.bs.modal', function (e) {
-// window.location.replace('https://uaterp.cbachula.com/');
-
-// });
-
-// }).fail((a,b,c)=>{console.log(a,b,c)}) 
-// }
-
-
-//! NO CREDIT CARD 
-
         $scope.postSoItems = function() {
 
-            $('#confirmModal').modal('hide');
+$('#confirmModal').modal('hide');
 
-            $.post("sales_order/post_so_items", {
+$.post("sales_order/post_so_items", {
 
-                post : true,
+    post : true,
 
-                sellerNo : $scope.seller_employee_id.toUpperCase(),
+    sellerNo : $scope.seller_employee_id.toUpperCase(),
 
-                customerTel : $scope.customer_tel,
-                
-                address: $scope.address,
+    customerTel : $scope.customer_tel,
+    
+    address: $scope.address,
 
-                productType : $scope.selectedProductType,
-				
-				payment : 0 ,
+    productType : $scope.selectedProductType,
+    
+    payment : 0 ,
 
-                vatType : $scope.vatType,
+    vatType : $scope.vatType,
 
-                totalNoVat : $scope.totalNoVat,
+    totalNoVat : $scope.totalPrice * 100/107,
 
-                totalVat : $scope.totalVat,
+    totalVat : $scope.selectedPaymentType=='CC' ? Math.ceil($scope.totalPrice+$scope.fee) * 7/107:$scope.totalPrice,
 
-                totalPrice : ($scope.totalPrice+$scope.fee),
+    totalPrice :$scope.selectedPaymentType=='CC' ? Math.ceil($scope.totalPrice+$scope.fee):$scope.totalPrice,
 
-                totalPoint : $scope.totalPoint,
+    realTotalPrice:($scope.totalPrice+$scope.fee),
 
-                totalCommission : $scope.totalCommission,
+    realTotalVat: ($scope.totalPrice+$scope.fee) * 7/107,
 
-                discount : $scope.discount,
 
-                soItems : JSON.stringify(angular.toJson($scope.soItems)),
-                
-                paymentType: null 
+    totalPoint : $scope.totalPoint,
 
-            }).done(function(data) {
+    totalCommission : $scope.totalCommission,
 
-    addModal('successModal', 'Sales Order',  data);
-    $('#successModal').modal('toggle');
-    $('#successModal').on('hide.bs.modal', function (e) {
-     window.location.replace('https://uaterp.cbachula.com/');
+    discount : $scope.discount,
+
+    soItems : JSON.stringify(angular.toJson($scope.soItems)),
+    
+    paymentType: $scope.selectedPaymentType 
+
+}).done(function(data) {
+
+addModal('successModal', 'Sales Order',  data);
+$('#successModal').modal('toggle');
+$('#successModal').on('hide.bs.modal', function (e) {
+window.location.replace('https://uaterp.cbachula.com/');
 
 });
 
 }).fail((a,b,c)=>{console.log(a,b,c)}) 
-    }
+}
+
+
+// //! NO CREDIT CARD 
+
+//         $scope.postSoItems = function() {
+
+//             $('#confirmModal').modal('hide');
+
+//             $.post("sales_order/post_so_items", {
+
+//                 post : true,
+
+//                 sellerNo : $scope.seller_employee_id.toUpperCase(),
+
+//                 customerTel : $scope.customer_tel,
+                
+//                 address: $scope.address,
+
+//                 productType : $scope.selectedProductType,
+				
+// 				payment : 0 ,
+
+//                 vatType : $scope.vatType,
+
+//                 totalNoVat : $scope.totalNoVat,
+
+//                 totalVat : $scope.totalVat,
+
+//                 totalPrice : ($scope.totalPrice+$scope.fee),
+
+//                 totalPoint : $scope.totalPoint,
+
+//                 totalCommission : $scope.totalCommission,
+
+//                 discount : $scope.discount,
+
+//                 soItems : JSON.stringify(angular.toJson($scope.soItems)),
+                
+//                 paymentType: null 
+
+//             }).done(function(data) {
+
+//     addModal('successModal', 'Sales Order',  data);
+//     $('#successModal').modal('toggle');
+//     $('#successModal').on('hide.bs.modal', function (e) {
+//      window.location.replace('https://uaterp.cbachula.com/');
+
+// });
+
+// }).fail((a,b,c)=>{console.log(a,b,c)}) 
+//     }
 
 
         

@@ -56,7 +56,7 @@ class homeModel extends model {
                                 left join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
                                 inner join Supplier on Supplier.supplier_no = Product.supplier_no and Supplier.product_line = Product.product_line
                                 inner join Week on Week.date = SO.so_date
-                                where SOPrinting.cancelled = 0 and not Product.product_name like '%ค่าส่ง%' and not Product.product_name like '%ติดตั้ง%' and Week.week between 1 and 10;");
+                                where SOPrinting.cancelled = 0 and not ProductCategory.category_name like 'ค่าจัดส่ง' and not ProductCategory.category_name like 'ค่าส่ง' and not ProductCategory.category_name like 'ค่าส่งสินค้า' and not ProductCategory.category_name like 'ค่าติดตั้ง' and Week.week between 1 and 10;");
 		$sql->execute();
 		if ( $sql->rowCount() > 0 ) {
 		  return $sql->fetchAll();

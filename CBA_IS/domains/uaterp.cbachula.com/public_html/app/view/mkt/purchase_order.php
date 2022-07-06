@@ -347,6 +347,7 @@
                     </table>
 
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">บันทึก PO</button>
+                    <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="debug()">บันทึก PO</button> -->
 
                 </div>
 
@@ -419,26 +420,15 @@
         $scope.suppliers = <?php echo $this->suppliers; ?>;
         console.log($scope.suppliers)
         
-
-        $scope.allProducts = <?php echo $this->products; ?>;
-        $scope.sos = '';
-        $scope.allSos = <?php echo $this->sos; ?>;
-        
-        $scope.vat_type="0";
-
-        
-
-        $scope.showIfOrderInstall = false;
-
-        $scope.showIfStock = false;
-
         
 
         $scope.isEdit = true;
 
         $scope.isFinishEdit = false;
 
-        
+        $scope.debug = function(){
+            console.log($scope.vat_type)
+        }
 
         $scope.confirmDetail = function() {
 
@@ -456,8 +446,9 @@
                 if(e.supplier_no == $scope.selectedSupplier){
                     $scope.vat_type = e.vat_type;
                 }
+                $scope.getSos();
                 
-            })
+                })
            
           
 
@@ -471,19 +462,7 @@
 
                 
 
-                if ($scope.selectedProductType === 'Stock') {
 
-                    $scope.showIfStock = true;
-
-                    $scope.products = $scope.allProducts.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
-
-                } else if ($scope.selectedProductType === 'Order' || $scope.selectedProductType === 'Install') {
-
-                    $scope.showIfOrderInstall = true;
-
-                    $scope.sos = $scope.allSos.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
-
-                }
 
                 
 
@@ -497,6 +476,8 @@
         $scope.addPoItemStock = function(product) {
 
             var newProduct = true;
+           console.log($scope.poItems);
+           
 
             angular.forEach($scope.poItems, function (value, key) {
 
@@ -540,11 +521,25 @@
 
         }
 
-        
+        $scope.save_vat = true;
+        $scope.save_vat_type='';
+
 
         $scope.addPoItemOrderInstall = function(so) {
 
             var newSo = true;
+            console.log(so.product_no.charAt(3));
+            if($scope.save_vat){
+                $scope.save_vat = false;
+                $scope.save_vat_type=so.product_no.charAt(3);
+
+            }
+            if(so.product_no.charAt(3)!=$scope.save_vat_type){
+                 
+            }
+       
+            
+            
 
             angular.forEach($scope.poItems, function (value, key) {
 
@@ -678,16 +673,32 @@
 
         }
         $scope.getSos = function() {
-            $.post("purchase_order/get_install_fortulip", {
+            $.post("purchase_order/get_install_forB03", {
                 post : true,
                 supplierNo : $scope.selectedSupplier,
-            }
-            , function(data) {
-                $scope.sos = data
+            }, function(data) {
+                $scope.allSos = JSON.parse(data);
+
+                if ($scope.selectedProductType === 'Stock') {
+
+                    $scope.showIfStock = true;
+
+                    $scope.products = $scope.allProducts.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
+
+                } else if ($scope.selectedProductType === 'Order' || $scope.selectedProductType === 'Install') {
+                
+                    $scope.showIfOrderInstall = true;
+                    //console.log($scope.allSos);
+                    $scope.sos = $scope.allSos.filter(function filter(product) {return product.supplier_no == $scope.selectedSupplier;});
+                
+                }
+
+
+                $scope.$digest();
             })
 
         }
-        $scope.getSos();
+        
 
 
         $scope.postPoItems = function() {

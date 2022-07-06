@@ -24,7 +24,7 @@
         <div class="row px-2 mt-2">
             <div class="col-12 px-0">
                 <p class="my-0">
-                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ3)</b><br>
+                <b>ห้างหุ้นส่วนสามัญ บริษัทจำลองจุฬาลงกรณ์มหาวิทยาลัย 2565 (โครงการ 3)</b><br>
                     อาคารไชยยศสมบัติ 1 ห้องเลขที่ 315 ชั้นที่ 3 เลขที่ 254 ถนนพญาไท แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330<br>
                     โทร. 0-2218-5762 โทรสาร. 0-2218-5762<br>
                 </p>
@@ -39,7 +39,7 @@
         <div class="text">
                 
                
-                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_name}} ธนาคารผู้รับโอน {{details[0].bank_name}}เลขที่บัญชี {{details[0].bank_book_number}}</p>
+                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_number}} ธนาคารผู้รับโอน {{details[0].bank_name}} เลขที่บัญชี {{details[0].bank_book_name}}</p>
         </div>        
         
         <hr>
@@ -81,7 +81,7 @@
        
         <div class="row px-2 mt-2">
                 <span>ลงชื่อ<img src="/public/img/fin_sign.jpg" width="100" 
-        height="75">(ผู้อันุมัติ)</span>
+        height="75">(ผู้อนุมัติ)</span>
                
         </div>
        
@@ -119,7 +119,8 @@
             $scope.details = <?php echo $this->re_req; ?>;
             $scope.company = $scope.details[0].re_req_no.substring(0,1);
             $scope.tableDetails = JSON.parse($scope.details[0].details)
-            console.log($scope.details[0])
+            console.log($scope.details[0].bank_name)
+            if(($scope.details[0].bank_name).includes('-')) $scope.details[0].bank_name = $scope.details[0].bank_name.slice(0,-1)
             
             $scope.tableDetails.forEach(data => {
                 $scope.sum += Number(data.money);

@@ -47,7 +47,7 @@
                             <th colspan="10">ไม่มีเลข SOX ที่อัปโหลดสลิปการชำระเงิน</th>
                         </tr>
                         <tr ng-repeat="sox in soxs | unique:'sox_no' | filter:{sox_no:filterSox} | orderBy:['-slip_uploaded', 'slip_datetime']| orderBy:reverse:true" ng-click="addCrItem(sox)" ng-show="soxs.length > 0">
-                            <td>{{sox.sox_no}}</td>
+                            <td>{{sox.sox_no}} {{sox.product_type}}</td>
                             <td>{{sox.employee_id}} {{sox.employee_nickname_thai}}</td>
                             <td>{{sox.customer_name}} {{sox.customer_surname}}</td>
 							<td style="text-align: center">{{sox.payment_date==null ? getDate(sox):sox.payment_date}}</td>
@@ -245,6 +245,7 @@
         // $scope.selectedBank = '';
         // $scope.TransferTime = '';
         $scope.soxs = <?php echo $this->soxs; ?>;
+    
         $scope.creditCardfee=0;
         $scope.finalPrice=0;
         $scope.priceBeforeVat=0;
@@ -286,6 +287,8 @@
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
         $scope.processNumber = function(sox){
+            console.log(sox);
+            
 
             console.log(`===================== ${sox.sox_no} ======================`);
             

@@ -1795,8 +1795,8 @@ class mktModel extends model {
 
 
           $sql = $this->prepare( "insert into SOX (sox_no, sox_datetime, employee_id, customer_tel, address, so_sales_no_vat, so_sales_vat, so_sales_price, so_total_discount,
-											transportation_no_vat, transportation_vat, transportation_price, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, slip_uploaded, done, ird_no) 
-											values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, 0, 0, -1, '-')" );
+											transportation_no_vat, transportation_vat, transportation_price, total_sales_no_vat, total_sales_vat, total_sales_price, cancelled, slip_uploaded, done, ird_no,payment_option) 
+											values (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, 0, 0, -1, '-',?)" );
           $success = $sql->execute( [
             $soxno,
             input::post( 'sellerNo' ),
@@ -1808,7 +1808,8 @@ class mktModel extends model {
             ( double )input::post( 'discount' ),
             ( double )input::post( 'totalNoVat' ),
             ( double )input::post( 'totalVat' ),
-            ( double )input::post( 'totalPrice' )
+            ( double )input::post( 'totalPrice' ),
+            input::post('paymentType')
           ] );
 
           // if(!$success) {
@@ -1995,7 +1996,8 @@ class mktModel extends model {
 
       // promotion week 9		
 		// $sql = $this->promotionWeek10($sono);
-    $sql = $this->promotionTournamentWeek4($sono);
+    // $sql = $this->promotionTournamentWeek4($sono);
+    $sql = $this->promotionWeek5($sono);
     
     
 
@@ -2015,27 +2017,32 @@ class mktModel extends model {
       
 		// }
 
-    if(strcasecmp($dayOfWeek,'wednesday')==0){
-			if($dt_formatted>='1000' && $dt_formatted<='1200'){
-				$score*=1.5;
-			}
+		$sql = $this->prepare("INSERT INTO WavePoint (sp_id,datetime_sold,point,so_no) VALUES (?,CURRENT_TIMESTAMP,?,?)");
+		$sql->execute([$employee_id,$_POST["totalPrice"],$sono]);
+
+
+
+    // if(strcasecmp($dayOfWeek,'wednesday')==0){
+		// 	if($dt_formatted>='1000' && $dt_formatted<='1200'){
+		// 		$score*=1.5;
+		// 	}
       
-		}
+		// }
 
 		
-		$sql = $this->prepare("SELECT team_id FROM TeamMembers WHERE employee_id= ?");
-		$sql->execute([$employee_id]);
-		if ($sql->rowCount() > 0) {
-			$team_id = $sql->fetchAll()[0]['team_id'];
-			$sql = $this->prepare("INSERT INTO TeamTransactions (date,time,team_id,score,so_no,status)
-			VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,?,?,?,0)");
-			$sql->execute([$team_id,$score,$sono]);
-			print_r($sql->errorInfo());
+		// $sql = $this->prepare("SELECT team_id FROM TeamMembers WHERE employee_id= ?");
+		// $sql->execute([$employee_id]);
+		// if ($sql->rowCount() > 0) {
+		// 	$team_id = $sql->fetchAll()[0]['team_id'];
+		// 	$sql = $this->prepare("INSERT INTO TeamTransactions (date,time,team_id,score,so_no,status)
+		// 	VALUES (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,?,?,?,0)");
+		// 	$sql->execute([$team_id,$score,$sono]);
+		// 	print_r($sql->errorInfo());
       
 			// promotion team tour week 3
 			// $sql = $this->promotionWeek3($sono);
 		//}
-    }
+    
 
 		
 
@@ -2236,7 +2243,6 @@ class mktModel extends model {
   //PO Module
   public function getOrderInstallSo() {
 
-    
     if (input::post('supplierNo') == 'B03') { 
         
       $sql = $this->prepare( "select
@@ -2427,6 +2433,19 @@ class mktModel extends model {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
     }
     return json_encode( [] );
+  }
+  public function debugCi(){
+    $ciItemsArray = json_decode( input::post( 'ciItems' ), true );
+    $ciItemsArray = json_decode( $ciItemsArray, true );
+
+    $poList = array();
+
+    foreach ( $ciItemsArray as $value ){
+      print_r(( double )$value[ 'total_purchase_vat' ]." ");
+      
+
+  
+    }
   }
 
   // CI Module
@@ -3782,7 +3801,665 @@ ORDER BY `SO`.`so_date` , `SO`.`so_time`" );
 			
 // 		}
 		
-private function promotionTournamentWeek4 ($sono) {
+// private function promotionTournamentWeek4 ($sono) {
+
+//   $soItemsArray = json_decode(input::post('soItems'), true); 
+//   $soItemsArray = json_decode($soItemsArray, true);
+//   $extraPoint = 0;
+
+//   if(is_numeric(input::post('sellerNo'))) {
+
+//       switch (json_decode(session::get('employee_detail'), true)['product_line']) {
+
+//           // ไม่เคยขายสายเรา ทีวี 1 เครื่อง 50 pts
+//           case '1':
+//               //เคยขายไหม
+//               $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 1 AND cancelled = 0 AND so_no != ?");
+//               $sql->execute([input::post('sellerNo')]);
+//               $count = $sql->fetchAll()[0]['count'];
+
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 1.1' and cancelled = 0) as countProLine1");
+
+//               $sql->execute([input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+//                                       where employee_id = ? and Product.product_line = '1' and Product.category_no = '08' and SO.cancelled = 0 
+//                                       and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 50, 'Week 4 - Line 1.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 1.1 ได้รับ 50 พ้อยท์!!!) ';
+
+//                   }
+
+//               }
+
+//               break;
+
+//               // เคยขายสายเรา ขายแอร์ 1 เครื่อง 70 pts
+//           case '2': 
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 2 AND cancelled = 0 AND so_no != ?");
+//               $sql->execute([input::post('sellerNo')]);
+//               $count = $sql->fetchAll()[0]['count'];
+
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 2.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 2.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute([input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '2' and Product.category_no = '01'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 70, 'Week 4 - Line 2.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 2.1 ได้รับ 70 พ้อยท์!!!) ';
+//                       break;
+//         }
+              
+    
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '2' and Product.category_no = '03'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 40, 'Week 4 - Line 2.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 2.1 ได้รับ 40 พ้อยท์!!!) ';
+//         }
+//               } if($count == 0 && $temp['countProLine1'] == 0) {
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '2' and Product.category_no = '02'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 2.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 2.1 ได้รับ 30 พ้อยท์!!!) ';
+//                   }
+//               }
+
+
+//               // เคยขาย
+
+//               if($count > 0 && $temp['countProLine2'] == 0){
+      
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
+//                                       where employee_id = ? and Product.product_line = '2' and Product.category_no in ('01') and SO.cancelled = 0 
+//                 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+      
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                   values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 70, 'Week 4 - Line 2.2', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 2.2 ได้รับ 70 พ้อยท์!!!) ';
+//                 }
+//     }
+
+//     break;
+
+//           case '3':
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 3 AND cancelled = 0 AND so_no != ?");
+//               $sql->execute([input::post('sellerNo')]);
+//               $count = $sql->fetchAll()[0]['count'];
+
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 3.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 3.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute([input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) { 
+//                   // ต้นไม้ 20
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '3' and Product.category_no = '07'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
+//                       break;
+//         }
+
+//                   // เครื่องครัว
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '3' and Product.category_no = '18'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
+//                       break;
+//         }
+
+//                   // เซตกระทะ
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '3' and Product.category_no = '19'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
+//                       break;
+//         }
+
+//     }
+
+//               // เคยขาย
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+//                   // หม้อทอดไฟฟ้า 
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                           inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                           inner join Product on Product.product_no = SOPrinting.product_no
+//                                           inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                           where employee_id = ? and Product.product_line = '3' and Product.category_no = '03'
+//                                           and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                           values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
+//                       break;
+//                       }
+
+//                   // เก้าอี้ 
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '3' and Product.category_no = '20'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
+//                       break;
+//                       }
+
+//                   // โต๊ะ
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '3' and Product.category_no = '21'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
+//                       break;
+//                       }
+
+//               }
+
+//               break;
+
+//               // ไม่เคยขายสายเรา Smartwatch 10 pts 
+//               // เคยขายสายเรา iPad รุ่นไหนก็ได้ 2 เครื่อง 45 pts
+//   case '4': 
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 4 AND cancelled = 0 AND so_no != ?");
+//               $sql->execute([input::post('sellerNo')]);
+//               $count = $sql->fetchAll()[0]['count'];
+
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 4.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 4.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute([input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+//               $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '4' and (Product.sub_category = 'Smartwatch' or Product.product_no in ('4-I1-02-401-571','4-I1-02-401-573'))
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold > 0) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 10, 'Week 4 - Line 4.1', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 4.1 ได้รับ 10 พ้อยท์!!!) ';
+//         }
+//                   }
+//               // เคยขาย
+
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '4' and Product.category_no = '01'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+
+//                   if($countSold >= 2) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 45, 'Week 4 - Line 4.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 4.2 ได้รับ 45 พ้อยท์!!!) ';
+//         }
+//               }
+//               break;
+
+//           case '5': 
+
+//                   // เคยขายไหม
+//     $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 5 AND cancelled = 0 and so_no != ?");
+//     $sql->execute([input::post('sellerNo'), $sono]);
+//     $count = $sql->fetchAll()[0]['count'];
+    
+//     $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 5.1' and cancelled = 0) as countProLine1,
+//               (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 5.2' and cancelled = 0) as countProLine2");
+
+//       $sql->execute( [input::post('sellerNo')]);
+//       $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+                  
+//               // ไม่เคยขาย
+//     if($count == 0 && $temp['countProLine1'] == 0) {
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '5' and Product.category_no in ('01','02')
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 50, 'Week 4 - Line 5.1', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 5.1 ได้รับ 50 พ้อยท์!!!) ';
+//         }
+//     }
+//               // เคยขาย
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+//       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '5' and Product.category_no = '02'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//       $sql->execute([input::post('sellerNo')]);
+//       $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//       if($countSold > 0) {
+//         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//         $sql->execute([input::post('sellerNo'), 60, 'Week 4 - Line 5.2', $sono]);
+//         //print_r($sql->errorInfo());
+//         echo ' (ผ่านโปรสาย 5.2 ได้รับ 60 พ้อยท์!!!) ';
+//         }
+//     }
+//               break;
+
+//           case '6':
+//                   // เคยขายไหม
+//                   $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 6 AND cancelled = 0 and so_no != ?");
+//                   $sql->execute([input::post('sellerNo'), $sono]);
+//                   $count = $sql->fetchAll()[0]['count'];
+                  
+//                   $sql = $this->prepare("select * from 
+//                                       (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 6.1' and cancelled = 0) as countProLine1,
+//                                       (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 6.2' and cancelled = 0) as countProLine2");
+
+//                   $sql->execute( [input::post('sellerNo')]);
+//                   $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//                   // ไม่เคยขาย
+
+//                   if($count == 0 && $temp['countProLine1'] == 0) {
+//                       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                           inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                           inner join Product on Product.product_no = SOPrinting.product_no
+//                                           inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                           where employee_id = ? and Product.product_line = '6' and Product.product_no in ('6-I2-03-605-024','6-I2-03-605-025','6-I2-03-605-026','6-I2-03-605-034')
+//                                           and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                       $sql->execute([input::post('sellerNo')]);
+//                       $countSold = $sql->fetchAll()[0]['countSold'];
+                  
+//                       if($countSold > 0) {
+//                           $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                                   values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                           $sql->execute([input::post('sellerNo'), 10, 'Week 4 - Line 6.1', $sono]);
+//                           //print_r($sql->errorInfo());
+//                           echo ' (ผ่านโปรสาย 6.1 ได้รับ 10 พ้อยท์!!!) ';
+//                           }
+//                   }
+
+//                   // เคยขาย
+//                   if($count > 0 && $temp['countProLine2'] == 0) {
+//                       $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                           inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                           inner join Product on Product.product_no = SOPrinting.product_no
+//                                           inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                           where employee_id = ? and Product.product_line = '6' and Product.category_no = '02'
+//                                           and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                       $sql->execute([input::post('sellerNo')]);
+//                       $countSold = $sql->fetchAll()[0]['countSold'];
+                  
+//                       if($countSold > 0) {
+//                           $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                                   values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                           $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 6.2', $sono]);
+//                           //print_r($sql->errorInfo());
+//                           echo ' (ผ่านโปรสาย 6.2 ได้รับ 30 พ้อยท์!!!) ';
+//                           }
+//                   }
+//                   break;
+
+//           case '7':
+//                       // เคยขายไหม
+//                       $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 7 AND cancelled = 0 and so_no != ?");
+//                       $sql->execute([input::post('sellerNo'), $sono]);
+//                       $count = $sql->fetchAll()[0]['count'];
+                      
+//                       $sql = $this->prepare("select * from 
+//                                           (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 7.1' and cancelled = 0) as countProLine1");
+  
+//                       $sql->execute( [input::post('sellerNo')]);
+//                       $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//                       // ไม่เคยขาย
+//                       if($count == 0 && $temp['countProLine1'] == 0) {
+//                           $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                               inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                               inner join Product on Product.product_no = SOPrinting.product_no
+//                                               inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                               where employee_id = ? and Product.product_line = '7' and Product.category_no != '04'
+//                                               and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                           $sql->execute([input::post('sellerNo')]);
+//                           $totalSold = $sql->fetchAll()[0]['totalSold'];
+                      
+//                           if($totalSold >= 600) {
+//                               $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                                       values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                               $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 7.1', $sono]);
+//                               //print_r($sql->errorInfo());
+//                               echo ' (ผ่านโปรสาย 7.1 ได้รับ 20 พ้อยท์!!!) ';
+//                               }
+//                       }
+//                       break;
+          
+//           case '8': 
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 8 AND cancelled = 0 and so_no != ?");
+//               $sql->execute([input::post('sellerNo'), $sono]);
+//               $count = $sql->fetchAll()[0]['count'];
+              
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 8.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 8.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute( [input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '8' and (Product.category_no != '06' or Product.product_name like '%ส่วนลดค่าจัดส่ง%')
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+//                   if($totalSold >= 1000) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 15, 'Week 4 - Line 8.1', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 8.1 ได้รับ 15 พ้อยท์!!!) ';
+//                       }
+//               }
+
+//               // เคยขาย
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '8' and Product.category_no in ('01','03')
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+//                   if($totalSold >= 1500) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 8.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 8.2 ได้รับ 20 พ้อยท์!!!) ';
+//                       }
+//               }
+//               break;
+          
+//           case '9':
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 9 AND cancelled = 0 and so_no != ?");
+//               $sql->execute([input::post('sellerNo'), $sono]);
+//               $count = $sql->fetchAll()[0]['count'];
+              
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 9.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 9.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute( [input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '9' and Product.category_no != '04'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+//                   if($totalSold >= 500) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 9.1', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 9.1 ได้รับ 20 พ้อยท์!!!) ';
+//                       }
+//               }
+
+//               // เคยขาย
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '9' and Product.sub_category = 'Bag' and Product.sub_category = 'Clothes'
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $countSold = $sql->fetchAll()[0]['countSold'];
+              
+//                   if($countSold > 0) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 25, 'Week 4 - Line 9.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 9.2 ได้รับ 25 พ้อยท์!!!) ';
+//                       }
+//               }
+//               break;
+
+//           case '0':
+//               // เคยขายไหม
+//               $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 0 AND cancelled = 0 and so_no != ?");
+//               $sql->execute([input::post('sellerNo'), $sono]);
+//               $count = $sql->fetchAll()[0]['count'];
+              
+//               $sql = $this->prepare("select * from 
+//                                   (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 10.1' and cancelled = 0) as countProLine1,
+//                                   (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 10.2' and cancelled = 0) as countProLine2");
+
+//               $sql->execute( [input::post('sellerNo')]);
+//               $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+
+//               // ไม่เคยขาย
+
+//               if($count == 0 && $temp['countProLine1'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '0' and Product.category_no in ('03','04')
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+//                   if($totalSold >= 300) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 15, 'Week 4 - Line 10.1', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 10.1 ได้รับ 15 พ้อยท์!!!) ';
+//                       }
+//               }
+
+//               // เคยขาย
+//               if($count > 0 && $temp['countProLine2'] == 0) {
+//                   $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+//                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
+//                                       inner join Product on Product.product_no = SOPrinting.product_no
+//                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+//                                       where employee_id = ? and Product.product_line = '0' and Product.category_no in ('01','07')
+//                                       and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+//                   $sql->execute([input::post('sellerNo')]);
+//                   $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+//                   if($totalSold >= 350) {
+//                       $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+//                                               values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+//                       $sql->execute([input::post('sellerNo'), 25, 'Week 4 - Line 10.2', $sono]);
+//                       //print_r($sql->errorInfo());
+//                       echo ' (ผ่านโปรสาย 10.2 ได้รับ 25 พ้อยท์!!!) ';
+//                       }
+//               }
+//               break;
+                  
+// }
+
+
+
+//       }
+
+//   }
+private function promotionWeek5 ($sono) {
 
   $soItemsArray = json_decode(input::post('soItems'), true); 
   $soItemsArray = json_decode($soItemsArray, true);
@@ -3792,654 +4469,585 @@ private function promotionTournamentWeek4 ($sono) {
 
       switch (json_decode(session::get('employee_detail'), true)['product_line']) {
 
-          // ไม่เคยขายสายเรา ทีวี 1 เครื่อง 50 pts
-          case '1':
-              //เคยขายไหม
-              $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 1 AND cancelled = 0 AND so_no != ?");
-              $sql->execute([input::post('sellerNo')]);
-              $count = $sql->fetchAll()[0]['count'];
+          case '1': // smart humidifire 1 เครื่อง 20 pts
+              
+              $sql = $this->prepare( "select * from 
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 1' and cancelled = 0) as countProLine1" );
 
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 1.1' and cancelled = 0) as countProLine1");
+              $sql->execute( [ input::post( 'sellerNo' ) ] );
 
-              $sql->execute([input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+              $temp = $sql->fetchAll()[ 0 ];
 
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-
+              if ( $temp[ 'countProLine1' ] == 0 ) {
                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
-                                      where employee_id = ? and Product.product_line = '1' and Product.category_no = '08' and SO.cancelled = 0 
-                                      and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '1' and Product.product_no = '1-I2-03-101-024'
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 50, 'Week 4 - Line 1.1', $sono]);
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 1', $sono]);
         //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 1.1 ได้รับ 50 พ้อยท์!!!) ';
-
+        echo ' (ผ่านโปรสาย 1 ได้รับ 20 พ้อยท์!!!) ';
                   }
 
-              }
 
-              break;
-
-              // เคยขายสายเรา ขายแอร์ 1 เครื่อง 70 pts
-          case '2': 
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 2 AND cancelled = 0 AND so_no != ?");
-              $sql->execute([input::post('sellerNo')]);
-              $count = $sql->fetchAll()[0]['count'];
-
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 2.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 2.2' and cancelled = 0) as countProLine2");
-
-              $sql->execute([input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '2' and Product.category_no = '01'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 70, 'Week 4 - Line 2.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 2.1 ได้รับ 70 พ้อยท์!!!) ';
-                      break;
-        }
-              
-    
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '2' and Product.category_no = '03'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 40, 'Week 4 - Line 2.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 2.1 ได้รับ 40 พ้อยท์!!!) ';
-        }
-              } if($count == 0 && $temp['countProLine1'] == 0) {
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '2' and Product.category_no = '02'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 2.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 2.1 ได้รับ 30 พ้อยท์!!!) ';
-                  }
-              }
-
-
-              // เคยขาย
-
-              if($count > 0 && $temp['countProLine2'] == 0){
-      
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line
-                                      where employee_id = ? and Product.product_line = '2' and Product.category_no in ('01') and SO.cancelled = 0 
-                and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-      
-      if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                  values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 70, 'Week 4 - Line 2.2', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 2.2 ได้รับ 70 พ้อยท์!!!) ';
-                }
-    }
-
-    break;
-
-          case '3':
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 3 AND cancelled = 0 AND so_no != ?");
-              $sql->execute([input::post('sellerNo')]);
-              $count = $sql->fetchAll()[0]['count'];
-
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 3.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 3.2' and cancelled = 0) as countProLine2");
-
-              $sql->execute([input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) { 
-                  // ต้นไม้ 20
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '3' and Product.category_no = '07'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-              
-      if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
-                      break;
-        }
-
-                  // เครื่องครัว
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '3' and Product.category_no = '18'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-              
-      if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
-                      break;
-        }
-
-                  // เซตกระทะ
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '3' and Product.category_no = '19'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-              
-      if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 3.1', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 3.1 ได้รับ 20 พ้อยท์!!!) ';
-                      break;
-        }
-
-    }
-
-              // เคยขาย
-              if($count > 0 && $temp['countProLine2'] == 0) {
-                  // หม้อทอดไฟฟ้า 
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                          inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                          inner join Product on Product.product_no = SOPrinting.product_no
-                                          inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                          where employee_id = ? and Product.product_line = '3' and Product.category_no = '03'
-                                          and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                          values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
-                      break;
-                      }
-
-                  // เก้าอี้ 
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '3' and Product.category_no = '20'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
-                      break;
-                      }
-
-                  // โต๊ะ
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '3' and Product.category_no = '21'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 3.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
-                      break;
-                      }
-
-              }
-
-              break;
-
-              // ไม่เคยขายสายเรา Smartwatch 10 pts 
-              // เคยขายสายเรา iPad รุ่นไหนก็ได้ 2 เครื่อง 45 pts
-  case '4': 
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT COUNT(*) AS count FROM SO WHERE employee_id = ? AND product_line = 4 AND cancelled = 0 AND so_no != ?");
-              $sql->execute([input::post('sellerNo')]);
-              $count = $sql->fetchAll()[0]['count'];
-
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 4.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 4.2' and cancelled = 0) as countProLine2");
-
-              $sql->execute([input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-              $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '4' and (Product.sub_category = 'Smartwatch' or Product.product_no in ('4-I1-02-401-571','4-I1-02-401-573'))
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold > 0) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 10, 'Week 4 - Line 4.1', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 4.1 ได้รับ 10 พ้อยท์!!!) ';
-        }
-                  }
-              // เคยขาย
-
-              if($count > 0 && $temp['countProLine2'] == 0) {
-
-                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '4' and Product.category_no = '01'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
-
-                  if($countSold >= 2) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 45, 'Week 4 - Line 4.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 4.2 ได้รับ 45 พ้อยท์!!!) ';
-        }
               }
               break;
 
-          case '5': 
+          case '2': // เครื่องฟอกอากาศ ,เครื่องกระจายกลิ่นหอม 03,08 50 pts
 
-                  // เคยขายไหม
-    $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 5 AND cancelled = 0 and so_no != ?");
-    $sql->execute([input::post('sellerNo'), $sono]);
-    $count = $sql->fetchAll()[0]['count'];
-    
-    $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 5.1' and cancelled = 0) as countProLine1,
-              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 5.2' and cancelled = 0) as countProLine2");
+              $sql = $this->prepare( "select * from 
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 2' and cancelled = 0) as countProLine1" );
 
-      $sql->execute( [input::post('sellerNo')]);
-      $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+              $sql->execute( [ input::post( 'sellerNo' ) ] );
+
+              $temp = $sql->fetchAll()[ 0 ];
+
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '2' and Product.category_no in ('03','08')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 50, 'Week 5 - Line 2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 2 ได้รับ 50 พ้อยท์!!!) ';
+                  }
+
+
+              }
+              break;
+
+          case '3': // ขายของสาย 3 ครบ 2 categories, ขายชุดเครื่องนอน เครื่องดูดฝุ่น เซตกระทะ 30 pts
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 3.2' and cancelled = 0) as countProLine2");
+
+              $sql->execute([input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+              // ขายของสาย 3 ครบ 2 categories 25 pts
+              // อันนี้เขียนไม่ถูกเด้ออออ
+              // if ($temp['countProLine1'] == 0) {
+              //     $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+              //                         inner join SOPrinting on SOPrinting.so_no = SO.so_no
+              //                         inner join Product on Product.product_no = SOPrinting.product_no
+              //                         inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+              //                         where employee_id = ? and Product.product_line = '3' and Product.category_no in ('08','12','18')
+              //                         and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+    // 	$sql->execute([input::post('sellerNo')]);
+    // 	$countSold = $sql->fetchAll()[0]['countSold'];
+              
+    // 	if($countSold > 0) {
+    // 		$sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+    // 								values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+    // 		$sql->execute([input::post('sellerNo'), 30, 'Week 5 - Line 3.2', $sono]);
+    // 		//print_r($sql->errorInfo());
+    // 		echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
+                      
+              //     }
                   
-              // ไม่เคยขาย
-    if($count == 0 && $temp['countProLine1'] == 0) {
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+              // }
+
+              // ชุดเครื่องนอน เครื่องดูดฝุ่น เซตกระทะ 30 pts
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '3' and Product.category_no in ('08','12','18')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 30, 'Week 5 - Line 3.2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 3.2 ได้รับ 30 พ้อยท์!!!) ';
+                      
+                  }
+              }
+              break;
+          
+          
+          case '4': 
+              
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 4.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 4.2' and cancelled = 0) as countProLine2");
+
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+
+              // ขาย case ipad 1 ชิ้น
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '4' and Product.sub_category in ('Case iPad','Case iPad (Bundle)')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 4.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 4.1 ได้รับ 10 พ้อยท์!!!) ';
+                  }
+
+              }
+              // ขายโทรศัพท์ 1 เครื่อง 35 pts 
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '4' and Product.category_no = '03'
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 35, 'Week 5 - Line 4.2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 4.2 ได้รับ 35 พ้อยท์!!!) ';
+                      
+                  }
+              }
+              break;
+          
+          case '5':
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 5.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 5.2' and cancelled = 0) as countProLine2");
+
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+
+              // accessories, peripherals 20 pts
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '5' and Product.sub_category in ('Accessories','peripherals')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 5.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 5.1 ได้รับ 20 พ้อยท์!!!) ';
+                  }
+
+              }
+          
+              // notebook, macbook 55 pts
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
                                       where employee_id = ? and Product.product_line = '5' and Product.category_no in ('01','02')
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
       $sql->execute([input::post('sellerNo')]);
       $countSold = $sql->fetchAll()[0]['countSold'];
               
       if($countSold > 0) {
         $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
                     values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 50, 'Week 4 - Line 5.1', $sono]);
+        $sql->execute([input::post('sellerNo'), 55, 'Week 5 - Line 5.2', $sono]);
         //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 5.1 ได้รับ 50 พ้อยท์!!!) ';
-        }
-    }
-              // เคยขาย
-              if($count > 0 && $temp['countProLine2'] == 0) {
-      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '5' and Product.category_no = '02'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-      $sql->execute([input::post('sellerNo')]);
-      $countSold = $sql->fetchAll()[0]['countSold'];
-              
-      if($countSold > 0) {
-        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-        $sql->execute([input::post('sellerNo'), 60, 'Week 4 - Line 5.2', $sono]);
-        //print_r($sql->errorInfo());
-        echo ' (ผ่านโปรสาย 5.2 ได้รับ 60 พ้อยท์!!!) ';
-        }
-    }
+        echo ' (ผ่านโปรสาย 5.2 ได้รับ 55 พ้อยท์!!!) ';
+                      
+                  }
+              }
               break;
-
+          
           case '6':
-                  // เคยขายไหม
-                  $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 6 AND cancelled = 0 and so_no != ?");
-                  $sql->execute([input::post('sellerNo'), $sono]);
-                  $count = $sql->fetchAll()[0]['count'];
-                  
-                  $sql = $this->prepare("select * from 
-                                      (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 6.1' and cancelled = 0) as countProLine1,
-                                      (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 6.2' and cancelled = 0) as countProLine2");
 
-                  $sql->execute( [input::post('sellerNo')]);
-                  $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 6.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 6.2' and cancelled = 0) as countProLine2,
+              (select count(*) as countProLine3 from PointLog where employee_id = ? and remark = 'Week 5 - Line 6.3' and cancelled = 0) as countProLine3,
+              (select count(*) as countProLine4 from PointLog where employee_id = ? and remark = 'Week 5 - Line 6.4' and cancelled = 0) as countProLine4");
 
-                  // ไม่เคยขาย
-
-                  if($count == 0 && $temp['countProLine1'] == 0) {
-                      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                          inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                          inner join Product on Product.product_no = SOPrinting.product_no
-                                          inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                          where employee_id = ? and Product.product_line = '6' and Product.product_no in ('6-I2-03-605-024','6-I2-03-605-025','6-I2-03-605-026','6-I2-03-605-034')
-                                          and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                      $sql->execute([input::post('sellerNo')]);
-                      $countSold = $sql->fetchAll()[0]['countSold'];
-                  
-                      if($countSold > 0) {
-                          $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                                  values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                          $sql->execute([input::post('sellerNo'), 10, 'Week 4 - Line 6.1', $sono]);
-                          //print_r($sql->errorInfo());
-                          echo ' (ผ่านโปรสาย 6.1 ได้รับ 10 พ้อยท์!!!) ';
-                          }
-                  }
-
-                  // เคยขาย
-                  if($count > 0 && $temp['countProLine2'] == 0) {
-                      $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
-                                          inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                          inner join Product on Product.product_no = SOPrinting.product_no
-                                          inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                          where employee_id = ? and Product.product_line = '6' and Product.category_no = '02'
-                                          and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                      $sql->execute([input::post('sellerNo')]);
-                      $countSold = $sql->fetchAll()[0]['countSold'];
-                  
-                      if($countSold > 0) {
-                          $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                                  values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                          $sql->execute([input::post('sellerNo'), 30, 'Week 4 - Line 6.2', $sono]);
-                          //print_r($sql->errorInfo());
-                          echo ' (ผ่านโปรสาย 6.2 ได้รับ 30 พ้อยท์!!!) ';
-                          }
-                  }
-                  break;
-
-          case '7':
-                      // เคยขายไหม
-                      $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 7 AND cancelled = 0 and so_no != ?");
-                      $sql->execute([input::post('sellerNo'), $sono]);
-                      $count = $sql->fetchAll()[0]['count'];
-                      
-                      $sql = $this->prepare("select * from 
-                                          (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 7.1' and cancelled = 0) as countProLine1");
-  
-                      $sql->execute( [input::post('sellerNo')]);
-                      $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-                      // ไม่เคยขาย
-                      if($count == 0 && $temp['countProLine1'] == 0) {
-                          $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
-                                              inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                              inner join Product on Product.product_no = SOPrinting.product_no
-                                              inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                              where employee_id = ? and Product.product_line = '7' and Product.category_no != '04'
-                                              and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                          $sql->execute([input::post('sellerNo')]);
-                          $totalSold = $sql->fetchAll()[0]['totalSold'];
-                      
-                          if($totalSold >= 600) {
-                              $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                                      values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                              $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 7.1', $sono]);
-                              //print_r($sql->errorInfo());
-                              echo ' (ผ่านโปรสาย 7.1 ได้รับ 20 พ้อยท์!!!) ';
-                              }
-                      }
-                      break;
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo'),input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
           
-          case '8': 
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 8 AND cancelled = 0 and so_no != ?");
-              $sql->execute([input::post('sellerNo'), $sono]);
-              $count = $sql->fetchAll()[0]['count'];
-              
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 8.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 8.2' and cancelled = 0) as countProLine2");
+              // ขายสินค้าอะไรก็ได้ในสายครบ 500/800/1000 บาท 10/15/20 pts
 
-              $sql->execute( [input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+              $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '8' and (Product.category_no != '06' or Product.product_name like '%ส่วนลดค่าจัดส่ง%')
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $totalSold = $sql->fetchAll()[0]['totalSold'];
-              
-                  if($totalSold >= 1000) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 15, 'Week 4 - Line 8.1', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 8.1 ได้รับ 15 พ้อยท์!!!) ';
-                      }
-              }
+                                      where employee_id = ? and Product.product_line = '6' and Product.category_no in ('01','02','03','04')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+              $sql->execute([input::post('sellerNo')]);
+              $totalSold = $sql->fetchAll()[0]['totalSold'];
 
-              // เคยขาย
-              if($count > 0 && $temp['countProLine2'] == 0) {
-                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '8' and Product.category_no in ('01','03')
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $totalSold = $sql->fetchAll()[0]['totalSold'];
-              
-                  if($totalSold >= 1500) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 8.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 8.2 ได้รับ 20 พ้อยท์!!!) ';
-                      }
-              }
-              break;
-          
-          case '9':
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 9 AND cancelled = 0 and so_no != ?");
-              $sql->execute([input::post('sellerNo'), $sono]);
-              $count = $sql->fetchAll()[0]['count'];
-              
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 9.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 9.2' and cancelled = 0) as countProLine2");
+              if ($temp['countProLine1'] == 0 && $totalSold < 800  && $totalSold >= 500) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 6.1', $sono]);
+                  echo ' (ผ่านโปรสาย 6.1 ได้รับ 10 พ้อยท์!!!)';
+                      
+              } else if ($temp['countProLine1'] == 0 && $totalSold < 1000 && $totalSold >= 800) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 6.1', $sono]);
+                  echo ' (ผ่านโปรสาย 6.1 ได้รับ 10 พ้อยท์!!!)';
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 15, 'Week 5 - Line 6.2', $sono]);
+                  echo ' (ผ่านโปรสาย 6.2 ได้รับ 15 พ้อยท์!!!)';
+                      
+              } else if ($temp['countProLine1'] == 0 && $totalSold >= 1000 ) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 6.1', $sono]);
+                  echo ' (ผ่านโปรสาย 6.1 ได้รับ 10 พ้อยท์!!!)';
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 15, 'Week 5 - Line 6.2', $sono]);
+                  echo ' (ผ่านโปรสาย 6.2 ได้รับ 15 พ้อยท์!!!)';
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 6.3', $sono]);
+                  echo ' (ผ่านโปรสาย 6.3 ได้รับ 20 พ้อยท์!!!)';
+                      
+              } else if ($temp['countProLine1'] != 0 && $temp['countProLine2'] == 0 && $totalSold < 1000  && $totalSold >= 800) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 15, 'Week 5 - Line 6.2', $sono]);
+                  echo ' (ผ่านโปรสาย 6.2 ได้รับ 15 พ้อยท์!!!)';
+                      
+              } else if ($temp['countProLine1'] != 0 && $temp['countProLine2'] == 0 && $totalSold >= 1000 ) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 15, 'Week 5 - Line 6.2', $sono]);
+                  echo ' (ผ่านโปรสาย 6.2 ได้รับ 15 พ้อยท์!!!)';
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 6.3', $sono]);
+                  echo ' (ผ่านโปรสาย 6.3 ได้รับ 20 พ้อยท์!!!)';
+                      
+              } else if ($temp['countProLine1'] != 0 && $temp['countProLine2'] != 0 && $temp['countProLine3'] == 0 && $totalSold >= 1000 ) {
+                  
+                  $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                  $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 6.3', $sono]);
+                  echo ' (ผ่านโปรสาย 6.3 ได้รับ 20 พ้อยท์!!!)';
+                      
+              }    
+              // ขาย voucher ต้มตุ๋นใบแรก
+              if ($temp['countProLine4'] == 0) {
 
-              $sql->execute( [input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
-
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
-                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
-                                      inner join Product on Product.product_no = SOPrinting.product_no
-                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '9' and Product.category_no != '04'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $totalSold = $sql->fetchAll()[0]['totalSold'];
-              
-                  if($totalSold >= 500) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 20, 'Week 4 - Line 9.1', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 9.1 ได้รับ 20 พ้อยท์!!!) ';
-                      }
-              }
-
-              // เคยขาย
-              if($count > 0 && $temp['countProLine2'] == 0) {
                   $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '9' and Product.sub_category = 'Bag' and Product.sub_category = 'Clothes'
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $countSold = $sql->fetchAll()[0]['countSold'];
+                                      where employee_id = ? and Product.product_line = '6' and Product.product_no = '6-S1-04-609-006'
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
               
-                  if($countSold > 0) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 25, 'Week 4 - Line 9.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 9.2 ได้รับ 25 พ้อยท์!!!) ';
-                      }
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 15, 'Week 5 - Line 6.4', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 6.4 ได้รับ 15 พ้อยท์!!!) ';
+                      
+                  }
+              }
+              break;
+          
+          case '7': 
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 7.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 7.2' and cancelled = 0) as countProLine2");
+
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+
+              // ขายเซตหนังสือวิศวะ 1 เซต 20 pts
+
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '7' and Product.product_no in ('7-S3-05-706-092','7-S3-05-706-093')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 7.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 7.1 ได้รับ 20 พ้อยท์!!!) ';
+                  }
+
+              }
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '7' and Product.product_no in ('7-S1-01-701-006','7-S1-01-701-007')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 7.2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 7.2 ได้รับ 20 พ้อยท์!!!) ';
+                      
+                  }
+              }
+              break;
+          
+          case '8':
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 8.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 8.2' and cancelled = 0) as countProLine2");
+              
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+              // ขายสินค้า rom&nd / 3ce ครบ 1000 บาท 20 pts
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '8' and Product.supplier_no = '824' and Product.brand in ('Rom&nd','3CE')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $totalSold = $sql->fetchAll()[0]['totalSold'];
+              
+      if($totalSold >= 1000) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 8.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 8.1 ได้รับ 20 พ้อยท์!!!) ';
+                  }
+              }
+              // ขายแปรงสีฟัน Linko 1 แท่ง 20 pts
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '8' and Product.supplier_no = '812'
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 8.2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 8.2 ได้รับ 20 พ้อยท์!!!) ';
+                      
+                  }
+              }
+              break;
+              
+          case '9':
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 9.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 9.2' and cancelled = 0) as countProLine2");
+              
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
+              // ขายเสื้อหรือกระเป๋ารวม 2 ชิ้น 20 pts
+              if ( $temp[ 'countProLine1' ] == 0 ) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '9' and Product.sub_category in ('Bag','Clothes')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 1) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 9.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 9.1 ได้รับ 20 พ้อยท์!!!) ';
+                  }
+
+              }
+              // ขาย mamotion 1 ชิ้น
+              if ($temp['countProLine2'] == 0) {
+
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
+                                      inner join SOPrinting on SOPrinting.so_no = SO.so_no
+                                      inner join Product on Product.product_no = SOPrinting.product_no
+                                      inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
+                                      where employee_id = ? and Product.product_line = '9' and Product.supplier_no = '925'
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
+              
+      if($countSold > 0) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 20, 'Week 5 - Line 9.2', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 9.2 ได้รับ 20 พ้อยท์!!!) ';
+                      
+                  }
               }
               break;
 
           case '0':
-              // เคยขายไหม
-              $sql = $this->prepare("SELECT count(*) as count FROM SO WHERE employee_id = ? AND product_line = 0 AND cancelled = 0 and so_no != ?");
-              $sql->execute([input::post('sellerNo'), $sono]);
-              $count = $sql->fetchAll()[0]['count'];
+
+              $sql = $this->prepare("select * from
+              (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 5 - Line 10.1' and cancelled = 0) as countProLine1,
+              (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 5 - Line 10.2' and cancelled = 0) as countProLine2,
+              (select count(*) as countProLine3 from PointLog where employee_id = ? and remark = 'Week 5 - Line 10.3' and cancelled = 0) as countProLine3,
+              (select count(*) as countProLine4 from PointLog where employee_id = ? and remark = 'Week 5 - Line 10.4' and cancelled = 0) as countProLine4");
               
-              $sql = $this->prepare("select * from 
-                                  (select count(*) as countProLine1 from PointLog where employee_id = ? and remark = 'Week 4 - Line 10.1' and cancelled = 0) as countProLine1,
-                                  (select count(*) as countProLine2 from PointLog where employee_id = ? and remark = 'Week 4 - Line 10.2' and cancelled = 0) as countProLine2");
+              $sql->execute([input::post('sellerNo'),input::post('sellerNo'),input::post('sellerNo'),input::post('sellerNo')]);
+              $temp = $sql->fetchAll()[0];
 
-              $sql->execute( [input::post('sellerNo')]);
-              $temp = $sql->fetchAll(PDO::FETCH_ASSOC)[0];
+              // ขายสินค้าอะไรก็ได้ 2 ชิ้นจาก Supplier : peeti.studio/ chavee.vibes/ everglow/ sooth.ur.soul 40 pts
+              if ( $temp[ 'countProLine1' ] == 0 ) {
 
-              // ไม่เคยขาย
-
-              if($count == 0 && $temp['countProLine1'] == 0) {
-                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+                  $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '0' and Product.category_no in ('03','04')
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $totalSold = $sql->fetchAll()[0]['totalSold'];
+                                      where employee_id = ? and Product.product_line = '0' and Product.supplier_no in ('025','027','030','038')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
               
-                  if($totalSold >= 300) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 15, 'Week 4 - Line 10.1', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 10.1 ได้รับ 15 พ้อยท์!!!) ';
-                      }
-              }
+      if($countSold > 1) {
+        $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
+                    values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
+        $sql->execute([input::post('sellerNo'), 40, 'Week 5 - Line 10.1', $sono]);
+        //print_r($sql->errorInfo());
+        echo ' (ผ่านโปรสาย 10.1 ได้รับ 40 พ้อยท์!!!) ';
+                  }
 
-              // เคยขาย
-              if($count > 0 && $temp['countProLine2'] == 0) {
-                  $sql = $this->prepare("select ifnull(sum(total_sales), 0) as totalSold from SO 
+              }
+              // ขายสินค้าขายดีของสาย 10 ได้ 6/8/10 ชิ้น 10/10/10 pts 
+              $sql = $this->prepare("select ifnull(sum(quantity), 0) as countSold from SO 
                                       inner join SOPrinting on SOPrinting.so_no = SO.so_no
                                       inner join Product on Product.product_no = SOPrinting.product_no
                                       inner join ProductCategory on ProductCategory.product_line = Product.product_line and ProductCategory.category_no = Product.category_no
-                                      where employee_id = ? and Product.product_line = '0' and Product.category_no in ('01','07')
-                                      and SO.cancelled = 0 and ((so_date = '2022-06-20' AND so_time >= '12:00:00') OR so_date between '2022-06-21' AND '2022-06-25')");
-                  $sql->execute([input::post('sellerNo')]);
-                  $totalSold = $sql->fetchAll()[0]['totalSold'];
+                                      where employee_id = ? and Product.product_line = '0' and Product.supplier_no in ('019','020','034','035','036') and Product.category_no not in ('05','06')
+                                      and SO.cancelled = 0 and ((so_date = '2022-06-27' AND so_time >= '12:00:00') OR so_date between '2022-06-28' AND '2022-07-02')");
+      $sql->execute([input::post('sellerNo')]);
+      $countSold = $sql->fetchAll()[0]['countSold'];
               
-                  if($totalSold >= 350) {
-                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note,type, cancelled) 
-                                              values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,'Promotion', 0)");
-                      $sql->execute([input::post('sellerNo'), 25, 'Week 4 - Line 10.2', $sono]);
-                      //print_r($sql->errorInfo());
-                      echo ' (ผ่านโปรสาย 10.2 ได้รับ 25 พ้อยท์!!!) ';
-                      }
-              }
-              break;
+                  if ($temp['countProLine2'] == 0 && $countSold < 8  && $countSold >= 6) {
                   
-}
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.2', $sono]);
+                      echo ' (ผ่านโปรสาย 10.2 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  } else if ($temp['countProLine2'] == 0 && $countSold < 10 && $countSold >= 8) {
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.2', $sono]);
+                      echo ' (ผ่านโปรสาย 10.2 ได้รับ 10 พ้อยท์!!!)';
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.3', $sono]);
+                      echo ' (ผ่านโปรสาย 10.3 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  } else if ($temp['countProLine2'] == 0 && $countSold >= 10 ) {
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.2', $sono]);
+                      echo ' (ผ่านโปรสาย 10.2 ได้รับ 10 พ้อยท์!!!)';
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.3', $sono]);
+                      echo ' (ผ่านโปรสาย 10.3 ได้รับ 10 พ้อยท์!!!)';
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.4', $sono]);
+                      echo ' (ผ่านโปรสาย 10.4 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  } else if ($temp['countProLine2'] != 0 && $temp['countProLine3'] == 0 && $countSold < 10  && $countSold >= 8) {
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.3', $sono]);
+                      echo ' (ผ่านโปรสาย 10.3 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  } else if ($temp['countProLine2'] != 0 && $temp['countProLine3'] == 0 && $countSold >= 10 ) {
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.3', $sono]);
+                      echo ' (ผ่านโปรสาย 10.3 ได้รับ 10 พ้อยท์!!!)';
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.4', $sono]);
+                      echo ' (ผ่านโปรสาย 10.4 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  } else if ($temp['countProLine2'] != 0 && $temp['countProLine3'] != 0 && $temp['countProLine4'] == 0 && $countSold >= 10 ) {
+                      
+                      $sql = $this->prepare("insert into PointLog (date, time, employee_id, point, remark, note, type, cancelled) values (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, 'Promotion', 0)");
+                      $sql->execute([input::post('sellerNo'), 10, 'Week 5 - Line 10.4', $sono]);
+                      echo ' (ผ่านโปรสาย 10.4 ได้รับ 10 พ้อยท์!!!)';
+                          
+                  }    
+                  break;
 
-
-
+              
       }
-
-  }
+}
+}
 			
 // 	}
 // private function promotionWeek3($sono) {
@@ -7331,6 +7939,7 @@ FROM (SELECT DISTINCT Week.week, ProductCategory.product_line, ProductCategory.c
       
       
     ]);
+    print_r($sql->errorInfo());
     
     return input::post( 're_req_no' );
     

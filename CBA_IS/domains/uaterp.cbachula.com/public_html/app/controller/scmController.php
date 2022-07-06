@@ -277,6 +277,7 @@ class scmController extends controller {
         
             echo '<tr>';
                 echo '<th>sox_no</th>';
+                // echo '<th>iv_no</th>';
                 echo '<th>ลทบ/EMS</th>';
                 echo '<th>ชื่อ</th>';
                 echo '<th>ที่อยู่</th>';
@@ -287,6 +288,7 @@ class scmController extends controller {
             foreach($data as $value) {
                 echo '<tr>';
                     echo '<td>'.$value['sox_no'].'</td>';
+                    // echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['note'].'</td>';
                     echo '<td>'.$value['customer_name'].'</td>';
                     echo '<td>'.$value['address'].'</td>';
@@ -310,6 +312,7 @@ class scmController extends controller {
                 echo '<th>so_no</th>';
                 echo '<th>sox_no</th>';
                 echo '<th>box_size</th>';
+                //echo '<th>iv_no</th>';
                 echo '<th>Product No.</th>';
                 echo '<th>Product Name.</th>';
                 echo '<th>Quantity</th>';
@@ -320,6 +323,7 @@ class scmController extends controller {
                     echo '<td>'.$value['so_no'].'</td>';
                     echo '<td>'.$value['sox_no'].'</td>';
                     echo '<td>'.$value['box_size'].'</td>';
+                    //echo '<td>'.$value['invoice_no'].'</td>';
                     echo '<td>'.$value['product_no'].'</td>';
                     echo '<td>'.$value['product_name'].'</td>';
                     echo '<td>'.$value['quantity'].'</td>';
@@ -347,19 +351,20 @@ class scmController extends controller {
                 echo '<th>เวลาที่มารับของ</th>';
                 echo '<th>ผู้รับ CE/SP</th>';
                 echo '<th>เบอร์ติดต่อ</th>';
-                echo '<th>รายการสินค้า</th>';
+                echo '<th>รายการชื่อสินค้า</th>';
+                echo '<th>จำนวน</th>';
             echo '</tr>';
             
             foreach($data as $value) {
                 echo '<tr>';
                     echo '<td>'.$value['sox_no'].'</td>';
                     echo '<td>'.$value['invoice_no'].'</td>';
-                    $data = explode(',',substr($value['address'],1,-1));
-                    echo '<td>'.$data[0].'</td>';
-                    echo '<td>'.$data[1].'</td>';
-                    echo '<td>'.$data[2].'</td>';
-                    echo '<td>'.$data[3].'</td>';
-                    echo '<td>'.$value['product_detail'].'</td>';
+                    echo '<td>'.$value['date'].'</td>';
+                    echo '<td>'.$value['time'].'</td>';
+                    echo '<td>'.$value['receiver'].'</td>';
+                    echo '<td>'.$value['tel'].'</td>';
+                    echo '<td>'.$value['product_name'].'</td>';
+                    echo '<td>'.$value['quantity'].'</td>';
                 echo '</tr>';
             }
             

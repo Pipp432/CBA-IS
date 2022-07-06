@@ -94,6 +94,7 @@
                         
                     </table>
                     <button type="button" class="btn btn-default btn-block my-1" ng-click="formValidate()">บันทึก CI</button>
+                    <!-- <button type="button" class="btn btn-default btn-block my-1" ng-click="debug()">DEBUG (MKT and SP ห้ามกด)</button> -->
                 </div>
             </div>
         </div>
@@ -144,6 +145,7 @@
                 });
             }
             $scope.calculateTotalPrice();
+            console.log($scope.totalVat)
         }
         
         $scope.dropCiItem = function(product) {
@@ -156,6 +158,7 @@
             $scope.ciItems = tempRemoved;
             
             $scope.calculateTotalPrice();
+            
         }
         
         $scope.calculateTotalPrice = function() {
@@ -167,7 +170,7 @@
                 $scope.totalVat += (value.quantity * value.poprinting_purchase_vat);
                 $scope.totalPrice += (value.quantity * value.poprinting_purchase_price);
             });
-            console.log($scope.ciItems)
+            console.log($scope.totalVat)
         }
         
         $scope.formValidate = function() {
@@ -203,6 +206,23 @@
             }
             
         }
+        $scope.debug = function() {
+           
+            
+           $('#confirmModal').modal('hide');
+           
+           if(!clicked){
+               clicked = true;
+               $.post("confirm_install/debug", {
+                   post : true,
+                   supplierNo : $scope.selectedSupplier,
+                   ciItems : JSON.stringify(angular.toJson($scope.ciItems))
+               }, function(data) {
+                 console.log(data);
+               });   
+           }
+           
+       }
 
     });
 
