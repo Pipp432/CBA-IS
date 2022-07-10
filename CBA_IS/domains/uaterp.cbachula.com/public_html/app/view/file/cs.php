@@ -70,9 +70,10 @@
                     <td style="text-align: left;">{{item.product_name}}</td>
                     <td style="text-align: right;">{{item.sales_price}}</td>
                     <td style="text-align: left;">{{item.unit}}</td>
-                    <td style="text-align: right;">{{item.quantity}}</td>
-                    <td></td>
-                    <td></td>
+                    <td style="text-align: right;">{{item.quantity_in}}</td>
+                    <td style="text-align: right;">{{item.quantity_out}}</td>
+                    <td style="text-align: right;">{{item.quantity_left}}</td>
+
                 </tr>
             </table>
         </div> 

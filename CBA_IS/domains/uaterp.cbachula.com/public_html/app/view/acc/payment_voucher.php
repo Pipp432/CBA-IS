@@ -929,13 +929,15 @@
             }
         }
 
+
         $scope.diff = 0;
-        $scope.final_before_vat = 0;
         $scope.sup_diff = 0;
         $scope.vat_diff = 0;
         $scope.final_price =0;
         $scope.added_diff = false;
-        $scope.product_vat = 0;
+        $scope.diff_dr_sup = 0;
+        $scope.diff_dr_tax = 0;
+        $scope.diff_total = 0;
 
         $scope.getrrcinopvDetail = function(rrcinopv) {
             $("#pvItemRR").prop("disabled", true);
@@ -946,55 +948,15 @@
             $scope.pvItemPaidTotal = parseFloat(rrcinopv.confirm_total);
             $scope.ci_no = rrcinopv.ci_no;
             $scope.diff = rrcinopv.diff;
-            $scope.diff_sup += rrcinopv.diff_dr_sup;
-            $scope.sup_diff = (- $scope.vat_diff);
-            console.log($scope.vat_diff);
-            console.log($scope.sup_diff)
-     
-            $scope.current = Number(rrcinopv['confirm_total'])
-            console.log(rrcinopv) 
-            $scope.vat_type = rrcinopv.product_no.charAt(3)
-            $scope.current_price =  Number(rrcinopv['confirm_total'])
+            $scope.diff_dr_sup = rrcinopv.diff_dr_sup;
+            $scope.diff_dr_tax = rrcinopv.diff_dr_tax;
+            $scope.diff_total =  $scope.diff_dr_sup + $scope.diff_dr_tax;
+            if($scope.diff_dr_sup == 0){
+                 $scope.sup_diff = (-$scope.vat_diff);
+            }
+            
             $scope.final_price += Number(rrcinopv['confirm_total'])
-            $scope.product_vat = $scope.current_price *7/107
-            
-            // if($scope.vat_type!=='1'){
-              
-            //   if(!$scope.added_diff){ 
-            //         $scope.vat_diff =  Number(rrcinopv["diff_dr_tax"]) == 0 ? Number(rrcinopv['diff']) :  Number(rrcinopv["diff_dr_tax"])
-            //         $scope.final_tax += ($scope.vat_diff)
-            //         $scope.final_before_vat += - ($scope.vat_diff);
-
-            //         $scope.added_diff = true;
-                    
-            //     }
-            // }
-            // else{
-            //     if(!$scope.added_diff){ 
-            //         $scope.final_before_vat += $scope.sup_diff;
-            //         $scope.vat_diff +=  Number(rrcinopv["diff_dr_tax"]) == 0 ? Number(rrcinopv['diff']) :  Number(rrcinopv["diff_dr_tax"])
-            //         $scope.final_tax += ($scope.current_price * 7/107 +  $scope.vat_diff )
-            //         $scope.added_diff = true;
-                    
-            //     }
-            //     else{
-            //         $scope.final_tax += $scope.current_price*7/107;
-            //         ws$scope.final_before_vat += $scope.current*100/107
-            //     }
-             
-            //     console.log($scope.final_tax)
-
-            // }
            
-            
-          
-           
-            
-           
-            
-            
-             
-            
         }
         
         $scope.getWsDetail = function(ws) {
@@ -1147,23 +1109,31 @@
             $scope.calculateTotalPrice();
         }
         
+        $scope.vat_type = '';
+
         $scope.calculateTotalPrice = function() {
 
+            $scope.vat_type = JSON.parse($scope.selectedSupplier).vat_type;
             $scope.totalPaidBeforeVat = 0;
             $scope.totalVat = 0;
+
             angular.forEach($scope.pvItems, function(value, key) {
                 if($scope.selectedPaymentType != "PC"){
-                    if(JSON.parse($scope.selectedSupplier).vat_type =='1'){
+
+                    if($scope.vat_type =='1'){
+
                     $scope.totalPaidBeforeVat += Number(((value.total_paid) * 100/107).toFixed(2));
                     $scope.totalVat += Number(((value.total_paid) * 7/107).toFixed(2));
 
                     }else{
+
                         $scope.totalPaidBeforeVat += Number(((value.total_paid)).toFixed(2));
                         $scope.totalVat += 0
 
                     }
 
                 }else{
+
                     $scope.totalVat += Number(((value.total_paid) * 7/107).toFixed(2));
 
                 }
@@ -1172,7 +1142,6 @@
             });
             console.log($scope.totalVat);
             console.log($scope.totalPaidBeforeVat)
-            
         }
 
         $scope.postPVB = ()=> {
@@ -1196,7 +1165,7 @@
                     pv_address : $scope.pvAddress,
                     company_code : $scope.pvItems[0].rr_no.substr(0,1),
                     pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
-                    totalPaid : $scope.final_price+$scope.diff_sup,
+                    totalPaid : $scope.final_price+$scope.diff_dr_sup,
                     totalPaidThai : NumToThai($scope.final_price),
                     totalVat : $scope.totalVat + $scope.vat_diff,
                     dueDate : dueDateStr,

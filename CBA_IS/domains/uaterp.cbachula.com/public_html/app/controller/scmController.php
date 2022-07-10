@@ -498,5 +498,63 @@ class scmController extends controller {
         echo '</table>';
         
     }
+    
+    public function exchange() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("scm");
+            $this->view->setTitle("Exchange");
+            $this->view->css = $this->model->getCsExchange();
+            $this->view->render("scm/exchange", "navbar");
+        } else if (uri::get(2)==='post_cs_items') {
+            $this->positionEcho('scm', $this->model->addCsforExchange());
+        }
+    }
 
+    public function get_product() {
+        
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=Product.xls");
+        $data = $this->model->getproduct();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>Product No.</th>';
+                echo '<th>Product Name.</th>';
+                echo '<th>product_description</th>';
+                echo '<th>product_line</th>';
+                echo '<th>supplier_no</th>';
+                echo '<th>brand</th>';
+                echo '<th>category_no</th>';
+                echo '<th>sub_category</th>';
+                echo '<th>unit</th>';
+                echo '<th>weight</th>';
+                echo '<th>width</th>';
+                echo '<th>length</th>';
+                echo '<th>height</th>';
+
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['product_no'].'</td>';
+                    echo '<td>'.$value['product_name'].'</td>';
+                    echo '<td>'.$value['product_description'].'</td>';
+                    echo '<td>'.$value['product_line'].'</td>';
+                    echo '<td>'.$value['supplier_no'].'</td>';
+                    echo '<td>'.$value['brand'].'</td>';
+                    echo '<td>'.$value['category_no'].'</td>';
+                    echo '<td>'.$value['sub_category'].'</td>';
+                    echo '<td>'.$value['unit'].'</td>';
+                    echo '<td>'.$value['weight'].'</td>';
+                    echo '<td>'.$value['width'].'</td>';
+                    echo '<td>'.$value['length'].'</td>';
+                    echo '<td>'.$value['height'].'</td>';
+                     
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+        
+    }
 }

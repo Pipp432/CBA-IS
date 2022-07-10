@@ -2058,6 +2058,297 @@ class mktModel extends model {
 
   }
 
+  public function getProductCS() {
+    $employee_id = json_decode(session::get('employee_detail'), true)['employee_id'];
+    $statement = $this->prepare( "SELECT 
+                                         CSPrinting.cs_no,
+                                         Product.product_no,
+                              Product.product_name,
+                                          View_CSStock.so_left as stock,
+                              Supplier.supplier_name,
+                              Product.supplier_no,
+                              ProductCategory.category_name,
+                              Product.product_type,
+                              Product.product_line,
+                              Product.category_no,
+                              Product.sub_category,
+                              Product.unit,
+                              Product.sales_no_vat,
+                              Product.sales_vat,
+                              Product.sales_price,
+                              Product.point,
+                              Product.commission,
+                              Product.margin,
+                              Product.vat_type,
+                              Product.weight,
+                                          Product.width,
+                                          Product.height,
+                                          Product.length
+
+                    from CSPrinting
+                    left join CS on CS.cs_no = CSPrinting.cs_no
+                    left join Product on CSPrinting.product_no = Product.product_no
+                    left join ProductCategory on (ProductCategory.category_no = Product.category_no and ProductCategory.product_line = Product.product_line)
+                    LEFT JOIN Supplier on Supplier.supplier_no = Product.supplier_no
+                    left join View_CSStock on View_CSStock.file_no = CSPrinting.cs_no and View_CSStock.product_no = CSPrinting.product_no
+                    where  CS.employee_id = ? and CS.confirmed = '1'
+                    group by CSPrinting.cs_no,CSPrinting.product_no;
+                    " );
+    $statement->execute( [ $employee_id ] );
+    //print_r($employee_id);
+
+    if ($statement->rowCount() > 0) {
+      return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+    } else return json_encode([]); 
+  }
+  
+  
+  public function addSoForCs() {
+
+    $sono = $this->assignSo( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
+  
+    $fileName = $_FILES['slip_file']['name'];
+    $fileData = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
+    $fileType = $_FILES['slip_file']['type'];
+
+
+    $sql = $this->prepare( "INSERT into SOtransaction (so_no, cs_no, customer_tel, customer_address, slip_uploaded, slip_date, slip_time, slip_name, invoice_no )
+                                values (?, ?, ?, ?, 1, CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP, ?, null)" );
+    $success = $sql->execute( [
+      $sono,
+      input::post( 'cs_no' ),
+      input::post( 'customerTel' ),
+      input::post( 'customerAddress' ),
+      $fileName
+    ]);
+    
+    // if($success) echo 'success';  
+    // else echo implode(" ",$sql->errorInfo());
+
+    if($success) {
+      echo $sono;
+      echo ' สำเร็จ';
+    } else {
+      echo $sono;
+      echo ' ล้มเหลว';
+    }
+    // insert SO
+    $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type,payment_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, note, discountso, done)
+                                 values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?,?, ?,?, ?, ?, ?, 0, ?, 0, 1)" );
+    $success = $sql->execute( [
+      $sono,
+      json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
+      json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
+      json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ],
+      'Stock', 
+      null,
+      null,
+      input::post( 'vat_type' ),
+      ( double )input::post( 'totalNoVat' ),
+      ( double )input::post( 'totalVat' ),
+      ( double )input::post( 'totalPrice' ),
+      ( double )input::post( 'totalPoint' ),
+      ( double )input::post( 'totalCommission' ),
+      input::post( 'cs_no' )
+    ] );
+
+    
+    $soItemsArray = json_decode( input::post( 'soItems' ), true );
+    //$soItemsArray = json_decode( $soItemsArray, true );
+
+    foreach ( $soItemsArray as $value ) {
+      // insert SOPrinting
+      $sql = $this->prepare( "insert into SOPrinting (so_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales, point, total_point, commission, total_commission, cancelled, margin)
+                                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)" );
+      $sql->execute( [
+        $sono,
+        $value[ 'product_no' ],
+        ( double )$value[ 'sales_no_vat' ],
+        ( double )$value[ 'sales_vat' ],
+        ( double )$value[ 'sales_price' ],
+        ( double )$value[ 'quantity' ],
+        ( double )$value[ 'quantity' ] * $value[ 'sales_price' ],
+        ( double )$value[ 'point' ],
+        ( double )$value[ 'quantity' ] * $value[ 'point' ],
+        ( double )$value[ 'commission' ],
+        ( double )$value[ 'quantity' ] * $value[ 'commission' ],
+        ( double )$value[ 'quantity' ] * $value[ 'margin' ]
+      ] );
+
+      
+        $sql = $this->prepare("INSERT into StockOutcs (product_no, file_no, file_type, date, time, quantity_out, lot) 
+                                      select ?, ?, 'SO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, count(*) + 1 from StockOutcs where product_no = ? and file_no= ? ");
+        
+        $sql->execute([$value['product_no'], input::post( 'cs_no' ) , ( double )$value[ 'quantity' ], $value['product_no'], $sono]);
+
+    }
+      
+    
+      // echo $sono . $depositSox . ' สำเร็จ';
+  }
+
+  public function getCS() {
+    $sql = $this->prepare(" SELECT CS.cs_no,
+                  CS.cs_date,
+                  CSPrinting.product_no,
+                  CSPrinting.sales_no_vat,
+                  CSPrinting.sales_vat,
+                  CSPrinting.sales_price,
+                  Product.product_name,
+                  Product.vat_type,
+                  Product.point,
+                  Product.commission,
+                  View_CSStock.so_left as stock,
+                  CSLocation.location_name,
+                  sumcs.salesprice
+                
+              from CSPrinting
+              left join CS on CS.cs_no = CSPrinting.cs_no
+              left join Product on CSPrinting.product_no = Product.product_no
+              left join View_CSStock on View_CSStock.file_no = CSPrinting.cs_no AND View_CSStock.product_no = CSPrinting.product_no
+              left join CSLocation on CS.location_no = CSLocation.location_no
+              LEFT JOIN (SELECT CSPrinting.cs_no,CSPrinting.sales_price,View_CSStock.so_left,SUM((View_CSStock.so_left*CSPrinting.sales_price)) as salesprice
+              FROM CSPrinting
+              INNER JOIN View_CSStock ON CSPrinting.cs_no = View_CSStock.file_no AND View_CSStock.product_no = CSPrinting.product_no
+              GROUP BY CSPrinting.cs_no) as sumcs on sumcs.cs_no = CSPrinting.cs_no
+              where  CS.employee_id = ? and  CS.confirmed = '2';");
+    $sql->execute([ json_decode(session::get('employee_detail'), true)['employee_id'] ]);
+    if ($sql->rowCount() > 0) {
+        return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+    }
+    return null;
+  }
+  
+  public function addSoReturn() {
+        $totalPoint = 0;
+        $totalCommission = 0;
+        $cs_no = $_POST['cs_no'];
+        $sono = $this->assignSo( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
+
+        $fileName = $_FILES['slip_file']['name'];
+        $fileData = base64_encode(file_get_contents($_FILES['slip_file']['tmp_name']));
+        $fileType = $_FILES['slip_file']['type'];
+
+        $sql = $this->prepare("SELECT CS.cs_no,
+                                      CS.cs_date,
+                                      CSPrinting.product_no,
+                                      Product.product_name,
+                                      CSPrinting.sales_no_vat,
+                                      CSPrinting.sales_vat,
+                                      CSPrinting.sales_price,
+                                      View_CSStock.so_left as quantity,
+                                      (CSPrinting.sales_price * View_CSStock.so_left) as total_sales,
+                                      Product.point,
+                                      (Product.point * View_CSStock.so_left) as total_point,
+                                      Product.commission,
+                                      (Product.commission * View_CSStock.so_left) as total_commission,
+                                      (Product.margin  * View_CSStock.so_left) as margin,
+                                      Product.vat_type
+                              from CSPrinting
+                              left join CS on CS.cs_no = CSPrinting.cs_no
+                              left join Product on CSPrinting.product_no = Product.product_no
+                              left join View_CSStock on View_CSStock.file_no = CSPrinting.cs_no  AND  View_CSStock.product_no = CSPrinting.product_no
+                              where  CS.confirmed = '2' and CS.cs_no = ?;
+                              ");
+        $sql->execute([ input::post( 'cs_no' ) ]);
+        $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
+        //$vat_id = intval($temp[0]["id_no"]);
+
+        $sql = $this->prepare( "INSERT into SOtransaction (so_no, cs_no, customer_tel, customer_address, slip_uploaded, slip_date, slip_time, slip_name, slip_type, slip_data, invoice_no )
+                                values (?, ?, ?, ?, 1, CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP, ?, ?, ?, null)" );
+        $success = $sql->execute( [
+          $sono,
+          input::post( 'cs_no' ),
+          '-',
+          '-',
+          $fileName,
+          $fileType,
+          $fileData
+        ]);
+
+        if($success) {
+          echo $sono;
+          echo ' สำเร็จ';
+        } else {
+          echo $sono;
+          echo ' ล้มเหลว';
+        }
+      
+
+        // $check = $sql->errorInfo()[ 0 ];
+        // echo $sql->errorInfo();
+          
+      
+        $soItemsArray = json_decode( input::post( 'csItems' ), true );
+        // $soItemsArray = json_decode( $soItemsArray, true );
+
+         
+      
+        foreach ( $temp as $value ) {
+        
+          // insert SOPrinting
+          $sql = $this->prepare( "insert into SOPrinting (so_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales, point, total_point, commission, total_commission, cancelled, margin)
+                                        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)" );
+          $sql->execute([
+            $sono,
+            $value[ 'product_no' ],
+            ( double )$value[ 'sales_no_vat' ],
+            ( double )$value[ 'sales_vat' ],
+            ( double )$value[ 'sales_price' ],
+            ( double )$value[ 'quantity' ],
+            ( double )$value[ 'total_sales' ],
+            ( double )$value[ 'point' ],
+            ( double )$value[ 'total_point' ],
+            ( double )$value[ 'commission' ],
+            ( double )$value[ 'total_commission' ],
+            ( double )$value[ 'margin' ]
+          ]);
+
+          
+          $sql = $this->prepare("INSERT into StockOutcs (product_no, file_no, file_type, date, time, quantity_out, lot) 
+                                        select ?, ?, 'SO', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, count(*) + 1 from StockOutcs where product_no = ? and file_no= ? ");
+          
+          $sql->execute([$value['product_no'], input::post( 'cs_no' ) , ( double )$value[ 'quantity' ], $value['product_no'], input::post( 'cs_no' )]);
+          
+          $totalPoint += ( double )$value[ 'total_point' ];
+          $totalCommission += ( double )$value[ 'total_commission' ];
+        }
+
+        
+        $sql = $this->prepare( "insert into SO (so_no, so_date, so_time, employee_id, approve_employee_no, product_line, product_type,payment_type,payment , vat_type, total_sales_no_vat, total_sales_vat, total_sales_price, point, commission, cancelled, note, discountso, done)
+                                 values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ? ,? , ?, ?, ?, ?,?, ?,?, ?, ?, ?, 0, ?, 0, 1)" );
+        $success = $sql->execute( [
+          $sono,
+          json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
+          json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
+          json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ],
+          'Stock', 
+          null,
+          null,
+          input::post( 'vat_type' ),
+          ( double )input::post( 'totalNoVat' ),
+          ( double )input::post( 'totalVat' ),
+          ( double )input::post( 'totalPrice' ),
+          $totalPoint,
+          $totalCommission,
+          input::post( 'cs_no' )
+        ] );
+       
+        // $sql = $this->prepare("UPDATE CS SET 
+        //                            confirmed = 3
+        //                            where cs_no  = ? ");
+
+        // $success = $sql->execute([ input::post( 'cs_no' ) ]);
+
+        $sql = $this->prepare("UPDATE CS SET 
+                                   confirmed = 3
+                                   where cs_no  = ? ");
+
+        $success = $sql->execute([ input::post( 'cs_no' ) ]);
+      
+        
+
+  }
 
   // SO Module
   private function assignSo( $productLine ) {
@@ -2667,15 +2958,17 @@ class mktModel extends model {
 
     $csno = $this->assignCs( json_decode( session::get( 'employee_detail' ), true )[ 'product_line' ] );
 
-    $sql = $this->prepare( "insert into CS (cs_no, cs_date, employee_id, location_no, minimart, approved_employee, transaction_date, cancelled, note, confirmed)
-                                values (?, ?, ?, ?, 0, ?, CURRENT_TIMESTAMP, 0, null, 0)" );
+    $sql = $this->prepare( "insert into CS (cs_no, cs_date, employee_id, location_no, approved_employee, transaction_date, cancelled, note, confirmed)
+                                values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0, null, 0)" );
     $sql->execute( [
       $csno,
       input::post( 'cs_date' ),
       json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ],
       input::post( 'location_no' ),
-      json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ]
+      '-'
     ] );
+
+    //print_r($sql->errorInfo());
 
     $csItemsArray = json_decode( input::post( 'csItems' ), true );
     $csItemsArray = json_decode( $csItemsArray, true );
@@ -2694,9 +2987,9 @@ class mktModel extends model {
         ( double )$value[ 'quantity' ] * $value[ 'sales_price' ]
       ] );
 
-      $sql = $this->prepare( "insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, rr_no)
-                                    values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, ?)" );
-      $sql->execute( [ $value[ 'product_no' ], $csno, $value[ 'quantity' ], $csno ] );
+      // $sql = $this->prepare( "insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, rr_no)
+      //                               values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, ?)" );
+      // $sql->execute( [ $value[ 'product_no' ], $csno, $value[ 'quantity' ], $csno ] );
 
     }
 
@@ -2865,7 +3158,7 @@ class mktModel extends model {
 
   // Dashboard Module
   	public function getDashboradCs() {
-    $sql = $this->prepare( "select CS.cs_no, cs_date from CS where approved_employee = ? and cancelled = 0 order by cs_no desc" );
+    $sql = $this->prepare( "select CS.cs_no, cs_date from CS where employee_id = ? and cancelled = 0 and confirmed >= 1 order by cs_no desc" );
     $sql->execute( [ json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ] ] );
     if ( $sql->rowCount() > 0 ) {
       return json_encode( $sql->fetchAll( PDO::FETCH_ASSOC ), JSON_UNESCAPED_UNICODE );
@@ -2979,22 +3272,22 @@ ORDER BY `SO`.`so_date` , `SO`.`so_time`" );
 
   	public function getPointReport() {
     $sql = $this->prepare( "select
-                                	PointLog.date,
-                                    concat(sp.employee_id, ' ', sp.employee_nickname_thai) as sp,
-                                    sp.product_line,
-                                    concat(ce.employee_id, ' ', ce.employee_nickname_thai) as ce,
-                                    PointLog.point,
-                                    PointLog.remark,
-                                    PointLog.note,
-									PointLog.type,
-									SO.total_sales_no_vat,
-									SO.total_sales_vat,
-                                    SO.total_sales_price
-                                from PointLog 
-                                inner join Employee as sp on sp.employee_id = PointLog.employee_id
-                                inner join Employee as ce on ce.employee_id = sp.ce_id
-                                left join SO on SO.so_no = PointLog.note
-                                where PointLog.employee_id > 0 and PointLog.cancelled = 0" );
+    PointLog.date,
+      concat(sp.employee_id, ' ', sp.employee_nickname_thai) as sp,
+      sp.product_line,
+      concat(ce.employee_id, ' ', ce.employee_nickname_thai) as ce,
+      PointLog.point,
+      PointLog.remark,
+      PointLog.note,
+PointLog.type,
+SO.total_sales_no_vat,
+SO.total_sales_vat,
+      SO.total_sales_price
+  from PointLog 
+  inner join Employee as sp on sp.employee_id = PointLog.employee_id
+  inner join Employee as ce on ce.employee_id = sp.ce_id
+  left join SO on SO.so_no = PointLog.note
+  where PointLog.employee_id > 0 AND PointLog.cancelled = 0;" );
     $sql->execute();
     if ( $sql->rowCount() > 0 ) {
       return $sql->fetchAll();

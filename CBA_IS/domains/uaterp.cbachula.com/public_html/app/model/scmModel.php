@@ -600,7 +600,7 @@ class scmModel extends model {
                                     CSPrinting.product_no,
                                     Product.product_name,
                                     CSPrinting.quantity,
-                                    CS.approved_employee as employee_id,
+                                    CS.employee_id,
                                     ce.employee_nickname_thai
                                 from CS
                                 join CSPrinting on CSPrinting.cs_no = CS.cs_no
@@ -615,12 +615,14 @@ class scmModel extends model {
         }
         return json_encode([]);
     }
+
+
     
     // CS Module
     public function addCounterSalesOut() {
-        
-        $sql = $this->prepare("update CS set confirmed = 1 where cs_no = ?");
-        $sql->execute([input::post('cs_no')]);
+
+        $sql = $this->prepare("update CS set confirmed = 1, approved_employee = ? where cs_no = ?");
+        $sql->execute([ json_decode(session::get('employee_detail'), true)['employee_id'] ,input::post('cs_no') ]);
         
         $csItemsArray = json_decode(input::post('csItems'), true); 
         $csItemsArray = json_decode($csItemsArray, true);
@@ -629,9 +631,19 @@ class scmModel extends model {
             
             $sql = $this->prepare("update CSPrinting set quantity = ?, total_sales_price = ? * sales_price where product_no = ? and cs_no = ?");                                             
             $sql->execute([$value['quantity'], $value['quantity'], $value['product_no'], input::post('cs_no')]);
+
             
-            $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ?");                                             
-            $sql->execute([$value['quantity'], $value['product_no'], input::post('cs_no')]);
+            $sql = $this->prepare( "insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no)
+            values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, 'CS', ?)" );
+            $sql->execute( [$value[ 'product_no' ], input::post('cs_no') , $value[ 'quantity' ], input::post('cs_no') ] );
+
+            //เพิ่มไปแล้วด้านบน
+            // $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ?");                                             
+            // $sql->execute([$value['quantity'], $value['product_no'], input::post('cs_no')]);
+            $sql = $this->prepare("insert into StockIncs (product_no, file_no, file_type, date, time, quantity_in, lot, note) 
+                                    values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL)");
+            $sql->execute([$value['product_no'], input::post('cs_no'), $value['quantity']]);   
+
             
         }
         
@@ -640,22 +652,24 @@ class scmModel extends model {
     // CS Module
     public function getCsConfirmed() {
         $sql = $this->prepare("select
-                                	CS.cs_no,
-                                    CS.cs_date,
-                                    CSLocation.location_name,
-                                    CSPrinting.product_no,
-                                    Product.product_name,
-                                    CSPrinting.quantity,
-                                    CSPrinting.quantity_out,
-                                    CS.approved_employee as employee_id,
-                                    ce.employee_nickname_thai
-                                from CS
-                                join CSPrinting on CSPrinting.cs_no = CS.cs_no
-                                left join Product on Product.product_no = CSPrinting.product_no
-                                left join CSLocation on CSLocation.location_no = CS.location_no
-                                left join Employee ce on ce.employee_id = CS.approved_employee
-                                where CS.confirmed = 1 and CS.cancelled = 0
-                                order by CS.cs_date");
+        CS.cs_no,
+        CS.cs_date,
+        CSLocation.location_name,
+        CSPrinting.product_no,
+        Product.product_name,
+        CSPrinting.quantity,
+        CSPrinting.quantity_out,
+        CS.approved_employee as employee_id,
+        ce.employee_nickname_thai,
+        View_CSStock.quantity_left
+    from  CS 
+    inner join CSPrinting on CSPrinting.cs_no = CS.cs_no
+    LEFT join View_CSStock ON CSPrinting.cs_no = View_CSStock.file_no AND CSPrinting.product_no = View_CSStock.product_no
+    left join Product on Product.product_no = CSPrinting.product_no
+    left join CSLocation on CSLocation.location_no = CS.location_no
+    left join Employee ce on ce.employee_id = CS.approved_employee
+    where CS.confirmed = 1 and CS.cancelled = 0
+ORDER BY CS.cs_date");
         $sql->execute();
         if ($sql->rowCount()>0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -666,24 +680,25 @@ class scmModel extends model {
     // CS Module
     public function addCounterSalesIn() {
         
-        $sql = $this->prepare("update CS set CS.confirmed = -2 where CS.cs_no = ?");
-        $sql->execute([input::post('cs_no')]);
-        
         $csItemsArray = json_decode(input::post('csItems'), true); 
         $csItemsArray = json_decode($csItemsArray, true);
+
+        $cs_no = input::post('cs_no');
+        $sql = $this->prepare("update CS set CS.confirmed = 2 where CS.cs_no = ?");
+        $sql->execute([$cs_no]);
         
         foreach($csItemsArray as $value) {
-            
-            $sql = $this->prepare("update CSPrinting set quantity_out = ? where product_no = ? and cs_no = ?");                                             
-            $sql->execute([$value['quantity'] - $value['quantity_in'], $value['product_no'], input::post('cs_no')]);
-            
-            $sql = $this->prepare("insert into StockIn (product_no, file_no, file_type, date, time, quantity_in, lot, note) 
-                                    values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL)");
-            $sql->execute([$value['product_no'], input::post('cs_no'), $value['quantity_in']]);   
-            
+
+            $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ? and note = 'CS'");
+            $sql->execute([$value['quantity_left']-$value['quantity_in'], $value['product_no'], $cs_no]);
+
+            $sql = $this->prepare("insert into StockOutcs (product_no, file_no, file_type, date, time, quantity_out, lot) 
+                                    select ?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, count(*) + 1 from StockOutcs where product_no = ? and file_no=? ");
+            $sql->execute([$value['product_no'], $cs_no, $value['quantity_in'], $value['product_no'], $cs_no]);
         }
         
     }
+
     public function dashPickup() {
         $sql = $this->prepare("SELECT SOX.sox_no,Invoice.invoice_no,Pickup.date, Pickup.time, Pickup.reciever, Pickup.tel, group_concat(DISTINCT concat(Product.product_name ,' x ', SOPrinting.quantity)) AS product_detail,
         (CASE WHEN SOX.done=0 AND SOX.cancelled = 0 THEN 2 WHEN SOX.done = 1 AND SOX.cancelled = 0 THEN 1 WHEN SOX.cancelled=1 THEN 3 END ) AS status 
@@ -1232,7 +1247,7 @@ class scmModel extends model {
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
         INNER JOIN Product ON Product.product_no=SOPrinting.product_no 
         inner join Customer on Customer.customer_tel = SOX.customer_tel  
-        WHERE sox_status=1 AND SOX.done=0
+        WHERE sox_status=1 AND SOX.done=0 AND SOX.note <> 'pickup'
         GROUP BY SOX.sox_no;");
     $sql->execute();
     if ( $sql->rowCount() > 0 ) {
@@ -1405,5 +1420,85 @@ ORDER BY SOX.sox_no ASC;");
 
         echo "yes";
     }
+
+    public function getCsExchange() {
+        $sql = $this->prepare("select
+        CS.cs_no,
+        CS.cs_date,
+        CSLocation.location_name,
+        CSPrinting.product_no,
+        Product.product_name,
+        CSPrinting.quantity,
+        CSPrinting.quantity_out,
+        CS.approved_employee as employee_id,
+        ce.employee_nickname_thai,
+        View_CSStock.quantity_left
+    from  CS 
+    inner join CSPrinting on CSPrinting.cs_no = CS.cs_no
+    LEFT join View_CSStock ON CSPrinting.cs_no = View_CSStock.file_no AND CSPrinting.product_no = View_CSStock.product_no
+    left join Product on Product.product_no = CSPrinting.product_no
+    left join CSLocation on CSLocation.location_no = CS.location_no
+    left join Employee ce on ce.employee_id = CS.approved_employee
+    where CS.confirmed = 1 and CS.cancelled = 0
+ORDER BY CS.cs_date");
+        $sql->execute();
+        if ($sql->rowCount()>0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function addCsforExchange() {
+        
+
+        $csItemsArray = json_decode(input::post('csItems'), true); 
+        $csItemsArray = json_decode($csItemsArray, true);
+        
+        foreach($csItemsArray as $value) {
+            
+            $cs_no = input::post('cs_no');
+
+            $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ? and note = 'CS'");
+            $sql->execute([$value['quantity_left']-$value['quantity_in'], $value['product_no'], $cs_no]);
+
+            $sql = $this->prepare("insert into StockOutcs (product_no, file_no, file_type, date, time, quantity_out, lot) 
+                                    select ?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, count(*) + 1 from StockOutcs where product_no = ? and file_no=? ");
+            $sql->execute([$value['product_no'], $cs_no, $value['quantity_in'], $value['product_no'], $cs_no]);
+        }
+        
+    }
+    public function getproduct(){
+        $sql=$this->prepare("SELECT product_no , product_name, product_description, product_line, product_type, supplier_no, brand, category_no, unit, weight, width, length,height FROM `Product` WHERE product_type = 'stock' OR product_type = 'order'");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
+
+    public function getStockCS() {
+		$sql = $this->prepare("select `cbachula_master2022`.`StockIncs`.`file_no` AS `file_no`,
+                                `cbachula_master2022`.`StockIncs`.`product_no` AS `product_no`,
+                                `cbachula_master2022`.`StockIncs`.`quantity_in` AS `quantity_in`,
+                                ifnull(`outcs`.`sumoutcs`,0) AS `quantity_out`,ifnull(`outso`.`sumoutso`,0) AS `so_out`,
+                                `cbachula_master2022`.`StockIncs`.`quantity_in` - ifnull(`outcs`.`sumoutcs`,0) AS `quantity_left`,
+                                `cbachula_master2022`.`StockIncs`.`quantity_in` - ifnull(`outcs`.`sumoutcs`,0) - ifnull(`outso`.`sumoutso`,0) AS `so_left` 
+                                from ((`cbachula_master2022`.`StockIncs` left join (select `cbachula_master2022`.`StockOutcs`.`product_no` AS `product_no`,
+                                `cbachula_master2022`.`StockOutcs`.`file_no` AS `file_no`,sum(`cbachula_master2022`.`StockOutcs`.`quantity_out`) AS `sumoutcs` 
+                                from `cbachula_master2022`.`StockOutcs` 
+                                where `cbachula_master2022`.`StockOutcs`.`file_type` = 'CS' 
+                                group by `cbachula_master2022`.`StockOutcs`.`file_no`,
+                                `cbachula_master2022`.`StockOutcs`.`product_no`) `outcs` on(`cbachula_master2022`.`StockIncs`.`file_no` = `outcs`.`file_no` and `cbachula_master2022`.`StockIncs`.`product_no` = `outcs`.`product_no`)) 
+                                left join (select `cbachula_master2022`.`StockOutcs`.`product_no` AS `product_no`,`cbachula_master2022`.`StockOutcs`.`file_no` AS `file_no`,
+                                sum(`cbachula_master2022`.`StockOutcs`.`quantity_out`) AS `sumoutso` from `cbachula_master2022`.`StockOutcs` 
+                                where `cbachula_master2022`.`StockOutcs`.`file_type` = 'SO' group by `cbachula_master2022`.`StockOutcs`.`file_no`,`cbachula_master2022`.`StockOutcs`.`product_no`) `outso` on(`cbachula_master2022`.`StockIncs`.`file_no` = `outso`.`file_no` and `cbachula_master2022`.`StockIncs`.`product_no` = `outso`.`product_no`)) 
+                                where `cbachula_master2022`.`StockIncs`.`file_type` = 'CS' order by `cbachula_master2022`.`StockIncs`.`file_no`");
+		$sql->execute();
+		if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+	}
 	
 }
+

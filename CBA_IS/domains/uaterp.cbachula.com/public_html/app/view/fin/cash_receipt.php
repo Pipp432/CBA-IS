@@ -34,12 +34,13 @@
                             <th>ลูกค้า</th>
 							<th>Payment Date</th>
 							<th>Payment Time</th>
-                            <th>tax</th>
+                            <!-- <th>tax</th> -->
 							<th>Payment Amount</th>
                             <th>ราคารวม</th>
                             <th>payment method</th>
 							<th>ขอใบกำกับภาษี</th>
 							<th>Auto Match Status</th>
+                            <th>Pick up ?</th>
                             <!-- <th>Error Status</th> -->
                            
                         </tr>
@@ -52,7 +53,7 @@
                             <td>{{sox.customer_name}} {{sox.customer_surname}}</td>
 							<td style="text-align: center">{{sox.payment_date==null ? getDate(sox):sox.payment_date}}</td>
 							<td style="text-align: center">{{sox.payment_time==null ? getTime(sox):sox.payment_time}}</td>
-							<td style="text-align: center">{{sox.so_total_sales_vat | number:2}}</td>
+							<!-- <td style="text-align: center">{{sox.so_total_sales_vat | number:2}}</td> -->
                             <td style="text-align: center">{{sox.payment_amount | number:2}}</td>
                             
                             <td style="text-align: right;">
@@ -65,6 +66,8 @@
                             <td style="text-align: center">{{sox.payment_type===null ? "-":sox.payment_type }}</td>
 							<td style="text-align: center"><i ng-show="sox.fin_form==1" class="bi bi-check2-circle"></i></td>
 							<td style="text-align: center"><i ng-show="sox.id > 0" class="bi bi-check2-circle"></i></td>
+							<td ng-show = "isPickup" style="text-align: center; color: red">PICKUP</td>
+                            <td ng-show = "!isPickup" style="text-align: center">not pickup</td>
                             <!-- <td style="text-align: center; color: green" ng-show = " sox.product_type ==='Install'">ออกได้</td>
                             <td style="text-align: center; color: green" ng-show = "sox.balance > 0 && sox.product_type ==='Stock'">ออกได้</td>
                             <td style="text-align: center; color: red" ng-show = "sox.balance <= 0 && sox.balance!==null">ออกไม่ได้</td> -->
@@ -117,7 +120,7 @@
                             <th>จำนวน</th>
                             <th>ราคารวม</th>
                         </tr>
-                        <tr ng-repeat="soPrinting in crItems| unique:'product_no'">
+                        <tr ng-repeat="soPrinting in crItems " ><!-- | unique:'product_no' -->  <!-- makes multiple so with same product no not appear -->
                             <td style="text-align: center;">{{soPrinting.so_no}}</td>
                             <td style="text-align: center;">{{soPrinting.product_name}}</td>
                             <td style="text-align: center;">{{soPrinting.sales_price | number:2}}</td>
@@ -245,7 +248,15 @@
         // $scope.selectedBank = '';
         // $scope.TransferTime = '';
         $scope.soxs = <?php echo $this->soxs; ?>;
-    
+
+        angular.forEach($scope.soxs, function (value, key) {
+            if((value.product_type == "Stock" || value.product_type == "Order") && value.transportation_price == 0) { //for fast track pickup
+                value.isPickup = true;
+            } else value.isPickup = false;
+        });
+
+
+
         $scope.creditCardfee=0;
         $scope.finalPrice=0;
         $scope.priceBeforeVat=0;
@@ -430,6 +441,29 @@
                     $scope.crItems.push(transportation);
                 }
                 
+                else if(key == $scope.crItems.length - 1 && value.transportation_price == 0 && value.product_type != 'Install') {
+                    var transportation = {
+                        product_type : "Transport",
+                        quantity : 1,
+                        sales_no_vat : parseFloat(value.transportation_no_vat),
+                        sales_vat : parseFloat(value.transportation_vat),
+                        sales_price : parseFloat(value.transportation_price),
+                        total_sales : parseFloat(value.transportation_price),
+                        so_total_sales_no_vat : parseFloat(value.so_total_sales_no_vat),
+                        so_total_sales_vat : parseFloat(value.so_total_sales_vat),
+                        so_total_sales_price : parseFloat(value.so_total_sales_price),
+                        transportation_no_vat : parseFloat(value.transportation_no_vat),
+                        transportation_vat : parseFloat(value.transportation_vat),
+                        transportation_price : parseFloat(value.transportation_price),
+                        so_no : value.so_no,
+                        sox_no : value.sox_no,
+                        product_no : "X",
+                        product_name : "ค่าขนส่ง (Pick Up)"
+                    }
+                    tempSoNo = value.so_no;
+                    $scope.crItems.push(transportation);
+                }
+                
                 Object.assign(value, {priceInThai: NumToThai(parseFloat(value.so_total_sales_price2))});
                 console.log(NumToThai(parseFloat(value.so_total_sales_price2)))
                 
@@ -486,7 +520,7 @@
             // console.log((parseFloat(sox.total_sales)*2.45)/100)
             $scope.crItems.forEach((e)=>{
             
-            $scope.priceWithVat+=Number(e.sales_price)
+            $scope.priceWithVat+=Number(e.sales_price * e.quantity)
             console.log(e.sales_price)
          })
          

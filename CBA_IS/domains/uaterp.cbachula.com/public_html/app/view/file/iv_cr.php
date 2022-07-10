@@ -69,7 +69,7 @@
                         <td><b>รหัสพนักงาน</b> {{detail[0].employee_id}}</td>
                     </tr>
                     <tr>
-                        <td colspan ="2"><b>ที่อยู่</b> {{detail[0].customer_address}}</td>
+                        <td colspan ="2"><b>ที่อยู่</b> {{ detail[0].customer_address}}</td>
                         <!--<td><b>เลขที่ SO</b> {{detail[0].file_no}}</td>-->
                     </tr>
                     <tr>
@@ -93,7 +93,11 @@
                 <tr ng-repeat="item in detail">
                     <td style="text-align: center;">{{$index+1}}</td>
                     <td style="text-align: center;">{{item.product_no}}</td>
-                    <td style="text-align: left;">{{item.product_name==null? 'ค่าขนส่ง' : item.product_name}}</td>
+                    <td style="text-align: left;">
+                        <span ng-show="item.product_name==null && item.note != 'pickup'">{{'ค่าส่ง'}}</span>
+                        <span ng-show="item.product_name==null && item.note == 'pickup'">{{'ค่าส่ง (Pick Up)'}}</span>
+                        <span ng-show="item.product_name != null">{{item.product_name}}</span>
+                    </td>
                     <td style="text-align: right;">{{item.quantity}}</td>
                     <td style="text-align: left;">{{item.unit==null? 'รายการ' : item.unit}}</td>
                     <td style="text-align: right;">{{item.sales_price | number:2}}</td>
@@ -111,7 +115,7 @@
                     
                 </tr>
                 <tr>
-                    <th colspan="4" rowspan="3">
+                    <th id = "bigbox" colspan="4" rowspan="3"> 
                         <div class="row">
                             <div class="col-4">
                                 <br>ได้รับสินค้าตามรายการ<br>ถูกต้องและเรียบร้อยแล้ว
@@ -133,21 +137,24 @@
                             </div>
                         </div>
                     </th>
-                    <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
-                    <th colspan="1" style="text-align: right;">{{priceBefore}}</th>
+                    
                 </tr>
                     <tr>
-                        <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
-                        <th colspan="1" style="text-align: right;">{{creditCardFee}}</th>
+                        <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
+                        <th colspan="1" style="text-align: right;">{{priceBefore|number:2}}</th>
                     </tr>
-                <tr>
-                    <th colspan="2" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
-                    <th colspan="1" style="text-align: right;">{{vat}}</th>
-                </tr>
-                <tr>
-                    <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
-                    <th colspan="1" style="text-align: right;">{{detail[0]["payment_type"]=='CC' ? rounded : detail[0].invoice_total_sales_price | number:2}}</th>
-                </tr>
+                    <tr>
+                        <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
+                        <th colspan="1" style="text-align: right;">{{creditCardFee|number:2}}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
+                        <th colspan="1" style="text-align: right;">{{vat|number:2}}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
+                        <th colspan="1" style="text-align: right;">{{detail[0].payment_type==='MB'||detail[0].payment_type===null ? detail[0].invoice_total_sales_price :rounded |number:2}}</th>
+                    </tr>
             </table>
         </div> 
         <br>
@@ -265,22 +272,21 @@
             // console.log( $scope.detail[0].customer_name.substring(0,6))
             // console.log( $scope.customer_title)
             
-           
-                if($scope.detail[0]["payment_type"] =="CC"){
-                    
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+            // $scope.creditCardFee = 0;
+            //     if($scope.detail[0]["payment_type"] =="CC"){
+            //         $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107 *(2.45/100);
+            //         $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                    
-                }
-                else if($scope.detail[0]["payment_type"] =='FB'){
-                    $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+            //     }
+            //     else if($scope.detail[0]["payment_type"] =='FB'){
+            //         $scope.creditCardFee = Number($scope.detail[0].so_total_sales_price) * 100/107*(2.75/100);
+            //         $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                   
-                }else{
-                    $scope.creditCardFee =0;
-                    $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
+            //     }else{
+            //         $scope.creditCardFee = 0;
+            //         $scope.totalPrice =$scope.detail[0].invoice_total_purchase_vat+$scope.creditCardFee;
                    
-                }
+            //     }
                 // console.log($scope.creditCardFee)
             
           
@@ -304,10 +310,64 @@
 
             // ราคาสุดท้ายหลังรวมทุกอย่าง
             $scope.finalPrice = Number($scope.detail[0].invoice_total_sales_price);
+            
 
-                if($scope.detail[0].payment_type==='CC' || $scope.detail[0].payment_type==='FB'){
+                if($scope.detail[0].product_type ==='Install'){
+
+                
+                    if($scope.detail[0].payment_type ==='CC'){
+
+
+                        // ราคาปัดเศษ
+                        $scope.rounded = (Math.ceil($scope.finalPrice)).toFixed(0);
+
+                        // กรณี vat type = 3
+                        if($scope.detail[0].vat_type==='3') {
+                            // ตั้ง vat =  0
+                            $scope.vat = 0;
+                            // มูลค่าสินค้า
+                            $scope.priceBefore = $scope.rounded.toFixed(2) ;
+                        }
+                        else {
+                            // vat คิดจากราคาสุดท้าย
+                            $scope.vat = ($scope.rounded * 7/107).toFixed(2);
+                            // มูลค่าสินค้า
+                            $scope.priceBefore = ($scope.salesWithVAT* 100/107).toFixed(2)
+                        }
+                        
+                        $scope.creditCardFee = $scope.rounded - $scope.vat - $scope.priceBefore
+                       
+                        
+                    }else{
+                        $scope.creditCardFee = 0.00;
+                        if($scope.detail[0].vat_type==='3') {
+                            $scope.vat = 0;
+                            $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                        }
+                        else {
+                            $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
+                            $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                        }
+                    }
+               
+        }
+        else{
+                if($scope.detail[0].payment_type ==='CC'){
+                    
+                    $scope.sox_total_price = Number($scope.detail[0].so_sales_price) + Number($scope.detail[0].transportation_price);
+                    console.log($scope.sox_total_price);
+                    
+                    
+                    $scope.total_CC_fee =  Math.ceil($scope.sox_total_price * 1.0245) - $scope.sox_total_price;
+                    
+                    
+                   $scope.so_total_price = $scope.detail[0].invoice_total_sales_price;
+                   $scope.so_ratio = parseFloat($scope.so_total_price)/parseFloat($scope.sox_total_price)
+                  
+                   $scope.creditCardFee = ($scope.so_ratio * $scope.total_CC_fee) * 100/107;
+
                     // ราคาปัดเศษ
-                    $scope.rounded = (Math.ceil($scope.finalPrice)).toFixed(0);
+                    $scope.rounded = $scope.finalPrice;
 
                     // กรณี vat type = 3
                     if($scope.detail[0].vat_type==='3') {
@@ -318,35 +378,30 @@
                     }
                     else {
                         // vat คิดจากราคาสุดท้าย
-                        $scope.vat = ($scope.rounded * 7/107).toFixed(2);
+                       
                         // มูลค่าสินค้า
-                        $scope.priceBefore = ($scope.salesWithVAT* 100/107).toFixed(2)
+                        $scope.priceBefore = Number(($scope.so_total_price* 100/107));
+                        $scope.vat = Number((($scope.priceBefore + ($scope.creditCardFee)) *7/100))
                     }
-                    $scope.creditCardFee = (Number($scope.rounded) - (Number($scope.priceBefore) + Number($scope.vat))).toFixed(2)
 
+                    // $scope.creditCardFee = $scope.rounded - $scope.vat - $scope.priceBefore
                     
-                }else{
-                    $scope.creditCardFee = 0.00;
-                    if($scope.detail[0].vat_type==='3') {
-                        $scope.vat = 0;
-                        $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
-                    }
-                    else {
-                        $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
-                        $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
-                    }
-                }
-                console.log($scope.vat)
-                console.log($scope.priceBefore)
-                console.log($scope.creditCardFee)
-                console.log($scope.finalPrice)
-                console.log($scope.rounded)
-                
-   
-               
+                    $scope.rounded = $scope.priceBefore+$scope.vat+ $scope.creditCardFee
            
-        
-        }
+                    }else{
+                        $scope.creditCardFee = 0.00;
+                        if($scope.detail[0].vat_type==='3') {
+                            $scope.vat = 0;
+                            $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                        }
+                        else {
+                            $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
+                            $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                        }
+                    }
+
+            }
+    }
       
         
     });

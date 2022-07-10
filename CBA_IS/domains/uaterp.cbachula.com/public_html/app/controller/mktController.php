@@ -87,6 +87,41 @@ class mktController extends controller {
             $this->positionEcho('mkt', $this->model->addSo());
         }
     }
+
+    public function so_cs() {
+        if(empty(uri::get(2))) {
+            $this->view->setTitle("SO CS for invoice");
+            // $this->view->suppliers = $this->model->getSuppliers();
+            $this->view->products = $this->model->getProductCS();
+            $this->view->render("mkt/so_cs", "mkt/so_cs_hub"); 
+            // $this->view->render("mkt/so_cs", "navbar");
+        } else if (uri::get(2)==='get_customer_name') {
+            $this->positionEcho('mkt', $this->model->getCustomerName());
+        } else if (uri::get(2)==='post_so_cs') {
+            $this->positionEcho('mkt', $this->model->addSoForCs());
+        }
+    }
+
+    public function so_cs_hub() {        
+        if(empty(uri::get(2))) {
+            $this->requirePostition("mkt");
+            $this->view->setTitle("SO for CS");
+            $this->view->render("mkt/so_cs_hub"); 
+        } 
+    }
+
+
+    public function so_out() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("mkt");
+            $this->view->setTitle("SO CS return");
+            $this->view->csItems = $this->model->getCS();
+            $this->view->render("mkt/so_out", "mkt/so_cs_hub"); 
+        } else if (uri::get(2)==='post_csItems') {
+            $this->positionEcho('mkt', $this->model->addSoReturn());
+        } 
+    }
+
     public function os_sales_order() {
         if(empty(uri::get(2))) {
             $this->view->setTitle("Sales Order (SO)");
@@ -502,7 +537,7 @@ class mktController extends controller {
             $this->view->setTitle("Payment Voucher A (PV-A)"); 
             $this->view->render("mkt/petty_cash_request", "navbar");
         } else if (uri::get(2)==='post_pva') {
-            $this->positionEcho('mkt', $this->model->addRequestPettyMoney());
+            echo $this->model->addRequestPettyMoney();
         }
     }
     

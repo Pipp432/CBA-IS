@@ -110,8 +110,9 @@ class fileModel extends model {
                                     SO.vat_type,
                                     SO.total_sales_price as so_total_sales_price,
                                     SOX.transportation_price,
+                                    SOX.so_sales_price,
                                     SOX.note,
-                                    SOX.total_sales_price as SOX_total_sales_price
+                                    SOX.total_sales_price as sox_total_sales_price
                                     
                                 from InvoicePrinting
                                 inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
@@ -331,18 +332,22 @@ class fileModel extends model {
 		$sql = $this->prepare("select
                                 	CS.cs_no,
                                     CS.cs_date,
-                                    concat(CS.approved_employee, ' ', ce.employee_nickname_thai) as employee_name,
+                                    concat(CS.employee_id, ' ', ce.employee_nickname_thai) as employee_name,
                                     CSLocation.location_name,
                                     CSPrinting.product_no,
                                     Product.product_name,
                                     Product.unit,
                                     CSPrinting.sales_price,
-                                    CSPrinting.quantity
+                                    CSPrinting.quantity,
+                                    View_CSStock.quantity_in,
+                                    View_CSStock.quantity_out,
+                                    View_CSStock.quantity_left
                                 from CSPrinting
                                 inner join CS on CS.cs_no = CSPrinting.cs_no
                                 left join Product on Product.product_no = CSPrinting.product_no
                                 left join CSLocation on CSLocation.location_no = CS.location_no
-                                left join Employee ce on ce.employee_id = CS.approved_employee
+                                left join Employee ce on ce.employee_id = CS.employee_id
+    							left JOIN View_CSStock ON CSPrinting.cs_no = View_CSStock.file_no AND CSPrinting.product_no = View_CSStock.product_no
     							where CS.cs_no = ?");
         $sql->execute([$cs_no]);
         if ($sql->rowCount() > 0) {
@@ -541,6 +546,45 @@ class fileModel extends model {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return null;
+	}
+
+    public function getIvcs($iv_no) {
+		$sql = $this->prepare("SELECT
+                                	Invoice.invoice_no,
+                                    Invoice.invoice_date,
+                                    Invoice.file_no,
+                                    Invoice.customer_name,
+                                    Invoice.customer_title,
+                                    Invoice.employee_id,
+                                    Invoice.customer_address,
+                                    Invoice.id_no,
+                                    InvoicePrinting.product_no,
+                                    Product.product_name,
+                                    sum(InvoicePrinting.quantity) as quantity,
+                                    Product.unit,
+                                    InvoicePrinting.sales_price,
+                                    InvoicePrinting.total_sales_price,
+                                    Invoice.discount,
+                                    Invoice.total_sales_no_vat as invoice_total_purchase_no_vat,
+                                    Invoice.total_sales_vat as invoice_total_sales_vat,
+                                    Invoice.total_sales_price as invoice_total_sales_price,
+                                    Invoice.sales_price_thai,
+                                    Invoice.payment_type,
+                                    SO.vat_type,
+                                    SO.total_sales_price as so_total_sales_price
+                                    
+                                from InvoicePrinting
+                                inner join Invoice on Invoice.invoice_no = InvoicePrinting.invoice_no
+                                left join Product on Product.product_no = InvoicePrinting.product_no
+                                inner join SOtransaction on Invoice.invoice_no = SOtransaction.invoice_no
+                                inner join SO on SO.so_no = SOtransaction.so_no
+                                
+    							where Invoice.invoice_no = ? 
+                                group by InvoicePrinting.product_no");
+        $sql->execute([$iv_no]);
+      
+        return  json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+       
 	}
 
 }

@@ -2033,8 +2033,326 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
       }
       
 
+      public function getCsslip($so_no) {
+        $sql = $this->prepare("SELECT
+
+                                slip_data as receipt_data, 
+                                slip_name as receipt_name,
+                                slip_type as receipt_type
+                                
+                                from SOtransaction
+                                where so_no = ?");
+        $sql->execute([$so_no]);
+
+        if ($sql->rowCount()>0) {
+            $data = $sql->fetchAll()[0];
+    		header('Content-type: '.$data['receipt_type']);
+            echo base64_decode($data['receipt_data']);
+        } else {
+            echo 'ไม่มีสลิปโอนเงินของ IV นี้'; 
+        }
+        
+    }
+
+
+    public function getCSforIV() {
+        $sql = $this->prepare("SELECT
+        SO.so_no,
+        SOtransaction.cs_no,
+        SO.so_date,
+        SO.employee_id,
+        Employee.employee_nickname_thai,
+        Customer.customer_name,
+        Customer.customerTitle,
+        Customer.customer_surname,
+        SOtransaction.customer_address,
+        Customer.national_id,
+        SO.product_type,
+        SOPrinting.product_no,
+        Product.product_name,
+        SOPrinting.sales_no_vat,
+        SOPrinting.sales_vat,
+        SOPrinting.sales_price,
+        SOPrinting.quantity,
+        SOPrinting.total_sales,
+        SO.total_sales_no_vat AS so_total_sales_no_vat,
+        SO.total_sales_vat AS so_total_sales_vat,
+        SO.total_sales_price AS so_total_sales_price,
+        SO.discountso,
+        SO.point AS so_point,
+        SO.payment AS payment,
+        SO.vat_type,
+        SO.commission AS so_commission,
+        SOtransaction.slip_uploaded,
+        SOtransaction.slip_date,
+        SOtransaction.slip_time,
+        CS.location_no,
+        CSLocation.location_name,
+        MAX(View_InvoiceStock.balance) AS balance,
+        Product.vat_type
+    FROM
+        SO
+    INNER JOIN SOPrinting ON SO.so_no = SOPrinting.so_no
+    INNER JOIN SOtransaction ON SO.so_no = SOtransaction.so_no
+    INNER JOIN Product ON SOPrinting.product_no = Product.product_no
+    LEFT JOIN View_InvoiceStock ON Product.product_no = View_InvoiceStock.product_no
+    LEFT JOIN Employee ON SO.employee_id = Employee.employee_id
+    LEFT JOIN Customer ON SOtransaction.customer_tel = Customer.customer_tel AND SOtransaction.customer_address = Customer.address
+    INNER JOIN CS ON SOtransaction.cs_no = CS.cs_no
+    INNER JOIN CSLocation ON CS.location_no = CSLocation.location_no
+    WHERE
+        SOtransaction.slip_name IS NOT NULL AND SOtransaction.invoice_no IS NULL
+    GROUP BY
+        SOPrinting.so_no,
+        SOPrinting.product_no
+    ORDER BY
+        SOtransaction.slip_date;");  
+        $sql->execute();
+        if ($sql->rowCount() > 0) {
+            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        }
+        return json_encode([]);
+    }
+
+    public function addIV() {
+        
+        $crItemsArray = json_decode(input::post('crItems'), true); 
+        $crItemsArray = json_decode($crItemsArray, true); 
+        
+        $csList = array();
+        #$csProductList = array();
+        #$csEmpList = array();
+        $iv_no = "";
+        $cr_no = "";
+        $approved_employee=json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ];
+        
+ 
+
+        foreach($crItemsArray as $value) {
+            
+            if (array_key_exists($value['so_no'], $csList)) {
+                
+                $iv_no = $csList[$value['so_no']];
+                
+            } else {
+                  
+                $iv_no = $this->assignIv($value['so_no']); 
+                $csList += [$value['so_no']=>$iv_no];
+                $cr_no = $iv_no[0].'CR'.substr($iv_no, 3);
+
+                echo $iv_no.' ('.$value['so_no'].') ';
+                
+                $sql = $this->prepare("update SOtransaction set invoice_no = ? where so_no = ? and cs_no = ?");
+                $sql->execute([$iv_no,$value['so_no'],$value['cs_no']]);
+
+                $sql = $this->prepare("select SUM(quantity*sales_vat) as cs_total_sales_vat 
+                    from SOPrinting where so_no = ?;");
+                $sql->execute([$value['so_no']]);
+                $cs_total_sales_vat = $sql->fetchAll()[0]['cs_total_sales_vat'];                
+                
+                if($cs_total_sales_vat != 0) {
+                    $total_sales_no_vat = ((double) input::post('cs_total_sales_price')) / 1.07;
+                    $total_sales_vat = ((double) input::post('cs_total_sales_price')) / 107 * 7;
+                    $total_sales_price = (double) input::post('cs_total_sales_price');
+                } else {
+                    $total_sales_no_vat = (double) input::post('cs_total_sales_price');
+                    $total_sales_vat = 0;
+                    $total_sales_price = (double) input::post('cs_total_sales_price');
+                }
+                
+                // insert IV                      
+                     
+                $sql = $this->prepare("insert into Invoice (invoice_no, 
+                                                            invoice_date, 
+                                                            invoice_time, 
+                                                            employee_id, 
+                                                            customer_name, 
+                                                            customer_address, 
+                                                            id_no, 
+                                                            file_no,
+                                                            file_type, 
+                                                            total_sales_no_vat, 
+                                                            total_sales_vat, 
+                                                            total_sales_price, 
+                                                            discount, 
+                                                            sales_price_thai, 
+                                                            point, 
+                                                            commission, 
+                                                            approved_employee, 
+                                                            cr_no, 
+                                                            cancelled, 
+                                                            note)
+                                        values (?, 
+                                                CURRENT_TIMESTAMP, 
+                                                CURRENT_TIMESTAMP, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                'CS', 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                0, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                0, 
+                                                ?)");  
+                $sql->execute([
+                    $iv_no,
+                    $approved_employee,
+                    input::post('cusName'),
+                    input::post('cusAddress'),
+                    input::post('cusId'),
+                    $value['cs_no'],
+                    $total_sales_no_vat,
+                    $total_sales_vat,
+                    $total_sales_price,
+                    input::post('priceInThai'), 
+                    (double) $value['so_point'],                    
+                    (double) $value['so_commission'],
+                    json_decode(session::get('employee_detail'), true)['employee_id'],
+                    $cr_no,
+                    input::post('noted')
+                ]);
+                
+                // ============================================================================================================================================================
+                //CBA 2022
+               
+                // NEW CBA2022 ACC
+                // insert AccountDetail sequence 1
+                //กระบวนการขายสินค้า Stock และ Order 
+                //เมื่อลูกค้าชำระเงิน ( ACC กดยืนยัน Tax invoice) sequence 1-3 IV
+                // Dr เงินฝากออมทรัพย์
+                
+                $sql = $this->prepare("insert into CR (cr_no, cr_date, cr_time, employee_id, customer_name, customer_address, id_no, total_price_no_vat, total_price_vat, total_price, commission, 
+                                        approved_employee, payment_type, note, transfer_date, transfer_time, remark_check_date, cancelled, tr_no, total_text, time, slip, noted)
+                                        values(?,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL, NULL, NULL, NULL, NULL, 0, NULL, ?, NULL, NULL, NULL)");
+                $sql->execute([
+                    $cr_no,
+                    $value['employee_id'],
+                    input::post('cusName'),
+                    input::post('cusAddress'),
+                    input::post('cusId'),
+                    $total_sales_no_vat,
+                    $total_sales_vat,
+                    $total_sales_price,
+                    json_decode(session::get('employee_detail'), true)['employee_id'],
+                    input::post('priceInThai')
+                ]);
+
+
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
+                
+                // insert AccountDetail sequence 2
+                // Cr ขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '2', '41-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
+                
+                // insert AccountDetail sequence 3
+                // Cr ภาษีขาย - โครงการ X
+                $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
+                
+                // Dr เงินฝากออมทรัพย์
+                
+                         
+
+                // //FIN โอนเงินจาก Pool กลางเข้าออมทรัพย์ (กด TR)
+                // //Dr. เงินฝากออมทรัพย์ – โครงการ X 
+                // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                          values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                // $sql->execute([$iv_no, '1', '12-1'.$iv_no[0].'00', (double) $total_sales_price, 0, 'CR']);
+                // //Cr.  เงินฝากออมทรัพย์
+                // $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                //                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                // $sql->execute([$iv_no, '1', '12-0000',0, (double) $total_sales_price, 'CR']);
+                // // ============================================================================================================================================================
+                // // END CBA2020 ACC
+                
+            }
+            
+            //copy old file
+            //CSProduct IVPrinting
+            // insert InvoicePrinting for Install / Order / Transport
+
+            $accumStock = 0;
+            //rr_no for Stock
+            if ($value['product_type'] == 'Stock') { $accumStock  = (double) $value['quantity']; }
+            
+            while( $accumStock > 0) {
+
+                
+                
+                $cutStock = 0;
+                $sql = $this->prepare("select * from View_InvoiceStock where product_no = ? and balance > 0 order by file_no");
+                $sql->execute([$value['product_no']]);
+                $rrTable = $sql->fetchAll()[0];
+              
+                $rrStock = (int) $rrTable['balance'];
+              
+                $rr_no = $rrTable['file_no'];
+                
+                if($rrStock<=0) return "<h1 style='color:red'>ออกไม่ได้ หยุดการออก IV ติดต่อ IS</h1>";
+
+               
+                    if( $accumStock > $rrStock )
+                    {
+                        $cutStock = $rrStock;
+                    }
+                    else $cutStock = $accumStock;
+    
+                 
+    
+                    $sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) 
+                                            values (?, ?, 'IC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL, ?)");
+                    $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]); 
+                    
+                    $sql = $this->prepare("insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no) 
+                                            values (?, ?, 'IRD1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, 'CS', ?)");
+                    $sql->execute([$value['product_no'], $iv_no, $cutStock, $rr_no]);  
+                    
+                    
+                // insert InvoicePrinting for Stock
+                    if  ($value['product_type'] == 'Stock') {
+                    // echo " ".$value['product_no'];
+                    $sql = $this->prepare("insert into InvoicePrinting (invoice_no, product_no, sales_no_vat, sales_vat, sales_price, quantity, total_sales_price, cancelled, rr_no)
+                                        values (?, ?, ?, ?, ?, ?, ?, 0, ?)");  
+                    $sql->execute([
+                        $iv_no,
+                        $value['product_no'],
+                        (double) $value['sales_no_vat'],
+                        (double) $value['sales_vat'],
+                        (double) $value['sales_price'],
+                        $cutStock,
+                        (double) $value['total_sales'],
+                        $rr_no 
+                    ]);
+                 
+                   
+                    }
+                
+                    $accumStock = $accumStock - $cutStock;
+            
+            }
+
+            
+        }
+       
+        return $cr_no;
 
     }
+
+
+}
 
 
 
