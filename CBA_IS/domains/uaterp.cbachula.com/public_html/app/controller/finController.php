@@ -22,7 +22,10 @@ class finController extends controller {
             $this->view->render("fin/cash_receipt","navbar");
         } else if (uri::get(2)==='post_ivcr') {
             $this->positionEcho('fin', $this->view->cr_no = $this->model->addCr());
-        } else if (uri::get(2)==='sox_slip') {
+        } else if (uri::get(2)==='debug') {
+            $this->positionEcho('fin', $this->view->cr_no = $this->model->debug());
+        }
+         else if (uri::get(2)==='sox_slip') {
             $this->requirePostition("fin");
             if (!empty(Uri::get(3))) {
                 $this->positionEcho('fin', $this->model->getSoxReceipt(Uri::get(3)));
@@ -132,6 +135,17 @@ foreach ($list as $value) {
             $this->view->render("fin/dashboard", "navbar");
         }
     }
+
+
+    public function dashboard_cs() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("Dashboard CS");
+            $this->view->dashboards = $this->model->getDashboardForCs();
+            $this->view->render("fin/dashboard_cs", "navbar");
+        }
+    }
+
     public function tr() {
         if(empty(uri::get(2))) {
             $this->requirePostition("fin");
@@ -424,7 +438,10 @@ foreach ($list as $value) {
             $this->view->pvcs = $this->model->getPVCStatus();
             $this->view->reReqs = $this->model->getReReqStatus();
             $this->view->render("fin/pvc_status","navbar"); 
-    }
+        }
+        else if(uri::get(2)=='cancel_exc'){
+            echo $this->model->cancelEXC2(uri::get(3)); 
+        }
     }
     public function pvc_process(){
         if(empty(uri::get(2))) {
@@ -516,5 +533,23 @@ foreach ($list as $value) {
             
         echo '</table>';
         
+    }
+
+    public function invoice_cs() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("fin");
+            $this->view->setTitle("Invoice for CS (IC)");
+            $this->view->CSs = $this->model->getCSforIV();
+            $this->view->render("fin/invoice_cs","navbar");
+        } else if (uri::get(2)==='post_iv') {
+            $this->positionEcho('fin', $this->model->addIV());
+        } else if (uri::get(2)==='get_csslip') {
+            
+            if (!empty(Uri::get(3))) {
+                $this->positionEcho('fin', $this->model->getCsslip(Uri::get(3)));
+            } else {
+                $this->err404();
+            }
+        } 
     }
 }

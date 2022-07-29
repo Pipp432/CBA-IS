@@ -31,7 +31,7 @@
                         <tr ng-repeat="pvc in pvcs track by $index">
                             <td>{{pvc.pv_no}}</td>
                             <td>{{pvc.pv_date}}</td>
-                            <td>{{pvc.total_paid}}</td>
+                            <td>{{pvc.total_paid | number:2}}</td>
                             <td>
                                 <form id = "form {{pvc.pv_no}}">
                                 <input type="file" name= "file" id ="file">
@@ -43,7 +43,7 @@
                             </td>
 
                             <td style="text-align: center;">
-                                <button type="button" class="btn btn-default btn-block" ng-click="confirm(pvc.pv_no)">confirm</button>
+                                <button type="button" class="btn" ng-click="confirm(pvc.pv_no)"><span>confirm</span></button>
                             </td>
                             
                             
@@ -80,6 +80,23 @@
 <style>
     td { border-bottom: 1px solid lightgray; text-align: center;}
     th { border-bottom: 1px solid lightgray; text-align: center; }
+    .btn{
+        background-color: rgba(102,178,255);
+        color: white;
+        width: 200px;
+    }
+    .btn:hover{
+        background-color: rgba(0,128,255);
+    }
+    .btn:hover span{
+        display: none;
+    }
+    .btn:hover::before{
+        background-color: rgba(0,128,255);
+        content: "ARE YOU SURE ?";
+        color: white;
+    }
+
 </style>
 
 <script>
@@ -95,7 +112,7 @@
           const form = document.getElementById(`form ${pv_no}`)
           var formData = new FormData(form)
           for (var pair of formData.entries()) {
-    console.log(pair); 
+            console.log(pair); 
 }
           $.ajax({
             url : `/fin/upload_iv_pvc/add_iv/${pv_no}`,
@@ -109,9 +126,9 @@
         }).fail(function(response){
             console.log(response)
         }).done(function(d){
-             
+             $scope.reload();
         })
-        $scope.reload();
+        
          
       }
       $scope.reload = function(){

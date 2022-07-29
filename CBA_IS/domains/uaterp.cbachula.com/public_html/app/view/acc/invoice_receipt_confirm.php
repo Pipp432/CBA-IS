@@ -291,6 +291,7 @@
         // }
         
         $scope.addIvrcItem = function(rrci) {
+            console.log(rrci)
             if ($scope.ivrcItems.length != 0 && $scope.ivrcItems[0].supplier_no != rrci.supplier_no) {
                 $('#formValidate3').modal('toggle');
             } else {

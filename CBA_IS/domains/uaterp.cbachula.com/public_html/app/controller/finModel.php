@@ -46,7 +46,7 @@ class finModel extends model {
         SOX.slip_datetime,
         SOX.payment_date,
         SOX.payment_time,
-        SOX.payment_amount,SOX.so_sales_price,
+        SOX.payment_amount,
         SOX.fin_form,
         Bank_Statement.id,
         MAX(View_InvoiceStock.balance) as balance
@@ -132,7 +132,6 @@ class finModel extends model {
         }
         return json_encode([]);
     }
-   
 	public function addCr_withIV() {
         
         $sql = $this->prepare("update SOX set SOX.done = 2 where SOX.sox_no = ?");
@@ -388,7 +387,6 @@ class finModel extends model {
     
     // CR Module
     public function addCr() {
-        $paymentType = input::post('payment_type');
     
         $sql = $this->prepare("update SOX set SOX.done = 0 where SOX.sox_no = ?");
         $sql->execute([input::post('sox_number')]);
@@ -427,7 +425,6 @@ class finModel extends model {
                     $total_sales_vat = 0;
                     $total_sales_price = (double) ceil($value['so_total_sales_price2']);
                 }
-               
 
                 $soxslip = explode(' ', $value['slip_datetime']);
                 $soxslips = strtotime($soxslip[0]);
@@ -445,8 +442,9 @@ class finModel extends model {
 
 
         
-                if($paymentType != 'CC'){
-                    $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
+                
+                // insert IV
+                $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
                                         file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note,payment_type)
                                         values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?,?)");  
                 $sql->execute([
@@ -469,41 +467,10 @@ class finModel extends model {
                     input::post('noted'),
                     input::post('payment_type')
                 ]); 
-
-                }else{
-                    if($value['product_type']=='Install'){
-                        $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
-                        file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note,payment_type)
-                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?,?)");  
-$sql->execute([
-    $iv_no,
-    $value['employee_id'],
-    input::post('cusName'),
-    input::post('customer_title'),
-    input::post('cusAddress'),
-    input::post('cusId'),
-    $value['so_no'],
-    $total_sales_no_vat,
-    $total_sales_vat,
-    $total_sales_price,
-    (double) $value['discountso'],
-    $value['priceInThai'], 
-    (double) $value['so_point'],                    
-    (double) $value['so_commission'],
-    json_decode(session::get('employee_detail'), true)['employee_id'],
-    $cr_no,
-    input::post('noted'),
-    input::post('payment_type')
-]); 
-                    }
-
-                }
-                // insert IV
-                
-               
+                $check = $sql->errorInfo()[0];
                
 
-				
+				if($check == '00000') {
                 //$text = $this->Convert($total_sales_price);
                 //insert CR
                 $sql = $this->prepare("insert into CR (cr_no, cr_date, cr_time, employee_id, customer_name, customer_address, id_no, total_price_no_vat, total_price_vat, total_price, commission, 
@@ -533,116 +500,34 @@ $sql->execute([
                     $value['employee_id'],
                     (double)$commission
                 ]);
-                
-
-                if(($value['product_type']=="Stock" ||$value['product_type']=="Order") && $paymentType=='CC' ){
-                    $sox_total = (float)$value['so_sales_price'] + (float)$value['transportation_price'];
-                    $ratio = $value['so_total_sales_price2']/$sox_total;
-                    $total_CC_fee = ceil($sox_total * 1.0245) - $sox_total;
-                    $CC_fee =  $total_CC_fee * $ratio * 100/107;
-                    $price_before_vat = $value['so_total_sales_price2'] * 100/107;
-                    $price_before_vat_CC = $price_before_vat + $CC_fee;
-                    $vat = ($price_before_vat+ $CC_fee) * 7/100;
-                    $final_price = $vat + $price_before_vat_CC;
-
-                    $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
-                    file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note,payment_type)
-                    values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'SO', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?,?)");  
-                    
-                    $sql->execute([
-                    $iv_no,
-                    $value['employee_id'],
-                    input::post('cusName'),
-                    input::post('customer_title'),
-                    input::post('cusAddress'),
-                    input::post('cusId'),
-                    $value['so_no'],
-                    $price_before_vat_CC,
-                    $vat,
-                    $final_price,
-                    (double) $value['discountso'],
-                    $value['priceInThai'], 
-                    (double) $value['so_point'],                    
-                    (double) $value['so_commission'],
-                    json_decode(session::get('employee_detail'), true)['employee_id'],
-                    $cr_no,
-                    input::post('noted'),
-                    input::post('payment_type')
-                    ]); 
-
-                }
-               
+                $paymentType = input::post('payment_type');
 
 
-
-                    if($value['product_type']=='Install'){  
-
-                        if($paymentType=='CC'){
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '1', '13-3'.$iv_no[0].'00', (double) ceil($total_sales_price), 0, 'IV']);
-                        } else{
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
-        
-                        }
+                    if($paymentType=='CC' || $paymentType=='FB' ){
                         $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                         values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
-
-
-                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                        $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
-                           
-
-                    }else{
-                    
-                        
-                        if($paymentType=='CC'){
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '1', '13-3'.$iv_no[0].'00', (double) $final_price, 0, 'IV']);
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $price_before_vat_CC, 'IV']);
-                        
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $vat, 'IV']);
-
-                            print_r(" เข้า credit ");
-
-                        }
-                        else{
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
-
-                            
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
-    
-    
-                            $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
-                                                    values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                            $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
-                         
-        
-
-                        }  
-                       
+                        $sql->execute([$iv_no, '1', '13-3'.$iv_no[0].'00', (double) ceil($total_sales_price), 0, 'IV']);
 
                     }
-                   
- 
-                       
-                    
-                    
+                    else{
+                        $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                        values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                        $sql->execute([$iv_no, '1', '12-0000', (double) $total_sales_price, 0, 'IV']);
+    
 
+                    }  
+                    // insert AccountDetail sequence 2
+                    // Cr รายได้รับล่วงหน้า - โครงการ X
+                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$iv_no, '2', '24-1'.$iv_no[0].'00', 0, (double) $total_sales_no_vat, 'IV']);
                     
+                    // insert AccountDetail sequence 3
+                    // Cr ภาษีขาย - โครงการ X
+                    $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
+                                            values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
+                    $sql->execute([$iv_no, '3', '62-1'.$iv_no[0].'00', 0, (double) $total_sales_vat, 'IV']);
+
                 
                 
                 
@@ -650,7 +535,13 @@ $sql->execute([
                 // END CBA2020 ACC
               
               
-              
+                } else {
+            
+            	echo 'เกิดข้อผิดพลาด รบกวนออก IVCR ใหม่ กรุณาแคปหน้าเจอให้กับทางทีม IS ขออภัยในความไม่สะดวก';
+                $check = $sql->errorInfo()[2];
+               
+				return $check;
+				}
             }
           
             //rr_no for Install / Order / Transport
@@ -1294,31 +1185,6 @@ where s.status = '3' and s.ws_type = '3' and isnull(v.iv2_data)");
         }
         return json_encode([]);
     }
-
-    
-    public function getDashboardForCs() {
-        $sql = $this->prepare("SELECT
-                                SOtransaction.cs_no,
-                                SOtransaction.so_no,
-                                SOtransaction.invoice_no,
-                                Invoice.invoice_date,
-                                Invoice.invoice_time,
-                                Invoice.approved_employee,
-                                Employee.employee_nickname_thai
-                            
-                                from SOtransaction
-                                left join Invoice on Invoice.invoice_no = SOtransaction.invoice_no
-                                left join Employee on Employee.employee_id = Invoice.approved_employee
-                                where SOtransaction.invoice_no is not null and SOtransaction.invoice_no != '0000'
-                                ORDER BY SOtransaction.invoice_no;");
-                                                         
-        $sql->execute();
-        if ($sql->rowCount()>0) {
-            return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-        }
-        return json_encode([]);
-    }
-	
 	
 	public function getTR($tr_no=NULL) {
 		if ($tr_no==NULL){
@@ -2115,11 +1981,11 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
         if($success) {
 
-           
+            echo $_FILES['file'];
               
         } else {
             echo 'failed';
-            
+            print_r($sql->errorInfo());
         }
     }
     public function getPVCsForIV(){
@@ -2145,11 +2011,11 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
 
         if($success) {
 
-         
+            echo $_FILES['file'];
               
         } else {
             echo 'failed';
-           
+            print_r($sql->errorInfo());
         }
         
     }
@@ -2243,9 +2109,9 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
       }
       public function cancelEXC2($ex_no){
         
-        $sql = $this->prepare("UPDATE `Reimbursement_Request` SET `confirmed` = -1 WHERE `re_req_no`= ? ");
-        $sql->execute([$ex_no]);
-        
+        $sql = $this->prepare("UPDATE `Reimbursement_Request` SET `confirmed` = -1 WHERE `ex_no`= $ex_no ");
+        $sql->execute();
+       
         return $ex_no;
 
       }
@@ -2331,40 +2197,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
         }
         return json_encode([]);
     }
-    public function debug(){
-        $crItemsArray = json_decode(input::post('crItems'), true); 
-        $crItemsArray = json_decode($crItemsArray, true); 
-        
-        $csList = array();
-        #$csProductList = array();
-        #$csEmpList = array();
-        $iv_no = "";
-        $cr_no = "";
-        $approved_employee=json_decode( session::get( 'employee_detail' ), true )[ 'employee_id' ];
-        
- 
-
-        foreach($crItemsArray as $value) {
-            print_r(' Vat_Type '.$value['vat_type'].' ');
-            if($value['vat_type'] != "3") {
-                $total_sales_price = (double) ceil($value['so_total_sales_price2']);
-                $total_sales_no_vat = ((double) ceil($total_sales_price)) *100/107;
-                $total_sales_vat = ((double) ceil($total_sales_price)) *7/107;
-              
-            } else {
-                $total_sales_no_vat = (double) ceil($value['so_total_sales_price2']);
-                $total_sales_vat = 0;
-                $total_sales_price = (double) ceil($value['so_total_sales_price2']);
-            }
-            print_r( "TOTAL ".$total_sales_price);
-            print_r( " VAT ". $total_sales_vat);
-            print_r(" NO VAT ". $total_sales_no_vat);
-            
-
-            return;
-        }
-
-    }
 
     public function addIV() {
         
@@ -2414,32 +2246,64 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                 
                 // insert IV                      
                      
-
-                $sql = $this->prepare("insert into Invoice (invoice_no, invoice_date, invoice_time, employee_id, customer_name, customer_title,customer_address, id_no, file_no,
-                                        file_type, total_sales_no_vat, total_sales_vat, total_sales_price, discount, sales_price_thai, point, commission, approved_employee, cr_no, cancelled, note)
-                                        values (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?,?, ?, 'CS', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");  
+                $sql = $this->prepare("insert into Invoice (invoice_no, 
+                                                            invoice_date, 
+                                                            invoice_time, 
+                                                            employee_id, 
+                                                            customer_name, 
+                                                            customer_address, 
+                                                            id_no, 
+                                                            file_no,
+                                                            file_type, 
+                                                            total_sales_no_vat, 
+                                                            total_sales_vat, 
+                                                            total_sales_price, 
+                                                            discount, 
+                                                            sales_price_thai, 
+                                                            point, 
+                                                            commission, 
+                                                            approved_employee, 
+                                                            cr_no, 
+                                                            cancelled, 
+                                                            note)
+                                        values (?, 
+                                                CURRENT_TIMESTAMP, 
+                                                CURRENT_TIMESTAMP, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                'CS', 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                0, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                ?, 
+                                                0, 
+                                                ?)");  
                 $sql->execute([
                     $iv_no,
-                    $value['employee_id'],
+                    $approved_employee,
                     input::post('cusName'),
-                    input::post('customer_title'),
                     input::post('cusAddress'),
                     input::post('cusId'),
                     $value['cs_no'],
                     $total_sales_no_vat,
                     $total_sales_vat,
                     $total_sales_price,
-                    (double) $value['discountso'],
                     input::post('priceInThai'), 
                     (double) $value['so_point'],                    
                     (double) $value['so_commission'],
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     $cr_no,
                     input::post('noted')
-                ]); 
+                ]);
                 
-                print_r($sql->errorInfo());
-                echo input::post('priceInThai');
                 // ============================================================================================================================================================
                 //CBA 2022
                
@@ -2451,7 +2315,7 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                 
                 $sql = $this->prepare("insert into CR (cr_no, cr_date, cr_time, employee_id, customer_name, customer_address, id_no, total_price_no_vat, total_price_vat, total_price, commission, 
                                         approved_employee, payment_type, note, transfer_date, transfer_time, remark_check_date, cancelled, tr_no, total_text, time, slip, noted)
-                                        values(?,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, 0, NULL, ?, NULL, NULL, NULL)");
+                                        values(?,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL, NULL, NULL, NULL, NULL, 0, NULL, ?, NULL, NULL, NULL)");
                 $sql->execute([
                     $cr_no,
                     $value['employee_id'],
@@ -2461,7 +2325,6 @@ $sql = $this->prepare("select * from WS_Form where form_no = ?");
                     $total_sales_no_vat,
                     $total_sales_vat,
                     $total_sales_price,
-                    (double) $value['so_commission'],
                     json_decode(session::get('employee_detail'), true)['employee_id'],
                     input::post('priceInThai')
                 ]);

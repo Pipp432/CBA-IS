@@ -115,7 +115,7 @@
                     
                 </tr>
                 <tr>
-                    <th id = "bigbox" colspan="4" rowspan="3"> 
+                    <th id = "bigbox" colspan="4" rowspan="4"> 
                         <div class="row">
                             <div class="col-4">
                                 <br>ได้รับสินค้าตามรายการ<br>ถูกต้องและเรียบร้อยแล้ว
@@ -136,28 +136,33 @@
                                 __________________________<br>ผู้รับสินค้า<br>วันที่ _____/_____/_____ 
                             </div>
                         </div>
-                    </th>
+                   
                     
-                </tr>
-                    <tr>
+                        </th>
                         <th colspan="2" style="text-align: right;">มูลค่าสินค้า/บริการ</th>
                         <th colspan="1" style="text-align: right;">{{priceBefore|number:2}}</th>
-                    </tr>
-                    <tr>
+
+                </tr>
+
+                    
+                    <tr ng-show='hasCC'>
                         <th colspan="2" style="text-align: right;">ค่าธรรมเนียมบัตรเครดิต</th>
                         <th colspan="1" style="text-align: right;">{{creditCardFee|number:2}}</th>
                     </tr>
-                    <tr>
-                        <th colspan="6" style="text-align: right;">ภาษีมูลค่าเพิ่ม 7%</th>
+                   
+                    <tr >
+                        <th colspan="2" style="text-align: right;" id='vat_row'>ภาษีมูลค่าเพิ่ม 7%</th>
                         <th colspan="1" style="text-align: right;">{{vat|number:2}}</th>
                     </tr>
                     <tr>
-                        <th colspan="6" style="text-align: right;">จำนวนเงินรวม</th>
-                        <th colspan="1" style="text-align: right;">{{detail[0].payment_type==='MB'||detail[0].payment_type===null ? detail[0].invoice_total_sales_price :rounded |number:2}}</th>
+                        <th colspan="2" style="text-align: right;">จำนวนเงินรวม</th>
+                        <th colspan="1" style="text-align: right;">{{detail[0].payment_type==='MB'||detail[0].payment_type===null ? total_price :rounded |number:2}}</th>
                     </tr>
+                   
+                
             </table>
         </div> 
-        <br>
+       <br>
     
     </div>
 </div>
@@ -255,6 +260,7 @@
             $scope.customer_title = $scope.detail[0].customer_title;
             console.log($scope.detail)
             $scope.hasTransportation = false;
+            $scope.hasCC  = true;
             
             $scope.company = $scope.detail[0].invoice_no.substring(0,1);
 			$scope.year = $scope.detail[0].invoice_date.substring(0,4);
@@ -327,15 +333,19 @@
                             $scope.vat = 0;
                             // มูลค่าสินค้า
                             $scope.priceBefore = $scope.rounded.toFixed(2) ;
+                            $scope.total_price = $scope.rounded
                         }
                         else {
                             // vat คิดจากราคาสุดท้าย
                             $scope.vat = ($scope.rounded * 7/107).toFixed(2);
                             // มูลค่าสินค้า
                             $scope.priceBefore = ($scope.salesWithVAT* 100/107).toFixed(2)
+                            $scope.total_price = $scope.rounded
+                            console.log('Hello');
+                            
                         }
                         
-                        $scope.creditCardFee = $scope.rounded - $scope.vat - $scope.priceBefore
+                        $scope.creditCardFee = +$scope.rounded - Number($scope.vat) - Number($scope.priceBefore)
                        
                         
                     }else{
@@ -343,10 +353,12 @@
                         if($scope.detail[0].vat_type==='3') {
                             $scope.vat = 0;
                             $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                            $scope.total_price = Number($scope.vat) + Number($scope.priceBefore)
                         }
                         else {
                             $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
                             $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                            $scope.total_price = Number($scope.vat) + Number($scope.priceBefore)
                         }
                     }
                
@@ -364,10 +376,10 @@
                    $scope.so_total_price = $scope.detail[0].invoice_total_sales_price;
                    $scope.so_ratio = parseFloat($scope.so_total_price)/parseFloat($scope.sox_total_price)
                   
-                   $scope.creditCardFee = ($scope.so_ratio * $scope.total_CC_fee) * 100/107;
+                //    $scope.creditCardFee = ($scope.so_ratio * $scope.total_CC_fee) * 100/107;
 
                     // ราคาปัดเศษ
-                    $scope.rounded = $scope.finalPrice;
+                    
 
                     // กรณี vat type = 3
                     if($scope.detail[0].vat_type==='3') {
@@ -375,30 +387,40 @@
                         $scope.vat = 0;
                         // มูลค่าสินค้า
                         $scope.priceBefore = $scope.rounded.toFixed(2) ;
+                        $scope.total_price = Number($scope.vat) + Number($scope.priceBefore)
                     }
                     else {
                         // vat คิดจากราคาสุดท้าย
                        
                         // มูลค่าสินค้า
-                        $scope.priceBefore = Number(($scope.so_total_price* 100/107));
-                        $scope.vat = Number((($scope.priceBefore + ($scope.creditCardFee)) *7/100))
+                        $scope.priceBefore = Number(($scope.salesWithVAT* 100/107).toFixed(2));
+                        $scope.vat = Number((($scope.finalPrice) *7/107).toFixed(2))
                     }
 
+                    $scope.creditCardFee = $scope.finalPrice -$scope.priceBefore-$scope.vat;
+
                     // $scope.creditCardFee = $scope.rounded - $scope.vat - $scope.priceBefore
-                    
-                    $scope.rounded = $scope.priceBefore+$scope.vat+ $scope.creditCardFee
+                    $scope.rounded = $scope.finalPrice;
+                    // $scope.rounded = $scope.priceBefore+$scope.vat+ $scope.creditCardFee
            
                     }else{
                         $scope.creditCardFee = 0.00;
                         if($scope.detail[0].vat_type==='3') {
                             $scope.vat = 0;
                             $scope.priceBefore = $scope.finalPrice.toFixed(2) ;
+                            $scope.total_price = Number($scope.vat) + Number($scope.priceBefore)
                         }
                         else {
                             $scope.vat = ($scope.salesWithVAT * 7/107).toFixed(2);
                             $scope.priceBefore = ($scope.salesWithVAT * 100/107).toFixed(2)
+                            $scope.total_price = Number($scope.vat) + Number($scope.priceBefore)
                         }
                     }
+
+            }
+            if($scope.creditCardFee == 0.00){
+                $scope.hasCC = false;
+                $("#bigbox").attr("rowspan",3)
 
             }
     }

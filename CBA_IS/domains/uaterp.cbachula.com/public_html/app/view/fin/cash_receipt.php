@@ -115,6 +115,7 @@
                     <table class="table table-hover mb-1 mt-2" ng-show="crItems.length != 0">
                         <tr>
                             <th>เลข SO</th>
+                            <th>Vat Type</th>
                             <th>ชื่อสินค้า</th>
                             <th>ราคา</th>
                             <th>จำนวน</th>
@@ -122,34 +123,37 @@
                         </tr>
                         <tr ng-repeat="soPrinting in crItems " ><!-- | unique:'product_no' -->  <!-- makes multiple so with same product no not appear -->
                             <td style="text-align: center;">{{soPrinting.so_no}}</td>
+                            <td style="text-align: center;" ng-show="soPrinting.vat_type != null">{{soPrinting.vat_type}}</td>
+                            <td style="text-align: center;" ng-show="soPrinting.vat_type == null">-</td>
                             <td style="text-align: center;">{{soPrinting.product_name}}</td>
                             <td style="text-align: center;">{{soPrinting.sales_price | number:2}}</td>
                             <td style="text-align: center;">{{soPrinting.quantity}}</td>
                             <td style="text-align: center;">{{soPrinting.sales_price * soPrinting.quantity | number:2}}</td>
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="4">ราคารวมก่อนภาษี</th>
-                            <th id="totalPrice" style="text-align: right;">{{priceBeforeVat|number:2}}</th>
+                            <th style="text-align: right;" colspan="5">ราคารวมก่อนภาษี</th>
+                            <th id="totalPrice" style="text-align: center;">{{priceBeforeVat|number:2}}</th>
                             <!--ผิด table-->
                         </tr>
                         <tr>
-                            <th style="text-align: right;" colspan="4">ส่วนลด</th>
-                            <th id="totalPrice" style="text-align: right;">{{crItems[0].so_total_discount | number:2}}</th>
+                            <th style="text-align: right;" colspan="5">ส่วนลด</th>
+                            <th id="totalPrice" style="text-align: center;">{{crItems[0].so_total_discount | number:2}}</th>
                         </tr> 
                         <tr>
-                            <th style="text-align: right;" colspan="4">ค่าธรรมเนียมบัตรเครดิต</th>
-                            <th id="cardFee" style="text-align: right;">{{creditCardfee|number:2}}</th>
+                            <th style="text-align: right;" colspan="5">ค่าธรรมเนียมบัตรเครดิต</th>
+                            <th id="cardFee" style="text-align: center;">{{creditCardfee|number:2}}</th>
                         </tr>   
                         <tr>
-                            <th style="text-align: right;" colspan="4">ภาษี 7%</th>
-                            <th id="totalPrice" style="text-align: right;">{{vat|number:2}}</th>
+                            <th style="text-align: right;" colspan="5">ภาษี 7%</th>
+                            <th id="totalPrice" style="text-align: center;">{{vat|number:2}}</th>
                         </tr>  
                         
                         <tr>
-                            <th style="text-align: right;" colspan="4">ราคารวม</th>
-                            <th id="totalPrice" style="text-align: right;">{{finalPrice}}</th>
+                            <th style="text-align: right;" colspan="5">ราคารวม</th>
+                            <th id="totalPrice" style="text-align: center;">{{finalPrice}}</th>
                             <!--ผิด table-->
                         </tr>
+                        <tr></tr>
                         <!--<tr>
                             <th style="text-align: right;" colspan="4">คะแนน</th>
                             <th id="totalPrice" style="text-align: right;">{{crItems[0].total_point | number:2}}</th>
@@ -205,6 +209,7 @@
 		<div  style="position: fixed; right: 0; bottom: 0; margin-bottom: 1%; margin-right: 7%">
         <button class="btn btn-light" ng-click="scrollToTop()">เลื่อนขึ้น</button> &nbsp; &nbsp; 
 		<button class="btn btn-light" ng-click="scrollToBottom()">เลื่อนลง</button>
+        <button class="btn btn-light" ng-click="debug()">debug</button>
 		</div>
 		
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -606,6 +611,53 @@
             }); 
            
         }
+        
+$scope.debug = function() {
+
+$('#confirmModal').modal('hide');
+
+                      
+// var transferDateStr = $scope.TransferTime.getFullYear() + '-' + 
+//                         (($scope.TransferTime.getMonth()+1) < 10 ? '0' : '') + ($scope.TransferTime.getMonth()+1) + '-' + 
+//                         ($scope.TransferTime.getDate() < 10 ? '0' : '') + $scope.TransferTime.getDate();
+// var transferTimeStr = ($scope.TransferTime.getHours() < 10 ? '0' : '') + $scope.TransferTime.getHours() + ':' + 
+//                         ($scope.TransferTime.getMinutes() < 10 ? '0' : '') + $scope.TransferTime.getMinutes() + ':00';  
+                        
+$.post("/fin/cash_receipt/debug", {
+    post : true,
+    cusName : $('#textBoxCusName').val(),
+    customer_title: $scope.sox.customerTitle, 
+    cusAddress : $('#textboxCusAddress').val(),
+    cusId : $('#textboxCusId').val(),
+    // cusName : '-',
+    // cusAddress : '-',
+    // cusId : '-',
+    bank : $scope.selectedBank,
+    noted : $scope.Noted,
+    // transferDate : transferDateStr,
+    // transferTime : transferTimeStr,
+    sox_number : $scope.sox.sox_no,
+    crItems : JSON.stringify(angular.toJson($scope.crItems)),
+    payment_type:$scope.crItems[0].payment_type,
+    total_sales_no_vat:$scope.crItems[0].so_total_sales_no_vat,
+    payment_type: $scope.crItems[0].payment_type
+}, function(data) {
+   
+    addModal('successModal', 'ใบกำกับภาษีและใบเสร็จรับเงิน / Invoice(IV) and Cash Receipt(CR)', 'บันทึก ' + data);
+  
+    $('#successModal').modal('toggle');
+    $('#successModal').on('hide.bs.modal', function (e) {
+        window.open('/file/iv_cr/' + data.substring(0, 9));
+        location.reload();
+        // window.location.assign('/');
+    });           
+}).done(()=>{console.log("DONE")}).fail(function(a,b,c){
+    console.log(a)
+    console.log(b)
+    console.log(c)
+}); 
+
+}
         
     });
 

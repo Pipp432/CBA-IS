@@ -111,6 +111,7 @@
                     
                     <br>
                 </form>
+                
                     
                     <button type="button" class="btn btn-default btn-block btn-transition" id="buttonConfirmDetail" ng-click="submit()">ยืนยัน</button>
                     

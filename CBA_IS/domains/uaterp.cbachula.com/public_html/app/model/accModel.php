@@ -875,7 +875,7 @@ class accModel extends model {
                                 inner join RR on RR.rr_no = View_CIRR_NOIV.ci_no
                                 inner join RRPrinting on RRPrinting.rr_no = View_CIRR_NOIV.ci_no
                                 left join Product on Product.product_no = RRPrinting.product_no
-                                inner join Supplier on Supplier.supplier_no = View_CIRR_NOIV.supplier_no
+                                inner join Supplier on Supplier.supplier_no = View_CIRR_NOIV.supplier_no AND Product.product_line = Supplier.product_line
                                 union
                                 select
                                 	RI.ri_no,
@@ -1031,14 +1031,14 @@ class accModel extends model {
                     // Dr เจ้าหนี้การค้ารอ Tax Invoice - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '8',  '21-2'.$value['supplier_no'], (double) $_POST['final_purchase_no_vat'], 0, 'CIV']);
+                    $sql->execute([$value['ci_no'], '8',  '21-2'.$value['supplier_no'], (double) $value['confirm_subtotal'], 0, 'CIV']);
                     print_r($sql->errorInfo());
                     
                     // insert AccountDetail sequence 9
                     // Dr ภาษีซื้อ
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '9', '61-1'.$value['ci_no'][0].'00', (double)  $_POST['final_purchase_vat'], 0, 'CIV']);
+                    $sql->execute([$value['ci_no'], '9', '61-1'.$value['ci_no'][0].'00', (double)  $value['confirm_vat'], 0, 'CIV']);
                     
                     
                     // insert AccountDetail sequence 10
@@ -1051,7 +1051,7 @@ class accModel extends model {
                     // Cr เจ้าหนี้การค้า - Supplier XXX
                     $sql = $this->prepare("insert into AccountDetail (file_no, sequence, date, time, account_no, debit, credit, cancelled, note)
                                             values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
-                    $sql->execute([$value['ci_no'], '11', '21-1'.$value['supplier_no'], 0, (double)  $_POST['total_purchase_price'], 'CIV']);
+                    $sql->execute([$value['ci_no'], '11', '21-1'.$value['supplier_no'], 0, (double)  $value['confirm_total'], 'CIV']);
                     
                 
                 // } else if ($value['type'] == 'RI') {
@@ -1496,7 +1496,7 @@ class accModel extends model {
                                         RRPrinting.quantity,
                                         Product.unit,
                                         'RR' as type,
-                                        RR.diff,RR.diff_dr_sup,RR.diff_dr_tax,RR.diff_cr_sup
+                                        RR.diff,RR.diff_dr_sup,RR.diff_cr_sup,RR.diff_dr_tax
                                     from View_CIRR_NOPV
                                     inner join RR on RR.rr_no = View_CIRR_NOPV.ci_no
                                     inner join RRPrinting on RRPrinting.rr_no = View_CIRR_NOPV.ci_no
@@ -1751,16 +1751,16 @@ class accModel extends model {
         // $sql = $this->prepare("insert into PV (pv_no, pv_date, pv_type, vat_type, supplier_no, pv_name, pv_address, total_paid, approved_employee, paid, cancelled, note, thai_text, total_vat, due_date, bank)
         //                         values (?, CURRENT_TIMESTAMP, 'Expense', 1, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)");  
         $sql = $this->prepare("INSERT INTO PVC (pv_no,ex_no,re_req_no,vat_type,pv_details,pv_date,exc_date,pv_due_date,pv_type,approved_employee,pv_address,total_paid,total_paid_thai,pv_payout,pv_payto,bank_book_number,bank_book_name,bank_name) 
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");  
+        VALUES (?,?,?,?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,?,?,?)");  
         $sql->execute([
             $pvno,
             input::post('ex_no'),
             input::post('re_req_no'),
             '1',
             
-            input::post('pv_detail'),
+            input::post('detail'),
             input::post('pv_date'),
-            'CURRENT_TIMESTAMP',
+            
             input::post('dueDate'),
             
            
@@ -2215,7 +2215,7 @@ class accModel extends model {
                                     where pv_no = ?");
                 $sql->execute([$value]);
                 $temp = $sql->fetchAll(PDO::FETCH_ASSOC);
-                $tot = intval($temp[0]["total_paid"]) + intval($temp[0]["additional_cash"]);
+                $tot = floatval($temp[0]["total_paid"]) + floatval($temp[0]["additional_cash"]);
 
 
                 //dr เงินรองจ่าย
@@ -3239,6 +3239,7 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
                                 Invoice.invoice_time,
                                 Invoice.approved_employee,
                                 Invoice.file_no,
+                                Invoice.file_type,
                                 Invoice.id_no,
                                 Invoice.acc_confirm,
                                 SO.product_type,
@@ -3321,7 +3322,7 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
         bank_name, bank_book_name, bank_book_number, authorizer_name, details,
         evidence, company, debit, return_tax, confirmed, pv_name, pv_address, 
         pv_date, pv_company, total_paid, pv_details, pv_payout,create_date,
-         pv_payto,quotation_name FROM `Reimbursement_Request` WHERE Reimbursement_Request.ex_no IS NOT NULL AND Reimbursement_Request.confirmed != '1' ");
+         pv_payto,quotation_name FROM `Reimbursement_Request` WHERE Reimbursement_Request.ex_no IS NOT NULL AND Reimbursement_Request.confirmed != '1' AND Reimbursement_Request.confirmed != '-1'");
         $sql->execute();
         if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -3554,59 +3555,62 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
                 return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
             } else return json_encode([]); 
 
-        }else if($stmType == 'Stmspe1'){         
+        }
+        // else if($stmType == 'Stmspe1'){         
+        //     $sql = "SELECT 
+        //                 AccountName.account_name,
+        //                 AccountDetail.account_no , 
+        //                 IF(AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110'), SUM(AccountDetail.debit-AccountDetail.credit) , SUM(AccountDetail.credit-AccountDetail.debit) ) as total_amount,
+        //                 SUBSTRING(AccountDetail.account_no, 1, 4) AS prefix
+
+        //                 FROM `AccountDetail` 
+        //                 left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
+
+        //                 WHERE AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110','23-2100','24-2100','25-2100','31-1100','32-1100') and (AccountDetail.date between ? and ?)
+
+        //                 group by AccountDetail.account_no  
+        //                 ORDER BY `AccountDetail`.`account_no` ASC";
+        //     $statement = $this->prepare($sql);
+        //     $statement->execute([$startdate,$duedate]);
+
+        //     if ($statement->rowCount() > 0) {
+        //         return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        //     } else return json_encode([]); 
+
+        // }else if($stmType == 'Stmspe2'){
+        //     $sql = "SELECT 
+        //                 AccountName.account_name,
+        //                 AccountDetail.account_no , 
+        //                 IF(AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110'), SUM(AccountDetail.debit-AccountDetail.credit) , SUM(AccountDetail.credit-AccountDetail.debit) ) as total_amount,
+        //                 SUBSTRING(AccountDetail.account_no, 1, 4) AS prefix
+
+        //                 FROM `AccountDetail` 
+        //                 left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
+
+        //                 WHERE AccountDetail.account_no in ('11-2200','12-2200','13-2200','16-2200','16-2210','23-2200','24-2200','25-2200','31-1200','32-1200') and (AccountDetail.date between ? and ?)
+
+        //                 group by AccountDetail.account_no  
+        //                 ORDER BY `AccountDetail`.`account_no` ASC";
+        //     $statement = $this->prepare($sql);
+        //     $statement->execute([$startdate,$duedate]);
+
+        //     if ($statement->rowCount() > 0) {
+        //         return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        //     } else return json_encode([]); 
+
+        // }
+        else if($stmType == 'Stmprofit1'){ 
             $sql = "SELECT 
                         AccountName.account_name,
                         AccountDetail.account_no , 
-                        IF(AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110'), SUM(AccountDetail.debit-AccountDetail.credit) , SUM(AccountDetail.credit-AccountDetail.debit) ) as total_amount,
+                        IF(AccountDetail.account_no in ('42-1100','43-1100','44-1100','41-1100','41-1110'), SUM(AccountDetail.credit-AccountDetail.debit) , SUM(AccountDetail.debit-AccountDetail.credit) ) as total_amount,
                         SUBSTRING(AccountDetail.account_no, 1, 4) AS prefix
 
                         FROM `AccountDetail` 
                         left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
 
-                        WHERE AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110','23-2100','24-2100','25-2100','31-1100','32-1100') and (AccountDetail.date between ? and ?)
-
-                        group by AccountDetail.account_no  
-                        ORDER BY `AccountDetail`.`account_no` ASC";
-            $statement = $this->prepare($sql);
-            $statement->execute([$startdate,$duedate]);
-
-            if ($statement->rowCount() > 0) {
-                return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-            } else return json_encode([]); 
-
-        }else if($stmType == 'Stmspe2'){
-            $sql = "SELECT 
-                        AccountName.account_name,
-                        AccountDetail.account_no , 
-                        IF(AccountDetail.account_no in ('11-2100','12-2100','13-2100','16-2100','16-2110'), SUM(AccountDetail.debit-AccountDetail.credit) , SUM(AccountDetail.credit-AccountDetail.debit) ) as total_amount,
-                        SUBSTRING(AccountDetail.account_no, 1, 4) AS prefix
-
-                        FROM `AccountDetail` 
-                        left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
-
-                        WHERE AccountDetail.account_no in ('11-2200','12-2200','13-2200','16-2200','16-2210','23-2200','24-2200','25-2200','31-1200','32-1200') and (AccountDetail.date between ? and ?)
-
-                        group by AccountDetail.account_no  
-                        ORDER BY `AccountDetail`.`account_no` ASC";
-            $statement = $this->prepare($sql);
-            $statement->execute([$startdate,$duedate]);
-
-            if ($statement->rowCount() > 0) {
-                return json_encode($statement->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-            } else return json_encode([]); 
-
-        }else if($stmType == 'Stmprofit1'){ 
-            $sql = "SELECT 
-                        AccountName.account_name,
-                        AccountDetail.account_no , 
-                        IF(AccountDetail.account_no in ('42-1200','43-1200','44-1200','41-1200','41-1210'), SUM(AccountDetail.credit-AccountDetail.debit) , SUM(AccountDetail.debit-AccountDetail.credit) ) as total_amount,
-                        SUBSTRING(AccountDetail.account_no, 1, 4) AS prefix
-
-                        FROM `AccountDetail` 
-                        left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
-
-                        WHERE AccountDetail.account_no in ('51-1100','51-1110','51-2100','14-0100','52-0100','52-1101','52-1102','52-1103','52-1100','52-2100','52-2110','52-3100','52-3110','52-3120','52-3130','52-3140','52-3150','52-3160','52-3199','53-1100','53-1120','53-2100','53-3100','53-4100','53-5100','63-1100','41-1100','41-1110','42-1100','43-1100','44-1100') and (AccountDetail.date between ? and ?)
+                        WHERE AccountDetail.account_no in ('51-1100','51-1110','51-2100','14-0100','52-0100','52-1101','52-1102','52-1103','52-1100','52-2100','52-2110','52-3100','52-3110','52-3120','52-3130','52-3140','52-3150','52-3160','52-3199','53-1100','53-1120','53-2100','53-3100','53-4100','53-5100','63-1100','41-1100','41-1110','42-1100','43-1100','44-1100')
+                        and (AccountDetail.date between ? and ?)
 
                         group by AccountDetail.account_no  
                         ORDER BY `AccountDetail`.`account_no` ASC
@@ -3628,7 +3632,8 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
                         FROM `AccountDetail` 
                         left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
 
-                        WHERE AccountDetail.account_no in ('51-1200','51-1210','51-2200','14-0200','52-0200','52-1104','52-1105','52-1200','52-2200','52-2210','52-3200','52-3210','52-3220','52-3230','52-3240','52-3250','52-3260','52-3299','53-1200','53-1220','53-2200','53-3200','53-4200','53-5200','63-1200','41-1200','41-1210','42-1200','43-1200','44-1200') 
+                        WHERE AccountDetail.account_no in ('51-1200','51-1210','51-2200','14-0200','52-0200','52-1104','52-1105','52-1200','52-2200','52-2210','52-3200','52-3210','52-3220','52-3230','52-3240','52-3250','52-3260','52-3299','53-1200','53-1220','53-2200','53-3200','53-4200','53-5200','63-1200','41-1200','41-1210','42-1200','43-1200','44-1200')
+                        and (AccountDetail.date between ? and ?)
 
                         group by AccountDetail.account_no  
                         ORDER BY `AccountDetail`.`account_no` ASC
@@ -3650,7 +3655,7 @@ join Supplier on Supplier.supplier_no = RI.supplier_no");
                         FROM `AccountDetail` 
                         left JOIN AccountName ON AccountName.account_no = AccountDetail.account_no  
 
-                        WHERE AccountDetail.account_no in ('51-1300','51-1310','51-2300','14-0300','52-0300','52-1106','52-1107','52-1108','52-1109','52-1110','52-1300','52-2300','52-2310','52-3300','52-3310','52-3320','52-3330','52-3340','52-3350','52-3360','52-3399','53-1300','53-1320','53-2300','53-3300','53-4300','53-5300','63-1300','41-1300','41-1310','42-1300','43-1300','44-1300') 
+                        WHERE AccountDetail.account_no in ('51-1300','51-1310','51-2300','14-0300','52-0300','52-1106','52-1107','52-1108','52-1109','52-1110','52-1300','52-2300','52-2310','52-3300','52-3310','52-3320','52-3330','52-3340','52-3350','52-3360','52-3399','53-1300','53-1320','53-2300','53-3300','53-4300','53-5300','63-1300','41-1300','41-1310','42-1300','43-1300','44-1300')
                         and (AccountDetail.date between ? and ?)
 
                         group by AccountDetail.account_no  

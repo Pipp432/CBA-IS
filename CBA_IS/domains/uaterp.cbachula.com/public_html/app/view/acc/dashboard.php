@@ -442,7 +442,7 @@
 
                         </div>
 
-                    <td> <div ng-show="dashboard.confirmed_employee===null">☢️
+                    <td> <div ng-show="dashboard.confirmed_employee===null">
                             <p>Not Confirmed</p>
 
                         </div>

@@ -12,6 +12,11 @@ class isController extends controller {
     public function index() { 
         $this->err404();
     }
+
+    public function test() { 
+        header('Access-Control-Allow-Origin: *');
+        $this->view->render("is/test","navbar");
+    }
     
     public function edit_purchase_order() { 
         if(empty(uri::get(2))) {
@@ -134,23 +139,56 @@ class isController extends controller {
         }
     }
 
-    public function split_rr() { 
-        if(empty(uri::get(2))) {
-            $this->requirePostition("is");
-            $this->view->setTitle("split RR");
-            $this->view->IRDRRstock = $this->model->getIRDRRstock();
-            $this->view->render("is/split_rr", "navbar");
-        } else if (uri::get(2) === 'split') {
-            echo $this->model->splitRR();
-        }
-    }
 
-    public function split_stockout() {
-        echo $this->model->splitStockOut();
-    }
+    //dangerous functions.
+
+    // public function split_rr() { 
+    //     if(empty(uri::get(2))) {
+    //         $this->requirePostition("is");
+    //         $this->view->setTitle("split RR");
+    //         $this->view->IRDRRstock = $this->model->getIRDRRstock();
+    //         $this->view->render("is/split_rr", "navbar");
+    //     } else if (uri::get(2) === 'split') {
+    //         echo $this->model->splitRR();
+    //     }
+    // }
+
+    // public function split_stockout() {
+    //     $this->requirePostition("is");
+    //     echo $this->model->splitStockOut();
+    // }
 
     public function checkWave() {
         echo $this->model->checkWaveProgress();
+    }
+
+    public function cboin_bank() {
+        $this->requireSignIn();
+        if(empty(uri::get(2))) {
+            $this->view->render("is/cboin_bank", "navbar");
+        } else if (uri::get(2) === 'get_cboin') {
+            echo $this->model->getCboin();
+        } else if (uri::get(2) === 'add_cboin') {
+            echo $this->model->addCboin();
+        }
+    }
+
+    public function add_cboin() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("hr");
+            $this->view->setTitle("Add cboin");
+            $this->view->render("is/add_cboin", "navbar"); 
+        } else if (uri::get(2) === 'post_point') {
+            $this->positionEcho('hr', $this->model->postPoint());
+        }
+    }
+
+    public function cboin_dashboard() {
+        if(empty(uri::get(2))) {
+            $this->view->cboins = $this->model->getCboinForDashboard();
+            $this->view->setTitle("cboin dashboard");
+            $this->view->render("is/cboinDashboard", "navbar"); 
+        }
     }
 }
  

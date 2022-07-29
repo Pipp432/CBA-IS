@@ -39,11 +39,8 @@
                         <td><b>จ่ายเพื่อ</b> เบิกค่าใช้จ่าย</td>
                         <td><b>วันครบกำหนดจ่ายเงิน</b> {{detail[0].pv_due_date}}</td>
                     </tr>
-                    <tr ng-show="detail[0].supplier_no != ''">
-                        <td colspan="2"><b>ที่อยู่</b> {{detail[0].pv_address}}</td>
-						<td><b>เลขที่ Supplier</b> {{detail[0].supplier_no}}</td>
-                    </tr>
-                    <tr ng-show="detail[0].supplier_no == ''">
+                   
+                    <tr>
                         <td colspan="3"><b>ที่อยู่</b> {{detail[0].pv_address}}</td>
                     </tr>
                 </table>
@@ -59,14 +56,13 @@
                     
                     <th>จำนวน</th>
                     <th>หมายเหตุ</th>
-                </tr>
-              
+                </tr>ห
                     <td style="text-align: left;">{{detail[0].exc_date}}</td>
                     <td style="text-align: left;">{{detail[0].ex_no}}</td>
                     <td style="text-align: left;">{{detail[0].pv_details}}</td>
                     
-                    <td style="text-align: right;">{{detail[0].total_paid| number:2}}</td>
-                    <td style="text-align: left;">{{item.note}}</td>
+                    <td style="text-align: left;">{{detail[0].total_paid| number:2}}</td>
+                    <td style="text-align: right;">{{item.note}}</td>
                 
                 <tr>
                     <th colspan="1" style="text-align: center;">จำนวนเงิน</th>
@@ -98,6 +94,8 @@
     app.controller('moduleAppController', function($scope) {
         $scope.getDetail = function() {
             $scope.detail = <?php echo $this->pvc; ?>;
+            console.log($scope.detail);
+            
             $scope.company = $scope.detail[0].pv_no.substring(0,1);
             console.log($scope.company)
         }

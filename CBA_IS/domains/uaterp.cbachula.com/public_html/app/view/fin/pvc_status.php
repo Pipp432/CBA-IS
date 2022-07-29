@@ -25,6 +25,7 @@
                     </div>
                 
             </div>
+            <br>
         </div>
         
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -87,24 +88,24 @@
                     <th style= "text-align:center">ผู้อนุมัติ</th>
                     <th style= "text-align:center">รายการ</th>
                     <th style= "text-align:center">จำนวนเงิน</th>
-                    
                     <th style= "text-align:center">สถานะ</th>
+                    <th style ="text-align:center">Cancel ?</th>
                 </tr>
                 <tr ng-show="reReqs.length == 0">
                     <th colspan="5">
                         <h6 class="my-0" style="text-align:center;"> no Re-Req to show</h6>
                     </th>
                 </tr>
-                <tr ng-repeat="reReq in reReqs" ng-click="viewFile(reReq.re_req_no)">
-                    <td style= "text-align:center">{{reReq.ex_no}}</td>
+                <tr ng-repeat="reReq in reReqs">
+                    <td style= "text-align:center"><a href="https://uaterp.cbachula.com/file/re_req/{{reReq.re_req_no}}">{{reReq.ex_no}}</a></td>
                     <td style= "text-align:center">{{reReq.withdraw_name}} {{reReq.employee_id}}</td>
                     <td style= "text-align:center">{{reReq.authorize_date}}</td>
                     <td style= "text-align:center">{{reReq.authorizer_name}}</td>
                     <td style= "text-align:center">{{(JSONConverter(reReq.details))[0].date}} {{(JSONConverter(reReq.details))[0].details}}</td>
                     <td style= "text-align:center">{{(JSONConverter(reReq.details))[0].money| number : 2}}</td>
+                    <td style= "text-align:center">{{getStatus(reReq)[0]}}</td>
                     
-                  
-                    <td style= "text-align:center">{{reReq.confirmed==0 ? "awaiting confirmation": "confirmed"}}</td>
+                    <td><button class='button-cancel' ng-show ="getStatus(reReq)[1]" ng-click ="cancelEXC(reReq.ex_no)"><span>Cancel</span></button></td>
                 </tr>
             </table>
             
@@ -140,6 +141,27 @@
         box-shadow: 0 5px #666;
         transform: translateY(4px);
     }
+    .button-cancel{
+        border-radius: 10px;
+        color: white;
+        background-color: red;
+        border-style: solid 2px;
+        width: 100%;
+        height:100%;
+        
+        
+    }
+    .button-cancel:hover span {
+        display:none
+    }
+    .button-cancel:hover::before{
+        content: "Sure ? 🤨";
+        background-color: rgba(143, 0, 0, 1)
+    }
+    .button-cancel:hover{
+        background-color: rgba(143, 0, 0, 1)
+    }
+
 </style>
 
 <script>
@@ -147,7 +169,6 @@
     app.controller('moduleAppController', function($scope, $http, $compile) {
         
         $scope.doc = '';
-       
         $scope.pvType = '';
         $scope.temp=''
         $scope.selectPVC = function(){
@@ -159,7 +180,7 @@
         $scope.selectReReq = function(){
             $scope.temp='ReReq'
             $scope.reReqs = <?php echo $this->reReqs; ?>;
-            console.log($scope.reReqs[0].authorizer_name)
+            console.log($scope.reReqs)
             
         }
         $scope.JSONConverter = function(str){
@@ -173,6 +194,47 @@
         }
         $scope.viewFilePVC  = function(pv_no){
             window.open(`https://uaterp.cbachula.com/file/pvc/${pv_no}`)
+
+        }
+        $scope.getStatus = (reReq)=>{
+            switch (reReq.confirmed) {
+                case "1":
+                    
+                    return ["Confirmed",false]
+                    
+                    break;
+
+                case "0":
+                    if(!reReq.ex_no){
+                        return ["Awaitng Finance Confirmation",true];
+                    }
+                    return ["Awaitng Accountant Confirmation",true]
+                    
+                case "-1":
+                    
+                    return ["Canceled",false]
+            
+                default:
+                    
+                    return ["Error",false]
+                    break;
+            }
+
+        }
+        $scope.cancelEXC = function (ex_no){
+            $.post(`/fin/pvc_status/cancel_exc/${ex_no}`).then((data)=>{ 
+                console.log(`Canceled: ${data}`);
+                addModal('successModal', 'EXC/PVC Status', 'ยกเลิก ' + data);
+                $('#successModal').modal('toggle');
+                $('#successModal').on('hide.bs.modal', function (e) {
+                 
+                  location.reload();
+                  // window.location.assign('/');
+              });           
+            }
+               
+                
+            )
 
         }
         

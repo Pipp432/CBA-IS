@@ -285,6 +285,23 @@ class scmModel extends model {
                                       values (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?)"); 
                 $sql->execute([$value['invoice_no'], '7', '22-1'.$value['invoice_no'][0].'00', 0, (double) $value['commission'], 'IV']);
 
+
+                $sql = $this->prepare("insert into StockOut
+								SELECT product_no, 
+										SO.so_no as file_no,
+										'IRD1' as file_type, 
+										SO.so_date as date, 
+										SO.so_time as time, 
+										sum(SOPrinting.quantity) as quantity_out,  
+										0 as lot,
+										NULL as note,
+										'-' as rr_no
+								
+								FROM SOPrinting INNER JOIN SO ON SOPrinting.so_no=SO.so_no
+								WHERE SO.so_no = ?
+								GROUP BY product_no, file_no");
+		        $sql->execute([$value['so_no']]);
+
             }
             
         }
@@ -633,13 +650,14 @@ class scmModel extends model {
             $sql->execute([$value['quantity'], $value['quantity'], $value['product_no'], input::post('cs_no')]);
 
             
-            $sql = $this->prepare( "insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no)
-            values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, 'CS', ?)" );
-            $sql->execute( [$value[ 'product_no' ], input::post('cs_no') , $value[ 'quantity' ], input::post('cs_no') ] );
+            // $sql = $this->prepare( "insert into StockOut (product_no, file_no, file_type, date, time, quantity_out, lot, note, rr_no)
+            // values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, 'CS', ?)" );
+            // $sql->execute( [$value[ 'product_no' ], input::post('cs_no') , $value[ 'quantity' ], input::post('cs_no') ] );
 
             //เพิ่มไปแล้วด้านบน
-            // $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ?");                                             
-            // $sql->execute([$value['quantity'], $value['product_no'], input::post('cs_no')]);
+            $sql = $this->prepare("update StockOut set quantity_out = ? where product_no = ? and file_no = ?");                                             
+            $sql->execute([$value['quantity'], $value['product_no'], input::post('cs_no')]);
+
             $sql = $this->prepare("insert into StockIncs (product_no, file_no, file_type, date, time, quantity_in, lot, note) 
                                     values (?, ?, 'CS', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 0, NULL)");
             $sql->execute([$value['product_no'], input::post('cs_no'), $value['quantity']]);   
@@ -701,9 +719,9 @@ ORDER BY CS.cs_date");
 
     public function dashPickup() {
         $sql = $this->prepare("SELECT SOX.sox_no,Invoice.invoice_no,Pickup.date, Pickup.time, Pickup.reciever, Pickup.tel, group_concat(DISTINCT concat(Product.product_name ,' x ', SOPrinting.quantity)) AS product_detail,
-        (CASE WHEN SOX.done=0 AND SOX.cancelled = 0 THEN 2 WHEN SOX.done = 1 AND SOX.cancelled = 0 THEN 1 WHEN SOX.cancelled=1 THEN 3 END ) AS status 
-		FROM Pickup
-        INNER JOIN SOX ON SOX.sox_no = Pickup.sox_no
+        (CASE WHEN SOX.done=0 AND SOX.cancelled = 0 AND SOX.pickup_status = '0' THEN 2 WHEN SOX.done=0 AND SOX.cancelled = 0 AND SOX.pickup_status = '-1' THEN 0 WHEN SOX.done = 1 AND SOX.cancelled = 0 THEN 1 WHEN SOX.cancelled=1 THEN 3 END ) AS status 
+		FROM SOX
+        LEFT JOIN Pickup ON SOX.sox_no = Pickup.sox_no
         INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
         INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
         INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
@@ -711,8 +729,8 @@ ORDER BY CS.cs_date");
         INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no 
         INNER JOIN Product ON InvoicePrinting.product_no = Product.product_no 
         WHERE sox_status=1 AND SOX.cancelled = 0 AND SOX.note = 'pickup' 
-        group by SOX.sox_no
-        ORDER BY SOX.sox_no ASC");
+        group by SOX.sox_no  
+ORDER BY `status`  ASC;");
         $sql->execute();
         if ($sql->rowCount()>0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
@@ -1430,7 +1448,7 @@ ORDER BY SOX.sox_no ASC;");
         Product.product_name,
         CSPrinting.quantity,
         CSPrinting.quantity_out,
-        CS.approved_employee as employee_id,
+        CS.employee_id,
         ce.employee_nickname_thai,
         View_CSStock.quantity_left
     from  CS 
@@ -1438,7 +1456,7 @@ ORDER BY SOX.sox_no ASC;");
     LEFT join View_CSStock ON CSPrinting.cs_no = View_CSStock.file_no AND CSPrinting.product_no = View_CSStock.product_no
     left join Product on Product.product_no = CSPrinting.product_no
     left join CSLocation on CSLocation.location_no = CS.location_no
-    left join Employee ce on ce.employee_id = CS.approved_employee
+    left join Employee ce on ce.employee_id = CS.employee_id
     where CS.confirmed = 1 and CS.cancelled = 0
 ORDER BY CS.cs_date");
         $sql->execute();
@@ -1477,28 +1495,45 @@ ORDER BY CS.cs_date");
     }
 
     public function getStockCS() {
-		$sql = $this->prepare("select `cbachula_master2022`.`StockIncs`.`file_no` AS `file_no`,
-                                `cbachula_master2022`.`StockIncs`.`product_no` AS `product_no`,
-                                `cbachula_master2022`.`StockIncs`.`quantity_in` AS `quantity_in`,
-                                ifnull(`outcs`.`sumoutcs`,0) AS `quantity_out`,ifnull(`outso`.`sumoutso`,0) AS `so_out`,
-                                `cbachula_master2022`.`StockIncs`.`quantity_in` - ifnull(`outcs`.`sumoutcs`,0) AS `quantity_left`,
-                                `cbachula_master2022`.`StockIncs`.`quantity_in` - ifnull(`outcs`.`sumoutcs`,0) - ifnull(`outso`.`sumoutso`,0) AS `so_left` 
-                                from ((`cbachula_master2022`.`StockIncs` left join (select `cbachula_master2022`.`StockOutcs`.`product_no` AS `product_no`,
-                                `cbachula_master2022`.`StockOutcs`.`file_no` AS `file_no`,sum(`cbachula_master2022`.`StockOutcs`.`quantity_out`) AS `sumoutcs` 
-                                from `cbachula_master2022`.`StockOutcs` 
-                                where `cbachula_master2022`.`StockOutcs`.`file_type` = 'CS' 
-                                group by `cbachula_master2022`.`StockOutcs`.`file_no`,
-                                `cbachula_master2022`.`StockOutcs`.`product_no`) `outcs` on(`cbachula_master2022`.`StockIncs`.`file_no` = `outcs`.`file_no` and `cbachula_master2022`.`StockIncs`.`product_no` = `outcs`.`product_no`)) 
-                                left join (select `cbachula_master2022`.`StockOutcs`.`product_no` AS `product_no`,`cbachula_master2022`.`StockOutcs`.`file_no` AS `file_no`,
-                                sum(`cbachula_master2022`.`StockOutcs`.`quantity_out`) AS `sumoutso` from `cbachula_master2022`.`StockOutcs` 
-                                where `cbachula_master2022`.`StockOutcs`.`file_type` = 'SO' group by `cbachula_master2022`.`StockOutcs`.`file_no`,`cbachula_master2022`.`StockOutcs`.`product_no`) `outso` on(`cbachula_master2022`.`StockIncs`.`file_no` = `outso`.`file_no` and `cbachula_master2022`.`StockIncs`.`product_no` = `outso`.`product_no`)) 
-                                where `cbachula_master2022`.`StockIncs`.`file_type` = 'CS' order by `cbachula_master2022`.`StockIncs`.`file_no`");
+		$sql = $this->prepare("SELECT View_CSStock.*,CS.cs_date,CS.employee_id,CS.location_no
+        FROM View_CSStock
+        inner JOIN CS ON View_CSStock.file_no = CS.cs_no");
 		$sql->execute();
 		if ($sql->rowCount() > 0) {
             return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
         }
         return json_encode([]);
 	}
+
+    public function getDownloadReportPickup() {
+        $sql = $this->prepare("SELECT DISTINCT SOX.sox_no,Invoice.invoice_no,Pickup.date, Pickup.time, Pickup.reciever as receiver, Pickup.tel, Product.product_name , InvoicePrinting.quantity 
+                                FROM Pickup 
+                                INNER JOIN SOX ON SOX.sox_no = Pickup.sox_no 
+                                INNER JOIN SOXPrinting ON SOX.sox_no=SOXPrinting.sox_no 
+                                INNER JOIN SO ON SOXPrinting.so_no=SO.so_no 
+                                INNER JOIN SOPrinting ON SO.so_no=SOPrinting.so_no 
+                                INNER JOIN Invoice ON Invoice.file_no=SO.so_no 
+                                INNER JOIN InvoicePrinting ON Invoice.invoice_no=InvoicePrinting.invoice_no 
+                                INNER JOIN Product ON InvoicePrinting.product_no = Product.product_no 
+                                WHERE sox_status=1 AND SOX.cancelled = 0 AND SOX.done = 1 AND SOX.note = 'pickup' 
+                                ORDER BY SOX.sox_no ASC");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+          return $sql->fetchAll();
+        }
+        return [];
+      }
+      public function getdashboardcs(){
+        $sql=$this->prepare("SELECT View_CSStock.file_no,View_CSStock.product_no,View_CSStock.product_name,Product.sales_price,Product.unit,View_CSStock.quantity_in,View_CSStock.quantity_out,View_CSStock.quantity_left
+        FROM View_CSStock
+        INNER JOIN Product ON View_CSStock.product_no = Product.product_no
+        ORDER BY View_CSStock.file_no,View_CSStock.product_no;");
+        $sql->execute();
+        if ( $sql->rowCount() > 0 ) {
+            return $sql->fetchAll();
+        }
+        return [];
+    }
 	
 }
 

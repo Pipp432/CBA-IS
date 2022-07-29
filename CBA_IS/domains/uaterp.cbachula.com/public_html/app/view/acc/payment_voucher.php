@@ -273,7 +273,10 @@
                             <td><i class="fa fa-times-circle" aria-hidden="true" ng-click="dropPvItem(pvItem)"></i></td>
                             <td style="text-align: center;">{{pvItem.ex_no}}</td>
                             <td style="text-align: center;">{{pvItem.authorize_date}}</td>
-                            <td style="text-align: center;">{{pvItemDebit}}</td>
+                            <td style="text-align: center;">
+                                <span ng-show = "pvItem.debit != null ">{{pvItem.debit}}</span>
+                                <span ng-show = "pvItem.debit ==null ">ยังไม่ได้กรอก</span>
+                            </td>
                            
                             <td style="text-align: center;">
                                 <ul ng-repeat="entries in JSONdetails track by $index ">
@@ -360,22 +363,22 @@
                         </tr>
                         <tr>
                             <th colspan="5" style="text-align: right;" >diff สินค้า</th>
-                            <th>{{sup_diff}}</th>
+                            <th>{{sup_diff |number:2}}</th>
                             <th style="text-align: right;" colspan="1">มูลค่าสินค้า</th>
-                            <th style="text-align: right;">{{totalPaidBeforeVat | number:2}}</th>
+                            <th style="text-align: right;">{{final_before_vat | number:2}}</th>
                         </tr>
                         
                         <tr>
                             <th colspan="5" style="text-align: right;" >diff ภาษี</th>
-                            <th>{{vat_diff}}</th>
+                            <th>{{vat_diff|number:2}}</th>
                             <th style="text-align: right;" colspan="1">ภาษีสุทธิ</th>
-                            <th style="text-align: right;">{{totalVat| number:2}}</th>
+                            <th style="text-align: right;">{{final_tax| number:2}}</th>
                             
                         </tr>
                         <tr>
                             <th colspan="5" style="text-align: right;" >diff สุทธิ</th>
-                            <th>{{vat_diff + sup_diff}}</th>
-                            <th style="text-align: right;" colspan="7">รวมสุทธิ</th>
+                            <th>{{total_diff|number:2}}</th>
+                            <th style="text-align: right;" colspan="1">รวมสุทธิ</th>
                             <th style="text-align: right;">{{final_price | number:2}}</th>
                         </tr>
                     </table>
@@ -929,17 +932,17 @@
             }
         }
 
-
         $scope.diff = 0;
+        $scope.final_before_vat = 0;
         $scope.sup_diff = 0;
         $scope.vat_diff = 0;
         $scope.final_price =0;
         $scope.added_diff = false;
-        $scope.diff_dr_sup = 0;
-        $scope.diff_dr_tax = 0;
-        $scope.diff_total = 0;
+        $scope.product_vat = 0;
+        $scope.total_diff = 0;
 
         $scope.getrrcinopvDetail = function(rrcinopv) {
+            console.log(rrcinopv)
             $("#pvItemRR").prop("disabled", true);
             $("#pvItemIV").prop("disabled", true);
             $("#pvItemPaidTotal").prop("disabled", true);
@@ -947,16 +950,95 @@
             $scope.pvItemIV = rrcinopv.tax_no;
             $scope.pvItemPaidTotal = parseFloat(rrcinopv.confirm_total);
             $scope.ci_no = rrcinopv.ci_no;
-            $scope.diff = rrcinopv.diff;
-            $scope.diff_dr_sup = rrcinopv.diff_dr_sup;
-            $scope.diff_dr_tax = rrcinopv.diff_dr_tax;
-            $scope.diff_total =  $scope.diff_dr_sup + $scope.diff_dr_tax;
-            if($scope.diff_dr_sup == 0){
-                 $scope.sup_diff = (-$scope.vat_diff);
-            }
+            $scope.diff = Number(rrcinopv.diff);
+            $scope.diff_dr_sup = Number(rrcinopv.diff_dr_sup);
+            $scope.diff_dr_tax = Number(rrcinopv.diff_dr_tax);
+            // console.log($scope.diff_dr_tax);
             
-            $scope.final_price += Number(rrcinopv['confirm_total'])
+
+            $scope.vat_diff += $scope.diff !== 0 ? $scope.diff : $scope.diff_dr_tax;
+            
+            
+            $scope.sup_diff += $scope.diff_dr_sup
+            if(!$scope.added_diff) $scope.total_diff += ($scope.vat_diff + $scope.sup_diff);
+            if($scope.diff !== Number("0.00")) {
+                $scope.total_diff = 0;
+                $scope.sup_diff = -$scope.vat_diff;
+            }
+            console.log(typeof $scope.diff);
+            
+            // console.log(`VAT DIFF: ${$scope.vat_diff}`);
+            // console.log(`SUP DIFF: ${$scope.sup_diff}`);
+            // console.log(`TOTAL DIFF: ${$scope.total_diff}`);
+         
            
+            $scope.current = Number(rrcinopv['confirm_total'])
+        
+            $scope.vat_type = rrcinopv.product_no.charAt(3)
+            $scope.current_price =  Number(rrcinopv['confirm_total'])
+            $scope.final_price += Number(rrcinopv['confirm_total'])
+            
+            $scope.product_vat = $scope.current_price *7/107
+            
+            if($scope.vat_type!=='1'){
+              
+              if(!$scope.added_diff){ 
+                    $scope.final_tax += (0 +  $scope.vat_diff )
+                    $scope.final_before_vat += Number((($scope.sup_diff + $scope.current_price)).toFixed(2))
+                    $scope.final_price += $scope.total_diff
+
+                    $scope.added_diff = true;
+                   
+                    
+                } else{
+                    $scope.final_tax += 0
+                    $scope.final_before_vat += Number(($scope.current_price).toFixed(2))
+                    
+                }
+                
+
+            }
+            else{
+                if(!$scope.added_diff){ 
+                    $scope.final_before_vat += Number((($scope.sup_diff + $scope.current_price* 100/107) ).toFixed(2))
+                
+                    $scope.final_tax += (Number(($scope.current_price*7/107).toFixed(2)) +  $scope.vat_diff )
+                    $scope.added_diff = true;
+                    $scope.final_price += Number($scope.total_diff);
+                    console.log(`TOTAL DIFF ${$scope.total_diff}`);
+                    
+                    console.log(`YO2 ${$scope.final_price}`);
+                    
+                    
+                    
+                }
+                else{
+                    $scope.final_tax += Number(($scope.current_price*7/107).toFixed(2));
+                    $scope.final_before_vat += Number(($scope.current_price * 100/107).toFixed(2))
+                    
+                }
+             
+              
+
+            }
+           
+            
+          
+           
+        //     console.log(`Current tax:${$scope.current_price * 7/107}`);
+            
+        //    console.log($scope.sup_diff);
+        //    console.log($scope.current_price * 100/107);
+        //    console.log($scope.final_tax);
+           
+           
+        //     console.log($scope.final_before_vat);
+        //     console.log($scope.final_price);
+            
+            
+            
+             
+            
         }
         
         $scope.getWsDetail = function(ws) {
@@ -1042,6 +1124,17 @@
                     }).fail(function(e){
                         console.log(e)
                     });
+                    $http.get('/acc/payment_voucher/get_ReReqs')
+                        .then(function(response){
+                            $scope.ReReqs = response.data;
+                            $scope.pvItem = $scope.ReReqs ;
+                            $scope.pvItems = $scope.ReReqs;$scope.isLoad = false;
+                            console.log("Hey")
+                        });
+                
+
+
+
                 }
               
                 $scope.final_vat_diff = $scope.vat_diff== '0'? $scope.diff: $scope.vat_diff;
@@ -1109,31 +1202,25 @@
             $scope.calculateTotalPrice();
         }
         
-        $scope.vat_type = '';
-
         $scope.calculateTotalPrice = function() {
 
-            $scope.vat_type = JSON.parse($scope.selectedSupplier).vat_type;
+            // console.log(JSON.parse($scope.selectedSupplier).vat_type);
+            
             $scope.totalPaidBeforeVat = 0;
             $scope.totalVat = 0;
-
             angular.forEach($scope.pvItems, function(value, key) {
                 if($scope.selectedPaymentType != "PC"){
-
-                    if($scope.vat_type =='1'){
-
+                    if(JSON.parse($scope.selectedSupplier).vat_type =='1'){
                     $scope.totalPaidBeforeVat += Number(((value.total_paid) * 100/107).toFixed(2));
                     $scope.totalVat += Number(((value.total_paid) * 7/107).toFixed(2));
 
                     }else{
-
                         $scope.totalPaidBeforeVat += Number(((value.total_paid)).toFixed(2));
                         $scope.totalVat += 0
 
                     }
 
                 }else{
-
                     $scope.totalVat += Number(((value.total_paid) * 7/107).toFixed(2));
 
                 }
@@ -1142,6 +1229,7 @@
             });
             console.log($scope.totalVat);
             console.log($scope.totalPaidBeforeVat)
+            
         }
 
         $scope.postPVB = ()=> {
@@ -1165,13 +1253,13 @@
                     pv_address : $scope.pvAddress,
                     company_code : $scope.pvItems[0].rr_no.substr(0,1),
                     pvItems : JSON.stringify(angular.toJson($scope.pvItems)),
-                    totalPaid : $scope.final_price+$scope.diff_dr_sup,
+                    totalPaid : $scope.final_price,
                     totalPaidThai : NumToThai($scope.final_price),
-                    totalVat : $scope.totalVat + $scope.vat_diff,
+                    totalVat : $scope.final_tax,
                     dueDate : dueDateStr,
                     bank : $scope.bank,
                     ci_no : $scope.ci_no,
-                    diff_sup : $scope.final_vat_diff ? $scope.final_vat_diff:0
+                    diff_sup : $scope.total_diff
                 }, function(data) {
                     addModal('PVBsuccessModal', 'ใบสำคัญสั่งจ่าย / Payment Voucher (PV)', 'บันทึก ' + data + ' สำเร็จ');
                     $('#PVBsuccessModal').modal('toggle');
@@ -1207,33 +1295,37 @@
                         (month<10 ? '0' : '') + month + '/' +
                         (day<10 ? '0' : '') + day;
                         
-                    console.log( angular.toJson($scope.pvItems));
+                    $scope.detail = JSON.parse(($scope.pvItems)['details'])[0]['details'];
+                    
+                    
+                    
                     console.log({
                         post : true,
                         pv_name : $scope.pvName,
                         pv_address : $scope.pvAddress,
                         pv_date: output,
-                        pv_detail:$scope.pvDetails,
-                        ex_no: $scope.pvItemRR ,
-                        re_req_no: $scope.pvItemRR ,
+                        pv_detail:$scope.pvItemDetail,
+                        ex_no:$scope.pvItemRR,
+                        re_req_no:$scope.pvItems["re_req_no"],
                         company_code : $scope.company_code,
-                        pvItems : angular.toJson($scope.pvItems),
+                        detail : $scope.detail,
                         totalPaid : $scope.pvItemPaidTotal,
                         totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
                         dueDate : dueDateStr,
                         bank : $scope.bank,
-                        payTo :$scope.pv_payto,
+                        payTo :$scope.pvItems["pv_payto"],
                         payout:$scope.pvPayout,
-                        excDate:`${$scope.pvItemDate.getFullYear()}-${$scope.pvItemDate.getMonth()}-${$scope.pvItemDate.getDate()}`,
-                        bankBookName:$scope.bankBookName,
-                        bankBookNumber:$scope.bankBookNumber,
-                        bankName:$scope.bankName,
+                        excDate:$scope.pvItems["authorize_date"],
+                        bankBookName:$scope.pvItems["bank_book_name"],
+                        bankBookNumber:$scope.pvItems["bank_book_number"],
+                        bankName:$scope.pvItems["bank_name"],
                         company_code:"3",
                         pvItems:$scope.pvItems,
                         debit:$scope.pvItemDebit,
-                        return_tax: $scope.return_tax
+                        return_tax: $scope.pvItems["return_tax"]
                     });
+                    
                     
 
                     $.post("/acc/payment_voucher/post_pvc", {
@@ -1245,7 +1337,7 @@
                         ex_no:$scope.pvItemRR,
                         re_req_no:$scope.pvItems["re_req_no"],
                         company_code : $scope.company_code,
-                        pvItems : angular.toJson($scope.pvItems),
+                        detail : $scope.detail,
                         totalPaid : $scope.pvItemPaidTotal,
                         totalPaidThai : NumToThai($scope.pvItemPaidTotal),
                         totalVat : $scope.totalVat,
@@ -1343,6 +1435,8 @@
             $scope.bankBookNumber=$scope.pvItems["bank_book_number"]
             $scope.bankName=$scope.pvItems["bank_name"]
             $scope.return_tax = $scope.pvItems['return_tax']
+            console.log($scope.pvItemDetail);
+            
       
       
           
@@ -1352,13 +1446,13 @@
             // console.log(Number(entry.money));
             // console.log(Number($scope.pvItemPaidTotal));
             
-            $scope.pvItemPaidTotal = Number($scope.pvItemPaidTotal)+ Number(entry.money);
+            $scope.pvItemPaidTotal = Number((Number($scope.pvItemPaidTotal)+ Number(entry.money)).toFixed(2));
             $scope.total_tax += Number(entry.money*7/107);
         });
         // console.log($scope.JSONdetails);
         
         $scope.totalPaid =$scope.pvItemPaidTotal
-            $scope.totalVat =$scope.total_tax 
+        $scope.totalVat =$scope.total_tax 
             // console.log($scope.pvItemPaidTotal);
 
            

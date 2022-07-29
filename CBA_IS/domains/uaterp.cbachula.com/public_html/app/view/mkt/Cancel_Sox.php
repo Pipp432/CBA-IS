@@ -10,7 +10,7 @@
 
     <div class="container mt-3" ng-controller="moduleAppController">
 
-        <h2 class="mt-3">ยกเลิก SO/SOX</h2> 
+       
 
         <!-- -------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
         <!-- Choose type of cancel -->
@@ -19,15 +19,37 @@
         <div class="card shadow p-1 mt-3" style="border:none; border-radius:10px;">
             <div class="card-body">
                 <div class="row mx-0">
-                    <div class="col-md-3">
+                    
+                <div class="col-md-3">
+                <label>Filter by Line</label>
+                        <select class="form-control" ng-model="selectedLine" ng-change="selectLine()" id="dropdownCancelType">
+                            <option value="">Select Line</option>
+                            <option value="1">Line 1</option>
+                            <option value="2">Line 2</option>
+                            <option value="3">Line 3</option>
+                            <option value="4">Line 4</option>
+                            <option value="5">Line 5</option>
+                            <option value="6">Line 6</option>
+                            <option value="7">Line 7</option>
+                            <option value="8">Line 8</option>
+                            <option value="9">Line 9</option>
+                            <option value="0">Line 10</option>
+                            <option value="OS">OS</option>
+                            <option value="All">All</option>
+                        </select>
+                    </div> 
+
+                    <div class="col-md-3" ng-show='selectedLine'>
                         <label for="dropdownCancelType">ประเภทการยกเลิก</label>
                         <select class="form-control" ng-model="selectedCancelType" ng-change="selecteCancelType()" id="dropdownCancelType">
                             <option value="">เลือกประเภทการยกเลิก</option>
                             <option value="SOX">ยกเลิกทั้ง SOX </option>
                             <option value="SO">ยกเลิกเฉพาะ SO</option>
                         </select>
-                    </div>                        
-                </div>
+                        
+                          
+                </div> 
+                </div>                    
             </div>
         </div>
 
@@ -259,13 +281,15 @@
 
 
     app.controller('moduleAppController', function($scope, $http, $compile) {
-        $scope.soxs = <?php echo $this->soxs; ?>;
-        $scope.onlysos = <?php echo $this->onlysos; ?>;  
+        // $scope.soxs = <?php echo $this->soxs; ?>;
+        // $scope.onlysos = <?php echo $this->onlysos; ?>;  
+        $scope.soxs=[]
         $scope.selectedCancelType = '';     
 		$scope.filtersox='';
         $scope.filterSO = '';
         $scope.soxItems = [];
         $scope.soItems = [];
+        $scope.selectedLine = '';
 
         $scope.addSOX = function(sox) {
             var newSox = true;
@@ -348,6 +372,38 @@
 
         }
         
+        $scope.selectLine = ()=>{
+            console.log($scope.selectedLine);
+            if($scope.selectedLine !== 'All'){
+                $.post(`/mkt/Cancel_Sox/get_SOX_by_line/${$scope.selectedLine}`, (response)=>{
+                console.log(JSON.parse(response));
+                $scope.soxs = JSON.parse(response)
+                console.log($scope.soxs);
+                
+            })
+            $.post(`/mkt/Cancel_Sox/get_SO_by_line/${$scope.selectedLine}`, (response)=>{
+                console.log(JSON.parse(response));
+                $scope.onlysos = JSON.parse(response)
+                console.log($scope.onlysos);
+                
+            })
+            
+
+            }else{
+                $.post(`/mkt/Cancel_Sox/get_SOX_by_line/All`, (response)=>{
+                console.log(JSON.parse(response));
+                $scope.soxs = JSON.parse(response)
+                console.log($scope.soxs);
+            })
+                $.post(`/mkt/Cancel_Sox/get_SO_by_line/All`, (response)=>{
+                console.log(JSON.parse(response));
+                $scope.onlysos = JSON.parse(response)
+                console.log($scope.onlysos);
+            })
+        
+            
+            
+        }
         $scope.CancelSOX = function() {
             $('#confirmModal').modal('hide');
             $.post('/mkt/Cancel_Sox/Change_CancelSOX',{
@@ -366,6 +422,7 @@
                 } )
             
         }
+    }
 
         $scope.formValidate2 = function() {
             console.log($scope.soItems)

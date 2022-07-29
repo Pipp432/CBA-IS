@@ -615,5 +615,85 @@ order by substring(SOPrinting.product_no, 1, 1)");
 
         echo '</pre>';
     }
+
+
+    public function getCboin() {
+
+        $sql = $this->prepare("SELECT * FROM `View_Cboin` where employee_id = ?");
+        $sql->execute([$_POST['sp_id']]);
+        if ($sql->rowCount() > 0) echo $sql->fetchAll(PDO::FETCH_ASSOC)[0]["coin"];
+        else echo 0;
+    }
+
+    public function addCboin() {
+        $sql = $this->prepare(" INSERT INTO `CboinLog`(
+                                    `employee_id`,
+                                    `coin`,
+                                    `type`,
+                                    `note`
+                                )
+                                VALUES(
+                                    ?,
+                                    ?,
+                                    ?,
+                                    ?
+                                )");
+        $sql->execute([$_POST['sp_id'],$_POST["coin"],"on site",json_decode(session::get('employee_detail'), true)['employee_id']]);
+
+        if($sql->errorInfo()[0] == '00000') echo 'ok';
+        else print_r($sql->errorInfo());
+    }
+
+    public function postPoint() {
+
+        $pointArr = json_decode($_POST["cboinArray"]);
+            // $statement = "  INSERT into PointLog 
+            //                     (date,time,employee_id,point,remark,note,type,cancelled)
+            //                 values ";
+        echo $pointArr;
+        foreach($pointArr as $value) {
+
+            $sql = $this->prepare(" INSERT INTO `CboinLog`(
+                            `employee_id`,
+                            `coin`,
+                            `type`,
+                            `note`
+                        )
+                        VALUES(
+                            ?,
+                            ?,
+                            ?,
+                            ?
+                        )");
+            $sql->execute([$value[0],$value[1],$value[2],json_decode(session::get('employee_detail'), true)['employee_id']]);
+                                    
+            if($sql->errorInfo()[0] == '00000') echo 'ok';
+            else print_r($sql->errorInfo());
+        }
+    }
+
+    public function getCboinForDashboard() {
+
+        $sql = $this->prepare(' SELECT cboin_detail.*,View_Cboin.coin FROM View_Cboin 
+                                LEFT JOIN (SELECT
+                                    cbachula_master2022.CboinLog.employee_id AS employee_id,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : find your treasure" THEN 1 ELSE 0 END) AS gameACount,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : find your treasure" THEN CboinLog.coin ELSE 0 END) as gameAbalance,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : bet your direction" THEN 1 ELSE 0 END) AS gameBCount,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : bet your direction" THEN CboinLog.coin ELSE 0 END) AS gameBbalance,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : upgrade your weapon" THEN 1 ELSE 0 END) AS gameCCount,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "line game : upgrade your weapon" THEN CboinLog.coin ELSE 0 END) AS gameCbalance,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type REGEXP "^line [0-9]" THEN 1 ELSE 0 END) AS promoCount,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type REGEXP "^line [0-9]" THEN CboinLog.coin ELSE 0 END) AS promoBalance,
+                                    COALESCE(GROUP_CONCAT(CASE WHEN cbachula_master2022.CboinLog.type REGEXP "^line [0-9]" THEN SUBSTRING(CboinLog.type,6,10) ELSE NULL END), "") AS promoArr,
+                                    SUM(CASE WHEN cbachula_master2022.CboinLog.type = "Check Name" THEN 1 ELSE 0 END) AS checkInCount
+                                FROM
+                                    cbachula_master2022.CboinLog
+                                GROUP BY
+                                    cbachula_master2022.CboinLog.employee_id) as cboin_detail on cboin_detail.employee_id = View_Cboin.employee_id;');
+        $sql->execute();
+        if ($sql->rowCount() > 0) return json_encode($sql->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+        else return json_encode([], JSON_UNESCAPED_UNICODE);
+    }
     
 }

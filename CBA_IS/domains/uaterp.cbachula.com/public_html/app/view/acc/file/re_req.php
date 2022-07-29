@@ -39,7 +39,7 @@
         <div class="text">
                 
                
-                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_number}} ธนาคารผู้รับโอน {{details[0].bank_name}} เลขที่บัญชี {{details[0].bank_book_name}}</p>
+                <p>ชื่อบัญชีธนาคารที่รับโอน {{details[0].bank_book_number}}  ธนาคารผู้รับโอน {{details[0].bank_name}} เลขที่บัญชี {{details[0].bank_book_name}}</p>
         </div>        
         
         <hr>
@@ -55,7 +55,7 @@
                     <tr ng-repeat = "item in tableDetails track by $index" >
                         <td><b> {{item.date}}</b> </td>
 						<td><b> {{item.details}}</b> </td>
-                        <td><b> {{item.money}}</b></td>
+                        <td><b> {{item.money | number:2 }}</b></td>
                     </tr>
                     <td colspan="3">
                        รวมทั้งสิ้น {{sum}} บาท
@@ -70,7 +70,7 @@
         <div>
             <p><b>(สำหรับฝ่ายการเงิน)<br></b></p>
             <p><u>จ่ายออกจากโครงการ</u></p>
-            <p>(&nbsp;{{details[0].company =="project1" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp; {{details[0].company =="project2" ? "X" : "" }} &nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;{{details[0].company =="project3" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;3</p>
+            <p>(&nbsp;{{details[0].company =="project1" ? "X" : "" }}&nbsp;)&nbsp;โครงการ&nbsp;1&emsp;&emsp;(&nbsp; {{details[0].company =="project2" ? "X" : "" }} &nbsp;)&nbsp;โครงการ&nbsp;2&emsp;&emsp;(&nbsp;X&nbsp;)&nbsp;โครงการ&nbsp;3</p>
         </div>
 
         <div>

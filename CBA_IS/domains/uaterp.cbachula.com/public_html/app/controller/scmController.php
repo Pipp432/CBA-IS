@@ -557,4 +557,84 @@ class scmController extends controller {
         echo '</table>';
         
     }
+
+    public function check_stockcs() {
+        if(empty(uri::get(2))) {
+            $this->requirePostition("scm");
+            $this->view->setTitle("Check Stock (CS)");
+            $this->view->Stocks = $this->model->getStockCS();
+            $this->view->render("scm/check_stockcs", "navbar");
+        } 
+    }
+
+    public function Download_Report_Pickup() {
+		header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=Report Pickup.xls");
+        $data = $this->model->getDownloadReportPickup();
+
+			echo '<table style="width:100%">';
+
+				echo '<tr>';
+					echo '<th>เลขที่ SOX</th>';
+					echo '<th>เลขที่ Invoice</th>';
+					echo '<th>Date</th>';
+					echo '<th>Time</th>';
+					echo '<th>REceiver</th>';
+					echo '<th>Phone_number (เบอร์โทรศัพท์)</th>';
+					echo '<th>Product Name</th>';
+					echo '<th>Quantity</th>';
+					
+				echo '</tr>';
+
+				foreach($data as $value) {
+					echo '<tr>';
+						echo '<td>'.$value['sox_no'].'</td>';
+                        echo '<td>'.$value['invoice_no'].'</td>';
+                        echo '<td>'.$value['date'].'</td>';
+                        echo '<td>'.$value['time'].'</td>';
+                        echo '<td>'.$value['reciever'].'</td>';
+                        echo '<td>'.$value['tel'].'</td>';
+                        echo '<td>'.$value['product_name'].'</td>';
+                        echo '<td>'.$value['quantity'].'</td>';
+                        
+					echo '</tr>';
+                }
+			echo '</table>';
+        
+        
+    }
+    public function get_dashboardcs(){
+        header("Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=CS.xls");
+        $data = $this->model->getdashboardcs();
+        
+        echo '<table style="width:100%">';
+        
+            echo '<tr>';
+                echo '<th>CS</th>';       
+                echo '<th>รหัสสินค้า/EMS</th>';
+                echo '<th>รายการ</th>';
+                echo '<th>ราคา/หน่วย</th>';
+                echo '<th>หน่วย</th>';
+                echo '<th>ออก(หน่วย)</th>';
+                echo '<th>เข้า(หน่วย)</th>';
+                echo '<th>ขาย(หน่วย)</th>';
+            echo '</tr>';
+            
+            foreach($data as $value) {
+                echo '<tr>';
+                    echo '<td>'.$value['file_no'].'</td>';
+                    echo '<td>'.$value['product_no'].'</td>';
+                    echo '<td>'.$value['product_name'].'</td>';
+                    echo '<td>'.$value['sales_price'].'</td>';
+                    echo '<td>'.$value['unit'].'</td>';
+                    echo '<td>'.$value['quantity_in'].'</td>';
+                    echo '<td>'.$value['quantity_out'].'</td>';
+                    echo '<td>'.$value['quantity_left'].'</td>';
+                    
+                echo '</tr>';
+            }
+            
+        echo '</table>';
+    }
 }

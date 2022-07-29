@@ -173,6 +173,19 @@ class fileController extends controller {
             }
         }
     }
+    public function cn2() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบลดหนี้/ใบกำกับภาษี #".uri::get(2));
+                $this->view->cn = $this->model->getCn(uri::get(2));
+                $this->view->render("file/cn2");
+            } else {
+                $this->err404();
+            }
+        }
+    }
 
     public function pvd() { 
         if(empty(uri::get(2))) {
@@ -290,7 +303,7 @@ class fileController extends controller {
     public function cs() { 
         if(empty(uri::get(2))) {
             $this->err404();
-        } else if(uri::get(2) == 'scm' || uri::get(2) == 'mkt') {
+        } else if(uri::get(2) == 'scm' || uri::get(2) == 'mkt' || uri::get(2) == 'is') {
             $this->view->setTitle("Counter Sales #".uri::get(3));
             $this->view->cs = $this->model->getCs(uri::get(3));
             $this->view->type = strtoupper(uri::get(2));
@@ -351,6 +364,21 @@ class fileController extends controller {
                 $this->view->setTitle("ใบสำคัญสั่งจ่าย".uri::get(2));
                 //$this->view->cn = $this->model->getCn(uri::get(2));
                 $this->view->render("file/pve");
+            } else {
+                $this->err404();
+            }
+        }
+    }
+
+    public function iv_cs() { 
+        if(empty(uri::get(2))) {
+            $this->err404();
+        } else {
+            if ($this->getPosition() == "acc" || $this->getPosition() == "fin" || $this->getPosition() == "is") {
+                $this->view->setTitle("ใบกำกับภาษี/ใบเสร็จรับเงิน #".uri::get(2));
+                $this->view->iv = $this->model->getIvcs(uri::get(2));
+                $this->view->serial = uri::get(3);
+                $this->view->render("file/iv_cs");
             } else {
                 $this->err404();
             }

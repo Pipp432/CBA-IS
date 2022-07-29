@@ -55,7 +55,7 @@ class mktController extends controller {
 			echo '<div class="form-check" style="margin-bottom:1rem;">';
 			
 			echo '<input class="form-check-input" type="radio" name="transportRadio" id="ThaiPost" value="'.$priceList['price'].'" checked>';
-			echo '<lable>Courier : <b>Thailand Post (ถ้าขึ้นราคาเดียวเกิดจากสินค้าเกิน 2 kg ส่งแบบ EMS เท่านั้น!!!)</b> </lable> </br>';
+			echo '<lable>Courier : <b>Thailand Post (ถ้าขึ้นราคาเดียวเกิดจากสินค้าเกิน 1 kg ส่งแบบ EMS เท่านั้น!!!)</b> </lable> </br>';
 			echo '<lable>Note : <b>'.$priceList['error'].'</b> </lable> </br>';
             echo 'ลงทะเบียน/EMS : <b>'.$priceList['shippings'][0]['price'].'</b> บาท / <b>'.$priceList['shippings'][1]['price'].'</b> บาท</lable> </br>';
 			// echo '<lable>ลงทะเบียน/EMS(ถ้าสั่งของจำนวนเยอะ) : <b>'.$priceList['shippings'][0]['price'].'</b> บาท</lable> </br>';
@@ -578,6 +578,12 @@ class mktController extends controller {
         } else if (uri::get(2)==='Change_CancelSO') {
             $this->positionEcho('mkt', $this->model->ChangeCancelSO());
         }
+        else if (uri::get(2)==='get_SOX_by_line') {
+            $this->positionEcho('mkt',$this->model->getSOXByLine(uri::get(3)));
+         }
+         else if (uri::get(2)==='get_SO_by_line') {
+            $this->positionEcho('mkt',$this->model->getSOByLine(uri::get(3)));
+         }
     }
 
     public function Cancel_SO() {

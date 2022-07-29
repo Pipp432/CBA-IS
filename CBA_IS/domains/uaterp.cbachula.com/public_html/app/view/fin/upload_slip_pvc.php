@@ -112,10 +112,10 @@
             console.log(b);
 
         }).done(function(){
-           
+            $scope.goToMainMenu();
               
         });
-        $scope.goToMainMenu();
+       
            
       }
       $scope.goToMainMenu = function(){
